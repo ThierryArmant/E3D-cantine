@@ -34,7 +34,6 @@
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 15px;}
         .btn:hover { background-color: #1b4332; }
         
-        /* Style de la table de composition */
         .menu-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border: 1px solid #e5e7eb; }
         .menu-table td { padding: 12px; vertical-align: top; border: 1px solid #e5e7eb; background-color: #f9fafb; }
@@ -225,7 +224,7 @@
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Portion de Fromage</label>
 
                                     <div class="sub-theme">🍰 Sucreries</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau / Pâtisserie"> Gâteau / Tarte aux fruits</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau / Tarte aux fruits"> Gâteau / Tarte aux fruits</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Glace / Sorbet"> Glace / Sorbet</label>
                                 </td>
                             </tr>
@@ -417,7 +416,7 @@
                 dessert_pct: hasDessert ? Math.floor(Math.random() * 40) + 5 : 0,
                 pain_nombre: 0,
                 poids_total_g: Math.floor(Math.random() * 150) + 40,
-                perte_euro: (Math.random() * 0.9).toFixed(2)
+                perte_euro: parseFloat((Math.random() * 0.9).toFixed(2))
             };
 
             fetch(ADRESSE_SHEET_OFFICIELLE, {
