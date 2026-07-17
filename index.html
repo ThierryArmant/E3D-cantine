@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- VUE 2 : BORNE -->
+            <!-- VUE 2 : BORNE AVEC SÉLECTEUR DE PLATEAU DE TEST -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 PLACEZ VOTRE PLATEAU</div>
@@ -149,11 +149,22 @@
                     <div class="progress-container" id="bar-container">
                         <div class="progress-bar" id="action-progress"></div>
                     </div>
-                    <div style="margin-top: 15px; font-size: 14px;">
+                    <div style="margin-top: 15px; font-size: 14px; margin-bottom: 20px;">
                         <span style="color: #4b5563; font-weight: 500;">Menu actif : </span>
                         <span id="borne-menu-active" style="font-weight: bold; color: #2d6a4f;">Non configuré</span>
                     </div>
-                    <button class="btn btn-simulation" onclick="simulateTrayDetection()">👇 SIMULER LE PASSAGE D'UN ÉLÈVE (1 ASSIETTE)</button>
+                    
+                    <!-- 🎮 SECTION INTERACTIVE DE SIMULATION -->
+                    <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <label style="font-weight: bold; font-size: 13px; color: #374151; display: block; margin-bottom: 8px;">🎮 CHOISIR LE CONTENU DU PLATEAU DE TEST :</label>
+                        <select id="sim-plateau-type" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 12px; font-size: 13px; background-color: #f9fafb; font-weight: 500; cursor: pointer;">
+                            <option value="complet">🍽️ Plateau Complet (Gaspillage sur chaque composant coché)</option>
+                            <option value="entree_only">🥗 Uniquement l'Entrée (ex: Reste de tomates uniquement, le reste est vide)</option>
+                            <option value="plat_only">🍖 Uniquement Plat & Accompagnement (ex: Poulet, le reste est vide)</option>
+                            <option value="dessert_only">🍰 Uniquement le Dessert (ex: Pastèque/Melon, le reste est vide)</option>
+                        </select>
+                        <button class="btn btn-simulation" onclick="simulateTrayDetection()" style="margin-top: 0; background-color: #2d6a4f; border: none; font-weight: bold;">👇 SIMULER LE PASSAGE DE CE PLATEAU</button>
+                    </div>
                 </div>
             </div>
 
@@ -483,7 +494,7 @@
             switchView('view-borne');
         }
 
-        // --- ENVOI TOTALEMENT PRÉCIS SANS PAIN NI ALIMENT FANTÔME ---
+        // --- ENVOI TOTALEMENT INTELLIGENT ET PRÉCIS SELON TON CHOIX ---
         function sendToAutomationPipeline() {
             const banner = document.getElementById('instruction-text');
             const frame = document.getElementById('scanner-frame');
@@ -491,10 +502,22 @@
             const light = document.getElementById('student-light');
             
             const menuText = document.getElementById('borne-menu-active').innerText;
-            const hasEntree = !menuText.includes('Sans entrée');
-            const hasPlat = !menuText.includes('Sans plat');
-            const hasAccomp = !menuText.includes('Sans accomp.');
-            const hasDessert = !menuText.includes('Sans dessert');
+            const simType = document.getElementById('sim-plateau-type').value;
+
+            // Détection intelligente selon le type de plateau choisi dans l'option
+            const hasEntree = !menuText.includes('Sans entrée') && (simType === 'complet' || simType === 'entree_only');
+            const hasPlat = !menuText.includes('Sans plat') && (simType === 'complet' || simType === 'plat_only');
+            const hasAccomp = !menuText.includes('Sans accomp.') && (simType === 'complet' || simType === 'plat_only');
+            const hasDessert = !menuText.includes('Sans dessert') && (simType === 'complet' || simType === 'dessert_only');
+
+            // Calcul du poids réaliste en fonction de ce qui a vraiment été jeté
+            let basePoids = 0;
+            if (hasEntree) basePoids += Math.floor(Math.random() * 40) + 20;   // ~20 à 60g pour les tomates
+            if (hasPlat) basePoids += Math.floor(Math.random() * 60) + 30;     // ~30 à 90g pour la viande
+            if (hasAccomp) basePoids += Math.floor(Math.random() * 50) + 20;   // ~20 à 70g pour l'accompagnement
+            if (hasDessert) basePoids += Math.floor(Math.random() * 30) + 10;  // ~10 à 40g pour le dessert
+
+            const finalWeight = basePoids || 15; // Minimum technique si l'élève a rendu un plateau vide de déchets
 
             const payload = {
                 menu_jour: menuText,
@@ -502,9 +525,9 @@
                 plat_pct: hasPlat ? Math.floor(Math.random() * 30) + 5 : 0,
                 accompagnement_pct: hasAccomp ? Math.floor(Math.random() * 50) + 10 : 0,
                 dessert_pct: hasDessert ? Math.floor(Math.random() * 40) + 5 : 0,
-                pain_nombre: 0, // STRIKTEMENT BLOQUÉ À 0 ! Pas de pain fantôme.
-                poids_total_g: Math.floor(Math.random() * 150) + 40,
-                perte_euro: parseFloat((Math.random() * 0.9).toFixed(2))
+                pain_nombre: 0, // Garanti sans aucun pain fantôme !
+                poids_total_g: finalWeight,
+                perte_euro: parseFloat(((finalWeight / 1000) * 4.5).toFixed(2)) // Prix moyen réaliste de 4,50€ par kg de bio-déchets
             };
 
             fetch(ADRESSE_SHEET_OFFICIELLE, {
