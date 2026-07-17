@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de Plateau A.B.C.</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 40px auto; padding: 20px; background-color: #f5f7fa; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e1e8ed; }
+        h2 { color: #2c3e50; text-align: center; margin-top: 0; }
+        p { text-align: center; color: #7f8c8d; font-size: 14px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #34495e; }
+        select, input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+        select:focus, input:focus { border-color: #3498db; outline: none; }
+        button { width: 100%; padding: 14px; background-color: #27ae60; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; transition: background 0.2s; }
+        button:hover { background-color: #219653; }
+        #status { margin-top: 20px; padding: 12px; border-radius: 6px; text-align: center; font-weight: bold; display: none; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Simulateur de Scan A.B.C. 🍽️</h2>
+        <p>Génère des données virtuelles pour tester le Google Sheets en temps réel</p>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+
+        <div class="form-group">
+            <label for="ecole">Établissement virtuel :</label>
+            <select id="ecole">
+                <option value="">🔄 Chargement de ta liste Sheets...</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="service">Session / Service :</label>
+            <select id="service">
+                <option value="Service 1">Service 1</option>
+                <option value="Service 2">Service 2</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="categorie">Catégorie d'aliment :</label>
+            <select id="categorie">
+                <option value="Plat">Plat Principal</option>
+                <option value="Entrée">Entrée</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Pain">Pain</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="poids">Poids du gaspillage (en kg) :</label>
+            <input type="number" id="poids" step="0.01" value="0.45">
+        </div>
+
+        <button onclick="envoyerScanVirtuel()">Envoyer le scan fictif 🚀</button>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // Ton URL de déploiement officielle synchronisée
+        const API_URL = "https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec";
+
+        // Chargement automatique des vraies écoles de ton Sheets au démarrage de la page
+        window.onload = function() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('ecole');
+                    select.innerHTML = '';
+                    data.forEach(ecole => {
+                        let option = document.createElement('option');
+                        option.value = ecole;
+                        option.textContent = ecole;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(err => {
+                    console.error("Erreur de récupération des écoles:", err);
+                    document.getElementById('ecole').innerHTML = '<option value="Collège Jean Giono">Collège Jean Giono (Secours)</option>';
+                });
+        };
+
+        function envoyerScanVirtuel() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.className = '';
+            statusDiv.textContent = '⏳ Envoi des données au Google Script...';
+
+            const poidsSaisi = parseFloat(document.getElementById('poids').value) || 0;
+
+            // Préparation des données attendues par ton handleLogScan
+            const payload = {
+                action: "logScan",
+                ecole: document.getElementById('ecole').value,
+                service: document.getElementById('service').value,
+                categorie: document.getElementById('categorie').value,
+                poids: poidsSaisi,
+                perte_economique: parseFloat((poidsSaisi * 2.25).toFixed(2)), // Simulation de perte (€)
+                co2: parseFloat((poidsSaisi * 1.5).toFixed(2)) // Simulation empreinte carbone
+            };
+
+            // Envoi de la requête simulée
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Évite les blocages de sécurité CORS sur les navigateurs locaux
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                statusDiv.className = 'success';
+                statusDiv.textContent = '✅ Envoyé ! Attends 2 secondes et regarde ton Google Sheets.';
+            })
+            .catch(err => {
+                statusDiv.className = 'error';
+                statusDiv.textContent = '❌ Erreur de transmission : ' + err;
+            });
+        }
+    </script>
+</body>
+</html>
