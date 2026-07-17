@@ -40,7 +40,8 @@
         .menu-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border: 1px solid #e5e7eb; }
         .menu-table td { padding: 12px; vertical-align: top; border: 1px solid #e5e7eb; background-color: #f9fafb; }
-        .sub-theme { font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 10px 0 6px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
+        .sub-theme { font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 12px 0 6px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
+        .sub-theme:first-child { margin-top: 0; }
         .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer; color: #374151; }
         .checkbox-label input { width: 16px; height: 16px; cursor: pointer; accent-color: #2d6a4f; }
         .borne-container { max-width: 650px; margin: 0 auto; text-align: center; }
@@ -135,53 +136,101 @@
                 </div>
             </div>
 
-            <!-- VUE 3 : ESPACE CUISINIER RESTAURÉ -->
+            <!-- VUE 3 : ESPACE CUISINIER (VERSION BLINDÉE CORRIGÉE) -->
             <div id="view-cuisinier" class="view-section">
-                <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1100px; margin: 0 auto;">
+                <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des effectifs attendus</h3>
                     <div style="display: flex; gap: 16px; margin-bottom: 24px; background-color: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Option 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px;"></div>
-                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Option 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px;"></div>
-                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;"><div>Total : <span id="lbl-total-attendus" style="font-weight: bold;">450</span></div><button class="btn" onclick="saveExpectedMeals()" style="padding: 10px; font-size: 13px;">💾 Valider</button></div>
+                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Option 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
+                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Option 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="margin-bottom: 6px; font-size: 13px;">Total : <span id="lbl-total-attendus" style="font-weight: bold; color: #2d6a4f;">450</span></div>
+                            <button class="btn" onclick="saveExpectedMeals()" style="padding: 10px; font-size: 13px;">💾 Valider</button>
+                        </div>
                     </div>
+
+                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">📋 Composition du menu du jour (Grand Catalogue)</h3>
                     <table class="menu-table">
-                        <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS</th></tr></thead>
+                        <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS & LAITAGES</th></tr></thead>
                         <tbody>
                             <tr>
+                                <!-- COLONNE ENTRÉES -->
                                 <td>
-                                    <div class="sub-theme">🍅 Crudités</div>
+                                    <div class="sub-theme">🍅 Crudités / Salades</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes"> Carottes</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes râpées"> Carottes râpées</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
+                                    
                                     <div class="sub-theme">🐷 Charcuterie</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
-                                    <div class="sub-theme">🥧 Cuites</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
+                                    
+                                    <div class="sub-theme">🥧 Entrées Cuites</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
                                 </td>
+                                
+                                <!-- COLONNE PLATS -->
                                 <td>
                                     <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
-                                    <div class="sub-theme">🥩 Viandes</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
+                                    
+                                    <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti"> Rôti</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
+                                    
+                                    <div class="sub-theme">🐟 Poissons</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin</label>
+                                    
+                                    <div class="sub-theme">🌱 Végétarien</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
                                 </td>
+                                
+                                <!-- COLONNE ACCOMPAGNEMENTS -->
                                 <td>
                                     <div class="sub-theme">🥔 Féculents</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes / Riz"> Pâtes / Riz</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes"> Pâtes</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
+                                    
                                     <div class="sub-theme">🌿 Légumes</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Brocolis"> Brocolis</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
                                 </td>
+                                
+                                <!-- COLONNE DESSERTS & LAITAGES -->
                                 <td>
-                                    <div class="sub-theme">🍈 Vergers</div>
+                                    <div class="sub-theme">🍈 Vergers & Fruits</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label>
-                                    <div class="sub-theme">🥛 Laitages</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote</label>
+                                    
+                                    <div class="sub-theme">🥛 Laitages & Fromages</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage (Kiri/Cantal/Gouda)</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert / Liégeois</label>
+                                    
+                                    <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte aux fruits"> Tarte aux fruits</label>
                                 </td>
                             </tr>
                         </tbody>
@@ -303,7 +352,7 @@
                     if (row.Entree_Pct > 0) totalCrudites += (row.Entree_Pct / 100) * poidsLigne;
                     if (row.Plat_Pct > 0) totalViandes += (row.Plat_Pct / 100) * poidsLigne;
                     if (row.Accompagnement_Pct > 0) {
-                        if (menu.includes("pâte") || menu.includes("riz")) { totalFeculents += (row.Accompagnement_Pct / 100) * poidsLigne; }
+                        if (menu.includes("pâte") || menu.includes("riz") || menu.includes("semoule") || menu.includes("frite")) { totalFeculents += (row.Accompagnement_Pct / 100) * poidsLigne; }
                         else { totalLegumes += (row.Accompagnement_Pct / 100) * poidsLigne; }
                     }
                     if (row.Dessert_Pct > 0) totalFruits += (row.Dessert_Pct / 100) * poidsLigne;
