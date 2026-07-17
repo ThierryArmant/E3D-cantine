@@ -1,5 +1,283 @@
-<!-- SCRIPTS DE LOGIQUE ET DE GRAPHISMES -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Banana 2 - Solution Anti-Gaspillage</title>
+    <!-- Chargement du moteur de graphiques Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+        body {
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* Menu Latéral Style Kikleo */
+        .sidebar {
+            width: 240px;
+            background-color: #2d6a4f;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+        .sidebar-brand {
+            padding: 0 20px 20px 20px;
+            font-size: 20px;
+            font-weight: bold;
+            border-bottom: 1px solid #40916c;
+        }
+        .sidebar-menu {
+            list-style: none;
+            margin-top: 20px;
+            flex-grow: 1;
+        }
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+        .menu-item:hover, .menu-item.active {
+            background-color: #40916c;
+        }
+
+        /* Zone de contenu principale */
+        .main-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .top-bar {
+            height: 60px;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+        .top-bar-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .content-area {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Sections d'affichage */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* Grille des 4 Cartes d'indicateurs (KPIs) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .kpi-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .kpi-blue { border-top: 5px solid #3b82f6; }
+        .kpi-green { border-top: 5px solid #10b981; }
+        .kpi-yellow { border-top: 5px solid #f59e0b; }
+        .kpi-red { border-top: 5px solid #ef4444; }
+        
+        .kpi-val { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .kpi-lbl { font-size: 12px; color: #6b7280; font-weight: 500; }
+
+        /* Layout Graphiques */
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .dashboard-col {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .chart-container {
+            position: relative;
+            height: 260px;
+            width: 100%;
+        }
+
+        /* Formulaires */
+        .form-group { margin-bottom: 15px; }
+        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 5px; }
+        .form-input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; }
+        .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center;}
+        .btn:hover { background-color: #1b4332; }
+
+        /* Panneau Caméra / Smartphone */
+        .camera-panel {
+            text-align: center;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .camera-viewfinder {
+            width: 100%;
+            height: 300px;
+            background: #111827;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .status-ready { background-color: #d1fae5; color: #065f46; }
+        .status-processing { background-color: #fef3c7; color: #92400e; }
+    </style>
+</head>
+<body>
+
+    <!-- BARRE LATÉRALE DE NAVIGATION -->
+    <div class="sidebar">
+        <div class="sidebar-brand">🍌 Nano Banana 2</div>
+        <ul class="sidebar-menu">
+            <li class="menu-item active" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
+            <li class="menu-item" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
+            <li class="menu-item" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
+            <li class="menu-item" onclick="switchView('view-config')">⚙️ Configuration</li>
+        </ul>
+    </div>
+
+    <!-- CONTENU PRINCIPAL -->
+    <div class="main-container">
+        <div class="top-bar">
+            <div class="top-bar-title" id="current-view-title">Tableau de bord général</div>
+            <div style="font-size: 13px; color: #6b7280;" id="live-date">Service du jour</div>
+        </div>
+
+        <div class="content-area">
+            
+            <!-- VUE 1 : TABLEAU DE BORD -->
+            <div id="view-dashboard" class="view-section active">
+                <div class="kpi-grid">
+                    <div class="kpi-card kpi-blue">
+                        <div class="kpi-val" id="kpi-avg">43.1 g</div>
+                        <div class="kpi-lbl">Moyenne par plateau</div>
+                    </div>
+                    <div class="kpi-card kpi-green">
+                        <div class="kpi-val" id="kpi-total">292 kg</div>
+                        <div class="kpi-lbl">Quantité gaspillée totale</div>
+                    </div>
+                    <div class="kpi-card kpi-yellow">
+                        <div class="kpi-val" id="kpi-money">1 544 €</div>
+                        <div class="kpi-lbl">Pertes économiques</div>
+                    </div>
+                    <div class="kpi-card kpi-red">
+                        <div class="kpi-val" id="kpi-impact">924 kg</div>
+                        <div class="kpi-lbl">Impact environnemental</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-row">
+                    <div class="dashboard-col">
+                        <h3 style="margin-bottom: 15px; font-size: 15px;">Évolution du gaspillage (g / convive)</h3>
+                        <div class="chart-container"><canvas id="chart-timeline"></canvas></div>
+                    </div>
+                    <div class="dashboard-col">
+                        <h3 style="margin-bottom: 15px; font-size: 15px;">Répartition du gaspillage total</h3>
+                        <div class="chart-container"><canvas id="chart-categories"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VUE 2 : BORNE ET SMARTPHONE -->
+            <div id="view-borne" class="view-section">
+                <div class="camera-panel">
+                    <div id="status-indicator" class="status-badge status-ready">Prêt à scanner</div>
+                    <div class="camera-viewfinder" id="viewfinder" onclick="triggerCapture()">
+                        <span id="viewfinder-text">Cliquez pour ouvrir l'appareil photo</span>
+                        <img id="preview-img" style="display:none; width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <span style="font-size: 13px; color: #4b5563;">Menu actif : </span>
+                        <span id="borne-menu-active" style="font-size: 13px; font-weight: bold; color: #2d6a4f;">Non configuré</span>
+                    </div>
+                    <button class="btn" onclick="triggerCapture()">📸 PRENDRE LA PHOTO DU PLATEAU</button>
+                    <input type="file" id="file-fallback" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                </div>
+            </div>
+
+            <!-- VUE 3 : ESPACE CUISINIER -->
+            <div id="view-cuisinier" class="view-section">
+                <div style="background: white; padding: 24px; border-radius: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width: 500px; margin: 0 auto;">
+                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Menu du jour</h3>
+                    <div class="form-group">
+                        <label class="form-label">Entrée</label>
+                        <input type="text" id="menu-entree" class="form-input" placeholder="Ex: Salade de crudités">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Plat principal</label>
+                        <input type="text" id="menu-plat" class="form-input" placeholder="Ex: Émincé de poulet">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Accompagnement</label>
+                        <input type="text" id="menu-feculent" class="form-input" placeholder="Ex: Semoule">
+                    </div>
+                    <button class="btn" onclick="saveMenu()">💾 Lancer le service</button>
+                </div>
+            </div>
+
+            <!-- VUE 4 : PARAMÈTRES ET CONFIGURATION -->
+            <div id="view-config" class="view-section">
+                <div style="background: white; padding: 24px; border-radius: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
+                    <h3 style="margin-bottom: 15px;">Liaisons Systèmes</h3>
+                    <div class="form-group">
+                        <label class="form-label">URL Google Apps Script (Générée à l'étape précédente)</label>
+                        <input type="text" id="cfg-sheet-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                    </div>
+                    <button class="btn" onclick="saveConfig()">💾 Sauvegarder les liaisons</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SCRIPTS DE LOGIQUE ET DE GRAPHISMES -->
     <script>
+        // 1. ADRESSE OFFICIELLE DE CET ÉTABLISSEMENT (GRAVÉE DANS LE MARBRE)
+        const ADRESSE_SHEET_OFFICIELLE = 'https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec';
+
+        // Affichage de la date du jour
         document.getElementById('live-date').innerText = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         // Gestion de la navigation
@@ -12,14 +290,13 @@
             if(activeItem) activeItem.classList.add('active');
         }
 
-        // Sauvegarde de l'URL Google Script
+        // Configuration (Affiche l'adresse officielle en lecture seule pour éviter les erreurs d'inattention à la cantine)
+        document.getElementById('cfg-sheet-url').value = ADRESSE_SHEET_OFFICIELLE;
+        document.getElementById('cfg-sheet-url').readOnly = true; 
+
         function saveConfig() {
-            const url = document.getElementById('cfg-sheet-url').value;
-            localStorage.setItem('nb_sheet_url', url);
-            alert('Lien avec Google Sheet configuré !');
+            alert('Liaison sécurisée active pour le collège Jean Giono !');
         }
-        // GRAVÉ DANS LE MARBRE : URL Jean Giono par défaut si la mémoire locale est vide
-        document.getElementById('cfg-sheet-url').value = localStorage.getItem('nb_sheet_url') || 'https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec';
 
         // Enregistrement du menu par le cuisinier
         function saveMenu() {
@@ -54,18 +331,10 @@
             status.innerText = "Analyse IA et synchronisation...";
             status.className = "status-badge status-processing";
 
-            // GRAVÉ DANS LE MARBRE : Deuxième sécurité pour l'envoi direct
-            const scriptUrl = localStorage.getItem('nb_sheet_url') || 'https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec';
-            if(!scriptUrl) {
-                setTimeout(() => {
-                    alert("Attention : Aucune URL Google Sheet configurée. Mode démo activé !");
-                    status.innerText = "Prêt à scanner";
-                    status.className = "status-badge status-ready";
-                }, 1000);
-                return;
-            }
+            // Utilisation directe de l'adresse gravée (sécurité totale)
+            const scriptUrl = ADRESSE_SHEET_OFFICIELLE;
 
-            // Simulation de données extraites par l'IA (en attendant le branchement Dify final)
+            // Simulation de données extraites par l'IA
             const payload = {
                 menu_jour: document.getElementById('borne-menu-active').innerText,
                 entree_pct: Math.floor(Math.random() * 50),
