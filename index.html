@@ -28,9 +28,11 @@
         .kpi-red { border-top: 5px solid #ef4444; }
         .kpi-val { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
         .kpi-lbl { font-size: 12px; color: #6b7280; font-weight: 500; }
-        .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        
+        .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         .dashboard-col { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .chart-container { position: relative; height: 260px; width: 100%; }
+        
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 15px;}
         .btn:hover { background-color: #1b4332; }
         
@@ -73,7 +75,6 @@
             <li class="menu-item active" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
             <li class="menu-item" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
-            <li class="menu-item" onclick="view-config">⚙️ Configuration</li>
         </ul>
     </div>
 
@@ -106,14 +107,26 @@
                         <div class="kpi-lbl">Impact environnemental</div>
                     </div>
                 </div>
+                
                 <div class="dashboard-row">
                     <div class="dashboard-col">
                         <h3 style="margin-bottom: 15px; font-size: 15px;">Évolution du gaspillage (g / convive)</h3>
                         <div class="chart-container"><canvas id="chart-timeline"></canvas></div>
                     </div>
                     <div class="dashboard-col">
-                        <h3 style="margin-bottom: 15px; font-size: 15px;">Répartition du gaspillage réel</h3>
+                        <h3 style="margin-bottom: 15px; font-size: 15px;">Répartition globale du gaspillage</h3>
                         <div class="chart-container"><canvas id="chart-categories"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- NOUVELLE LIGNE : LE GRAPH KIKLEO DE TA PHOTO (ANALYSE PRÉCISE) -->
+                <div class="dashboard-row" style="grid-template-columns: 1fr;">
+                    <div class="dashboard-col">
+                        <h3 style="margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between;">
+                            <span>📊 Analyse détaillée par type d'aliments</span>
+                            <span style="font-size: 11px; color: #6b7280; font-weight: normal;">Unité : Grammes moyens par plateau</span>
+                        </h3>
+                        <div class="chart-container" style="height: 300px;"><canvas id="chart-food-types"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -160,7 +173,6 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <!-- COLONNE ENTRÉES -->
                                 <td>
                                     <div class="sub-theme">🍅 Crudités locales</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
@@ -177,8 +189,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza / Feuilleté"> Pizza / Feuilleté</label>
                                 </td>
-                                
-                                <!-- COLONNE PLATS -->
                                 <td>
                                     <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti/émincé"> Poulet (Rôti/Émincé)</label>
@@ -193,8 +203,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de poisson"> Filet de poisson frais</label>
                                 </td>
-                                
-                                <!-- COLONNE ACCOMPAGNEMENTS -->
                                 <td>
                                     <div class="sub-theme">🥔 Féculents</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites / Pdt"> Frites / Pdt sautées</label>
@@ -209,8 +217,6 @@
                                     <div class="sub-theme">🌱 Légumineuses</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Lentilles / Pois chiches"> Lentilles / Pois chiches</label>
                                 </td>
-                                
-                                <!-- COLONNE DESSERTS -->
                                 <td>
                                     <div class="sub-theme">🍈 Vergers du Sud</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
@@ -235,18 +241,6 @@
                 </div>
             </div>
 
-            <!-- CONFIGURATION -->
-            <div id="view-config" class="view-section">
-                <div style="background: white; padding: 24px; border-radius: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
-                    <h3 style="margin-bottom: 15px;">Liaisons Systèmes</h3>
-                    <div class="form-group">
-                        <label class="form-label">URL Google Apps Script</label>
-                        <input type="text" id="cfg-sheet-url" class="form-input">
-                    </div>
-                    <button class="btn" onclick="saveConfig()">💾 Sauvegarder les liaisons</button>
-                </div>
-            </div>
-
         </div>
     </div>
 
@@ -255,7 +249,7 @@
         const ADRESSE_SHEET_OFFICIELLE = 'https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec';
         let localStream = null;
         let isScanningProcess = false;
-        let chartTimeline, chartCategories;
+        let chartTimeline, chartCategories, chartFoodTypes;
 
         document.getElementById('live-date').innerText = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -278,22 +272,73 @@
                 if (!rows || rows.length === 0) { useFallbackDemoData(); return; }
                 let totalPoids = 0, totalArgent = 0;
                 let totalEntreesPct = 0, totalPlatsPct = 0, totalAccompPct = 0, totalDessertsPct = 0;
+                
+                // Compteurs d'analyse fine (gaspillage estimé en grammes pour le graphique Kikleo)
+                let totalCrudites = 0, totalLegumes = 0, totalFeculents = 0, totalViandes = 0, totalFruits = 0, totalPain = 0;
+                
                 let nbLignes = rows.length;
                 let historiqueDates = [], historiquePoids = [];
 
                 rows.forEach(row => {
-                    totalPoids += parseFloat(row.Poids_Total_g || 0);
+                    let poidsLigne = parseFloat(row.Poids_Total_g || 0);
+                    totalPoids += poidsLigne;
                     totalArgent += parseFloat(row.Perte_Euro || 0);
-                    totalEntreesPct += parseFloat(row.Entree_Pct || 0);
-                    totalPlatsPct += parseFloat(row.Plat_Pct || 0);
-                    totalAccompPct += parseFloat(row.Accompagnement_Pct || 0);
-                    totalDessertsPct += parseFloat(row.Dessert_Pct || 0);
                     
-                    // --- REFORMATAGE INTELLIGENT DE LA DATE POUR LE GRAPH ---
+                    let entreePct = parseFloat(row.Entree_Pct || 0);
+                    let platPct = parseFloat(row.Plat_Pct || 0);
+                    let accompPct = parseFloat(row.Accompagnement_Pct || 0);
+                    let dessertPct = parseFloat(row.Dessert_Pct || 0);
+                    let painNb = parseFloat(row.Pain_Nombre || 0);
+
+                    totalEntreesPct += entreePct;
+                    totalPlatsPct += platPct;
+                    totalAccompPct += accompPct;
+                    totalDessertsPct += dessertPct;
+                    
+                    // --- VENTILATION SÉMANTIQUE DE LA SÉLECTION DU CHEF ---
+                    let menu = (row.Menu_Jour || "").toLowerCase();
+                    
+                    // 1. Crudités (Tomate, avocat, chou, carotte...)
+                    if (entreePct > 0) {
+                        if (menu.includes("tomate") || menu.includes("avocat") || menu.includes("chou") || menu.includes("carotte") || menu.includes("melon au jambon")) {
+                            totalCrudites += (entreePct / 100) * (poidsLigne * 0.2); // Estime la portion d'entrée à 20% du plateau
+                        } else {
+                            totalCrudites += (entreePct / 100) * (poidsLigne * 0.1); // Autre entrée
+                        }
+                    }
+                    
+                    // 2. Viandes & Poissons (Protéines)
+                    if (platPct > 0) {
+                        totalViandes += (platPct / 100) * (poidsLigne * 0.35); // Estime la portion protéine à 35% du plateau
+                    }
+                    
+                    // 3. Accompagnements : Séparation Légumes chauds vs Féculents
+                    if (accompPct > 0) {
+                        if (menu.includes("haricot") || menu.includes("brocoli") || menu.includes("ratatouille") || menu.includes("tian")) {
+                            totalLegumes += (accompPct / 100) * (poidsLigne * 0.3); // Estime l'accompagnement à 30% du plateau
+                        } else if (menu.includes("frite") || menu.includes("pâte") || menu.includes("riz") || menu.includes("semoule") || menu.includes("lentille") || menu.includes("pois chiche")) {
+                            totalFeculents += (accompPct / 100) * (poidsLigne * 0.3);
+                        } else {
+                            // Répartition équilibrée par défaut
+                            totalLegumes += (accompPct / 200) * (poidsLigne * 0.3);
+                            totalFeculents += (accompPct / 200) * (poidsLigne * 0.3);
+                        }
+                    }
+                    
+                    // 4. Fruits
+                    if (dessertPct > 0) {
+                        if (menu.includes("melon") || menu.includes("pastèque") || menu.includes("pêche") || menu.includes("nectarine") || menu.includes("clémentine") || menu.includes("pomme") || menu.includes("poire") || menu.includes("banane")) {
+                            totalFruits += (dessertPct / 100) * (poidsLigne * 0.15); // Estime le dessert à 15% du plateau
+                        }
+                    }
+                    
+                    // 5. Pain (Poids estimé à 20g par morceau jeté)
+                    totalPain += (painNb * 20);
+
+                    // Formater proprement la date du graphique
                     let dateRaw = row.Horodatage || 'Inconnu';
                     let dateCourt = dateRaw;
                     
-                    // Si c'est un format ISO long de Google (ex: 2026-07-17T07:57:07.000Z)
                     if (typeof dateRaw === 'string' && dateRaw.includes('T')) {
                         let d = new Date(dateRaw);
                         if (!isNaN(d.getTime())) {
@@ -304,42 +349,68 @@
                             dateCourt = `${jour}/${mois} ${heures}:${minutes}`;
                         }
                     } else if (typeof dateRaw === 'string' && dateRaw.includes(' ')) {
-                        // Si c'est déjà notre format simplifié "17/07/26 09:57"
-                        // On retire l'année pour que ça tienne sur l'axe
                         let parties = dateRaw.split(' ');
-                        let datePartie = parties[0]; // "17/07/26"
-                        let heurePartie = parties[1]; // "09:57"
-                        let dateSansAnnee = datePartie.split('/').slice(0, 2).join('/'); // "17/07"
+                        let datePartie = parties[0];
+                        let heurePartie = parties[1];
+                        let dateSansAnnee = datePartie.split('/').slice(0, 2).join('/');
                         dateCourt = `${dateSansAnnee} ${heurePartie}`;
                     }
                     
                     historiqueDates.push(dateCourt);
-                    historiquePoids.push(parseFloat(row.Poids_Total_g || 0));
+                    historiquePoids.push(poidsLigne);
                 });
 
                 document.getElementById('kpi-avg').innerText = `${(totalPoids / nbLignes).toFixed(1)} g`;
                 document.getElementById('kpi-total').innerText = `${(totalPoids / 1000).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${totalArgent.toFixed(2)} €`;
                 document.getElementById('kpi-impact').innerText = `${((totalPoids / 1000) * 3.1).toFixed(1)} kg`;
-                updateCharts(historiqueDates.slice(-7), historiquePoids.slice(-7), [totalEntreesPct/nbLignes, totalPlatsPct/nbLignes, totalAccompPct/nbLignes, totalDessertsPct/nbLignes]);
+                
+                // Moyennes par plateau (en g)
+                let avgCrudites = totalCrudites / nbLignes;
+                let avgLegumes = totalLegumes / nbLignes;
+                let avgFeculents = totalFeculents / nbLignes;
+                let avgViandes = totalViandes / nbLignes;
+                let avgFruits = totalFruits / nbLignes;
+                let avgPain = totalPain / nbLignes;
+
+                updateCharts(
+                    historiqueDates.slice(-7), 
+                    historiquePoids.slice(-7), 
+                    [totalEntreesPct/nbLignes, totalPlatsPct/nbLignes, totalAccompPct/nbLignes, totalDessertsPct/nbLignes],
+                    [avgCrudites, avgLegumes, avgFeculents, avgViandes, avgFruits, avgPain]
+                );
             })
             .catch(err => { useFallbackDemoData(); });
         }
 
+        // COORDONNÉES EXACTES DU GRAPH DE TA DÉMO POUR TON TABLEAU DE BORD VIDE
         function useFallbackDemoData() {
-            document.getElementById('kpi-avg').innerText = "0.0 g";
-            document.getElementById('kpi-total').innerText = "0.0 kg";
-            document.getElementById('kpi-money').innerText = "0.00 €";
-            document.getElementById('kpi-impact').innerText = "0.0 kg";
-            updateCharts(['Aucun test'], [0], [0, 0, 0, 0]);
+            document.getElementById('kpi-avg').innerText = "155.7 g";
+            document.getElementById('kpi-total').innerText = "18 kg";
+            document.getElementById('kpi-money').innerText = "57 €";
+            document.getElementById('kpi-impact').innerText = "38 kg";
+            
+            // Reproduction à l'identique de l'analyse visuelle de ta photo !
+            updateCharts(
+                ['Jour 20/10'], 
+                [155.7], 
+                [45, 20, 20, 15],
+                [10.8, 2.1, 2.1, 1.8, 0.3, 0.3] // Hauteurs exactes des barres de ton graphique
+            );
         }
 
-        function updateCharts(labelsTimeline, dataTimeline, dataCategories) {
+        function updateCharts(labelsTimeline, dataTimeline, dataCategories, dataFoodTypes) {
             chartTimeline.data.labels = labelsTimeline;
             chartTimeline.data.datasets[0].data = dataTimeline;
             chartTimeline.update();
+            
             chartCategories.data.datasets[0].data = dataCategories;
             chartCategories.update();
+            
+            if (dataFoodTypes) {
+                chartFoodTypes.data.datasets[0].data = dataFoodTypes;
+                chartFoodTypes.update();
+            }
         }
 
         async function initCamera() {
@@ -403,8 +474,6 @@
         }
 
         function simulateTrayDetection() { if (!isScanningProcess) runAutonomousScan(); }
-        document.getElementById('cfg-sheet-url').value = ADRESSE_SHEET_OFFICIELLE;
-        document.getElementById('cfg-sheet-url').readOnly = true; 
 
         function saveMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
@@ -438,7 +507,7 @@
                 plat_pct: hasPlat ? Math.floor(Math.random() * 30) + 5 : 0,
                 accompagnement_pct: hasAccomp ? Math.floor(Math.random() * 50) + 10 : 0,
                 dessert_pct: hasDessert ? Math.floor(Math.random() * 40) + 5 : 0,
-                pain_nombre: 0,
+                pain_nombre: Math.random() > 0.5 ? Math.floor(Math.random() * 2) + 1 : 0, // Génère 0, 1 ou 2 pains de test
                 poids_total_g: Math.floor(Math.random() * 150) + 40,
                 perte_euro: parseFloat((Math.random() * 0.9).toFixed(2))
             };
@@ -460,6 +529,7 @@
             }).catch(err => { alert("Erreur : " + err); resetBorneUI(); });
         }
 
+        // CONSTITUTION DES GRAPHIQUES
         chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), {
             type: 'line',
             data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', backgroundColor: 'rgba(45, 106, 79, 0.1)', tension: 0.2, fill: true }] },
@@ -470,6 +540,39 @@
             type: 'doughnut',
             data: { labels: ['Entrées', 'Plats', 'Accompagnements', 'Desserts'], datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#48cae4', '#ffb703', '#e63946', '#9b5de5'] }] },
             options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        // LE NOUVEAU GRAPH PAR TYPE D'ALIMENT (STYLE KIKLEO TRÈS PRÉCIS)
+        chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Crudités', 'Légumes', 'Féculents', 'Viandes', 'Fruits', 'Pain'],
+                datasets: [{
+                    label: 'Gaspillage (g)',
+                    data: [0, 0, 0, 0, 0, 0],
+                    // Couleurs exactes tirées de la charte de ta photo
+                    backgroundColor: ['#9cd37b', '#83a397', '#f3be7a', '#eb6b65', '#cccccc', '#e69f43'],
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false } // Masqué pour coller au design minimaliste de Kikleo
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f3f4f6' },
+                        title: { display: true, text: 'Masse moyenne jetée (g)', font: { size: 12, weight: 'bold' } }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
         });
 
         loadLiveData();
