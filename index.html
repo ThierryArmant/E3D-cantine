@@ -380,7 +380,21 @@
                     if (row.Dessert_Pct > 0) totalFruits += (row.Dessert_Pct / 100) * poidsLigne;
                     totalPain += (parseFloat(row.Pain_Nombre || 0) * 20);
 
-                    historiqueDates.push(row.Horodatage ? row.Horodatage.split(' ')[0] : 'Test');
+                    let dateLabel = 'Test';
+if (row.Horodatage) {
+    let d = new Date(row.Horodatage);
+    if (!isNaN(d.getTime())) {
+        let jour = String(d.getDate()).padStart(2, '0');
+        let mois = String(d.getMonth() + 1).padStart(2, '0');
+        let heures = String(d.getHours()).padStart(2, '0');
+        let minutes = String(d.getMinutes()).padStart(2, '0');
+        dateLabel = `${jour}/${mois} ${heures}:${minutes}`;
+    } else {
+        // Sécurité au cas où le format reçu serait différent
+        dateLabel = row.Horodatage.replace('T', ' ').fontcolor('Z', '').substring(0, 16);
+    }
+}
+historiqueDates.push(dateLabel);
                     historiquePoids.push(poidsLigne);
                 });
 
