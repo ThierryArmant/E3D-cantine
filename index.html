@@ -45,10 +45,6 @@
         #status-message { margin-top: 20px; padding: 15px; border-radius: 6px; text-align: center; font-weight: bold; display: none; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px; }
-        .stat-box { background: #f8f9fa; border: 1px solid #e2e8f0; padding: 20px; border-radius: 6px; text-align: center; }
-        .stat-box span { display: block; font-size: 28px; font-weight: bold; color: var(--primary); }
     </style>
 </head>
 <body>
@@ -66,7 +62,7 @@
     <div class="container">
         <div id="status-message"></div>
 
-        <!-- ONGLET 1 : MODE BORNE DE SCAN -->
+        <!-- ONGLET 1 : MODE BORNE DE SCAN (POUR LES ELEVES) -->
         <div id="tab-borne" class="tab-content active">
             <div class="card">
                 <h2>Enregistrement du Gaspillage</h2>
@@ -121,11 +117,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="cuisine-menu">Menu du jour (Détail des composants régionaux) :</label>
-                    <textarea id="cuisine-menu" rows="4" placeholder="Ex: Salade de tomates locales, Rôti de porc/lentilles du Puy, Pomme AOP..."></textarea>
+                    <label for="cuisine-menu">Menu du jour (Détail des composants) :</label>
+                    <textarea id="cuisine-menu" rows="4" placeholder="Ex: Salade de tomates locales, Rôti de porc/lentilles, Pomme AOP..."></textarea>
                 </div>
 
-                <button class="btn-submit" style="background-color: var(--primary);" onclick="soumettreCuisine()">Enregistrer les Données de Base 📝</button>
+                <button class="btn-submit" style="background-color: var(--primary);" onclick="soumettreCuisine()">Enregistrer les Données Cuisine 📝</button>
             </div>
         </div>
     </div>
@@ -136,12 +132,12 @@
         
         let selectedCategoryStr = "";
 
-        // Initialisation automatique au chargement
+        // Chargement automatique au démarrage
         window.onload = function() {
             chargerEtablissements();
         };
 
-        // Gestion du menu de navigation
+        // Navigation entre onglets Borne et Cuisine
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-tabs li').forEach(el => el.classList.remove('active'));
@@ -151,14 +147,14 @@
             masquerStatut();
         }
 
-        // Sélection de la catégorie d'aliment
+        // Gestion de la sélection visuelle des boutons catégories
         function selectCategory(element, value) {
             document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
             element.classList.add('selected');
             selectedCategoryStr = value;
         }
 
-        // Récupération dynamique des écoles depuis la passerelle Sheets
+        // Récupération automatique des écoles configurées dans le Google Sheet
         function chargerEtablissements() {
             fetch(ADRESSE_SHEET_OFFICIELLE)
                 .then(response => response.json())
@@ -176,28 +172,29 @@
                 })
                 .catch(err => {
                     console.error("Erreur d'initialisation des écoles:", err);
-                    afficherStatut("Impossible de charger la liste des écoles depuis Google Sheets. Mode secours activé.", "error");
-                    // Remplissage de secours au cas où le script d'initialisation échoue
-                    const backupList = ["Collège Jean Giono"];
+                    afficherStatut("Impossible de charger la liste depuis Google Sheets. Mode de secours activé.", "error");
+                    
+                    // Liste de secours au cas où la liaison initiale échoue
+                    const backupList = ["COLLEGE J. GI", "COLLEGE V. SCHOELCHER"];
                     [document.getElementById('borne-ecole'), document.getElementById('cuisine-ecole')].forEach(select => {
-                        select.innerHTML = '';
+                        select.innerHTML = '<option value="">-- Choisissez un établissement --</option>';
                         backupList.forEach(e => select.innerHTML += `<option value="${e}">${e}</option>`);
                     });
                 });
         }
 
-        // Envoi d'un Scan Plateau (Routage : Suivi_Gaspillage & Analyses_IA via Dify)
+        // Envoi des données de pesée (Routage : Suivi_Gaspillage & traitement Dify)
         function soumettreScan() {
             const ecole = document.getElementById('borne-ecole').value;
             const service = document.getElementById('borne-service').value;
             const poids = parseFloat(document.getElementById('borne-poids').value);
 
             if (!ecole || !selectedCategoryStr || isNaN(poids)) {
-                afficherStatut("Veuillez remplir tous les champs : Établissement, Catégorie et Poids.", "error");
+                afficherStatut("⚠️ Veuillez remplir tous les champs : Établissement, Catégorie et Poids.", "error");
                 return;
             }
 
-            afficherStatut("⏳ Transmission en cours au serveur A.B.C. (Calculs IA inclus)...", "");
+            afficherStatut("⏳ Transmission de la pesée en cours (Calculs IA et logs)...", "");
 
             const payload = {
                 action: "logScan",
@@ -205,25 +202,25 @@
                 service: service,
                 categorie: selectedCategoryStr,
                 poids: poids,
-                perte_economique: parseFloat((poids * 2.25).toFixed(2)), // Simulation de l'impact financier direct
-                co2: parseFloat((poids * 1.5).toFixed(2)) // Estimation de l'empreinte carbone
+                perte_economique: parseFloat((poids * 2.25).toFixed(2)),
+                co2: parseFloat((poids * 1.5).toFixed(2))
             };
 
-            executerPost(payload, "Pesée enregistrée avec succès ! Regarde tes onglets Suivi_Gaspillage et Analyses_IA.");
+            executerPost(payload, "Pesée enregistrée ! Les onglets du tableur ont été mis à jour.");
         }
 
-        // Envoi des infos Menus/Effectifs par la cuisine
+        // Envoi des informations saisies par le chef de cuisine
         function soumettreCuisine() {
             const ecole = document.getElementById('cuisine-ecole').value;
             const effectif = parseInt(document.getElementById('cuisine-effectif').value);
             const menu = document.getElementById('cuisine-menu').value;
 
             if (!ecole || isNaN(effectif) || !menu) {
-                afficherStatut("Veuillez compléter l'école, l'effectif prévisionnel et la description du menu.", "error");
+                afficherStatut("⚠️ Veuillez compléter l'établissement, l'effectif et le menu du jour.", "error");
                 return;
             }
 
-            afficherStatut("⏳ Enregistrement du menu du jour...", "");
+            afficherStatut("⏳ Synchronisation des données cuisine...", "");
 
             const payload = {
                 action: "logMenu",
@@ -235,25 +232,26 @@
             executerPost(payload, "Données de la cuisine synchronisées avec succès !");
         }
 
-        // Exécuteur HTTP POST générique vers Google Apps Script
+        // Fonction pivot pour envoyer les requêtes POST au Google Apps Script
         function executerPost(payload, messageSucces) {
             fetch(ADRESSE_SHEET_OFFICIELLE, {
                 method: 'POST',
-                mode: 'no-cors', // Évite l'interblocage des règles CORS
+                mode: 'no-cors',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(() => {
                 afficherStatut(`✅ ${messageSucces}`, "success");
-                // Reset partiel du formulaire
                 document.getElementById('borne-poids').value = "";
+                // Décocher la catégorie visuellement
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+                selectedCategoryStr = "";
             })
             .catch(err => {
-                afficherStatut("❌ Erreur lors de la communication réseau : " + err, "error");
+                afficherStatut("❌ Erreur réseau lors de la communication : " + err, "error");
             });
         }
 
-        // Fonctions d'affichage d'état
         function afficherStatut(msg, type) {
             const statusDiv = document.getElementById('status-message');
             statusDiv.style.display = 'block';
