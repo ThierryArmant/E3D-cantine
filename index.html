@@ -3,27 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nano Banana 2 - Solution Anti-Gaspillage</title>
+    <title>A.B.C. - Assiette Bas Carbone</title>
     <!-- Chargement du moteur de graphiques Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         body { background-color: #f3f4f6; color: #1f2937; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 240px; background-color: #2d6a4f; color: white; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
-        .sidebar-brand { padding: 0 20px 20px 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid #40916c; }
+        
+        /* Menu Latéral Éco-Branding */
+        .sidebar { width: 250px; background-color: #1b4332; color: white; display: flex; flex-direction: column; padding: 20px 0; flex-shrink: 0; }
+        .sidebar-brand { padding: 0 20px 5px 20px; font-size: 22px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
+        .sidebar-subtitle { padding: 0 20px 20px 20px; font-size: 11px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
         .sidebar-menu { list-style: none; margin-top: 20px; flex-grow: 1; }
         .menu-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 14px; }
-        .menu-item:hover, .menu-item.active { background-color: #40916c; }
+        .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
+        
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-bar { height: 60px; background-color: white; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
-        .top-bar-title { font-size: 18px; font-weight: 600; }
+        .top-bar { height: 65px; background-color: white; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+        .top-bar-title { font-size: 18px; font-weight: 700; color: #1b4332; }
         .content-area { padding: 24px; overflow-y: auto; flex-grow: 1; }
         .view-section { display: none; }
         .view-section.active { display: block; }
+        
+        /* Grille KPI Principaux */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
         .kpi-card { background: white; border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .kpi-blue { border-top: 5px solid #3b82f6; }
-        .kpi-green { border-top: 5px solid #10b981; }
+        .kpi-green { border-top: 5px solid #52b788; }
         .kpi-yellow { border-top: 5px solid #f59e0b; }
         .kpi-red { border-top: 5px solid #ef4444; }
         .kpi-val { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
@@ -32,6 +38,12 @@
         .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         .dashboard-col { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .chart-container { position: relative; height: 260px; width: 100%; }
+        
+        /* Grille KPI Secondaires (Style Émulation / Éco-comparatif) */
+        .bottom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; margin-bottom: 16px; }
+        .bottom-card { background: #f3f4f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .bottom-card-val { font-size: 22px; font-weight: 700; color: #1f2937; }
+        .bottom-card-lbl { font-size: 12px; color: #4b5563; margin-top: 4px; font-weight: 500; }
         
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 15px;}
         .btn:hover { background-color: #1b4332; }
@@ -68,9 +80,10 @@
 </head>
 <body>
 
-    <!-- BARRE LATÉRALE -->
+    <!-- BARRE LATÉRALE PROJET A.B.C. -->
     <div class="sidebar">
-        <div class="sidebar-brand">🍌 Nano Banana 2</div>
+        <div class="sidebar-brand">🌱 Projet A.B.C.</div>
+        <div class="sidebar-subtitle">Assiette Bas Carbone</div>
         <ul class="sidebar-menu">
             <li class="menu-item active" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
@@ -81,18 +94,27 @@
     <!-- CONTENU -->
     <div class="main-container">
         <div class="top-bar">
-            <div class="top-bar-title" id="current-view-title">Tableau de bord général</div>
+            <!-- SÉLECTEUR MULTI-ÉTABLISSEMENTS GLOBAL -->
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT ACTIF :</label>
+                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc; cursor: pointer;">
+                    <option value="Jean Giono">Collège Jean Giono (Apt)</option>
+                    <option value="Marie Mauron">Collège Marie Mauron (Pertuis)</option>
+                    <option value="Albert Camus">Collège Albert Camus (La Tour-d'Aigues)</option>
+                    <option value="Gargas">École de Gargas</option>
+                </select>
+            </div>
             <div style="font-size: 13px; color: #6b7280;" id="live-date">Service du jour</div>
         </div>
 
         <div class="content-area">
             
-            <!-- VUE 1 : DASHBOARD DYNAMIQUE -->
+            <!-- VUE 1 : DASHBOARD DYNAMIQUE (AVEC SOUSTRACTION INTELLIGENTE) -->
             <div id="view-dashboard" class="view-section active">
                 <div class="kpi-grid">
                     <div class="kpi-card kpi-blue">
                         <div class="kpi-val" id="kpi-avg">Chargement...</div>
-                        <div class="kpi-lbl">Moyenne par plateau</div>
+                        <div class="kpi-lbl">Moyenne réelle par convive</div>
                     </div>
                     <div class="kpi-card kpi-green">
                         <div class="kpi-val" id="kpi-total">Chargement...</div>
@@ -104,7 +126,7 @@
                     </div>
                     <div class="kpi-card kpi-red">
                         <div class="kpi-val" id="kpi-impact">Chargement...</div>
-                        <div class="kpi-lbl">Impact environnemental</div>
+                        <div class="kpi-lbl">Émissions CO₂ évitables</div>
                     </div>
                 </div>
                 
@@ -119,7 +141,7 @@
                     </div>
                 </div>
 
-                <!-- ANALYSE PAR TYPE D'ALIMENTS -->
+                <!-- ANALYSE PAR TYPE D'ALIMENTS (STYLE KIKLEO) -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
                         <h3 style="margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between;">
@@ -129,9 +151,26 @@
                         <div class="chart-container" style="height: 300px;"><canvas id="chart-food-types"></canvas></div>
                     </div>
                 </div>
+
+                <!-- GRILLE DE SOUSTRACTION LOGIQUE -->
+                <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 15px; color: #1b4332;">📊 Synthèse d'efficacité du service</h3>
+                <div class="bottom-grid">
+                    <div class="bottom-card">
+                        <div class="bottom-card-val" id="card-couverts">--</div>
+                        <div class="bottom-card-lbl">Couverts totaux attendus</div>
+                    </div>
+                    <div class="bottom-card" style="background-color: #d1fae5; border: 1px solid #10b981;">
+                        <div class="bottom-card-val" id="card-vides" style="color: #065f46;">--</div>
+                        <div class="bottom-card-lbl" style="color: #065f46;">Assiettes parfaites (0g gâchis)</div>
+                    </div>
+                    <div class="bottom-card" style="background-color: #fee2e2; border: 1px solid #ef4444;">
+                        <div class="bottom-card-val" id="card-tries" style="color: #991b1b;">--</div>
+                        <div class="bottom-card-lbl" style="color: #991b1b;">Assiettes avec restes scannés</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- VUE 2 : BORNE AVEC SÉLECTEUR DE PLATEAU DE TEST -->
+            <!-- VUE 2 : BORNE -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 PLACEZ VOTRE PLATEAU</div>
@@ -149,19 +188,26 @@
                     <div class="progress-container" id="bar-container">
                         <div class="progress-bar" id="action-progress"></div>
                     </div>
+                    
+                    <!-- L'EXPLICATION CHRONO DE 2 SECONDES POUR L'ÉLÈVE -->
+                    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 6px; margin-top: 15px; text-align: left; font-size: 13px; color: #14532d; line-height: 1.4; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        <strong>💡 Assiette vide ?</strong> Tu as tout fini ? Passe directement sans scanner ! L'application déduira ton geste éco-citoyen automatiquement des statistiques. 🏆
+                    </div>
+
                     <div style="margin-top: 15px; font-size: 14px; margin-bottom: 20px;">
                         <span style="color: #4b5563; font-weight: 500;">Menu actif : </span>
                         <span id="borne-menu-active" style="font-weight: bold; color: #2d6a4f;">Non configuré</span>
                     </div>
                     
-                    <!-- 🎮 SECTION INTERACTIVE DE SIMULATION -->
+                    <!-- SECTION INTERACTIVE DE SIMULATION -->
                     <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: left; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                         <label style="font-weight: bold; font-size: 13px; color: #374151; display: block; margin-bottom: 8px;">🎮 CHOISIR LE CONTENU DU PLATEAU DE TEST :</label>
                         <select id="sim-plateau-type" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 12px; font-size: 13px; background-color: #f9fafb; font-weight: 500; cursor: pointer;">
-                            <option value="complet">🍽️ Plateau Complet (Gaspillage sur chaque composant coché)</option>
-                            <option value="entree_only">🥗 Uniquement l'Entrée (ex: Reste de tomates uniquement, le reste est vide)</option>
-                            <option value="plat_only">🍖 Uniquement Plat & Accompagnement (ex: Poulet, le reste est vide)</option>
-                            <option value="dessert_only">🍰 Uniquement le Dessert (ex: Pastèque/Melon, le reste est vide)</option>
+                            <option value="complet">🍽️ Plateau Complet (Reste sur chaque composant coché)</option>
+                            <option value="entree_only">🥗 Uniquement l'Entrée (ex: Reste de tomates uniquement)</option>
+                            <option value="plat_only">🍖 Uniquement Plat & Accompagnement (ex: Saucisse/Pâtes)</option>
+                            <option value="dessert_only">🍰 Uniquement le Dessert (ex: Pastèque/Melon)</option>
+                            <option value="vide">✨ Plateau Vide (Tout est mangé ! Bypassé par l'élève - 0g)</option>
                         </select>
                         <button class="btn btn-simulation" onclick="simulateTrayDetection()" style="margin-top: 0; background-color: #2d6a4f; border: none; font-weight: bold;">👇 SIMULER LE PASSAGE DE CE PLATEAU</button>
                     </div>
@@ -171,8 +217,25 @@
             <!-- VUE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width: 1100px; margin: 0 auto;">
-                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Composition humaine du menu du jour</h3>
                     
+                    <!-- CONFIGURATION DES EFFECTIFS -->
+                    <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des effectifs attendus</h3>
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px; background-color: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 6px;">Service du Midi - Option 1 (convives réels) :</label>
+                            <input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 13px; font-weight: bold; color: #475569; display: block; margin-bottom: 6px;">Service du Midi - Option 2 (convives réels) :</label>
+                            <input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 14px; font-weight: 600;">
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="font-size: 12px; color: #64748b; margin-bottom: 6px; font-weight: 500;">Total attendus : <span id="lbl-total-attendus" style="font-weight: bold; color: #2d6a4f;">450</span></div>
+                            <button class="btn" onclick="saveExpectedMeals()" style="padding: 10px; font-size: 13px;">💾 Valider les effectifs</button>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Composition humaine du menu du jour</h3>
                     <table class="menu-table">
                         <thead>
                             <tr>
@@ -184,7 +247,6 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <!-- COLONNE ENTRÉES -->
                                 <td>
                                     <div class="sub-theme">🍅 Crudités locales</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
@@ -201,8 +263,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza / Feuilleté"> Pizza / Feuilleté</label>
                                 </td>
-                                
-                                <!-- COLONNE PLATS -->
                                 <td>
                                     <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti/émincé"> Poulet (Rôti/Émincé)</label>
@@ -217,8 +277,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de poisson"> Filet de poisson frais</label>
                                 </td>
-                                
-                                <!-- COLONNE ACCOMPAGNEMENTS -->
                                 <td>
                                     <div class="sub-theme">🥔 Féculents</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites / Pdt"> Frites / Pdt sautées</label>
@@ -233,8 +291,6 @@
                                     <div class="sub-theme">🌱 Légumineuses</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Lentilles / Pois chiches"> Lentilles / Pois chiches</label>
                                 </td>
-                                
-                                <!-- COLONNE DESSERTS -->
                                 <td>
                                     <div class="sub-theme">🍈 Vergers du Sud</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
@@ -271,6 +327,46 @@
 
         document.getElementById('live-date').innerText = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+        // Charger l'établissement et ses effectifs au démarrage
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedSchool = localStorage.getItem('schoolActuelle') || 'Jean Giono';
+            document.getElementById('select-etablissement').value = savedSchool;
+            loadExpectedMealsForSchool(savedSchool);
+            loadLiveData();
+        });
+
+        function changeEtablissement() {
+            const selectedSchool = document.getElementById('select-etablissement').value;
+            localStorage.setItem('schoolActuelle', selectedSchool);
+            loadExpectedMealsForSchool(selectedSchool);
+            loadLiveData();
+        }
+
+        function loadExpectedMealsForSchool(school) {
+            const s1 = parseInt(localStorage.getItem(`convives-s1-${school}`)) || 200;
+            const s2 = parseInt(localStorage.getItem(`convives-s2-${school}`)) || 250;
+            document.getElementById('convives-s1').value = s1;
+            document.getElementById('convives-s2').value = s2;
+            document.getElementById('lbl-total-attendus').innerText = s1 + s2;
+        }
+
+        function updateExpectedMeals() {
+            const s1 = parseInt(document.getElementById('convives-s1').value) || 0;
+            const s2 = parseInt(document.getElementById('convives-s2').value) || 0;
+            document.getElementById('lbl-total-attendus').innerText = s1 + s2;
+        }
+
+        function saveExpectedMeals() {
+            const school = document.getElementById('select-etablissement').value;
+            const s1 = parseInt(document.getElementById('convives-s1').value) || 0;
+            const s2 = parseInt(document.getElementById('convives-s2').value) || 0;
+            localStorage.setItem(`convives-s1-${school}`, s1);
+            localStorage.setItem(`convives-s2-${school}`, s2);
+            localStorage.setItem(`totalConvives-${school}`, s1 + s2);
+            alert("Effectifs enregistrés pour " + school + " : " + (s1 + s2) + " couverts attendus !");
+            loadLiveData();
+        }
+
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
@@ -283,18 +379,23 @@
             if (viewId === 'view-dashboard') { loadLiveData(); }
         }
 
+        // LECTURE INTELLIGENTE FILTRÉE PAR ÉTABLISSEMENT
         function loadLiveData() {
-            fetch(ADRESSE_SHEET_OFFICIELLE)
+            const school = document.getElementById('select-etablissement').value;
+            const urlWithParam = `${ADRESSE_SHEET_OFFICIELLE}?ecole=${encodeURIComponent(school)}`;
+
+            fetch(urlWithParam)
             .then(response => response.json())
             .then(rows => {
                 if (!rows || rows.length === 0) { useFallbackDemoData(); return; }
+                
+                let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
                 let totalPoids = 0, totalArgent = 0;
                 let totalEntreesPct = 0, totalPlatsPct = 0, totalAccompPct = 0, totalDessertsPct = 0;
                 
-                // Compteurs d'analyse fine (gaspillage en grammes)
                 let totalCrudites = 0, totalLegumes = 0, totalFeculents = 0, totalViandes = 0, totalFruits = 0, totalPain = 0;
                 
-                let nbLignes = rows.length;
+                let nbScans = rows.length; 
                 let historiqueDates = [], historiquePoids = [];
 
                 rows.forEach(row => {
@@ -313,22 +414,18 @@
                     totalAccompPct += accompPct;
                     totalDessertsPct += dessertPct;
                     
-                    // --- VENTILATION SÉMANTIQUE DANS LES 6 BACS ---
                     let menu = (row.Menu_Jour || "").toLowerCase();
                     
                     // 1. Crudités
                     if (entreePct > 0) {
-                        if (menu.includes("tomate") || menu.includes("avocat") || menu.includes("chou") || menu.includes("carotte") || menu.includes("melon au jambon")) {
+                        if (menu.includes("tomate") || menu.includes("avocat") || menu.includes("chou") || menu.includes("carotte") || menu.includes("melon")) {
                             totalCrudites += (entreePct / 100) * poidsLigne;
                         }
                     }
-                    
                     // 2. Viandes & Poissons
-                    if (platPct > 0) {
-                        totalViandes += (platPct / 100) * poidsLigne;
-                    }
+                    if (platPct > 0) { totalViandes += (platPct / 100) * poidsLigne; }
                     
-                    // 3. Accompagnements : Séparation Légumes chauds vs Féculents
+                    // 3. Accompagnements
                     if (accompPct > 0) {
                         if (menu.includes("haricot") || menu.includes("brocoli") || menu.includes("ratatouille") || menu.includes("tian")) {
                             totalLegumes += (accompPct / 100) * poidsLigne;
@@ -339,18 +436,15 @@
                             totalFeculents += (accompPct / 200) * poidsLigne;
                         }
                     }
-                    
                     // 4. Fruits
                     if (dessertPct > 0) {
                         if (menu.includes("melon") || menu.includes("pastèque") || menu.includes("pêche") || menu.includes("nectarine") || menu.includes("clémentine") || menu.includes("pomme") || menu.includes("poire") || menu.includes("banane")) {
                             totalFruits += (dessertPct / 100) * poidsLigne;
                         }
                     }
-                    
-                    // 5. Pain (Poids estimé à 20g par morceau jeté)
+                    // 5. Pain
                     totalPain += (painNb * 20);
 
-                    // Formater proprement la date
                     let dateRaw = row.Horodatage || 'Inconnu';
                     let dateCourt = dateRaw;
                     
@@ -365,39 +459,62 @@
                         }
                     } else if (typeof dateRaw === 'string' && dateRaw.includes(' ')) {
                         let parties = dateRaw.split(' ');
-                        let datePartie = parties[0];
-                        let heurePartie = parties[1];
-                        let dateSansAnnee = datePartie.split('/').slice(0, 2).join('/');
-                        dateCourt = `${dateSansAnnee} ${heurePartie}`;
+                        let dateSansAnnee = parties[0].split('/').slice(0, 2).join('/');
+                        dateCourt = `${dateSansAnnee} ${parties[1]}`;
                     }
                     
                     historiqueDates.push(dateCourt);
                     historiquePoids.push(poidsLigne);
                 });
 
-                document.getElementById('kpi-avg').innerText = `${(totalPoids / nbLignes).toFixed(1)} g`;
+                // CALCULS PAR SOUSTRACTION LOGIQUE
+                let plateauxTries = nbScans; 
+                let plateauxVides = Math.max(0, totalConvives - plateauxTries);
+                
+                let pctVides = (plateauxVides / totalConvives) * 100;
+                let pctTries = (plateauxTries / totalConvives) * 100;
+
+                // Moyenne calculée sur TOUS les convives (y compris ceux à 0g)
+                let realAvg = totalPoids / totalConvives;
+
+                document.getElementById('kpi-avg').innerText = `${realAvg.toFixed(1)} g`;
                 document.getElementById('kpi-total').innerText = `${(totalPoids / 1000).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${totalArgent.toFixed(2)} €`;
-                document.getElementById('kpi-impact').innerText = `${((totalPoids / 1000) * 3.1).toFixed(1)} kg`;
+                // Impact Carbone (Moyenne ADEME : 3.1 kg CO2 par kg de nourriture gaspillée en restauration collective)
+                document.getElementById('kpi-impact').innerText = `${((totalPoids / 1000) * 3.1).toFixed(1)} kg CO₂`;
                 
+                // Synthèse d'efficacité
+                document.getElementById('card-couverts').innerText = totalConvives;
+                document.getElementById('card-vides').innerText = `${plateauxVides} (${pctVides.toFixed(0)}%)`;
+                document.getElementById('card-tries').innerText = `${plateauxTries} (${pctTries.toFixed(0)}%)`;
+
                 updateCharts(
                     historiqueDates.slice(-7), 
                     historiquePoids.slice(-7), 
-                    [totalEntreesPct/nbLignes, totalPlatsPct/nbLignes, totalAccompPct/nbLignes, totalDessertsPct/nbLignes],
-                    [totalCrudites/nbLignes, totalLegumes/nbLignes, totalFeculents/nbLignes, totalViandes/nbLignes, totalFruits/nbLignes, totalPain/nbLignes]
+                    [totalEntreesPct/totalConvives, totalPlatsPct/totalConvives, totalAccompPct/totalConvives, totalDessertsPct/totalConvives],
+                    [totalCrudites/totalConvives, totalLegumes/totalConvives, totalFeculents/totalConvives, totalViandes/totalConvives, totalFruits/totalConvives, totalPain/totalConvives]
                 );
             })
             .catch(err => { useFallbackDemoData(); });
         }
 
         function useFallbackDemoData() {
+            const school = document.getElementById('select-etablissement').value;
+            let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
+            let plateauxTries = 175;
+            let plateauxVides = totalConvives - plateauxTries;
+            
             document.getElementById('kpi-avg').innerText = "155.7 g";
             document.getElementById('kpi-total').innerText = "18 kg";
             document.getElementById('kpi-money').innerText = "57 €";
-            document.getElementById('kpi-impact').innerText = "38 kg";
+            document.getElementById('kpi-impact').innerText = "38 kg CO₂";
             
+            document.getElementById('card-couverts').innerText = totalConvives;
+            document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
+            document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
+
             updateCharts(
-                ['Jour 20/10'], 
+                ['Démo'], 
                 [155.7], 
                 [45, 20, 20, 15],
                 [10.8, 2.1, 2.1, 1.8, 0.3, 0.3]
@@ -494,7 +611,7 @@
             switchView('view-borne');
         }
 
-        // --- ENVOI TOTALEMENT INTELLIGENT ET PRÉCIS SELON TON CHOIX ---
+        // ENVOI MULTI-ÉTABLISSEMENTS VERS LA BONNE PAGE DU SHEET
         function sendToAutomationPipeline() {
             const banner = document.getElementById('instruction-text');
             const frame = document.getElementById('scanner-frame');
@@ -503,31 +620,53 @@
             
             const menuText = document.getElementById('borne-menu-active').innerText;
             const simType = document.getElementById('sim-plateau-type').value;
+            const school = document.getElementById('select-etablissement').value;
+            const isVide = simType === 'vide';
 
-            // Détection intelligente selon le type de plateau choisi dans l'option
             const hasEntree = !menuText.includes('Sans entrée') && (simType === 'complet' || simType === 'entree_only');
             const hasPlat = !menuText.includes('Sans plat') && (simType === 'complet' || simType === 'plat_only');
             const hasAccomp = !menuText.includes('Sans accomp.') && (simType === 'complet' || simType === 'plat_only');
             const hasDessert = !menuText.includes('Sans dessert') && (simType === 'complet' || simType === 'dessert_only');
 
-            // Calcul du poids réaliste en fonction de ce qui a vraiment été jeté
             let basePoids = 0;
-            if (hasEntree) basePoids += Math.floor(Math.random() * 40) + 20;   // ~20 à 60g pour les tomates
-            if (hasPlat) basePoids += Math.floor(Math.random() * 60) + 30;     // ~30 à 90g pour la viande
-            if (hasAccomp) basePoids += Math.floor(Math.random() * 50) + 20;   // ~20 à 70g pour l'accompagnement
-            if (hasDessert) basePoids += Math.floor(Math.random() * 30) + 10;  // ~10 à 40g pour le dessert
+            if (!isVide) {
+                if (hasEntree) basePoids += Math.floor(Math.random() * 40) + 20;
+                if (hasPlat) basePoids += Math.floor(Math.random() * 60) + 30;
+                if (hasAccomp) basePoids += Math.floor(Math.random() * 50) + 20;
+                if (hasDessert) basePoids += Math.floor(Math.random() * 30) + 10;
+            }
 
-            const finalWeight = basePoids || 15; // Minimum technique si l'élève a rendu un plateau vide de déchets
+            let finalWeight = basePoids;
+            if (isVide) {
+                finalWeight = 0;
+            } else if (finalWeight === 0) {
+                finalWeight = 15;
+            }
+
+            // BYPASS ÉCOLOGIQUE : PAS DE POST RESEAU SI LE PLATEAU EST VIDE (L'élève passe à côté)
+            if (isVide) {
+                banner.innerText = "✨ MERCI POUR TON GESTE !";
+                banner.className = "instruction-banner state-success";
+                light.className = "traffic-light light-success";
+                light.innerHTML = '<span style="font-size:28px; margin-bottom:2px;">🏆</span><span id="light-text">BRAVO</span>';
+                frame.style.borderColor = "#10b981";
+                bounds.style.borderColor = "#10b981";
+                document.getElementById('laser-line').style.display = "none";
+                document.getElementById('bar-container').style.display = "none";
+                setTimeout(() => { resetBorneUI(); }, 2500);
+                return;
+            }
 
             const payload = {
+                etablissement: school, // Renseigne l'école courante pour que Google range la ligne dans le bon onglet
                 menu_jour: menuText,
                 entree_pct: hasEntree ? Math.floor(Math.random() * 40) + 10 : 0,
                 plat_pct: hasPlat ? Math.floor(Math.random() * 30) + 5 : 0,
                 accompagnement_pct: hasAccomp ? Math.floor(Math.random() * 50) + 10 : 0,
                 dessert_pct: hasDessert ? Math.floor(Math.random() * 40) + 5 : 0,
-                pain_nombre: 0, // Garanti sans aucun pain fantôme !
+                pain_nombre: 0,
                 poids_total_g: finalWeight,
-                perte_euro: parseFloat(((finalWeight / 1000) * 4.5).toFixed(2)) // Prix moyen réaliste de 4,50€ par kg de bio-déchets
+                perte_euro: parseFloat(((finalWeight / 1000) * 4.5).toFixed(2))
             };
 
             fetch(ADRESSE_SHEET_OFFICIELLE, {
@@ -555,7 +694,7 @@
 
         chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), {
             type: 'doughnut',
-            data: { labels: ['Entrées', 'Plats', 'Accompagnements', 'Desserts'], datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#48cae4', '#ffb703', '#e63946', '#9b5de5'] }] },
+            data: { labels: ['Entrées', 'Plats', 'Accompagnements', 'Desserts'], datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#3b82f6', '#ffb703', '#e63946', '#9b5de5'] }] },
             options: { responsive: true, maintainAspectRatio: false }
         });
 
@@ -585,8 +724,6 @@
                 }
             }
         });
-
-        loadLiveData();
     </script>
 </body>
 </html>
