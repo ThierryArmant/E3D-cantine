@@ -73,7 +73,7 @@
             <li class="menu-item active" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
             <li class="menu-item" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
-            <li class="menu-item" onclick="switchView('view-config')">⚙️ Configuration</li>
+            <li class="menu-item" onclick="view-config">⚙️ Configuration</li>
         </ul>
     </div>
 
@@ -288,7 +288,31 @@
                     totalPlatsPct += parseFloat(row.Plat_Pct || 0);
                     totalAccompPct += parseFloat(row.Accompagnement_Pct || 0);
                     totalDessertsPct += parseFloat(row.Dessert_Pct || 0);
-                    let dateCourt = row.Horodatage ? row.Horodatage.split(' ')[0] : 'Inconnu';
+                    
+                    // --- REFORMATAGE INTELLIGENT DE LA DATE POUR LE GRAPH ---
+                    let dateRaw = row.Horodatage || 'Inconnu';
+                    let dateCourt = dateRaw;
+                    
+                    // Si c'est un format ISO long de Google (ex: 2026-07-17T07:57:07.000Z)
+                    if (typeof dateRaw === 'string' && dateRaw.includes('T')) {
+                        let d = new Date(dateRaw);
+                        if (!isNaN(d.getTime())) {
+                            let jour = String(d.getDate()).padStart(2, '0');
+                            let mois = String(d.getMonth() + 1).padStart(2, '0');
+                            let heures = String(d.getHours()).padStart(2, '0');
+                            let minutes = String(d.getMinutes()).padStart(2, '0');
+                            dateCourt = `${jour}/${mois} ${heures}:${minutes}`;
+                        }
+                    } else if (typeof dateRaw === 'string' && dateRaw.includes(' ')) {
+                        // Si c'est déjà notre format simplifié "17/07/26 09:57"
+                        // On retire l'année pour que ça tienne sur l'axe
+                        let parties = dateRaw.split(' ');
+                        let datePartie = parties[0]; // "17/07/26"
+                        let heurePartie = parties[1]; // "09:57"
+                        let dateSansAnnee = datePartie.split('/').slice(0, 2).join('/'); // "17/07"
+                        dateCourt = `${dateSansAnnee} ${heurePartie}`;
+                    }
+                    
                     historiqueDates.push(dateCourt);
                     historiquePoids.push(parseFloat(row.Poids_Total_g || 0));
                 });
