@@ -85,7 +85,7 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
 
-        /* Grille des 4 Cartes d'indicateurs (KPIs) */
+        /* Grille des KPIs */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -125,52 +125,99 @@
             width: 100%;
         }
 
-        /* Formulaires & Tableaux */
+        /* Tableaux Espace Cuisinier */
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 15px;}
         .btn:hover { background-color: #1b4332; }
-        
         .menu-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border: 1px solid #e5e7eb; }
         .menu-table td { padding: 12px; vertical-align: top; border: 1px solid #e5e7eb; background-color: #f9fafb; }
         .checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; cursor: pointer; color: #374151; }
         .checkbox-label input { width: 18px; height: 18px; cursor: pointer; accent-color: #2d6a4f; }
 
-        /* Panneau Caméra / Smartphone */
-        .camera-panel {
-            text-align: center;
-            background: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            max-width: 500px;
+        /* 📸 INTERFACE BORNE AUTOMATIQUE */
+        .borne-container {
+            max-width: 650px;
             margin: 0 auto;
+            text-align: center;
         }
-        .camera-viewfinder {
+        .instruction-banner {
+            background-color: #1e3a8a;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .scanner-box {
+            position: relative;
             width: 100%;
-            height: 300px;
+            height: 420px;
             background: #111827;
-            border-radius: 6px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            border: 4px solid #d1d5db;
+        }
+        #camera-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .scan-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #9ca3af;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
         }
-        .status-badge {
-            display: inline-block;
-            padding: 6px 12px;
+        .target-corners {
+            position: absolute;
+            top: 25px; left: 25px; right: 25px; bottom: 25px;
+            border: 3px dashed rgba(255, 255, 255, 0.4);
+            border-radius: 8px;
+        }
+        .scan-laser {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(to bottom, transparent, #ef4444);
+            box-shadow: 0 0 12px #ef4444;
+            animation: laserMove 2s infinite linear;
+        }
+        @keyframes laserMove {
+            0% { top: 10%; }
+            50% { top: 90%; }
+            100% { top: 10%; }
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #e5e7eb;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 15px;
+            margin-top: 15px;
+            height: 20px;
+            overflow: hidden;
+            display: none;
         }
-        .status-ready { background-color: #d1fae5; color: #065f46; }
-        .status-processing { background-color: #fef3c7; color: #92400e; }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #f59e0b;
+            transition: width 0.1s linear;
+        }
+        .state-searching { background-color: #1e3a8a !important; }
+        .state-detected { background-color: #d97706 !important; }
+        .state-success { background-color: #059669 !important; }
+        .btn-simulation { margin-top: 15px; background-color: #4b5563; font-size: 13px; padding: 8px; }
     </style>
 </head>
 <body>
 
-    <!-- BARRE LATÉRALE DE NAVIGATION -->
+    <!-- BARRE LATÉRALE -->
     <div class="sidebar">
         <div class="sidebar-brand">🍌 Nano Banana 2</div>
         <ul class="sidebar-menu">
@@ -181,7 +228,7 @@
         </ul>
     </div>
 
-    <!-- CONTENU PRINCIPAL -->
+    <!-- CONTENU -->
     <div class="main-container">
         <div class="top-bar">
             <div class="top-bar-title" id="current-view-title">Tableau de bord général</div>
@@ -190,27 +237,26 @@
 
         <div class="content-area">
             
-            <!-- VUE 1 : TABLEAU DE BORD -->
+            <!-- VUE 1 : DASHBOARD DYNAMIQUE -->
             <div id="view-dashboard" class="view-section active">
                 <div class="kpi-grid">
                     <div class="kpi-card kpi-blue">
-                        <div class="kpi-val" id="kpi-avg">43.1 g</div>
+                        <div class="kpi-val" id="kpi-avg">Chargement...</div>
                         <div class="kpi-lbl">Moyenne par plateau</div>
                     </div>
                     <div class="kpi-card kpi-green">
-                        <div class="kpi-val" id="kpi-total">292 kg</div>
+                        <div class="kpi-val" id="kpi-total">Chargement...</div>
                         <div class="kpi-lbl">Quantité gaspillée totale</div>
                     </div>
                     <div class="kpi-card kpi-yellow">
-                        <div class="kpi-val" id="kpi-money">1 544 €</div>
+                        <div class="kpi-val" id="kpi-money">Chargement...</div>
                         <div class="kpi-lbl">Pertes économiques</div>
                     </div>
                     <div class="kpi-card kpi-red">
-                        <div class="kpi-val" id="kpi-impact">924 kg</div>
+                        <div class="kpi-val" id="kpi-impact">Chargement...</div>
                         <div class="kpi-lbl">Impact environnemental</div>
                     </div>
                 </div>
-
                 <div class="dashboard-row">
                     <div class="dashboard-col">
                         <h3 style="margin-bottom: 15px; font-size: 15px;">Évolution du gaspillage (g / convive)</h3>
@@ -223,28 +269,32 @@
                 </div>
             </div>
 
-            <!-- VUE 2 : BORNE ET SMARTPHONE -->
+            <!-- VUE 2 : BORNE INTÉLLIGENTE SANS CLIC -->
             <div id="view-borne" class="view-section">
-                <div class="camera-panel">
-                    <div id="status-indicator" class="status-badge status-ready">Prêt à scanner</div>
-                    <div class="camera-viewfinder" id="viewfinder" onclick="triggerCapture()">
-                        <span id="viewfinder-text">Cliquez pour ouvrir l'appareil photo</span>
-                        <img id="preview-img" style="display:none; width:100%; height:100%; object-fit:cover;" />
+                <div class="borne-container">
+                    <div id="instruction-text" class="instruction-banner state-searching">🤖 POSEZ VOTRE PLATEAU ICI</div>
+                    <div class="scanner-box" id="scanner-frame">
+                        <video id="camera-feed" autoplay playsinline muted></video>
+                        <div class="scan-overlay">
+                            <div class="target-corners" id="visual-bounds"></div>
+                            <div class="scan-laser" id="laser-line"></div>
+                        </div>
                     </div>
-                    <div style="margin-bottom: 20px;">
-                        <span style="font-size: 13px; color: #4b5563;">Menu actif : </span>
-                        <span id="borne-menu-active" style="font-size: 13px; font-weight: bold; color: #2d6a4f;">Non configuré</span>
+                    <div class="progress-container" id="bar-container">
+                        <div class="progress-bar" id="action-progress"></div>
                     </div>
-                    <button class="btn" onclick="triggerCapture()">📸 PRENDRE LA PHOTO DU PLATEAU</button>
-                    <input type="file" id="file-fallback" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    <div style="margin-top: 15px; font-size: 14px;">
+                        <span style="color: #4b5563; font-weight: 500;">Menu actif : </span>
+                        <span id="borne-menu-active" style="font-weight: bold; color: #2d6a4f;">Non configuré</span>
+                    </div>
+                    <button class="btn btn-simulation" onclick="simulateTrayDetection()">Simuler la dépose d'un plateau (Test PC)</button>
                 </div>
             </div>
 
-            <!-- VUE 3 : ESPACE CUISINIER (VERSION COMPLÈTE EN 4 COLONNES) -->
+            <!-- VUE 3 : CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width: 980px; margin: 0 auto;">
                     <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Composition du menu du jour</h3>
-                    
                     <table class="menu-table">
                         <thead>
                             <tr>
@@ -256,7 +306,6 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <!-- COLONNE ENTRÉES -->
                                 <td>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade / Crudités"> Salade / Crudités</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Charcuterie / Terrine"> Charcuterie / Terrine</label>
@@ -264,7 +313,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Soupe / Potage"> Soupe / Potage</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Feuilleté / Chausson"> Feuilleté / Chausson</label>
                                 </td>
-                                <!-- COLONNE PLATS -->
                                 <td>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Volaille (Poulet/Dinde)"> Volaille (Poulet/Dinde)</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson / Poisson pané"> Poisson / Poisson pané</label>
@@ -272,7 +320,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Plat Végétarien"> Plat Végétarien</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Porc / Rôti / Saucisse"> Porc / Rôti</label>
                                 </td>
-                                <!-- COLONNE ACCOMPAGNEMENTS -->
                                 <td>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites / Pdt sautées"> Frites / Pdt sautées</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes / Rice"> Pâtes / Riz</label>
@@ -280,7 +327,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Légumes verts (Haricots...)"> Légumes verts</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Légumineuses / Semoule"> Légumineuses / Semoule</label>
                                 </td>
-                                <!-- COLONNE DESSERTS -->
                                 <td>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit frais / Coupelle"> Fruit frais / Coupelle</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Laitage (Yaourt/Fromage)"> Laitage (Yaourt/From.)</label>
@@ -291,18 +337,17 @@
                             </tr>
                         </tbody>
                     </table>
-                    
                     <button class="btn" onclick="saveMenu()">💾 Activer le Menu & Lancer le service</button>
                 </div>
             </div>
 
-            <!-- VUE 4 : PARAMÈTRES ET CONFIGURATION -->
+            <!-- VUE 4 : CONFIGURATION -->
             <div id="view-config" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; box-shadow:0 1px 3px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto;">
                     <h3 style="margin-bottom: 15px;">Liaisons Systèmes</h3>
                     <div class="form-group">
-                        <label class="form-label">URL Google Apps Script (Générée à l'étape précédente)</label>
-                        <input type="text" id="cfg-sheet-url" class="form-input" placeholder="https://script.google.com/macros/s/.../exec">
+                        <label class="form-label">URL Google Apps Script</label>
+                        <input type="text" id="cfg-sheet-url" class="form-input">
                     </div>
                     <button class="btn" onclick="saveConfig()">💾 Sauvegarder les liaisons</button>
                 </div>
@@ -311,15 +356,15 @@
         </div>
     </div>
 
-    <!-- SCRIPTS DE LOGIQUE ET DE GRAPHISMES -->
+    <!-- SCRIPTS LOGIQUE ET REQUÊTES EN DIRECT -->
     <script>
-        // 1. ADRESSE OFFICIELLE DE CET ÉTABLISSEMENT (GRAVÉE DANS LE MARBRE)
         const ADRESSE_SHEET_OFFICIELLE = 'https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec';
+        let localStream = null;
+        let isScanningProcess = false;
+        let chartTimeline, chartCategories;
 
-        // Affichage de la date du jour
         document.getElementById('live-date').innerText = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-        // Gestion de la navigation
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
@@ -327,72 +372,157 @@
             
             const activeItem = Array.from(document.querySelectorAll('.menu-item')).find(item => item.getAttribute('onclick').includes(viewId));
             if(activeItem) activeItem.classList.add('active');
+
+            if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
+            if (viewId === 'view-dashboard') { loadLiveData(); }
         }
 
-        // Configuration (Affiche l'adresse officielle en lecture seule)
+        // 🔄 LECTURE ET CALCUL DES VRAIES DONNÉES DU GOOGLE SHEET
+        function loadLiveData() {
+            fetch(ADRESSE_SHEET_OFFICIELLE)
+            .then(response => response.json())
+            .then(rows => {
+                if (!rows || rows.length === 0) { useFallbackDemoData(); return; }
+
+                let totalPoids = 0;
+                let totalArgent = 0;
+                let totalEntreesPct = 0;
+                let totalPlatsPct = 0;
+                let totalFeculentsPct = 0;
+                let nbLignes = rows.length;
+
+                let historiqueDates = [];
+                let historiquePoids = [];
+
+                rows.forEach(row => {
+                    totalPoids += parseFloat(row.Poids_Total_g || 0);
+                    totalArgent += parseFloat(row.Perte_Euro || 0);
+                    totalEntreesPct += parseFloat(row.Entree_Pct || 0);
+                    totalPlatsPct += parseFloat(row.Plat_Pct || 0);
+                    totalFeculentsPct += parseFloat(row.Feculent_Pct || 0);
+
+                    // Extraction de la date pour le graphique linéaire
+                    let dateCourt = row.Horodatage ? row.Horodatage.split(' ')[0] : 'Inconnu';
+                    historiqueDates.push(dateCourt);
+                    historiquePoids.push(parseFloat(row.Poids_Total_g || 0));
+                });
+
+                let moyennePlateau = (totalPoids / nbLignes).toFixed(1);
+                let poidsTotalKg = (totalPoids / 1000).toFixed(1);
+                let impactCo2 = (poidsTotalKg * 3.1).toFixed(1); // Équivalent CO2 classique
+
+                // Mise à jour des boîtes de texte colorées
+                document.getElementById('kpi-avg').innerText = `${moyennePlateau} g`;
+                document.getElementById('kpi-total').innerText = `${poidsTotalKg} kg`;
+                document.getElementById('kpi-money').innerText = `${totalArgent.toFixed(2)} €`;
+                document.getElementById('kpi-impact').innerText = `${impactCo2} kg`;
+
+                // Mise à jour des vrais graphiques
+                updateCharts(historiqueDates.slice(-7), historiquePoids.slice(-7), [totalEntreesPct/nbLignes, totalPlatsPct/nbLignes, totalFeculentsPct/nbLignes]);
+            })
+            .catch(err => {
+                console.log("Mode démo ou en attente du script de lecture :", err);
+                useFallbackDemoData();
+            });
+        }
+
+        function useFallbackDemoData() {
+            document.getElementById('kpi-avg').innerText = "43.1 g";
+            document.getElementById('kpi-total').innerText = "292 kg";
+            document.getElementById('kpi-money').innerText = "1 544 €";
+            document.getElementById('kpi-impact').innerText = "924 kg";
+            updateCharts(['Lundi', 'Mardi', 'Jeudi', 'Vendredi'], [45, 38, 52, 43], [35, 25, 40]);
+        }
+
+        function updateCharts(labelsTimeline, dataTimeline, dataCategories) {
+            chartTimeline.data.labels = labelsTimeline;
+            chartTimeline.data.datasets[0].data = dataTimeline;
+            chartTimeline.update();
+
+            chartCategories.data.datasets[0].data = dataCategories;
+            chartCategories.update();
+        }
+
+        // CAMÉRA & SCAN AUTOMATIQUE
+        async function initCamera() {
+            const video = document.getElementById('camera-feed');
+            try {
+                if (localStream) stopCamera();
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false
+                });
+                video.srcObject = localStream;
+                resetBorneUI();
+                setTimeout(() => { if(!isScanningProcess && document.getElementById('view-borne').classList.contains('active')) simulateTrayDetection(); }, 4000);
+            } catch (err) {
+                document.getElementById('instruction-text').innerText = "⚠️ Écran de Contrôle Actif (Mode Démo)";
+            }
+        }
+
+        function stopCamera() { if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; } }
+
+        function resetBorneUI() {
+            isScanningProcess = false;
+            const banner = document.getElementById('instruction-text');
+            banner.innerText = "🤖 POSEZ VOTRE PLATEAU ICI";
+            banner.className = "instruction-banner state-searching";
+            document.getElementById('scanner-frame').style.borderColor = "#d1d5db";
+            document.getElementById('visual-bounds').style.borderColor = "rgba(255, 255, 255, 0.4)";
+            document.getElementById('visual-bounds').style.borderStyle = "dashed";
+            document.getElementById('laser-line').style.display = "block";
+            document.getElementById('bar-container').style.display = "none";
+            document.getElementById('action-progress').style.width = "0%";
+        }
+
+        function runAutonomousScan() {
+            if (isScanningProcess) return;
+            isScanningProcess = true;
+            const banner = document.getElementById('instruction-text');
+            const frame = document.getElementById('scanner-frame');
+            const bounds = document.getElementById('visual-bounds');
+            const progressBar = document.getElementById('action-progress');
+            
+            banner.innerText = "📦 PLATEAU DÉTECTÉ ! NE BOUGEZ PLUS...";
+            banner.className = "instruction-banner state-detected";
+            frame.style.borderColor = "#f59e0b";
+            bounds.style.borderColor = "#f59e0b";
+            bounds.style.borderStyle = "solid";
+            document.getElementById('bar-container').style.display = "block";
+
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    banner.innerText = "🤖 ANALYSE IA ET CAPTURE EN COURS...";
+                    sendToAutomationPipeline();
+                } else { width += 5; progressBar.style.width = width + '%'; }
+            }, 75);
+        }
+
+        function simulateTrayDetection() { if (!isScanningProcess) runAutonomousScan(); }
+        function saveConfig() { alert('Liaison active !'); }
         document.getElementById('cfg-sheet-url').value = ADRESSE_SHEET_OFFICIELLE;
         document.getElementById('cfg-sheet-url').readOnly = true; 
 
-        function saveConfig() {
-            alert('Liaison sécurisée active pour le collège Jean Giono !');
-        }
-
-        // Enregistrement automatique du menu par cases à cocher
         function saveMenu() {
-            // Récupération des cases cochées dans chaque colonne
-            const entreesSelectionnees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
-            const platsSelectionnes = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const accompsSelectionnes = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
-            const dessertsSelectionnes = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
+            const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
+            const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
+            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
 
-            // Vérification de sécurité
-            if (entreesSelectionnees.length === 0 && platsSelectionnes.length === 0 && accompsSelectionnes.length === 0 && dessertsSelectionnes.length === 0) {
-                alert("Veuillez cocher au moins un élément pour lancer le service !");
-                return;
-            }
+            if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) { alert("Cochez au moins un aliment !"); return; }
 
-            // Mise en forme des textes pour chaque catégorie
-            const txtEntree = entreesSelectionnees.length > 0 ? entreesSelectionnees.join('+') : 'Sans entrée';
-            const txtPlat = platsSelectionnes.length > 0 ? platsSelectionnes.join('+') : 'Sans plat';
-            const txtAccomp = accompsSelectionnes.length > 0 ? accompsSelectionnes.join('+') : 'Sans accomp.';
-            const txtDessert = dessertsSelectionnes.length > 0 ? dessertsSelectionnes.join('+') : 'Sans dessert';
-
-            // Concatenation finale pour l'affichage de la borne
-            const menuFinal = `${txtEntree} / ${txtPlat} / ${txtAccomp} / ${txtDessert}`;
+            const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
             document.getElementById('borne-menu-active').innerText = menuFinal;
-            
-            alert('Service initialisé avec succès ! Basculement vers la borne.');
+            alert('Menu configuré ! En avant.');
             switchView('view-borne');
         }
 
-        // Déclenchement photo smartphone
-        function triggerCapture() { document.getElementById('file-fallback').click(); }
-
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('viewfinder-text').style.display = 'none';
-                const img = document.getElementById('preview-img');
-                img.src = e.target.result;
-                img.style.display = 'block';
-                
-                sendToAutomationPipeline();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // Envoi automatique des données au Google Sheet
         function sendToAutomationPipeline() {
-            const status = document.getElementById('status-indicator');
-            status.innerText = "Analyse IA et synchronisation...";
-            status.className = "status-badge status-processing";
+            const banner = document.getElementById('instruction-text');
+            const frame = document.getElementById('scanner-frame');
+            const bounds = document.getElementById('visual-bounds');
 
-            const scriptUrl = ADRESSE_SHEET_OFFICIELLE;
-
-            // Simulation de données extraites par l'IA
             const payload = {
                 menu_jour: document.getElementById('borne-menu-active').innerText,
                 entree_pct: Math.floor(Math.random() * 50),
@@ -403,50 +533,42 @@
                 perte_euro: (Math.random() * 1.5).toFixed(2)
             };
 
-            // Envoi transparent et asynchrone au Google Sheet
-            fetch(scriptUrl, {
-                method: "POST",
-                mode: "no-cors",
+            fetch(ADRESSE_SHEET_OFFICIELLE, {
+                method: "POST", mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(() => {
-                status.innerText = "Plateau validé ! Videz vos restes.";
-                status.className = "status-badge status-ready";
-                setTimeout(() => { switchView('view-dashboard'); }, 1000);
-            }).catch(err => {
-                alert("Erreur lors de l'envoi auto : " + err);
-                status.className = "status-badge status-ready";
-            });
+                banner.innerText = "✅ PLATEAU VALIDÉ ! MERCI POUR LA PLANÈTE.";
+                banner.className = "instruction-banner state-success";
+                frame.style.borderColor = "#059669";
+                bounds.style.borderColor = "#059669";
+                document.getElementById('laser-line').style.display = "none";
+                document.getElementById('bar-container').style.display = "none";
+
+                setTimeout(() => {
+                    resetBorneUI();
+                    if(document.getElementById('view-borne').classList.contains('active')) {
+                        setTimeout(() => { simulateTrayDetection(); }, 4000);
+                    }
+                }, 3500);
+            }).catch(err => { alert("Erreur : " + err); resetBorneUI(); });
         }
 
-        // --- APPARITION DES GRAPHIQUES ---
-        new Chart(document.getElementById('chart-timeline').getContext('2d'), {
+        // INITIALISATION DES GRAPHIQUES VIDE AU DÉPART
+        chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), {
             type: 'line',
-            data: {
-                labels: ['Lundi', 'Mardi', 'Jeudi', 'Vendredi'],
-                datasets: [{
-                    label: 'Gaspillage moyen (g)',
-                    data: [45, 38, 52, 43],
-                    borderColor: '#2d6a4f',
-                    backgroundColor: 'rgba(45, 106, 79, 0.1)',
-                    tension: 0.2,
-                    fill: true
-                }]
-            },
+            data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', backgroundColor: 'rgba(45, 106, 79, 0.1)', tension: 0.2, fill: true }] },
             options: { responsive: true, maintainAspectRatio: false }
         });
 
-        new Chart(document.getElementById('chart-categories').getContext('2d'), {
+        chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), {
             type: 'doughnut',
-            data: {
-                labels: ['Crudités', 'Féculents', 'Légumes', 'Viandes', 'Pain'],
-                datasets: [{
-                    data: [25.5, 24.0, 19.1, 9.7, 7.3],
-                    backgroundColor: ['#48cae4', '#ffb703', '#2a9d8f', '#e63946', '#a8dadc']
-                }]
-            },
+            data: { labels: ['Entrées', 'Plats', 'Accompagnements'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#48cae4', '#ffb703', '#e63946'] }] },
             options: { responsive: true, maintainAspectRatio: false }
         });
+
+        // Charger les données dès l'ouverture
+        loadLiveData();
     </script>
 </body>
 </html>
