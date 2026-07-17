@@ -134,7 +134,7 @@
         .checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; cursor: pointer; color: #374151; }
         .checkbox-label input { width: 18px; height: 18px; cursor: pointer; accent-color: #2d6a4f; }
 
-        /* 📸 INTERFACE BORNE AUTOMATIQUE */
+        /* INTERFACE BORNE & GROS TÉMOIN LUMINEUX */
         .borne-container {
             max-width: 650px;
             margin: 0 auto;
@@ -143,19 +143,43 @@
         .instruction-banner {
             background-color: #1e3a8a;
             color: white;
-            padding: 15px;
+            padding: 12px;
             border-radius: 8px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             margin-bottom: 15px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
+        
+        /* NOUVEAU : Le gros témoin lumineux de passage pour l'élève */
+        .traffic-light {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            margin: 0 auto 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: white;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            border: 6px solid #ffffff;
+        }
+        .light-searching { background-color: #059669; box-shadow: 0 0 30px #059669; } /* Vert fixe (Libre) */
+        .light-detected { background-color: #ef4444; box-shadow: 0 0 35px #ef4444; animation: pulseStop 0.8s infinite alternate; } /* Rouge clignotant (Attente) */
+        .light-success { background-color: #10b981; box-shadow: 0 0 40px #10b981; animation: flashGo 0.4s infinite alternate; } /* Vert flash (C'est bon !) */
+        
+        @keyframes pulseStop { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+        @keyframes flashGo { 0% { background-color: #10b981; } 100% { background-color: #34d399; } }
+
         .scanner-box {
             position: relative;
             width: 100%;
-            height: 420px;
+            height: 380px;
             background: #111827;
             border-radius: 12px;
             overflow: hidden;
@@ -189,17 +213,14 @@
             box-shadow: 0 0 12px #ef4444;
             animation: laserMove 2s infinite linear;
         }
-        @keyframes laserMove {
-            0% { top: 10%; }
-            50% { top: 90%; }
-            100% { top: 10%; }
-        }
+        @keyframes laserMove { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
+        
         .progress-container {
             width: 100%;
             background-color: #e5e7eb;
             border-radius: 20px;
             margin-top: 15px;
-            height: 20px;
+            height: 16px;
             overflow: hidden;
             display: none;
         }
@@ -210,9 +231,10 @@
             transition: width 0.1s linear;
         }
         .state-searching { background-color: #1e3a8a !important; }
-        .state-detected { background-color: #d97706 !important; }
-        .state-success { background-color: #059669 !important; }
-        .btn-simulation { margin-top: 15px; background-color: #4b5563; font-size: 13px; padding: 8px; }
+        .state-detected { background-color: #b45309 !important; }
+        .state-success { background-color: #047857 !important; }
+        .btn-simulation { margin-top: 20px; background-color: #4b5563; font-size: 14px; padding: 12px; border: 2px dashed #fff; }
+        .btn-simulation:hover { background-color: #374151; }
     </style>
 </head>
 <body>
@@ -269,10 +291,18 @@
                 </div>
             </div>
 
-            <!-- VUE 2 : BORNE INTÉLLIGENTE SANS CLIC -->
+            <!-- VUE 2 : BORNE AVEC GROS VOYANT ROUTIER POUR L'ÉLÈVE -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
-                    <div id="instruction-text" class="instruction-banner state-searching">🤖 POSEZ VOTRE PLATEAU ICI</div>
+                    
+                    <div id="instruction-text" class="instruction-banner state-searching">🤖 PLACEZ VOTRE PLATEAU</div>
+                    
+                    <!-- LE FEU TRICOLORE PÉDAGOGIQUE -->
+                    <div id="student-light" class="traffic-light light-searching">
+                        <span style="font-size: 28px; margin-bottom: 2px;">🍏</span>
+                        <span id="light-text">AVANCEZ</span>
+                    </div>
+                    
                     <div class="scanner-box" id="scanner-frame">
                         <video id="camera-feed" autoplay playsinline muted></video>
                         <div class="scan-overlay">
@@ -280,14 +310,17 @@
                             <div class="scan-laser" id="laser-line"></div>
                         </div>
                     </div>
+                    
                     <div class="progress-container" id="bar-container">
                         <div class="progress-bar" id="action-progress"></div>
                     </div>
+                    
                     <div style="margin-top: 15px; font-size: 14px;">
                         <span style="color: #4b5563; font-weight: 500;">Menu actif : </span>
                         <span id="borne-menu-active" style="font-weight: bold; color: #2d6a4f;">Non configuré</span>
                     </div>
-                    <button class="btn btn-simulation" onclick="simulateTrayDetection()">Simuler la dépose d'un plateau (Test PC)</button>
+                    
+                    <button class="btn btn-simulation" onclick="simulateTrayDetection()">👇 SIMULER LE PASSAGE D'UN ÉLÈVE (1 ASSIETTE)</button>
                 </div>
             </div>
 
@@ -356,7 +389,7 @@
         </div>
     </div>
 
-    <!-- SCRIPTS LOGIQUE ET REQUÊTES EN DIRECT -->
+    <!-- SCRIPTS LOGIQUE -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = 'https://script.google.com/macros/s/AKfycbxGxucOMNYRXRUBySaYOXuP13ut2vNEM0ZFvEyM9DmVPJG0IhmJiwb2Zzzd-Kwq_6U_cw/exec';
         let localStream = null;
@@ -377,22 +410,14 @@
             if (viewId === 'view-dashboard') { loadLiveData(); }
         }
 
-        // 🔄 LECTURE ET CALCUL DES VRAIES DONNÉES DU GOOGLE SHEET
         function loadLiveData() {
             fetch(ADRESSE_SHEET_OFFICIELLE)
             .then(response => response.json())
             .then(rows => {
                 if (!rows || rows.length === 0) { useFallbackDemoData(); return; }
-
-                let totalPoids = 0;
-                let totalArgent = 0;
-                let totalEntreesPct = 0;
-                let totalPlatsPct = 0;
-                let totalFeculentsPct = 0;
+                let totalPoids = 0, totalArgent = 0, totalEntreesPct = 0, totalPlatsPct = 0, totalFeculentsPct = 0;
                 let nbLignes = rows.length;
-
-                let historiqueDates = [];
-                let historiquePoids = [];
+                let historiqueDates = [], historiquePoids = [];
 
                 rows.forEach(row => {
                     totalPoids += parseFloat(row.Poids_Total_g || 0);
@@ -400,30 +425,18 @@
                     totalEntreesPct += parseFloat(row.Entree_Pct || 0);
                     totalPlatsPct += parseFloat(row.Plat_Pct || 0);
                     totalFeculentsPct += parseFloat(row.Feculent_Pct || 0);
-
-                    // Extraction de la date pour le graphique linéaire
                     let dateCourt = row.Horodatage ? row.Horodatage.split(' ')[0] : 'Inconnu';
                     historiqueDates.push(dateCourt);
                     historiquePoids.push(parseFloat(row.Poids_Total_g || 0));
                 });
 
-                let moyennePlateau = (totalPoids / nbLignes).toFixed(1);
-                let poidsTotalKg = (totalPoids / 1000).toFixed(1);
-                let impactCo2 = (poidsTotalKg * 3.1).toFixed(1); // Équivalent CO2 classique
-
-                // Mise à jour des boîtes de texte colorées
-                document.getElementById('kpi-avg').innerText = `${moyennePlateau} g`;
-                document.getElementById('kpi-total').innerText = `${poidsTotalKg} kg`;
+                document.getElementById('kpi-avg').innerText = `${(totalPoids / nbLignes).toFixed(1)} g`;
+                document.getElementById('kpi-total').innerText = `${(totalPoids / 1000).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${totalArgent.toFixed(2)} €`;
-                document.getElementById('kpi-impact').innerText = `${impactCo2} kg`;
-
-                // Mise à jour des vrais graphiques
+                document.getElementById('kpi-impact').innerText = `${((totalPoids / 1000) * 3.1).toFixed(1)} kg`;
                 updateCharts(historiqueDates.slice(-7), historiquePoids.slice(-7), [totalEntreesPct/nbLignes, totalPlatsPct/nbLignes, totalFeculentsPct/nbLignes]);
             })
-            .catch(err => {
-                console.log("Mode démo ou en attente du script de lecture :", err);
-                useFallbackDemoData();
-            });
+            .catch(err => { useFallbackDemoData(); });
         }
 
         function useFallbackDemoData() {
@@ -438,12 +451,10 @@
             chartTimeline.data.labels = labelsTimeline;
             chartTimeline.data.datasets[0].data = dataTimeline;
             chartTimeline.update();
-
             chartCategories.data.datasets[0].data = dataCategories;
             chartCategories.update();
         }
 
-        // CAMÉRA & SCAN AUTOMATIQUE
         async function initCamera() {
             const video = document.getElementById('camera-feed');
             try {
@@ -453,19 +464,27 @@
                 });
                 video.srcObject = localStream;
                 resetBorneUI();
-                setTimeout(() => { if(!isScanningProcess && document.getElementById('view-borne').classList.contains('active')) simulateTrayDetection(); }, 4000);
             } catch (err) {
-                document.getElementById('instruction-text').innerText = "⚠️ Écran de Contrôle Actif (Mode Démo)";
+                document.getElementById('instruction-text').innerText = "🤖 BORNE DE CONTRÔLE (MODE TEST PC)";
             }
         }
 
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(track => track.stop()); localStream = null; } }
 
+        // REMISE A ZERO : VOYANT VERT "AVANCEZ"
         function resetBorneUI() {
             isScanningProcess = false;
+            
+            // Bandeau supérieur bleu
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "🤖 POSEZ VOTRE PLATEAU ICI";
+            banner.innerText = "🤖 PLACEZ VOTRE PLATEAU";
             banner.className = "instruction-banner state-searching";
+            
+            // Gros témoin passe au VERT FIXE
+            const light = document.getElementById('student-light');
+            light.className = "traffic-light light-searching";
+            light.innerHTML = '<span style="font-size:28px; margin-bottom:2px;">🍏</span><span id="light-text">AVANCEZ</span>';
+            
             document.getElementById('scanner-frame').style.borderColor = "#d1d5db";
             document.getElementById('visual-bounds').style.borderColor = "rgba(255, 255, 255, 0.4)";
             document.getElementById('visual-bounds').style.borderStyle = "dashed";
@@ -474,18 +493,27 @@
             document.getElementById('action-progress').style.width = "0%";
         }
 
+        // DETECTION : LE VOYANT PASSE AU ROUGE CLIGNOTANT ("STOP")
         function runAutonomousScan() {
             if (isScanningProcess) return;
             isScanningProcess = true;
+            
             const banner = document.getElementById('instruction-text');
             const frame = document.getElementById('scanner-frame');
             const bounds = document.getElementById('visual-bounds');
             const progressBar = document.getElementById('action-progress');
+            const light = document.getElementById('student-light');
             
+            // Bandeau orange
             banner.innerText = "📦 PLATEAU DÉTECTÉ ! NE BOUGEZ PLUS...";
             banner.className = "instruction-banner state-detected";
-            frame.style.borderColor = "#f59e0b";
-            bounds.style.borderColor = "#f59e0b";
+            
+            // Témoin passe au ROUGE FLUSH VIF / DANGER
+            light.className = "traffic-light light-detected";
+            light.innerHTML = '<span style="font-size:28px; margin-bottom:2px;">🛑</span><span id="light-text">STOP</span>';
+            
+            frame.style.borderColor = "#ef4444";
+            bounds.style.borderColor = "#ef4444";
             bounds.style.borderStyle = "solid";
             document.getElementById('bar-container').style.display = "block";
 
@@ -493,14 +521,14 @@
             const interval = setInterval(() => {
                 if (width >= 100) {
                     clearInterval(interval);
-                    banner.innerText = "🤖 ANALYSE IA ET CAPTURE EN COURS...";
+                    banner.innerText = "🤖 ANALYSE IA EN COURS...";
                     sendToAutomationPipeline();
                 } else { width += 5; progressBar.style.width = width + '%'; }
             }, 75);
         }
 
         function simulateTrayDetection() { if (!isScanningProcess) runAutonomousScan(); }
-        function saveConfig() { alert('Liaison active !'); }
+        
         document.getElementById('cfg-sheet-url').value = ADRESSE_SHEET_OFFICIELLE;
         document.getElementById('cfg-sheet-url').readOnly = true; 
 
@@ -514,14 +542,16 @@
 
             const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
             document.getElementById('borne-menu-active').innerText = menuFinal;
-            alert('Menu configuré ! En avant.');
+            alert('Menu configuré avec succès !');
             switchView('view-borne');
         }
 
+        // SUCCÈS : LE VOYANT PASSE AU VERT FLASH ANIMÉ ("PASSEZ")
         function sendToAutomationPipeline() {
             const banner = document.getElementById('instruction-text');
             const frame = document.getElementById('scanner-frame');
             const bounds = document.getElementById('visual-bounds');
+            const light = document.getElementById('student-light');
 
             const payload = {
                 menu_jour: document.getElementById('borne-menu-active').innerText,
@@ -538,23 +568,24 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             }).then(() => {
-                banner.innerText = "✅ PLATEAU VALIDÉ ! MERCI POUR LA PLANÈTE.";
+                // Bandeau vert
+                banner.innerText = "✅ PLATEAU VALIDÉ ! MERCI.";
                 banner.className = "instruction-banner state-success";
+                
+                // Gros témoin passe au VERT CLIGNOTANT / AUTORISATION
+                light.className = "traffic-light light-success";
+                light.innerHTML = '<span style="font-size:28px; margin-bottom:2px;">✅</span><span id="light-text">PASSEZ</span>';
+                
                 frame.style.borderColor = "#059669";
                 bounds.style.borderColor = "#059669";
                 document.getElementById('laser-line').style.display = "none";
                 document.getElementById('bar-container').style.display = "none";
 
-                setTimeout(() => {
-                    resetBorneUI();
-                    if(document.getElementById('view-borne').classList.contains('active')) {
-                        setTimeout(() => { simulateTrayDetection(); }, 4000);
-                    }
-                }, 3500);
+                // Le voyant reste au vert festif pendant 3.5 secondes pour laisser le temps à l'élève de passer, puis reset
+                setTimeout(() => { resetBorneUI(); }, 3500);
             }).catch(err => { alert("Erreur : " + err); resetBorneUI(); });
         }
 
-        // INITIALISATION DES GRAPHIQUES VIDE AU DÉPART
         chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), {
             type: 'line',
             data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', backgroundColor: 'rgba(45, 106, 79, 0.1)', tension: 0.2, fill: true }] },
@@ -567,7 +598,6 @@
             options: { responsive: true, maintainAspectRatio: false }
         });
 
-        // Charger les données dès l'ouverture
         loadLiveData();
     </script>
 </body>
