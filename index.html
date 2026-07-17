@@ -135,7 +135,7 @@
                 </div>
             </div>
 
-            <!-- VUE 3 : ESPACE CUISINIER -->
+            <!-- VUE 3 : ESPACE CUISINIER RESTAURÉ -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1100px; margin: 0 auto;">
                     <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des effectifs attendus</h3>
@@ -148,10 +148,41 @@
                         <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS</th></tr></thead>
                         <tbody>
                             <tr>
-                                <td><div class="sub-theme">🍅 Crudités</div><label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label><label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes"> Carottes</label><div class="sub-theme">🐷 Charcuterie</div><label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson</label><label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label><label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label><div class="sub-theme">🥧 Cuites</div><label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte</label></td>
-                                <td><div class="sub-theme">🐓 Volailles</div><label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label><label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label><div class="sub-theme">🥩 Viandes</div><label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label><label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti"> Rôti</label></td>
-                                <td><div class="sub-theme">🥔 Féculents</div><label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites</label><label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes / Riz"> Pâtes / Riz</label><div class="sub-theme">🌿 Légumes</div><label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label><label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label></td>
-                                <td><div class="sub-theme">🍈 Vergers</div><label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label><label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label><label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label><div class="sub-theme">🥛 Laitages</div><label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt</label></td>
+                                <td>
+                                    <div class="sub-theme">🍅 Crudités</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes"> Carottes</label>
+                                    <div class="sub-theme">🐷 Charcuterie</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
+                                    <div class="sub-theme">🥧 Cuites</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte</label>
+                                </td>
+                                <td>
+                                    <div class="sub-theme">🐓 Volailles</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
+                                    <div class="sub-theme">🥩 Viandes</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti"> Rôti</label>
+                                </td>
+                                <td>
+                                    <div class="sub-theme">🥔 Féculents</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes / Riz"> Pâtes / Riz</label>
+                                    <div class="sub-theme">🌿 Légumes</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
+                                </td>
+                                <td>
+                                    <div class="sub-theme">🍈 Vergers</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label>
+                                    <div class="sub-theme">🥛 Laitages</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt</label>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -176,7 +207,9 @@
                 schools.forEach(school => { const opt = document.createElement('option'); opt.value = school; opt.innerText = school; select.appendChild(opt); });
                 const savedSchool = localStorage.getItem('schoolActuelle') || schools[0];
                 select.value = schools.includes(savedSchool) ? savedSchool : schools[0];
+                
                 loadExpectedMealsForSchool(select.value);
+                loadMenuForSchool(select.value);
                 loadLiveData();
             })
             .catch(err => { useFallbackDemoData(); });
@@ -186,6 +219,7 @@
             const school = document.getElementById('select-etablissement').value;
             localStorage.setItem('schoolActuelle', school);
             loadExpectedMealsForSchool(school);
+            loadMenuForSchool(school);
             loadLiveData();
         }
 
@@ -195,6 +229,11 @@
             document.getElementById('convives-s1').value = s1;
             document.getElementById('convives-s2').value = s2;
             document.getElementById('lbl-total-attendus').innerText = s1 + s2;
+        }
+
+        function loadMenuForSchool(school) {
+            const savedMenu = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
+            document.getElementById('borne-menu-active').innerText = savedMenu;
         }
 
         function updateExpectedMeals() {
@@ -212,6 +251,25 @@
             localStorage.setItem(`totalConvives-${school}`, s1 + s2);
             alert("Effectifs enregistrés pour " + school);
             loadLiveData();
+        }
+
+        function saveMenu() {
+            const school = document.getElementById('select-etablissement').value;
+            const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
+            const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
+            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
+
+            if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) {
+                alert("Cochez au moins un aliment !");
+                return;
+            }
+
+            const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
+            document.getElementById('borne-menu-active').innerText = menuFinal;
+            localStorage.setItem(`menuActive-${school}`, menuFinal);
+            alert('Menu enregistré avec succès pour le service de cet établissement !');
+            switchView('view-borne');
         }
 
         function switchView(viewId) {
@@ -360,6 +418,11 @@
                 setTimeout(() => resetBorneUI(), 2500);
             });
         }
+
+        // Initialisation propre des graphiques au chargement de la page
+        chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { type: 'doughnut', data: { labels: ['Entrées', 'Plats', 'Accomp.', 'Desserts'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#e63946', '#9b5de5'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+        chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { type: 'bar', data: { labels: ['Crudités', 'Légumes', 'Féculents', 'Viandes', 'Fruits', 'Pain'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: ['#9cd37b', '#83a397', '#f3be7a', '#eb6b65', '#cccccc', '#e69f43'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
     </script>
 </body>
 </html>
