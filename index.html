@@ -44,22 +44,22 @@
         .sub-theme:first-child { margin-top: 0; }
         .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer; color: #374151; }
         .checkbox-label input { width: 16px; height: 16px; cursor: pointer; accent-color: #2d6a4f; }
-        .borne-container { max-width: 650px; margin: 0 auto; text-align: center; }
-        .instruction-banner { background-color: #1e3a8a; color: white; padding: 12px; border-radius: 8px; font-size: 18px; font-weight: 700; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-transform: uppercase; }
-        .traffic-light { width: 110px; height: 110px; border-radius: 50%; margin: 0 auto 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: white; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3), 0 10px 20px rgba(0,0,0,0.15); border: 6px solid #ffffff; }
-        .light-searching { background-color: #059669; box-shadow: 0 0 30px #059669; } 
-        .light-detected { background-color: #ef4444; box-shadow: 0 0 35px #ef4444; animation: pulseStop 0.8s infinite alternate; } 
-        .light-success { background-color: #10b981; box-shadow: 0 0 40px #10b981; animation: flashGo 0.4s infinite alternate; } 
-        @keyframes pulseStop { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+        .borne-container { max-width: 850px; margin: 0 auto; }
+        .instruction-banner { background-color: #1e3a8a; color: white; padding: 14px; border-radius: 8px; font-size: 20px; font-weight: 800; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.5px; }
+        .traffic-light { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 36px; color: white; box-shadow: inset 0 6px 12px rgba(0,0,0,0.3), 0 10px 25px rgba(0,0,0,0.2); border: 8px solid #ffffff; transition: all 0.2s ease; text-align: center; }
+        .light-searching { background-color: #059669; box-shadow: 0 0 30px rgba(5, 150, 105, 0.6); } 
+        .light-detected { background-color: #ef4444; box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); animation: pulseStop 0.6s infinite alternate; } 
+        .light-success { background-color: #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.8); animation: flashGo 0.3s infinite alternate; } 
+        @keyframes pulseStop { 0% { transform: scale(1); } 100% { transform: scale(1.06); } }
         @keyframes flashGo { 0% { background-color: #10b981; } 100% { background-color: #34d399; } }
-        .scanner-box { position: relative; width: 100%; height: 380px; background: #111827; border-radius: 12px; overflow: hidden; border: 4px solid #d1d5db; }
+        .scanner-box { position: relative; width: 100%; height: 350px; background: #111827; border-radius: 12px; overflow: hidden; border: 4px solid #d1d5db; }
         #camera-feed { width: 100%; height: 100%; object-fit: cover; }
         .scan-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 40px; }
         .target-corners { position: absolute; top: 25px; left: 25px; right: 25px; bottom: 25px; border: 3px dashed rgba(255, 255, 255, 0.4); border-radius: 8px; }
         .scan-laser { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(to bottom, transparent, #ef4444); box-shadow: 0 0 12px #ef4444; animation: laserMove 2s infinite linear; }
         @keyframes laserMove { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
-        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 15px; height: 16px; overflow: hidden; display: none; }
-        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.1s linear; }
+        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 12px; height: 16px; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.05s linear; }
         .state-searching { background-color: #1e3a8a !important; }
         .state-detected { background-color: #b45309 !important; }
         .state-success { background-color: #047857 !important; }
@@ -113,30 +113,67 @@
                 </div>
             </div>
 
-            <!-- VUE 2 : BORNE -->
+            <!-- VUE 2 : BORNE RESTRUCTURÉE POUR LES ÉLÈVES -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
-                    <div id="instruction-text" class="instruction-banner state-searching">🤖 PLACEZ VOTRE PLATEAU</div>
-                    <div id="student-light" class="traffic-light light-searching">🍏<br><span id="light-text">AVANCEZ</span></div>
-                    <div class="scanner-box" id="scanner-frame"><video id="camera-feed" autoplay playsinline muted></video><div class="scan-overlay"><div class="target-corners" id="visual-bounds"></div><div class="scan-laser" id="laser-line"></div></div></div>
-                    <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
-                    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; margin-top: 15px; text-align: left; font-size: 13px; color: #14532d;"><strong>💡 Assiette vide ?</strong> Passe directement sans scanner ! L'application déduira ton geste automatiquement. 🏆</div>
-                    <div style="margin-top: 15px; font-size: 14px; margin-bottom: 20px;"><span style="color: #4b5563; font-weight: 500;">Menu actif : </span><span id="borne-menu-active" style="font-weight: bold; color: #2d6a4f;">Non configuré</span></div>
-                    <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: left;">
-                        <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 8px;">AIGUILLAGE DU PLATEAU DE TEST :</label>
-                        <select id="sim-plateau-type" style="width: 100%; padding: 10px; margin-bottom: 12px; font-size: 13px; font-weight: 500;">
-                            <option value="complet">🍽️ Plateau Complet</option>
-                            <option value="entree_only">🥗 Uniquement l'Entrée</option>
-                            <option value="plat_only">🍖 Uniquement Plat & Accompagnement</option>
-                            <option value="dessert_only">🍰 Uniquement le Dessert</option>
-                            <option value="vide">✨ Plateau Vide (0g)</option>
-                        </select>
-                        <button class="btn btn-simulation" onclick="simulateTrayDetection()" style="margin-top: 0; background-color: #2d6a4f; border: none; font-weight: bold;">👇 SIMULER LE PASSAGE DE CE PLATEAU</button>
+                    
+                    <!-- BANDEAU CONTEXTUEL ÉLÈVE -->
+                    <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ICI</div>
+                    
+                    <!-- BLOC ÉCRAN ÉLÈVE (PRIORITÉ VISUELLE CÔTE À CÔTE) -->
+                    <div style="display: flex; gap: 24px; align-items: center; justify-content: center; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px;">
+                        
+                        <!-- GAUCHE : LE CADRE DE SCAN CIBLÉ -->
+                        <div style="flex: 1.3;">
+                            <div class="scanner-box" id="scanner-frame">
+                                <video id="camera-feed" autoplay playsinline muted></video>
+                                <div class="scan-overlay">
+                                    <div class="target-corners" id="visual-bounds"></div>
+                                    <div class="scan-laser" id="laser-line"></div>
+                                </div>
+                            </div>
+                            <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
+                        </div>
+                        
+                        <!-- DROITE : LE VOYANT GÉANT DU STATUT (VERT / ROUGE) -->
+                        <div style="flex: 0.7; display: flex; justify-content: center; align-items: center; min-width: 200px;">
+                            <div id="student-light" class="traffic-light light-searching">
+                                🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">AVANCEZ</span>
+                            </div>
+                        </div>
+                        
                     </div>
+                    
+                    <!-- ZONE TECHNIQUE & RETROACTIONS (DÉPLACÉE EN BAS) -->
+                    <hr style="border: 0; border-top: 2px dashed #cbd5e1; margin: 20px 0;">
+                    
+                    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 4px; font-size: 13px; color: #14532d; margin-bottom: 15px;">
+                        <strong>💡 Assiette bien propre ?</strong> Ne scanne pas, passe directement ! Le système calcule automatiquement ton geste écoresponsable. 🏆
+                    </div>
+                    
+                    <div style="font-size: 14px; margin-bottom: 15px; background: #e2e8f0; padding: 8px 12px; border-radius: 6px; display: inline-block;">
+                        <span style="color: #4b5563; font-weight: 600;">Configuration active : </span>
+                        <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">Non configuré</span>
+                    </div>
+                    
+                    <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: left;">
+                        <label style="font-weight: bold; font-size: 12px; display: block; margin-bottom: 6px; color: #475569;">PANNEL DE SIMULATION PÉDAGOGIQUE / TECHNIQUE :</label>
+                        <div style="display: flex; gap: 12px;">
+                            <select id="sim-plateau-type" style="flex: 1; padding: 10px; font-size: 13px; font-weight: 500; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <option value="complet">🍽️ Plateau Complet (Restes partout)</option>
+                                <option value="entree_only">🥗 Uniquement l'Entrée</option>
+                                <option value="plat_only">🍖 Uniquement Plat & Accompagnement</option>
+                                <option value="dessert_only">🍰 Uniquement le Dessert</option>
+                                <option value="vide">✨ Plateau Vide (0g - Zéro déchet)</option>
+                            </select>
+                            <button class="btn btn-simulation" onclick="simulateTrayDetection()" style="margin-top: 0; width: auto; background-color: #2d6a4f; border: none; font-weight: bold; border-radius: 6px;">👇 Tester ce plateau</button>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
 
-            <!-- VUE 3 : ESPACE CUISINIER (VERSION BLINDÉE CORRIGÉE) -->
+            <!-- VUE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des effectifs attendus</h3>
@@ -154,7 +191,6 @@
                         <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS & LAITAGES</th></tr></thead>
                         <tbody>
                             <tr>
-                                <!-- COLONNE ENTRÉES -->
                                 <td>
                                     <div class="sub-theme">🍅 Crudités / Salades</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
@@ -162,41 +198,32 @@
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
-                                    
                                     <div class="sub-theme">🐷 Charcuterie</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
-                                    
                                     <div class="sub-theme">🥧 Entrées Cuites</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
                                 </td>
-                                
-                                <!-- COLONNE PLATS -->
                                 <td>
                                     <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
-                                    
                                     <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
-                                    
                                     <div class="sub-theme">🐟 Poissons</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin</label>
-                                    
                                     <div class="sub-theme">🌱 Végétarien</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
                                 </td>
-                                
-                                <!-- COLONNE ACCOMPAGNEMENTS -->
                                 <td>
                                     <div class="sub-theme">🥔 Féculents</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
@@ -204,7 +231,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
-                                    
                                     <div class="sub-theme">🌿 Légumes</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
@@ -212,8 +238,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
                                 </td>
-                                
-                                <!-- COLONNE DESSERTS & LAITAGES -->
                                 <td>
                                     <div class="sub-theme">🍈 Vergers & Fruits</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
@@ -221,12 +245,10 @@
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote</label>
-                                    
                                     <div class="sub-theme">🥛 Laitages & Fromages</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage (Kiri/Cantal/Gouda)</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert / Liégeois</label>
-                                    
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert</label>
                                     <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
@@ -409,16 +431,16 @@
                 if (localStream) stopCamera();
                 localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
                 video.srcObject = localStream; resetBorneUI();
-            } catch (err) { document.getElementById('instruction-text').innerText = "🤖 MODE SIMULATION ACTIVE"; }
+            } catch (err) { document.getElementById('instruction-text').innerText = "🤖 MODE SIMULATION ACTIVÉ"; }
         }
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
 
         function resetBorneUI() {
             isScanningProcess = false;
-            document.getElementById('instruction-text').innerText = "🤖 PLACEZ VOTRE PLATEAU";
+            document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ICI";
             document.getElementById('instruction-text').className = "instruction-banner state-searching";
             document.getElementById('student-light').className = "traffic-light light-searching";
-            document.getElementById('student-light').innerHTML = '🍏<br>AVANCEZ';
+            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">AVANCEZ</span>';
             document.getElementById('bar-container').style.display = "none";
             document.getElementById('action-progress').style.width = "0%";
         }
@@ -428,14 +450,14 @@
             const banner = document.getElementById('instruction-text');
             banner.innerText = "📦 PLATEAU DÉTECTÉ !"; banner.className = "instruction-banner state-detected";
             document.getElementById('student-light').className = "traffic-light light-detected";
-            document.getElementById('student-light').innerHTML = '🛑<br>STOP';
+            document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 18px; font-weight: 900; display: block; margin-top: 5px; letter-spacing: 1px;">STOP</span>';
             document.getElementById('bar-container').style.display = "block";
 
             let width = 0;
             const interval = setInterval(() => {
                 if (width >= 100) { clearInterval(interval); sendToAutomationPipeline(); } 
                 else { width += 10; document.getElementById('action-progress').style.width = width + '%'; }
-            }, 50);
+            }, 30); // Jauge légèrement accélérée
         }
 
         function sendToAutomationPipeline() {
@@ -445,8 +467,10 @@
 
             if (simType === 'vide') {
                 document.getElementById('instruction-text').innerText = "✨ MERCI POUR TON GESTE !";
-                document.getElementById('student-light').innerHTML = '🏆<br>BRAVO';
-                setTimeout(() => resetBorneUI(), 2000);
+                document.getElementById('instruction-text').className = "instruction-banner state-success";
+                document.getElementById('student-light').className = "traffic-light light-success";
+                document.getElementById('student-light').innerHTML = '🏆<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">BRAVO</span>';
+                setTimeout(() => resetBorneUI(), 800); // 800ms au lieu de 2000ms
                 return;
             }
 
@@ -463,12 +487,14 @@
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
             .then(() => {
                 document.getElementById('instruction-text').innerText = "✅ PLATEAU ENREGISTRÉ !";
-                document.getElementById('student-light').innerHTML = '✅<br>MERCI';
-                setTimeout(() => resetBorneUI(), 2500);
+                document.getElementById('instruction-text').className = "instruction-banner state-success";
+                document.getElementById('student-light').className = "traffic-light light-success";
+                document.getElementById('student-light').innerHTML = '✅<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">MERCI</span>';
+                setTimeout(() => resetBorneUI(), 800); // 800ms au lieu de 2500ms
             });
         }
 
-        // Initialisation propre des graphiques au chargement de la page
+        // Initialisation des graphiques
         chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
         chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { type: 'doughnut', data: { labels: ['Entrées', 'Plats', 'Accomp.', 'Desserts'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#e63946', '#9b5de5'] }] }, options: { responsive: true, maintainAspectRatio: false } });
         chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { type: 'bar', data: { labels: ['Crudités', 'Légumes', 'Féculents', 'Viandes', 'Fruits', 'Pain'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: ['#9cd37b', '#83a397', '#f3be7a', '#eb6b65', '#cccccc', '#e69f43'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
