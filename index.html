@@ -119,7 +119,7 @@
                     </div>
                 </div>
 
-                <!-- NOUVELLE LIGNE : LE GRAPH KIKLEO DE TA PHOTO (ANALYSE PRÉCISE) -->
+                <!-- ANALYSE PAR TYPE D'ALIMENTS -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
                         <h3 style="margin-bottom: 15px; font-size: 15px; display: flex; justify-content: space-between;">
@@ -173,6 +173,7 @@
                         </thead>
                         <tbody>
                             <tr>
+                                <!-- COLONNE ENTRÉES -->
                                 <td>
                                     <div class="sub-theme">🍅 Crudités locales</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
@@ -189,6 +190,8 @@
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza / Feuilleté"> Pizza / Feuilleté</label>
                                 </td>
+                                
+                                <!-- COLONNE PLATS -->
                                 <td>
                                     <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti/émincé"> Poulet (Rôti/Émincé)</label>
@@ -203,6 +206,8 @@
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de poisson"> Filet de poisson frais</label>
                                 </td>
+                                
+                                <!-- COLONNE ACCOMPAGNEMENTS -->
                                 <td>
                                     <div class="sub-theme">🥔 Féculents</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites / Pdt"> Frites / Pdt sautées</label>
@@ -217,6 +222,8 @@
                                     <div class="sub-theme">🌱 Légumineuses</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Lentilles / Pois chiches"> Lentilles / Pois chiches</label>
                                 </td>
+                                
+                                <!-- COLONNE DESSERTS -->
                                 <td>
                                     <div class="sub-theme">🍈 Vergers du Sud</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
@@ -273,7 +280,7 @@
                 let totalPoids = 0, totalArgent = 0;
                 let totalEntreesPct = 0, totalPlatsPct = 0, totalAccompPct = 0, totalDessertsPct = 0;
                 
-                // Compteurs d'analyse fine (gaspillage estimé en grammes pour le graphique Kikleo)
+                // Compteurs d'analyse fine (gaspillage en grammes)
                 let totalCrudites = 0, totalLegumes = 0, totalFeculents = 0, totalViandes = 0, totalFruits = 0, totalPain = 0;
                 
                 let nbLignes = rows.length;
@@ -295,47 +302,44 @@
                     totalAccompPct += accompPct;
                     totalDessertsPct += dessertPct;
                     
-                    // --- VENTILATION SÉMANTIQUE DE LA SÉLECTION DU CHEF ---
+                    // --- VENTILATION SÉMANTIQUE DANS LES 6 BACS ---
                     let menu = (row.Menu_Jour || "").toLowerCase();
                     
-                    // 1. Crudités (Tomate, avocat, chou, carotte...)
+                    // 1. Crudités
                     if (entreePct > 0) {
                         if (menu.includes("tomate") || menu.includes("avocat") || menu.includes("chou") || menu.includes("carotte") || menu.includes("melon au jambon")) {
-                            totalCrudites += (entreePct / 100) * (poidsLigne * 0.2); // Estime la portion d'entrée à 20% du plateau
-                        } else {
-                            totalCrudites += (entreePct / 100) * (poidsLigne * 0.1); // Autre entrée
+                            totalCrudites += (entreePct / 100) * poidsLigne;
                         }
                     }
                     
-                    // 2. Viandes & Poissons (Protéines)
+                    // 2. Viandes & Poissons
                     if (platPct > 0) {
-                        totalViandes += (platPct / 100) * (poidsLigne * 0.35); // Estime la portion protéine à 35% du plateau
+                        totalViandes += (platPct / 100) * poidsLigne;
                     }
                     
                     // 3. Accompagnements : Séparation Légumes chauds vs Féculents
                     if (accompPct > 0) {
                         if (menu.includes("haricot") || menu.includes("brocoli") || menu.includes("ratatouille") || menu.includes("tian")) {
-                            totalLegumes += (accompPct / 100) * (poidsLigne * 0.3); // Estime l'accompagnement à 30% du plateau
+                            totalLegumes += (accompPct / 100) * poidsLigne;
                         } else if (menu.includes("frite") || menu.includes("pâte") || menu.includes("riz") || menu.includes("semoule") || menu.includes("lentille") || menu.includes("pois chiche")) {
-                            totalFeculents += (accompPct / 100) * (poidsLigne * 0.3);
+                            totalFeculents += (accompPct / 100) * poidsLigne;
                         } else {
-                            // Répartition équilibrée par défaut
-                            totalLegumes += (accompPct / 200) * (poidsLigne * 0.3);
-                            totalFeculents += (accompPct / 200) * (poidsLigne * 0.3);
+                            totalLegumes += (accompPct / 200) * poidsLigne;
+                            totalFeculents += (accompPct / 200) * poidsLigne;
                         }
                     }
                     
                     // 4. Fruits
                     if (dessertPct > 0) {
                         if (menu.includes("melon") || menu.includes("pastèque") || menu.includes("pêche") || menu.includes("nectarine") || menu.includes("clémentine") || menu.includes("pomme") || menu.includes("poire") || menu.includes("banane")) {
-                            totalFruits += (dessertPct / 100) * (poidsLigne * 0.15); // Estime le dessert à 15% du plateau
+                            totalFruits += (dessertPct / 100) * poidsLigne;
                         }
                     }
                     
                     // 5. Pain (Poids estimé à 20g par morceau jeté)
                     totalPain += (painNb * 20);
 
-                    // Formater proprement la date du graphique
+                    // Formater proprement la date
                     let dateRaw = row.Horodatage || 'Inconnu';
                     let dateCourt = dateRaw;
                     
@@ -365,37 +369,27 @@
                 document.getElementById('kpi-money').innerText = `${totalArgent.toFixed(2)} €`;
                 document.getElementById('kpi-impact').innerText = `${((totalPoids / 1000) * 3.1).toFixed(1)} kg`;
                 
-                // Moyennes par plateau (en g)
-                let avgCrudites = totalCrudites / nbLignes;
-                let avgLegumes = totalLegumes / nbLignes;
-                let avgFeculents = totalFeculents / nbLignes;
-                let avgViandes = totalViandes / nbLignes;
-                let avgFruits = totalFruits / nbLignes;
-                let avgPain = totalPain / nbLignes;
-
                 updateCharts(
                     historiqueDates.slice(-7), 
                     historiquePoids.slice(-7), 
                     [totalEntreesPct/nbLignes, totalPlatsPct/nbLignes, totalAccompPct/nbLignes, totalDessertsPct/nbLignes],
-                    [avgCrudites, avgLegumes, avgFeculents, avgViandes, avgFruits, avgPain]
+                    [totalCrudites/nbLignes, totalLegumes/nbLignes, totalFeculents/nbLignes, totalViandes/nbLignes, totalFruits/nbLignes, totalPain/nbLignes]
                 );
             })
             .catch(err => { useFallbackDemoData(); });
         }
 
-        // COORDONNÉES EXACTES DU GRAPH DE TA DÉMO POUR TON TABLEAU DE BORD VIDE
         function useFallbackDemoData() {
             document.getElementById('kpi-avg').innerText = "155.7 g";
             document.getElementById('kpi-total').innerText = "18 kg";
             document.getElementById('kpi-money').innerText = "57 €";
             document.getElementById('kpi-impact').innerText = "38 kg";
             
-            // Reproduction à l'identique de l'analyse visuelle de ta photo !
             updateCharts(
                 ['Jour 20/10'], 
                 [155.7], 
                 [45, 20, 20, 15],
-                [10.8, 2.1, 2.1, 1.8, 0.3, 0.3] // Hauteurs exactes des barres de ton graphique
+                [10.8, 2.1, 2.1, 1.8, 0.3, 0.3]
             );
         }
 
@@ -489,6 +483,7 @@
             switchView('view-borne');
         }
 
+        // --- ENVOI TOTALEMENT PRÉCIS SANS PAIN NI ALIMENT FANTÔME ---
         function sendToAutomationPipeline() {
             const banner = document.getElementById('instruction-text');
             const frame = document.getElementById('scanner-frame');
@@ -507,7 +502,7 @@
                 plat_pct: hasPlat ? Math.floor(Math.random() * 30) + 5 : 0,
                 accompagnement_pct: hasAccomp ? Math.floor(Math.random() * 50) + 10 : 0,
                 dessert_pct: hasDessert ? Math.floor(Math.random() * 40) + 5 : 0,
-                pain_nombre: Math.random() > 0.5 ? Math.floor(Math.random() * 2) + 1 : 0, // Génère 0, 1 ou 2 pains de test
+                pain_nombre: 0, // STRIKTEMENT BLOQUÉ À 0 ! Pas de pain fantôme.
                 poids_total_g: Math.floor(Math.random() * 150) + 40,
                 perte_euro: parseFloat((Math.random() * 0.9).toFixed(2))
             };
@@ -529,7 +524,6 @@
             }).catch(err => { alert("Erreur : " + err); resetBorneUI(); });
         }
 
-        // CONSTITUTION DES GRAPHIQUES
         chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), {
             type: 'line',
             data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', backgroundColor: 'rgba(45, 106, 79, 0.1)', tension: 0.2, fill: true }] },
@@ -542,7 +536,6 @@
             options: { responsive: true, maintainAspectRatio: false }
         });
 
-        // LE NOUVEAU GRAPH PAR TYPE D'ALIMENT (STYLE KIKLEO TRÈS PRÉCIS)
         chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), {
             type: 'bar',
             data: {
@@ -550,7 +543,6 @@
                 datasets: [{
                     label: 'Gaspillage (g)',
                     data: [0, 0, 0, 0, 0, 0],
-                    // Couleurs exactes tirées de la charte de ta photo
                     backgroundColor: ['#9cd37b', '#83a397', '#f3be7a', '#eb6b65', '#cccccc', '#e69f43'],
                     borderRadius: 6,
                     borderWidth: 0
@@ -559,18 +551,14 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false } // Masqué pour coller au design minimaliste de Kikleo
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                     y: {
                         beginAtZero: true,
                         grid: { color: '#f3f4f6' },
                         title: { display: true, text: 'Masse moyenne jetée (g)', font: { size: 12, weight: 'bold' } }
                     },
-                    x: {
-                        grid: { display: false }
-                    }
+                    x: { grid: { display: false } }
                 }
             }
         });
