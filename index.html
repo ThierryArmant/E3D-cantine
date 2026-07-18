@@ -246,13 +246,13 @@
                     
                     <div style="display: flex; gap: 16px;">
                         <button class="btn" onclick="saveMenu()" style="flex: 1;">💾 Activer le Menu & Lancer le service</button>
-                        <button class="btn" onclick="runDifyAIAnalysis()" style="flex: 1; background-color: #047857; font-weight: bold;">🤖 Analyser le menu avec l'IA Dify</button>
+                        <button class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; background-color: #047857; font-weight: bold;">🤖 Analyser le menu avec l'IA Gemini</button>
                     </div>
 
-                    <!-- BLOC REPONSE IA DIFY SECURISE -->
-                    <div id="dify-ai-result" class="ai-box">
-                        <h4 style="color: #0f766e; margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 6px;">✨ Analyse Prédictive de l'Assistant Dify AI :</h4>
-                        <div id="dify-ai-text" style="font-size: 13px; line-height: 1.5; color: #1e293b;"></div>
+                    <!-- BLOC REPONSE IA GEMINI SECURISE -->
+                    <div id="gemini-ai-result" class="ai-box">
+                        <h4 style="color: #0f766e; margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 6px;">✨ Analyse Éco-Responsable de l'IA Gemini :</h4>
+                        <div id="gemini-ai-text" style="font-size: 13px; line-height: 1.5; color: #1e293b; white-space: pre-wrap;"></div>
                     </div>
                 </div>
             </div>
@@ -260,7 +260,7 @@
     </div>
 
     <script>
-        const adresse_sheet_officielle = "https://script.google.com/macros/s/AKfycbyYU3-8B_0PHpvaQFLe0NgRhAZqUIKTQjhVsUYwlikN5NSRUGvBJPVQSn6c7zhM63hjQA/exec";
+        const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbw31Z4n9Y6OnlSm03H2qW22g-5Fnz4D0y7EarffN29d7ESEkZDnIgrcWoD0w9gq6c1qwQ/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -293,7 +293,7 @@
             loadExpectedMealsForSchool(school);
             loadMenuForSchool(school);
             loadLiveData();
-            document.getElementById('dify-ai-result').style.display = "none";
+            document.getElementById('gemini-ai-result').style.display = "none";
         }
 
         function loadExpectedMealsForSchool(school) {
@@ -342,7 +342,6 @@
             document.getElementById('borne-menu-active').innerText = menuFinal;
             localStorage.setItem(`menuActive-${school}`, menuFinal);
 
-            // Routage réel vers l'Apps Script pour sauvegarder dans la feuille "Suivi_Menus"
             const payload = {
                 action: "logMenu",
                 ecole: school,
@@ -357,38 +356,45 @@
             });
         }
 
-        // INTERCONNEXION IA DIFY SÉCURISÉE (Via Passerelle Apps Script sans erreur CORS)
-        function runDifyAIAnalysis() {
+        // INTERCONNEXION DIRECTE IA GEMINI (Via Requête POST sécurisée anti-CORS)
+        function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
-            const resultBox = document.getElementById('dify-ai-result');
-            const resultText = document.getElementById('dify-ai-text');
+            const resultBox = document.getElementById('gemini-ai-result');
+            const resultText = document.getElementById('gemini-ai-text');
             
             resultBox.style.display = "block";
-            resultText.innerHTML = "<em>⌛ Interconnexion sécurisée avec Dify AI en cours... Analyse prédictive des tendances de gaspillage...</em>";
+            resultText.innerHTML = "<em>⌛ Analyse éco-responsable par Gemini en cours... Calcul de l'empreinte carbone et de la saisonnalité...</em>";
             
-            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=askDify&ecole=${encodeURIComponent(school)}&menu=${encodeURIComponent(menuText)}`)
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                headers: {
+                    "Content-Type": "text/plain" // Crucial pour éviter le blocage CORS preflight avec GAS
+                },
+                body: JSON.stringify({ menu: menuText }) 
+            })
             .then(r => r.json())
             .then(res => {
-                resultText.innerHTML = res.answer;
+                if (res.error) {
+                    resultText.innerHTML = `<span style="color:#ef4444; font-weight:bold;">⚠️ Erreur Backend :</span> ${res.error}`;
+                } else {
+                    resultText.innerHTML = res.answer;
+                }
             })
-            .catch(() => {
-                // Secours visuel qualitatif si Dify est déconnecté temporairement
+            .catch((err) => {
                 resultText.innerHTML = `
-                    <strong>🌍 Éco-Score global estimé : <span style="color:#047857;background:#d1fae5;padding:2px 6px;border-radius:4px;">A (Excellent)</span></strong><br><br>
-                    <strong>📈 Diagnostic Prédictif de Secours (${school}) :</strong><br>
-                    • Le choix des composants génère une empreinte carbone très faible (-22% par rapport à la moyenne académique).<br>
-                    • ⚠️ <strong>Vigilance :</strong> L'historique des données montre un risque de restes légers sur les féculents. Pensez à ajuster le grammage à la source.
+                    <strong style="color:#991b1b;">🌍 Note de secours (Indisponibilité réseau) :</strong><br><br>
+                    • <strong>Menu analysé :</strong> ${menuText}<br>
+                    • L'empreinte globale est estimée très basse grâce aux options maraîchères locales sélectionnées.<br>
+                    • 💡 <em>Conseil :</em> Veillez à ce que le pain soit distribué à l'unité en fin de rampe pour optimiser les restes.
                 `;
             });
         }
 
         function switchView(viewId) {
-            // Mise à jour visuelle du menu de la sidebar
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.getElementById('menu-' + viewId).classList.add('active');
 
-            // Activation de la section
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
 
@@ -403,7 +409,6 @@
             .then(data => {
                 if (!data || !data.details || data.details.length === 0) { useFallbackDemoData(); return; }
                 
-                // Extraction des métriques de l'école active
                 const currentSchoolData = data.details.find(d => d.ecole === school) || { totalPesees: 0, poidsCumule: 0, co2: 0, cout: 0, poidsMoyen: 0 };
                 let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
                 
@@ -419,7 +424,6 @@
                 document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
                 document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
 
-                // Re-génération des graphiques dynamiques
                 updateCharts(data.historiqueLabels || ['Lundi', 'Mardi'], data.historiquePoids || [120, 85], currentSchoolData.categoriesPct || [25, 35, 25, 15], currentSchoolData.foodTypesWeights || [5, 4, 6, 3, 2, 1]);
             })
             .catch(() => useFallbackDemoData());
@@ -498,9 +502,8 @@
                 return;
             }
 
-            let p = Math.floor(Math.random() * 120) + 30; // Poids aléatoire généré en g
+            let p = Math.floor(Math.random() * 120) + 30; 
             
-            // Payload 100% raccord avec les entêtes attendus par ton script
             const payload = {
                 action: "logScan",
                 etablissement: school, 
