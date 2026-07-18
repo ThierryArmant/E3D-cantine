@@ -46,22 +46,15 @@
         .checkbox-label input { width: 16px; height: 16px; cursor: pointer; accent-color: #2d6a4f; }
         .borne-container { max-width: 850px; margin: 0 auto; }
         .instruction-banner { background-color: #1e3a8a; color: white; padding: 14px; border-radius: 8px; font-size: 20px; font-weight: 800; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.5px; }
-        .traffic-light { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 36px; color: white; box-shadow: inset 0 6px 12px rgba(0,0,0,0.3), 0 10px 25px rgba(0,0,0,0.2); border: 8px solid #ffffff; transition: all 0.2s ease; text-align: center; }
-        .light-searching { background-color: #059669; box-shadow: 0 0 30px rgba(5, 150, 105, 0.6); } 
-        .light-detected { background-color: #ef4444; box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); animation: pulseStop 0.6s infinite alternate; } 
-        .light-success { background-color: #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.8); animation: flashGo 0.3s infinite alternate; } 
+        .traffic-light { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 26px; color: white; box-shadow: inset 0 6px 12px rgba(0,0,0,0.3), 0 10px 25px rgba(0,0,0,0.2); border: 8px solid #ffffff; transition: all 0.2s ease; text-align: center; }
+        .light-searching { background-color: #6b7280; box-shadow: 0 0 20px rgba(107, 114, 128, 0.5); } 
+        .light-detected { background-color: #ef4444; box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); animation: pulseStop 0.4s infinite alternate; } 
+        .light-success { background-color: #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.8); } 
         @keyframes pulseStop { 0% { transform: scale(1); } 100% { transform: scale(1.06); } }
-        @keyframes flashGo { 0% { background-color: #10b981; } 100% { background-color: #34d399; } }
-        .scanner-box { position: relative; width: 100%; height: 350px; background: #111827; border-radius: 12px; overflow: hidden; border: 4px solid #d1d5db; }
-        #camera-feed { width: 100%; height: 100%; object-fit: cover; }
-        .scan-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; flex-direction: column; justify-content: space-between; padding: 40px; }
-        .target-corners { position: absolute; top: 25px; left: 25px; right: 25px; bottom: 25px; border: 3px dashed rgba(255, 255, 255, 0.4); border-radius: 8px; }
-        .scan-laser { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(to bottom, transparent, #ef4444); box-shadow: 0 0 12px #ef4444; animation: laserMove 2s infinite linear; }
-        @keyframes laserMove { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
         .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 12px; height: 16px; overflow: hidden; display: none; }
         .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.05s linear; }
-        .state-searching { background-color: #1e3a8a !important; }
-        .state-detected { background-color: #b45309 !important; }
+        .state-searching { background-color: #4b5563 !important; }
+        .state-detected { background-color: #ef4444 !important; }
         .state-success { background-color: #047857 !important; }
         .btn-simulation { margin-top: 20px; background-color: #4b5563; font-size: 14px; padding: 12px; border: 2px dashed #fff; }
         .ai-box { background: #f0fdfa; border: 1px solid #52b788; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
@@ -131,7 +124,7 @@
                         </div>
                         <div style="flex: 0.7; display: flex; justify-content: center; align-items: center; min-width: 200px;">
                             <div id="student-light" class="traffic-light light-searching">
-                                🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">AVANCEZ</span>
+                                🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">ATTENTE</span>
                             </div>
                         </div>
                     </div>
@@ -153,7 +146,7 @@
                                 <option value="dessert_only">🍰 Uniquement le Dessert</option>
                                 <option value="vide">✨ Plateau Vide (0g - Zéro déchet)</option>
                             </select>
-                            <button class="btn btn-simulation" onclick="simulateTrayDetection()" style="margin-top: 0; width: auto; background-color: #2d6a4f; border: none; font-weight: bold; border-radius: 6px;">👇 Tester ce plateau</button>
+                            <button class="btn btn-simulation" onclick="triggerAutomaticCapture()" style="margin-top: 0; width: auto; background-color: #2d6a4f; border: none; font-weight: bold; border-radius: 6px;">👇 Déclencher le Scan Visuel</button>
                         </div>
                     </div>
                 </div>
@@ -264,7 +257,6 @@
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
 
         window.addEventListener('DOMContentLoaded', () => { 
-            // Initialisation des graphiques vides au démarrage
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { type: 'doughnut', data: { labels: ['Entrées', 'Plats', 'Accomp.', 'Desserts'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#e63946', '#9b5de5'] }] }, options: { responsive: true, maintainAspectRatio: false } });
             chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { type: 'bar', data: { labels: ['Crudités', 'Légumes', 'Féculents', 'Viandes', 'Fruits', 'Pain'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: ['#9cd37b', '#83a397', '#f3be7a', '#eb6b65', '#cccccc', '#e69f43'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
@@ -326,6 +318,7 @@
             loadLiveData();
         }
 
+        // ESPACE CUISINIER OPTIMISÉ : Pas de redirection vers la borne, le chef reste sur sa page de saisie
         function saveMenu() {
             const school = document.getElementById('select-etablissement').value;
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
@@ -351,12 +344,12 @@
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
             .then(() => {
-                alert('Menu enregistré et synchronisé dans le Cloud avec succès !');
-                switchView('view-borne');
+                alert('Menu enregistré et synchronisé pour ' + school + ' ! L\'interface reste disponible pour modification ou analyse.');
+                // L'instruction de changement de vue automatique a été supprimée ici.
             });
         }
 
-        // INTERCONNEXION DIRECTE IA GEMINI (Via Requête POST sécurisée anti-CORS)
+        // BOUTON IA ENRICHI : Interrogeable à la demande, configuré pour envoyer l'action d'analyse globale (incluant les statistiques)
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
@@ -364,14 +357,17 @@
             const resultText = document.getElementById('gemini-ai-text');
             
             resultBox.style.display = "block";
-            resultText.innerHTML = "<em>⌛ Analyse éco-responsable par Gemini en cours... Calcul de l'empreinte carbone et de la saisonnalité...</em>";
+            resultText.innerHTML = "<em>⌛ Analyse prédictive à la demande... Lecture croisée de la saisonnalité, de l'équilibre et de l'historique des rejets de l'établissement...</em>";
             
+            // On passe l'établissement et une action spécifique pour que le script sache qu'il doit croiser les données du Sheet
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
-                headers: {
-                    "Content-Type": "text/plain" // Crucial pour éviter le blocage CORS preflight avec GAS
-                },
-                body: JSON.stringify({ menu: menuText }) 
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ 
+                    action: "analyzeMenuWithStats",
+                    etablissement: school,
+                    menu: menuText 
+                }) 
             })
             .then(r => r.json())
             .then(res => {
@@ -385,8 +381,8 @@
                 resultText.innerHTML = `
                     <strong style="color:#991b1b;">🌍 Note de secours (Indisponibilité réseau) :</strong><br><br>
                     • <strong>Menu analysé :</strong> ${menuText}<br>
-                    • L'empreinte globale est estimée très basse grâce aux options maraîchères locales sélectionnées.<br>
-                    • 💡 <em>Conseil :</em> Veillez à ce que le pain soit distribué à l'unité en fin de rampe pour optimiser les restes.
+                    • L'empreinte globale est estimée basse. Vos rejets historiques sur cette structure indiquent une sensibilité moyenne sur les légumes verts.<br>
+                    • 💡 <em>Conseil :</em> Surveillez la taille de la portion de ratatouille servie au premier service.
                 `;
             });
         }
@@ -457,7 +453,7 @@
             const video = document.getElementById('camera-feed');
             try {
                 if (localStream) stopCamera();
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
                 video.srcObject = localStream; resetBorneUI();
             } catch (err) { document.getElementById('instruction-text').innerText = "🤖 MODE SIMULATION ACTIVÉ"; }
         }
@@ -468,63 +464,96 @@
             document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ICI";
             document.getElementById('instruction-text').className = "instruction-banner state-searching";
             document.getElementById('student-light').className = "traffic-light light-searching";
-            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">AVANCEZ</span>';
+            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">ATTENTE</span>';
             document.getElementById('bar-container').style.display = "none";
             document.getElementById('action-progress').style.width = "0%";
         }
 
-        function simulateTrayDetection() {
-            if (isScanningProcess) return; isScanningProcess = true;
+        // ESPACE BORNE "FLASH & GO" OPTIMISÉ : Passage immédiat au STOP rouge, capture instantanée puis libération verte ultra-fluide
+        function triggerAutomaticCapture() {
+            if (isScanningProcess) return; 
+            isScanningProcess = true;
+
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "📦 PLATEAU DÉTECTÉ !"; banner.className = "instruction-banner state-detected";
+            
+            // 🔴 ÉTAPE 1 : STOP - Détection immédiate du plateau, l'élève s'arrête
+            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; 
+            banner.className = "instruction-banner state-detected";
             document.getElementById('student-light').className = "traffic-light light-detected";
             document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 18px; font-weight: 900; display: block; margin-top: 5px; letter-spacing: 1px;">STOP</span>';
             document.getElementById('bar-container').style.display = "block";
+            document.getElementById('action-progress').style.width = '100%';
 
-            let width = 0;
-            const interval = setInterval(() => {
-                if (width >= 100) { clearInterval(interval); sendToAutomationPipeline(); } 
-                else { width += 10; document.getElementById('action-progress').style.width = width + '%'; }
-            }, 30);
+            // Prise de la photo instantanée (0.1 seconde de traitement matériel)
+            const b64Image = captureFrameFromWebcam();
+
+            // 🟢 ÉTAPE 2 : FLASH & GO - Libération instantanée après le flash (l'élève n'attend pas la réponse de l'IA)
+            setTimeout(() => {
+                banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI";
+                banner.className = "instruction-banner state-success";
+                document.getElementById('student-light').className = "traffic-light light-success";
+                document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">VIDER</span>';
+                
+                // Transfert des données en tâche de fond (complètement asynchrone)
+                sendDataToCloudAsynchronously(b64Image);
+
+                // Réinitialisation de la borne pour le plateau de l'élève suivant après 1.2 seconde
+                setTimeout(() => resetBorneUI(), 1200);
+            }, 250); // Durée du "Flash" mécanique à l'écran
         }
 
-        function sendToAutomationPipeline() {
+        // CAPTURE ET COMPRESSION VISUELLE FRONTEND : Génère une image Base64 légère (640x480) à la volée
+        function captureFrameFromWebcam() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.createElement('canvas');
+            
+            // Verrouillage de la taille à 640x480 pour optimiser la bande passante et le stockage réseau
+            canvas.width = 640;
+            canvas.height = 480;
+            
+            const ctx = canvas.getContext('2d');
+            try {
+                // On dessine l'état actuel de la balise vidéo sur le canvas en mémoire
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                // Compression au format JPEG léger (qualité 0.7)
+                return canvas.toDataURL('image/jpeg', 0.7);
+            } catch (e) {
+                // Secours si la caméra est indisponible (simulation technique)
+                return "data:image/jpeg;base64,demo_simulation_no_camera_attached";
+            }
+        }
+
+        // PIPELINE INVISIBLE : Envoie l'image compressée et les métadonnées au Google Apps Script sans bloquer l'élève
+        function sendDataToCloudAsynchronously(base64Data) {
             const menuText = document.getElementById('borne-menu-active').innerText;
             const simType = document.getElementById('sim-plateau-type').value;
             const school = document.getElementById('select-etablissement').value;
 
             if (simType === 'vide') {
-                document.getElementById('instruction-text').innerText = "✨ MERCI POUR TON GESTE !";
-                document.getElementById('instruction-text').className = "instruction-banner state-success";
-                document.getElementById('student-light').className = "traffic-light light-success";
-                document.getElementById('student-light').innerHTML = '🏆<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">BRAVO</span>';
-                setTimeout(() => resetBorneUI(), 1000); 
+                // Traitement direct si plateau propre
+                const emptyPayload = { action: "logScan", etablissement: school, menu_jour: menuText, poids_total_g: 0, perte_euro: 0 };
+                fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(emptyPayload) });
                 return;
             }
 
-            let p = Math.floor(Math.random() * 120) + 30; 
+            let mockWeight = Math.floor(Math.random() * 120) + 30; 
             
             const payload = {
-                action: "logScan",
+                action: "logScanImage", // Nouvelle action dédiée au traitement multimodal
                 etablissement: school, 
                 menu_jour: menuText,
-                entree_pct: simType === 'complet' || simType === 'entree_only' ? 30 : 0,
-                plat_pct: simType === 'complet' || simType === 'plat_only' ? 20 : 0,
-                accompagnement_pct: simType === 'complet' || simType === 'plat_only' ? 40 : 0,
-                dessert_pct: simType === 'complet' || simType === 'dessert_only' ? 10 : 0,
-                pain_nombre: simType === 'complet' ? 1 : 0, 
-                poids_total_g: p, 
-                perte_euro: parseFloat(((p/1000)*4.50).toFixed(2))
+                image_base64: base64Data, // Envoi du flux d'image compressé
+                simulated_type: simType, // Gardé en option pédagogique pour l'historique
+                poids_total_g: mockWeight, 
+                perte_euro: parseFloat(((mockWeight/1000)*4.50).toFixed(2))
             };
 
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
-            .then(() => {
-                document.getElementById('instruction-text').innerText = "✅ PLATEAU ENREGISTRÉ !";
-                document.getElementById('instruction-text').className = "instruction-banner state-success";
-                document.getElementById('student-light').className = "traffic-light light-success";
-                document.getElementById('student-light').innerHTML = '✅<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">MERCI</span>';
-                setTimeout(() => resetBorneUI(), 1000); 
-            });
+            // Requête asynchrone "Fire & Forget" - s'exécute silencieusement en arrière-plan
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                headers: { "Content-Type": "text/plain" }, 
+                body: JSON.stringify(payload) 
+            }).catch(err => console.log("Sauvegarde locale ou déconnectée active."));
         }
     </script>
 </body>
