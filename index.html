@@ -101,7 +101,7 @@
         <div class="top-bar">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT ACTIF :</label>
-                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc; pointer-events: auto; opacity: 1;">
+                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc;">
                     <option>Chargement...</option>
                 </select>
             </div>
@@ -272,7 +272,7 @@
                     <div class="form-section" style="border-top: 6px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
                         <h2 style="color: #1b4332; font-size: 18px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 13px; color: #475569; margin-top: 4px; margin-bottom: 20px; line-height: 1.5;">
-                            Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les **Kilos (±1.00)**, à droite pour les **Grammes (±0.10)**.
+                            Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).
                         </p>
                         
                         <div class="form-grid">
@@ -380,7 +380,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FILTRAGE LEXICAL PAR DICTIONNAIRE ET AGREGATION -->
+    <!-- CODE CENTRAL DE GESTION APPLICATIVE JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
@@ -463,6 +463,124 @@
             document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
             let targetBtn = document.getElementById('btn-hist-' + mode);
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
+        }
+
+        // 🧠 MODULE CENTRAL DE NETTOYAGE LEXICAL ET D'AGRÉGATION (ANTI-FAUX POSITIFS IA)
+        function runGranularExtraction(rawGaspillage) {
+            if (!rawGaspillage || rawGaspillage.length === 0) {
+                chartFoodTypes.data.labels = [];
+                chartFoodTypes.data.datasets[0].data = [];
+                chartFoodTypes.update();
+                return;
+            }
+
+            // Dictionnaire ordonné par pertinence pour éviter les collisions (ex: légumes sautés interceptés avant sauté de porc)
+            const masterKeywords = [
+                // Entrées
+                { key: "tomate", label: "Tomates" },
+                { key: "carotte", label: "Carottes râpées" },
+                { key: "salade", label: "Salade verte" },
+                { key: "céleri", label: "Céleri rémoulade" },
+                { key: "oeuf", label: "Œuf mayonnaise" },
+                { key: "saucisson", label: "Saucisson" },
+                { key: "jambon de pays", label: "Jambon de pays" },
+                { key: "jambon blanc", label: "Jambon blanc" },
+                { key: "pâté", label: "Pâté / Terrine" },
+                { key: "terrine", label: "Pâté / Terrine" },
+                { key: "quiche", label: "Quiche / Tarte" },
+                { key: "pizza", label: "Pizza" },
+                { key: "friand", label: "Friand" },
+                
+                // Plats Principaux
+                { key: "gardianne", label: "Gardianne" },
+                { key: "couscous", label: "Couscous" },
+                { key: "paella", label: "Paella" },
+                { key: "bourguignon", label: "Bœuf bourguignon" },
+                { key: "blanquette", label: "Blanquette de veau" },
+                { key: "poulet rôti", label: "Poulet rôti" },
+                { key: "poulet", label: "Poulet rôti" },
+                { key: "nugget", label: "Nuggets" },
+                { key: "dinde", label: "Escalope de dinde" },
+                { key: "steak", label: "Steak haché" },
+                { key: "rôti de porc", label: "Rôti de porc/bœuf" },
+                { key: "rôti de bœuf", label: "Rôti de porc/bœuf" },
+                { key: "sauté de porc", label: "Sauté de porc" }, 
+                { key: "boulette", label: "Boulettes de bœuf" },
+                { key: "pané", label: "Poisson pané" },
+                { key: "colin", label: "Filet de colin" },
+                { key: "lasagne", label: "Lasagnes végétariennes" },
+                
+                // Accompagnements & Légumes (Placés ici pour court-circuiter l'expression générique "sauté")
+                { key: "ratatouille", label: "Ratatouille" },
+                { key: "légumes sautés", label: "Ratatouille" }, 
+                { key: "sauté de légumes", label: "Ratatouille" },
+                { key: "frite", label: "Frites" },
+                { key: "pâte", label: "Pâtes" },
+                { key: "riz", label: "Riz" },
+                { key: "semoule", label: "Semoule" },
+                { key: "purée", label: "Purée" },
+                { key: "haricot", label: "Haricots verts" },
+                { key: "brocoli", label: "Brocolis" },
+                { key: "courgette", label: "Courgettes" },
+                
+                // Desserts & Reste
+                { key: "melon", label: "Melon" },
+                { key: "pastèque", label: "Pastèque" },
+                { key: "pomme", label: "Pomme / Banane" },
+                { key: "banane", label: "Pomme / Banane" },
+                { key: "fruit", label: "Fruit de saison" },
+                { key: "compote", label: "Compote" },
+                { key: "yaourt", label: "Yaourt" },
+                { key: "fromage", label: "Portion Fromage" },
+                { key: "chocolat", label: "Gâteau au chocolat" },
+                { key: "éclair", label: "Éclair" },
+                { key: "pain", label: "Pain" }
+            ];
+
+            let aggregatedMap = {};
+
+            rawGaspillage.forEach(scan => {
+                let textRaw = scan.commentaire ? scan.commentaire.toLowerCase() : "";
+                let targetLabel = null;
+                
+                for (let item of masterKeywords) {
+                    if (textRaw.includes(item.key)) {
+                        targetLabel = item.label;
+                        break;
+                    }
+                }
+                
+                // Déduction par bloc si non référencé dans le catalogue direct
+                if (!targetLabel) {
+                    if (scan.entree > 0) targetLabel = "Autre Entrée";
+                    else if (scan.plat > 0) targetLabel = "Autre Plat";
+                    else if (scan.dessert > 0) targetLabel = "Autre Dessert";
+                    else if (scan.pain > 0) targetLabel = "Pain";
+                    else targetLabel = "Divers";
+                }
+                
+                let valMax = Math.max(scan.entree, scan.plat, scan.dessert, scan.pain);
+                if (!aggregatedMap[targetLabel]) {
+                    aggregatedMap[targetLabel] = { total: 0, count: 0 };
+                }
+                aggregatedMap[targetLabel].total += valMax;
+                aggregatedMap[targetLabel].count++;
+            });
+
+            let palmaresFinalList = [];
+            for (let label in aggregatedMap) {
+                palmaresFinalList.push({
+                    label: label,
+                    value: Math.round(aggregatedMap[label].total / aggregatedMap[label].count)
+                });
+            }
+            palmaresFinalList.sort((a, b) => b.value - a.value);
+
+            chartFoodTypes.data.labels = palmaresFinalList.map(item => item.label).slice(0, 8);
+            chartFoodTypes.data.datasets[0].data = palmaresFinalList.map(item => item.value).slice(0, 8);
+            const palette = ['#3b82f6', '#ffb703', '#9b5de5', '#e63946', '#2a9d8f', '#f4a261', '#e76f51', '#7209b7'];
+            chartFoodTypes.data.datasets[0].backgroundColor = chartFoodTypes.data.labels.map((_, i) => palette[i % palette.length]);
+            chartFoodTypes.update();
         }
 
         function adjustWeight(id, value) {
@@ -550,120 +668,8 @@
 
                 const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
                 
-                // 🧠 MOTOR D'EXTRACTION LEXICALE DE L'ESPACE CUISINIER (ANTI-PHRASES IA)
-                if (data.rawGaspillage && data.rawGaspillage.length > 0) {
-                    const masterKeywords = [
-                        { key: "tomate", label: "Tomates" },
-                        { key: "carotte", label: "Carottes râpées" },
-                        { key: "salade", label: "Salade verte" },
-                        { key: "céleri", label: "Céleri rémoulade" },
-                        { key: "oeuf", label: "Œuf mayonnaise" },
-                        { key: "saucisson", label: "Saucisson" },
-                        { key: "jambon de pays", label: "Jambon de pays" },
-                        { key: "jambon blanc", label: "Jambon blanc" },
-                        { key: "jambon", label: "Jambon blanc" },
-                        { key: "pâté", label: "Pâté / Terrine" },
-                        { key: "terrine", label: "Pâté / Terrine" },
-                        { key: "quiche", label: "Quiche / Tarte" },
-                        { key: "tarte salée", label: "Quiche / Tarte" },
-                        { key: "pizza", label: "Pizza" },
-                        { key: "friand", label: "Friand" },
-                        { key: "gardianne", label: "Gardianne" },
-                        { key: "couscous", label: "Couscous" },
-                        { key: "paella", label: "Paella" },
-                        { key: "bourguignon", label: "Bœuf bourguignon" },
-                        { key: "veau", label: "Blanquette de veau" },
-                        { key: "blanquette", label: "Blanquette de veau" },
-                        { key: "poulet", label: "Poulet rôti" },
-                        { key: "nugget", label: "Nuggets" },
-                        { key: "dinde", label: "Escalope de dinde" },
-                        { key: "steak", label: "Steak haché" },
-                        { key: "rôti", label: "Rôti de porc/bœuf" },
-                        { key: "sauté", label: "Sauté de porc" },
-                        { key: "boulette", label: "Boulettes de bœuf" },
-                        { key: "pané", label: "Poisson pané" },
-                        { key: "colin", label: "Filet de colin" },
-                        { key: "céréale", label: "Galette de céréales" },
-                        { key: "lasagne", label: "Lasagnes végétariennes" },
-                        { key: "frite", label: "Frites" },
-                        { key: "pâte", label: "Pâtes" },
-                        { key: "riz", label: "Riz" },
-                        { key: "semoule", label: "Semoule" },
-                        { key: "purée", label: "Purée" },
-                        { key: "haricot", label: "Haricots verts" },
-                        { key: "ratatouille", label: "Ratatouille" },
-                        { key: "brocoli", label: "Brocolis" },
-                        { key: "petits pois", label: "Petits pois / Carottes" },
-                        { key: "pois", label: "Petits pois / Carottes" },
-                        { key: "courgette", label: "Courgettes" },
-                        { key: "melon", label: "Melon" },
-                        { key: "pastèque", label: "Pastèque" },
-                        { key: "pomme", label: "Pomme / Banane" },
-                        { key: "banane", label: "Pomme / Banane" },
-                        { key: "fruit", label: "Fruit de saison" },
-                        { key: "compote", label: "Compote" },
-                        { key: "yaourt", label: "Yaourt" },
-                        { key: "fromage", label: "Portion Fromage" },
-                        { key: "kiri", label: "Portion Fromage" },
-                        { key: "cantal", label: "Portion Fromage" },
-                        { key: "gouda", label: "Portion Fromage" },
-                        { key: "liégeois", label: "Crème dessert" },
-                        { key: "crème", label: "Crème dessert" },
-                        { key: "sauce", label: "Sauce / Potage" },
-                        { key: "potage", label: "Sauce / Potage" },
-                        { key: "chocolat", label: "Gâteau au chocolat" },
-                        { key: "éclair", label: "Éclair" },
-                        { key: "tarte aux fruits", label: "Tarte aux fruits" },
-                        { key: "pain", label: "Pain" }
-                    ];
-
-                    let aggregatedMap = {};
-                    data.rawGaspillage.forEach(scan => {
-                        let textRaw = scan.commentaire.toLowerCase();
-                        let targetLabel = null;
-                        
-                        for (let item of masterKeywords) {
-                            if (textRaw.includes(item.key)) {
-                                targetLabel = item.label;
-                                break;
-                            }
-                        }
-                        
-                        // Sécurité si aucun mot-clé direct n'est trouvé
-                        if (!targetLabel) {
-                            if (scan.entree > 0) targetLabel = "Autre Entrée";
-                            else if (scan.plat > 0) targetLabel = "Autre Plat";
-                            else if (scan.dessert > 0) targetLabel = "Autre Dessert";
-                            else if (scan.pain > 0) targetLabel = "Pain";
-                            else targetLabel = "Divers";
-                        }
-                        
-                        let valMax = Math.max(scan.entree, scan.plat, scan.dessert, scan.pain);
-                        if (!aggregatedMap[targetLabel]) {
-                            aggregatedMap[targetLabel] = { total: 0, count: 0 };
-                        }
-                        aggregatedMap[targetLabel].total += valMax;
-                        aggregatedMap[targetLabel].count++;
-                    });
-
-                    let palmaresFinalList = [];
-                    for (let label in aggregatedMap) {
-                        palmaresFinalList.push({
-                            label: label,
-                            value: Math.round(aggregatedMap[label].total / aggregatedMap[label].count)
-                        });
-                    }
-                    palmaresFinalList.sort((a, b) => b.value - a.value);
-
-                    chartFoodTypes.data.labels = palmaresFinalList.map(item => item.label).slice(0, 8);
-                    chartFoodTypes.data.datasets[0].data = palmaresFinalList.map(item => item.value).slice(0, 8);
-                    const palette = ['#3b82f6', '#ffb703', '#9b5de5', '#e63946', '#2a9d8f', '#f4a261', '#e76f51', '#7209b7'];
-                    chartFoodTypes.data.datasets[0].backgroundColor = chartFoodTypes.data.labels.map((_, i) => palette[i % palette.length]);
-                } else {
-                    chartFoodTypes.data.labels = [];
-                    chartFoodTypes.data.datasets[0].data = [];
-                }
-                chartFoodTypes.update();
+                // Hydratation du Palmarès via notre extracteur granulaire
+                runGranularExtraction(data.rawGaspillage);
                 
                 updateCharts(data.historiqueLabels || ['Ce service'], data.historiquePoids || [0], rawPercentages);
                 
