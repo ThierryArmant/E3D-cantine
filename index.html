@@ -543,12 +543,14 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
+        // 🧠 MOTEUR CENTRAL EXTRACTEUR RÉVISÉ : FILTRAGE MULTI-RUBRIQUES PARALLÈLE
         function runGranularExtraction(rawGaspillage) {
             if (!rawGaspillage || rawGaspillage.length === 0) {
                 chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update(); return;
             }
 
-            const masterKeywords = [
+            // Catalogues segmentés par type de composant pour éviter les collusions
+            const keywordsEntree = [
                 { key: "tomate", label: "Tomates" },
                 { key: "carotte", label: "Carottes râpées" },
                 { key: "salade", label: "Salade verte" },
@@ -561,7 +563,10 @@
                 { key: "terrine", label: "Pâté / Terrine" },
                 { key: "quiche", label: "Quiche / Tarte" },
                 { key: "pizza", label: "Pizza" },
-                { key: "friand", label: "Friand" },
+                { key: "friand", label: "Friand" }
+            ];
+
+            const keywordsPlat = [
                 { key: "gardianne", label: "Gardianne" },
                 { key: "couscous", label: "Couscous" },
                 { key: "paella", label: "Paella" },
@@ -589,7 +594,10 @@
                 { key: "purée", label: "Purée" },
                 { key: "haricot", label: "Haricots verts" },
                 { key: "brocoli", label: "Brocolis" },
-                { key: "courgette", label: "Courgettes" },
+                { key: "courgette", label: "Courgettes" }
+            ];
+
+            const keywordsDessert = [
                 { key: "melon", label: "Melon" },
                 { key: "pastèque", label: "Pastèque" },
                 { key: "pomme", label: "Pomme / Banane" },
@@ -600,26 +608,51 @@
                 { key: "fromage", label: "Portion Fromage" },
                 { key: "chocolat", label: "Gâteau au chocolat" },
                 { key: "éclair", label: "Éclair" },
-                { key: "pain", label: "Pain" }
+                { key: "tarte aux fruits", label: "Tarte aux fruits" }
             ];
 
             let aggregatedMap = {};
+
+            function addMetric(label, val) {
+                if (!aggregatedMap[label]) aggregatedMap[label] = { total: 0, count: 0 };
+                aggregatedMap[label].total += val;
+                aggregatedMap[label].count++;
+            }
+
             rawGaspillage.forEach(scan => {
                 let textRaw = scan.commentaire ? scan.commentaire.toLowerCase() : "";
-                let targetLabel = null;
-                for (let item of masterKeywords) {
-                    if (textRaw.includes(item.key)) { targetLabel = item.label; break; }
+
+                // 1. Extraction Entrée distincte
+                if (scan.entree > 0) {
+                    let matched = false;
+                    for (let item of keywordsEntree) {
+                        if (textRaw.includes(item.key)) { addMetric(item.label, scan.entree); matched = true; break; }
+                    }
+                    if (!matched) addMetric("Autre Entrée", scan.entree);
                 }
-                if (!targetLabel) {
-                    if (scan.entree > 0) targetLabel = "Autre Entrée";
-                    else if (scan.plat > 0) targetLabel = "Autre Plat";
-                    else if (scan.dessert > 0) targetLabel = "Autre Dessert";
-                    else if (scan.pain > 0) targetLabel = "Pain";
-                    else targetLabel = "Divers";
+
+                // 2. Extraction Plat / Accompagnement distinct
+                if (scan.plat > 0) {
+                    let matched = false;
+                    for (let item of keywordsPlat) {
+                        if (textRaw.includes(item.key)) { addMetric(item.label, scan.plat); matched = true; break; }
+                    }
+                    if (!matched) addMetric("Autre Plat", scan.plat);
                 }
-                let valMax = Math.max(scan.entree, scan.plat, scan.dessert, scan.pain);
-                if (!aggregatedMap[targetLabel]) aggregatedMap[targetLabel] = { total: 0, count: 0 };
-                aggregatedMap[targetLabel].total += valMax; aggregatedMap[targetLabel].count++;
+
+                // 3. Extraction Dessert distinct
+                if (scan.dessert > 0) {
+                    let matched = false;
+                    for (let item of keywordsDessert) {
+                        if (textRaw.includes(item.key)) { addMetric(item.label, scan.dessert); matched = true; break; }
+                    }
+                    if (!matched) addMetric("Autre Dessert", scan.dessert);
+                }
+
+                // 4. Extraction Pain autonome
+                if (scan.pain > 0) {
+                    addMetric("Pain", scan.pain);
+                }
             });
 
             let palmaresFinalList = [];
@@ -762,7 +795,7 @@
                     if (currentLine.startsWith('### 1')) { blockActuel = 1; output += '<div class="ai-card-block ai-block-blue"><div class="ai-block-title">Analyse du Menu</div>'; }
                     else if (currentLine.startsWith('### 2')) { blockActuel = 2; output += '<div class="ai-card-block ai-block-orange"><div class="ai-block-title">Diagnostic du Gâchis</div>'; }
                     else if (currentLine.startsWith('### 3')) { blockActuel = 3; output += '<div class="ai-card-block ai-block-purple"><div class="ai-block-title">Prédictions</div>'; }
-                    else if (currentLine.startsWith('### 4')) { blockActuel = 4; output += '<div class="ai-card-block ai-block-green"><div class="ai-block-title">Recommandations au Chef</div>'; }
+                    else if (currentLine.startsWith('### 4')) { blockActuel = 4; output += '<div class="ai-card-block ai-block-green"><div class="ai-card-block-title">Recommandations au Chef</div>'; }
                     continue;
                 }
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
@@ -796,7 +829,6 @@
             document.getElementById('action-progress').style.width = "0%"; 
         }
 
-        // 🌟 CORRECTION DE SÉCURITÉ : AJOUT DE MODE: "NO-CORS" POUR EXPÉDIER LES DONNÉES SUR SHEET
         function triggerAutomaticCapture() {
             if (isScanningProcess) return; isScanningProcess = true;
             const banner = document.getElementById('instruction-text');
@@ -822,7 +854,6 @@
                     image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" 
                 };
                 
-                // Exécution réseau étanchéifiée avec mode: "no-cors"
                 fetch(ADRESSE_SHEET_OFFICIELLE, { 
                     method: "POST", 
                     mode: "no-cors", 
