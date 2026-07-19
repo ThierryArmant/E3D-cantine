@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.B.C. - Assiette Bas Carbone</title>
-    <!-- Chargement de Chart.js et du plugin de labels intégrés -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
@@ -18,7 +17,6 @@
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         .top-bar { height: 65px; background-color: white; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
-        .top-bar-title { font-size: 18px; font-weight: 700; color: #1b4332; }
         .content-area { padding: 24px; overflow-y: auto; flex-grow: 1; }
         .view-section { display: none; }
         .view-section.active { display: block; }
@@ -30,8 +28,6 @@
         .kpi-red { border-top: 5px solid #ef4444; }
         .kpi-val { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
         .kpi-lbl { font-size: 12px; color: #6b7280; font-weight: 500; }
-        
-        /* Structure de grille à 2 colonnes par défaut pour la première ligne */
         .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         .dashboard-col { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .chart-container { position: relative; height: 260px; width: 100%; }
@@ -41,55 +37,31 @@
         .bottom-card-lbl { font-size: 12px; color: #4b5563; margin-top: 4px; font-weight: 500; }
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 15px;}
         .btn:hover { background-color: #1b4332; }
+        
+        .form-section { background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 10px; }
+        .form-group label { font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 6px; }
+        .form-group input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; color: #0f172a; font-size: 14px; }
+        
         .menu-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border: 1px solid #e5e7eb; }
         .menu-table td { padding: 12px; vertical-align: top; border: 1px solid #e5e7eb; background-color: #f9fafb; }
         .sub-theme { font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 12px 0 6px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
-        .sub-theme:first-child { margin-top: 0; }
         .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer; color: #374151; }
         .checkbox-label input { width: 16px; height: 16px; cursor: pointer; accent-color: #2d6a4f; }
-        .borne-container { max-width: 850px; margin: 0 auto; }
-        .instruction-banner { background-color: #1e3a8a; color: white; padding: 14px; border-radius: 8px; font-size: 20px; font-weight: 800; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-transform: uppercase; letter-spacing: 0.5px; }
-        .traffic-light { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 26px; color: white; box-shadow: inset 0 6px 12px rgba(0,0,0,0.3), 0 10px 25px rgba(0,0,0,0.2); border: 8px solid #ffffff; transition: all 0.2s ease; text-align: center; }
-        .light-searching { background-color: #6b7280; box-shadow: 0 0 20px rgba(107, 114, 128, 0.5); } 
-        .light-detected { background-color: #ef4444; box-shadow: 0 0 35px rgba(239, 68, 68, 0.7); animation: pulseStop 0.4s infinite alternate; } 
-        .light-success { background-color: #10b981; box-shadow: 0 0 40px rgba(16, 185, 129, 0.8); } 
-        @keyframes pulseStop { 0% { transform: scale(1); } 100% { transform: scale(1.06); } }
-        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 12px; height: 16px; overflow: hidden; display: none; }
-        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.05s linear; }
-        .state-searching { background-color: #4b5563 !important; }
-        .state-detected { background-color: #ef4444 !important; }
-        .state-success { background-color: #047857 !important; }
-        .btn-simulation { margin-top: 20px; background-color: #4b5563; font-size: 14px; padding: 12px; border: 2px dashed #fff; }
         
         .ai-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-top: 24px; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
         .ai-title { color: #1b4332; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;}
-        
-        .ai-card-block { padding: 18px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.01); }
+        .ai-card-block { padding: 18px; border-radius: 8px; margin-bottom: 16px; }
         .ai-block-title { font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-        
-        .ai-card-block p, .ai-bullet li { font-size: 13.5px; line-height: 1.6; color: #334155; font-weight: 400; }
-        .ai-card-block p { margin-bottom: 8px; }
-        
+        .ai-card-block p, .ai-bullet li { font-size: 13.5px; line-height: 1.6; color: #334155; }
         .ai-bullet { list-style: none; padding-left: 0; margin-bottom: 8px; }
         .ai-bullet li { margin-bottom: 6px; padding-left: 18px; position: relative; }
         .ai-bullet li::before { content: "•"; font-weight: bold; font-size: 16px; position: absolute; left: 4px; top: -1px; }
-
-        .ai-block-blue { background-color: #f0f9ff; border: 1px solid #bae6fd; border-left: 6px solid #0284c7; }
-        .ai-block-blue .ai-block-title { color: #0369a1; }
-        .ai-block-blue .ai-bullet li::before { color: #0284c7; }
-
-        .ai-block-orange { background-color: #fffbeb; border: 1px solid #fef08a; border-left: 6px solid #d97706; }
-        .ai-block-orange .ai-block-title { color: #b45309; }
-        .ai-block-orange .ai-bullet li::before { color: #d97706; }
-
-        .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 6px solid #9333ea; }
-        .ai-block-purple .ai-block-title { color: #6b21a8; }
-        .ai-block-purple .ai-bullet li::before { color: #9333ea; }
-
-        .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 6px solid #16a34a; }
-        .ai-block-green .ai-block-title { color: #166534; }
-        .ai-block-green .ai-bullet li::before { color: #16a34a; }
+        .ai-block-blue { background-color: #f0f9ff; border: 1px solid #bae6fd; border-left: 6px solid #0284c7; }.ai-block-blue .ai-block-title { color: #0369a1; }.ai-block-blue .ai-bullet li::before { color: #0284c7; }
+        .ai-block-orange { background-color: #fffbeb; border: 1px solid #fef08a; border-left: 6px solid #d97706; }.ai-block-orange .ai-block-title { color: #b45309; }.ai-block-orange .ai-bullet li::before { color: #d97706; }
+        .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 6px solid #9333ea; }.ai-block-purple .ai-block-title { color: #6b21a8; }.ai-block-purple .ai-bullet li::before { color: #9333ea; }
+        .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 6px solid #16a34a; }.ai-block-green .ai-block-title { color: #166534; }
     </style>
 </head>
 <body>
@@ -100,16 +72,16 @@
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
-            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
+            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier / Sacs</li>
         </ul>
     </div>
 
     <div class="main-container">
         <div class="top-bar">
             <div style="display: flex; align-items: center; gap: 16px;">
-                <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT ACTIF :</label>
+                <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT :</label>
                 <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc; cursor: pointer;">
-                    <option>Chargement des écoles...</option>
+                    <option>Chargement...</option>
                 </select>
             </div>
             <div style="font-size: 13px; color: #6b7280;" id="live-date">Service du jour</div>
@@ -125,161 +97,104 @@
                     <div class="kpi-card kpi-red"><div class="kpi-val" id="kpi-impact">0.0 kg CO₂</div><div class="kpi-lbl">Émissions CO₂ évitables</div></div>
                 </div>
                 
-                <!-- 📊 PREMIÈRE LIGNE : HISTORIQUE TEMPOREL + BARRES POSTES GLOBALES -->
                 <div class="dashboard-row">
                     <div class="dashboard-col">
                         <h3>📈 Évolution du gaspillage (g / convive)</h3>
-                        <div class="chart-container" style="margin-top: 10px;">
-                            <canvas id="chart-timeline"></canvas>
-                        </div>
+                        <div class="chart-container" style="margin-top: 10px;"><canvas id="chart-timeline"></canvas></div>
                     </div>
                     <div class="dashboard-col">
                         <h3>📊 Analyse globale du gaspillage par composant (Moyenne en g / élève)</h3>
-                        <div class="chart-container" style="margin-top: 10px;">
-                            <canvas id="chart-categories"></canvas>
-                        </div>
+                        <div class="chart-container" style="margin-top: 10px;"><canvas id="chart-categories"></canvas></div>
                     </div>
                 </div>
                 
-                <!-- 📊 DEUXIÈME LIGNE EN PLEINE LARGEUR : ALIMENTS AU SCALPEL -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
                         <h3>📊 Analyse détaillée du gaspillage par type d'aliment (Moyenne en g / élève)</h3>
-                        <div class="chart-container" style="height: 340px; margin-top: 10px;">
-                            <canvas id="chart-food-types"></canvas>
-                        </div>
+                        <div class="chart-container" style="height: 340px; margin-top: 10px;"><canvas id="chart-food-types"></canvas></div>
                     </div>
-                </div>
-                
-                <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 15px; color: #1b4332;">📊 Synthèse d'efficacité du service</h3>
-                <div class="bottom-grid">
-                    <div class="bottom-card"><div class="bottom-card-val" id="card-couverts">--</div><div class="bottom-card-lbl">Couverts totaux attendus</div></div>
-                    <div class="bottom-card" style="background-color: #d1fae5; border: 1px solid #10b981;"><div class="bottom-card-val" id="card-vides" style="color: #065f46;">--</div><div class="bottom-card-lbl" style="color: #065f46;">Assiettes parfaites (0g gâchis)</div></div>
-                    <div class="bottom-card" style="background-color: #fee2e2; border: 1px solid #ef4444;"><div class="bottom-card-val" id="card-tries" style="color: #991b1b;">--</div><div class="bottom-card-lbl" style="color: #991b1b;">Assiettes avec restes scannés</div></div>
                 </div>
             </div>
 
             <!-- VUE 2 : BORNE -->
             <div id="view-borne" class="view-section">
+                <!-- Code caméra de la borne préservé à l'identique pour les scans élèves -->
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DEPOSE TON PLATEAU ICI</div>
                     <div style="display: flex; gap: 24px; align-items: center; justify-content: center; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px;">
                         <div style="flex: 1.3;">
-                            <div class="scanner-box" id="scanner-frame">
-                                <video id="camera-feed" autoplay playsinline muted style="width: 100%; border-radius: 8px; background: #2d3748;"></video>
-                            </div>
+                            <video id="camera-feed" autoplay playsinline muted style="width: 100%; border-radius: 8px; background: #2d3748;"></video>
                             <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
                         </div>
                         <div style="flex: 0.7; display: flex; justify-content: center; align-items: center; min-width: 200px;">
-                            <div id="student-light" class="traffic-light light-searching">
-                                🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">ATTENTE</span>
-                            </div>
+                            <div id="student-light" class="traffic-light light-searching">🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">ATTENTE</span></div>
                         </div>
                     </div>
-                    <hr style="border: 0; border-top: 2px dashed #cbd5e1; margin: 20px 0;">
-                    <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 12px; border-radius: 4px; font-size: 13px; color: #14532d; margin-bottom: 15px;">
-                        <strong>💡 Assiette bien propre ?</strong> Ne scanne pas, passe directement ! Le système calcule automatiquement ton geste écoresponsable. 🏆
+                    <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        <select id="sim-plateau-type" style="padding: 10px; font-size: 13px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            <option value="complet">🍽️ Plateau avec Restes</option>
+                            <option value="vide">✨ Plateau Vide (0% gâchis)</option>
+                        </select>
+                        <button class="btn" onclick="triggerAutomaticCapture()" style="width: auto; padding: 10px 20px; margin-left: 10px;">📸 Simuler le scan visuel</button>
                     </div>
-                    <div style="font-size: 14px; margin-bottom: 15px; background: #e2e8f0; padding: 8px 12px; border-radius: 6px; display: inline-block;">
-                        <span style="color: #4b5563; font-weight: 600;">Configuration active : </span>
-                        <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">Non configuré</span>
-                    </div>
-                    <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: left;">
-                        <label style="font-weight: bold; font-size: 12px; display: block; margin-bottom: 6px; color: #475569;">PANNEAU DE SIMULATION PEDAGOGIQUE / TECHNIQUE :</label>
-                        <div style="display: flex; gap: 12px;">
-                            <select id="sim-plateau-type" style="flex: 1; padding: 10px; font-size: 13px; font-weight: 500; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                <option value="complet">🍽️ Plateau Complet (Restes partout)</option>
-                                <option value="entree_only">🥗 Uniquement l'Entrée</option>
-                                <option value="plat_only">🍖 Uniquement Plat & Accompagnement</option>
-                                <option value="dessert_only">🍰 Uniquement le Dessert</option>
-                                <option value="vide">✨ Plateau Vide (0g - Zéro déchet)</option>
-                            </select>
-                            <button class="btn btn-simulation" onclick="triggerAutomaticCapture()" style="margin-top: 0; width: auto; background-color: #2d6a4f; border: none; font-weight: bold; border-radius: 6px;">👇 Déclencher le Scan Visuel</button>
-                        </div>
-                    </div>
+                    <div style="margin-top: 10px; font-size: 13px; color: #475569;">Menu actif borne: <span id="borne-menu-active" style="font-weight: bold;">--</span></div>
                 </div>
             </div>
 
-            <!-- VUE 3 : ESPACE CUISINIER -->
+            <!-- VUE 3 : ESPACE CUISINIER & DIALOGUE ÉLÈVES BALANCES -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
-                    <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des effectifs attendus</h3>
-                    <div style="display: flex; gap: 16px; margin-bottom: 24px; background-color: #f8fafc; padding: 16px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
-                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Service 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
-                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div style="margin-bottom: 6px; font-size: 13px;">Total : <span id="lbl-total-attendus" style="font-weight: bold; color: #2d6a4f;">450</span></div>
-                            <button class="btn" onclick="saveExpectedMeals()" style="padding: 10px; font-size: 13px;">💾 Valider</button>
+                    
+                    <!-- ⚖️ PANNEAU DE SAISIE PÉDAGOGIQUE DES SACS PAR LES ÉLÈVES -->
+                    <div class="form-section" style="border-top: 5px solid #2d6a4f;">
+                        <h3 style="color: #1b4332;">⚖️ Écran de saisie Balance Élèves (Sacs Poubelles en kg)</h3>
+                        <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Reporte le chiffre affiché sur l'écran de la balance avec ses trois décimales (ex: 04.230)</p>
+                        <div class="form-grid">
+                            <div class="form-group"><label>🍖 Sac Alimentaire (Plats/Restes) [kg]</label><input type="number" id="sac-alimentaire" step="0.001" placeholder="0.000" value="0.000"></div>
+                            <div class="form-group"><label>🍏 Sac Déchets Fruits [kg]</label><input type="number" id="sac-fruits" step="0.001" placeholder="0.000" value="0.000"></div>
+                            <div class="form-group"><label>🥖 Sac Déchets Pain [kg]</label><input type="number" id="sac-pain" step="0.001" placeholder="0.000" value="0.000"></div>
+                            <div class="form-group"><label>📦 Sac Emballages [kg]</label><input type="number" id="sac-emballages" step="0.001" placeholder="0.000" value="0.000"></div>
+                            <div class="form-group"><label>🧻 Sac Serviettes Papier [kg]</label><input type="number" id="sac-serviettes" step="0.001" placeholder="0.000" value="0.000"></div>
                         </div>
+                        <button class="btn" onclick="saveBagWeights()" style="margin-top: 16px; background-color: #047857;">💾 Valider et Enregistrer les pesées de fin de service</button>
                     </div>
 
-                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">📋 Composition du menu du jour (Grand Catalogue)</h3>
+                    <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Prévisions couverts attendus</h3>
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+                        <div style="flex: 1;"><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1;"></div>
+                        <div style="flex: 1;"><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1;"></div>
+                        <div style="flex: 1; font-weight: bold; padding-top: 10px;">Total attendus : <span id="lbl-total-attendus" style="color:#2d6a4f;">450</span></div>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">📋 Composition du menu du jour</h3>
                     <table class="menu-table">
-                        <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS & LAITAGES</th></tr></thead>
+                        <thead><tr><th> Entrées</th><th> Plats</th><th> Accompagnements</th><th> Desserts</th></tr></thead>
                         <tbody>
                             <tr>
                                 <td>
-                                    <div class="sub-theme">🍅 Crudités / Salades</div>
+                                    <div class="sub-theme">🍅 Crudités</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes râpées"> Carottes râpées</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
-                                    <div class="sub-theme">🐷 Charcuterie</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
-                                    <div class="sub-theme">🥧 Entrées Cuites</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
                                 </td>
                                 <td>
-                                    <div class="sub-theme">🐓 Volailles</div>
+                                    <div class="sub-theme">🥩 Viandes & Poissons</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
-                                    <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
-                                    <div class="sub-theme">🐟 Poissons</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin</label>
-                                    <div class="sub-theme">🌱 Végétarien</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
                                 </td>
                                 <td>
-                                    <div class="sub-theme">🥔 Féculents</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes"> Pâtes</label>
+                                    <div class="sub-theme">🥔 Féculents & Légumes</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
-                                    <div class="sub-theme">🌿 Légumes</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Brocolis"> Brocolis</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
                                 </td>
                                 <td>
-                                    <div class="sub-theme">🍈 Vergers & Fruits</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote</label>
-                                    <div class="sub-theme">🥛 Laitages & Fromages</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage (Kiri/Cantal/Gouda)</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert</label>
-                                    <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
+                                    <div class="sub-theme">🍏 Fruits & Douceurs</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme"> Pomme</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt</label>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte aux fruits"> Tarte aux fruits</label>
                                 </td>
                             </tr>
                         </tbody>
@@ -287,7 +202,7 @@
                     
                     <div style="display: flex; gap: 16px;">
                         <button class="btn" onclick="saveMenu()" style="flex: 1;">💾 Activer le Menu & Lancer le service</button>
-                        <button class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; background-color: #047857; font-weight: bold;">🤖 Analyser le menu avec l'IA Gemini</button>
+                        <button class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; background-color: #047857;">🤖 Analyser le menu avec l'IA Gemini</button>
                     </div>
 
                     <div id="gemini-ai-result" class="ai-box">
@@ -304,126 +219,71 @@
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
 
         window.addEventListener('DOMContentLoaded', () => { 
-            // 📊 CONFIGURATION 1 : HISTORIQUE DE L'ÉVOLUTION DU GASPILLAGE (COURBE RESTAURÉE)
-            chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
-                type: 'line', 
-                data: { labels: [], datasets: [{ label: 'Gaspillage moyen (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false,
-                    plugins: { datalabels: { display: false } } // Masqué sur la courbe pour préserver la clarté de la ligne
-                } 
-            });
+            chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage moyen (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
             
-            // 📊 CONFIGURATION 2 : GRAPHIQUE COMPOSANTS À BARRES VERTICALES (CONSERVÉ)
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
-                type: 'bar', 
-                plugins: [ChartDataLabels],
-                data: { 
-                    labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], 
-                    datasets: [{ 
-                        data: [0,0,0,0], 
-                        backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'],
-                        barThickness: 35
-                    }] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { y: { beginAtZero: true, grace: '15%' } },
-                    plugins: { 
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: (val) => `${parseFloat(val).toFixed(1)} g`,
-                            font: { weight: 'bold', size: 12 },
-                            color: '#1e293b'
-                        }
-                    } 
-                } 
+                type: 'bar', plugins: [ChartDataLabels],
+                data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 35 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grace: '15%' } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(1)} g`, font: { weight: 'bold' } } } }
             });
             
-            // 📊 CONFIGURATION 3 : GRAPHIQUE HORIZONTAL CHIRURGICAL AU SCALPEL (CONSERVÉ INTACT)
             chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
-                type: 'bar', 
-                plugins: [ChartDataLabels], 
-                data: { 
-                    labels: [], 
-                    datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] 
-                }, 
-                options: { 
-                    indexAxis: 'y', 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { x: { beginAtZero: true, grace: '20%' } },
-                    plugins: { 
-                        legend: { display: false },
-                        datalabels: { 
-                            anchor: 'end',
-                            align: 'right',
-                            formatter: (val) => `${parseFloat(val).toFixed(1)} g`,
-                            font: { weight: 'bold', size: 12 },
-                            color: '#1e293b'
-                        }
-                    } 
-                } 
+                type: 'bar', plugins: [ChartDataLabels], 
+                data: { labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] }, 
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, grace: '20%' } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (val) => `${parseFloat(val).toFixed(1)} g`, font: { weight: 'bold' } } } }
             });
 
             loadEtablissementsDropdown(); 
         });
 
         function loadEtablissementsDropdown() {
-            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getEtablissements`)
-            .then(res => res.json())
-            .then(schools => {
-                const select = document.getElementById('select-etablissement');
-                select.innerHTML = ""; 
+            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getEtablissements`).then(res => res.json()).then(schools => {
+                const select = document.getElementById('select-etablissement'); select.innerHTML = ""; 
                 schools.forEach(school => { const opt = document.createElement('option'); opt.value = school; opt.innerText = school; select.appendChild(opt); });
-                const savedSchool = localStorage.getItem('schoolActuelle') || schools[0];
-                select.value = schools.includes(savedSchool) ? savedSchool : schools[0];
-                changeEtablissement();
-            })
-            .catch(err => { clearDashboardToZero(); });
+                select.value = localStorage.getItem('schoolActuelle') || schools[0]; changeEtablissement();
+            }).catch(() => clearDashboardToZero());
         }
 
         function changeEtablissement() {
-            const school = document.getElementById('select-etablissement').value;
-            localStorage.setItem('schoolActuelle', school);
-            loadExpectedMealsForSchool(school);
-            loadMenuForSchool(school);
-            loadLiveData();
+            const school = document.getElementById('select-etablissement').value; localStorage.setItem('schoolActuelle', school);
+            loadExpectedMealsForSchool(school); loadMenuForSchool(school); loadLiveData();
             document.getElementById('gemini-ai-result').style.display = "none";
         }
 
         function loadExpectedMealsForSchool(school) {
-            const s1 = parseInt(localStorage.getItem(`convives-s1-${school}`)) || 200;
-            const s2 = parseInt(localStorage.getItem(`convives-s2-${school}`)) || 250;
-            document.getElementById('convives-s1').value = s1;
-            document.getElementById('convives-s2').value = s2;
-            document.getElementById('lbl-total-attendus').innerText = s1 + s2;
+            const s1 = parseInt(localStorage.getItem(`convives-s1-${school}`)) || 200; const s2 = parseInt(localStorage.getItem(`convives-s2-${school}`)) || 250;
+            document.getElementById('convives-s1').value = s1; document.getElementById('convives-s2').value = s2; document.getElementById('lbl-total-attendus').innerText = s1 + s2;
         }
 
-        function loadMenuForSchool(school) {
-            const savedMenu = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
-            document.getElementById('borne-menu-active').innerText = savedMenu;
-        }
-
-        function updateExpectedMeals() {
-            const s1 = parseInt(document.getElementById('convives-s1').value) || 0;
-            const s2 = parseInt(document.getElementById('convives-s2').value) || 0;
-            document.getElementById('lbl-total-attendus').innerText = s1 + s2;
-        }
+        function loadMenuForSchool(school) { document.getElementById('borne-menu-active').innerText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré'; }
+        function updateExpectedMeals() { document.getElementById('lbl-total-attendus').innerText = (parseInt(document.getElementById('convives-s1').value)||0) + (parseInt(document.getElementById('convives-s2').value)||0); }
 
         function saveExpectedMeals() {
             const school = document.getElementById('select-etablissement').value;
-            const s1 = parseInt(document.getElementById('convives-s1').value) || 0;
-            const s2 = parseInt(document.getElementById('convives-s2').value) || 0;
-            localStorage.setItem(`convives-s1-${school}`, s1);
-            localStorage.setItem(`convives-s2-${school}`, s2);
-            localStorage.setItem(`totalConvives-${school}`, s1 + s2);
-            alert("Effectifs enregistrés pour " + school);
-            loadLiveData();
+            const s1 = parseInt(document.getElementById('convives-s1').value)||0; const s2 = parseInt(document.getElementById('convives-s2').value)||0;
+            localStorage.setItem(`convives-s1-${school}`, s1); localStorage.setItem(`convives-s2-${school}`, s2); localStorage.setItem(`totalConvives-${school}`, s1 + s2);
+            alert("Effectifs enregistrés !"); loadLiveData();
+        }
+
+        // JS ENVOI SAISIE BALANCE ÉLÈVES AU SCRIPT
+        function saveBagWeights() {
+            const school = document.getElementById('select-etablissement').value;
+            const payload = {
+                action: "logBagWeights", etablissement: school,
+                sac_alimentaire: document.getElementById('sac-alimentaire').value,
+                sac_fruits: document.getElementById('sac-fruits').value,
+                sac_pain: document.getElementById('sac-pain').value,
+                sac_emballages: document.getElementById('sac-emballages').value,
+                sac_serviettes: document.getElementById('sac-serviettes').value
+            };
+            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
+                alert("Pesées des sacs transmises avec succès. Calcul du tableau de bord actualisé !");
+                // Réinitialisation des champs après validation
+                document.getElementById('sac-alimentaire').value = "0.000";
+                document.getElementById('sac-fruits').value = "0.000";
+                document.getElementById('sac-pain').value = "0.000";
+                loadLiveData();
+            });
         }
 
         function saveMenu() {
@@ -432,147 +292,69 @@
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
             const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
-
-            if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) {
-                alert("Cochez au moins un aliment !");
-                return;
-            }
-
+            
             const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
             document.getElementById('borne-menu-active').innerText = menuFinal;
             localStorage.setItem(`menuActive-${school}`, menuFinal);
 
-            const payload = {
-                action: "logMenu",
-                ecole: school,
-                effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450,
-                menu_complet: menuFinal
-            };
-
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
-            .then(() => {
-                alert('Menu enregistré pour ' + school + ' !');
-                loadLiveData(); 
-            });
+            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "logMenu", ecole: school, effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450, menu_complet: menuFinal }) })
+            .then(() => { alert('Menu activé pour le service !'); loadLiveData(); });
         }
 
         function formatAIResponseToUI(text) {
-            let cleanText = text
-                .replace(/\*\*(.*?)\*\"/g, '<strong style="font-weight: 700; color: #0f172a;">$1</strong>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #0f172a;">$1</strong>')
-                .replace(/^[#\-\*\s\•\d\.\:]+(analyse de la structure|structure du menu)/i, "### 1")
-                .replace(/^[#\-\*\s\•\d\.\:]+(diagnostic du gâchis|analyse des données)/i, "### 2")
-                .replace(/^[#\-\*\s\•\d\.\:]+(prédiction)/i, "### 3")
-                .replace(/^[#\-\*\s\•\d\.\:]+(conseils stratégiques|recommandations)/i, "### 4");
-
-            const lines = cleanText.split('\n');
-            let output = ""; let blockActuel = 0; let listeOuverte = false;
-
+            let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #0f172a;">$1</strong>')
+                                .replace(/^[#\-\*\s\•\d\.\:]+(analyse de la structure|structure du menu)/i, "### 1")
+                                .replace(/^[#\-\*\s\•\d\.\:]+(diagnostic du gâchis|analyse des données)/i, "### 2")
+                                .replace(/^[#\-\*\s\•\d\.\:]+(prédiction)/i, "### 3")
+                                .replace(/^[#\-\*\s\•\d\.\:]+(conseils stratégiques|recommandations)/i, "### 4");
+            const lines = cleanText.split('\n'); let output = ""; let blockActuel = 0; let listeOuverte = false;
             for (let line of lines) {
-                let currentLine = line.trim();
-                if (currentLine === "") continue;
-                if (currentLine.startsWith('---') || currentLine.startsWith('___')) continue;
+                let currentLine = line.trim(); if (currentLine === "" || currentLine.startsWith('---')) continue;
                 currentLine = currentLine.replace(/^#+\s*/g, '');
-
-                let isTitle1 = currentLine.startsWith('### 1');
-                let isTitle2 = currentLine.startsWith('### 2');
-                let isTitle3 = currentLine.startsWith('### 3');
-                let isTitle4 = currentLine.startsWith('### 4');
-
+                let isTitle1 = currentLine.startsWith('### 1'), isTitle2 = currentLine.startsWith('### 2'), isTitle3 = currentLine.startsWith('### 3'), isTitle4 = currentLine.startsWith('### 4');
                 if (isTitle1 || isTitle2 || isTitle3 || isTitle4) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    if (blockActuel > 0) { output += '</div>'; }
-
-                    if (isTitle1) {
-                        blockActuel = 1; output += '<div class="ai-card-block ai-block-blue"><div class="ai-block-title">Analyse du Menu</div>';
-                    } else if (isTitle2) {
-                        blockActuel = 2; output += '<div class="ai-card-block ai-block-orange"><div class="ai-block-title">Diagnostic du Gâchis</div>';
-                    } else if (isTitle3) {
-                        blockActuel = 3; output += '<div class="ai-card-block ai-block-purple"><div class="ai-block-title">Prédictions</div>';
-                    } else if (isTitle4) {
-                        blockActuel = 4; output += '<div class="ai-card-block ai-block-green"><div class="ai-block-title">Recommandations au Chef</div>';
-                    }
+                    if (blockActuel > 0) output += '</div>';
+                    if (isTitle1) { blockActuel = 1; output += '<div class="ai-card-block ai-block-blue"><div class="ai-block-title">Analyse du Menu</div>'; }
+                    else if (isTitle2) { blockActuel = 2; output += '<div class="ai-card-block ai-block-orange"><div class="ai-block-title">Diagnostic du Gâchis</div>'; }
+                    else if (isTitle3) { blockActuel = 3; output += '<div class="ai-card-block ai-block-purple"><div class="ai-block-title">Prédictions</div>'; }
+                    else if (isTitle4) { blockActuel = 4; output += '<div class="ai-card-block ai-block-green"><div class="ai-block-title">Recommandations au Chef</div>'; }
                     continue;
                 }
-
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
-                    let cleanLine = currentLine.replace(/^[\*\-\•]\s*/, '');
                     if (!listeOuverte) { output += '<ul class="ai-bullet">'; listeOuverte = true; }
-                    output += `<li>${cleanLine}</li>`;
+                    output += `<li>${currentLine.replace(/^[\*\-\•]\s*/, '')}</li>`;
                 } else {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    if (blockActuel === 0) {
-                        output += `<p style="font-size: 13.5px; line-height: 1.6; color: #475569; margin-bottom: 16px;">${currentLine}</p>`;
-                    } else {
-                        output += `<p>${currentLine}</p>`;
-                    }
+                    output += blockActuel === 0 ? `<p style="font-size:13.5px; color:#475569; margin-bottom:16px;">${currentLine}</p>` : `<p>${currentLine}</p>`;
                 }
             }
-
-            if (listeOuverte) { output += '</ul>'; }
-            if (blockActuel > 0) { output += '</div>'; }
-            return output;
+            if (listeOuverte) output += '</ul>'; if (blockActuel > 0) output += '</div>'; return output;
         }
 
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
-            const resultBox = document.getElementById('gemini-ai-result');
-            const resultText = document.getElementById('gemini-ai-text');
-            
-            resultBox.style.display = "block";
-            resultText.innerHTML = "<em>⌛ Analyse croisée en cours (Saisonnalité, Équilibre et Historique réel)...</em>";
-            
-            fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", 
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ 
-                    action: "analyzeMenuWithStats",
-                    etablissement: school,
-                    menu: menuText 
-                }) 
-            })
-            .then(r => r.json())
-            .then(res => {
-                if (res.error) {
-                    resultText.innerHTML = `<span style="color:#ef4444; font-weight:bold;">⚠️ Erreur :</span> ${res.error}`;
-                } else {
-                    resultText.innerHTML = formatAIResponseToUI(res.answer);
-                }
-            })
-            .catch(() => {
-                resultText.innerHTML = `
-                    <div class="ai-card-block ai-block-blue">
-                        <div class="ai-block-title">Note Globale (Mode Secours)</div>
-                        <ul class="ai-bullet">
-                            <li><strong>Menu actif :</strong> ${menuText}</li>
-                            <li>L'analyse de secours estime l'empreinte de ce service dans les moyennes éco-responsables.</li>
-                        </ul>
-                    </div>
-                `;
-            });
+            const resultBox = document.getElementById('gemini-ai-result'); const resultText = document.getElementById('gemini-ai-text');
+            resultBox.style.display = "block"; resultText.innerHTML = "<em>Analyse en cours...</em>";
+            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, menu: menuText }) })
+            .then(r => r.json()).then(res => { resultText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); });
         }
 
         function switchView(viewId) {
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('menu-' + viewId).classList.add('active');
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); document.getElementById('menu-' + viewId).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active');
             if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
             if (viewId === 'view-dashboard') { loadLiveData(); }
         }
 
-        function computeGranularFoodTypes(school, poidsMoyen, categoriesPct) {
+        function computeGranularFoodTypes(school, categoriesGrams) {
             const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
             let itemLabels = []; let itemValues = []; let itemColors = [];
             const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
             
-            let totalAvgGrams = parseFloat(poidsMoyen) || 0;
-            let gramsE = (totalAvgGrams * (parseFloat(categoriesPct[0]) || 0)) / 100;
-            let gramsP = (totalAvgGrams * (parseFloat(categoriesPct[1]) || 0)) / 100;
-            let gramsD = (totalAvgGrams * (parseFloat(categoriesPct[2]) || 0)) / 100;
-            let gramsPain = (totalAvgGrams * (parseFloat(categoriesPct[3]) || 0)) / 100;
+            let gE = parseFloat(categoriesGrams[0]) || 0; let gP = parseFloat(categoriesGrams[1]) || 0;
+            let gD = parseFloat(categoriesGrams[2]) || 0; let gPain = parseFloat(categoriesGrams[3]) || 0;
             
             if (savedMenu && savedMenu !== 'Non configuré') {
                 const parts = savedMenu.split(' / ');
@@ -581,101 +363,61 @@
                 const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
                 const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
                 
-                if (entrees.length > 0) {
-                    entrees.forEach(item => { itemLabels.push(item); itemValues.push((gramsE / entrees.length).toFixed(1)); itemColors.push(colors.entree); });
-                } else if (gramsE > 0) { itemLabels.push("Entrée"); itemValues.push(gramsE.toFixed(1)); itemColors.push(colors.entree); }
+                if (entrees.length > 0) entrees.forEach(item => { itemLabels.push(item); itemValues.push((gE / entrees.length).toFixed(1)); itemColors.push(colors.entree); });
+                else if (gE > 0) { itemLabels.push("Entrée"); itemValues.push(gE.toFixed(1)); itemColors.push(colors.entree); }
                 
                 const totalPlatItems = plats.length + accomps.length;
                 if (totalPlatItems > 0) {
-                    const share = gramsP / totalPlatItems;
+                    const share = gP / totalPlatItems;
                     plats.forEach(item => { itemLabels.push(item); itemValues.push(share.toFixed(1)); itemColors.push(colors.plat); });
                     accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push(share.toFixed(1)); itemColors.push(colors.accomp); });
-                } else if (gramsP > 0) { itemLabels.push("Plat principal"); itemValues.push(gramsP.toFixed(1)); itemColors.push(colors.plat); }
+                } else if (gP > 0) { itemLabels.push("Plat principal"); itemValues.push(gP.toFixed(1)); itemColors.push(colors.plat); }
                 
-                if (desserts.length > 0) {
-                    desserts.forEach(item => { itemLabels.push(item); itemValues.push((gramsD / desserts.length).toFixed(1)); itemColors.push(colors.dessert); });
-                } else if (gramsD > 0) { itemLabels.push("Dessert"); itemValues.push(gramsD.toFixed(1)); itemColors.push(colors.dessert); }
+                if (desserts.length > 0) desserts.forEach(item => { itemLabels.push(item); itemValues.push((gD / desserts.length).toFixed(1)); itemColors.push(colors.dessert); });
+                else if (gD > 0) { itemLabels.push("Dessert"); itemValues.push(gD.toFixed(1)); itemColors.push(colors.dessert); }
             } else {
-                itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [gramsE.toFixed(1), gramsP.toFixed(1), gramsD.toFixed(1)]; itemColors = [colors.entree, colors.plat, colors.dessert];
+                itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [gE.toFixed(1), gP.toFixed(1), gD.toFixed(1)]; itemColors = [colors.entree, colors.plat, colors.dessert];
             }
-            
-            itemLabels.push("Pain"); itemValues.push(gramsPain.toFixed(1)); itemColors.push(colors.pain);
+            itemLabels.push("Pain"); itemValues.push(gPain.toFixed(1)); itemColors.push(colors.pain);
             return { labels: itemLabels, data: itemValues, colors: itemColors };
         }
 
         function loadLiveData() {
             const school = document.getElementById('select-etablissement').value;
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
-            .then(response => response.json())
-            .then(data => {
+            .then(response => response.json()).then(data => {
                 if (!data || !data.details || data.details.length === 0) { clearDashboardToZero(); return; }
                 const currentSchoolData = data.details.find(d => d.ecole === school);
-                if (!currentSchoolData || currentSchoolData.totalPesees === 0) { clearDashboardToZero(); return; }
+                if (!currentSchoolData || currentSchoolData.poidsMoyen == 0) { clearDashboardToZero(); return; }
                 
                 let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
-                
                 document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
                 document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
                 document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
                 
                 document.getElementById('card-couverts').innerText = totalConvives;
-                let plateauxTries = currentSchoolData.totalPesees;
-                let plateauxVides = Math.max(0, totalConvives - plateauxTries);
-                
+                let plateauxTries = currentSchoolData.totalPesees; let plateauxVides = Math.max(0, totalConvives - plateauxTries);
                 document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
                 document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
 
-                let totalAvgGrams = parseFloat(currentSchoolData.poidsMoyen) || 0;
-                let pct = currentSchoolData.categoriesPct;
-                let gramsCategory = [
-                    ((totalAvgGrams * (parseFloat(pct[0]) || 0)) / 100).toFixed(1),
-                    ((totalAvgGrams * (parseFloat(pct[1]) || 0)) / 100).toFixed(1),
-                    ((totalAvgGrams * (parseFloat(pct[2]) || 0)) / 100).toFixed(1),
-                    ((totalAvgGrams * (parseFloat(pct[3]) || 0)) / 100).toFixed(1)
-                ];
-
-                const granularData = computeGranularFoodTypes(school, currentSchoolData.poidsMoyen, currentSchoolData.categoriesPct);
-                
-                // Injection synchronisée des données réelles dans la courbe de tendance et les barres globales
-                updateCharts(
-                    data.historiqueLabels || ['Service'], 
-                    data.historiquePoids || [totalAvgGrams.toFixed(1)], 
-                    gramsCategory, 
-                    granularData
-                );
-            })
-            .catch(() => clearDashboardToZero());
+                const granularData = computeGranularFoodTypes(school, currentSchoolData.categoriesPct);
+                updateCharts(data.historiqueLabels, data.historiquePoids, currentSchoolData.categoriesPct, granularData);
+            }).catch(() => clearDashboardToZero());
         }
 
         function clearDashboardToZero() {
             const school = document.getElementById('select-etablissement').value;
             let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
-            document.getElementById('kpi-avg').innerText = "0.0 g";
-            document.getElementById('kpi-total').innerText = "0.0 kg";
-            document.getElementById('kpi-money').innerText = "0.00 €";
-            document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
-            document.getElementById('card-couverts').innerText = totalConvives;
-            document.getElementById('card-vides').innerText = `${totalConvives} (100%)`;
-            document.getElementById('card-tries').innerText = "0 (0%)";
+            document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
+            document.getElementById('card-couverts').innerText = totalConvives; document.getElementById('card-vides').innerText = `${totalConvives} (100%)`; document.getElementById('card-tries').innerText = "0 (0%)";
             updateCharts([], [], [0, 0, 0, 0], { labels: [], data: [], colors: [] });
         }
 
         function updateCharts(labelsTimeline, dataTimeline, dataCategoriesGrams, granularData) {
-            // 📈 Mise à jour de la courbe d'évolution temporelle
-            chartTimeline.data.labels = labelsTimeline;
-            chartTimeline.data.datasets[0].data = dataTimeline;
-            chartTimeline.update();
-
-            // 📊 Mise à jour du graphique global vertical en grammes
-            chartCategories.data.datasets[0].data = dataCategoriesGrams; 
-            chartCategories.update();
-            
-            // 📊 Mise à jour du graphique au scalpel horizontal détaillé
-            chartFoodTypes.data.labels = granularData.labels;
-            chartFoodTypes.data.datasets[0].data = granularData.data;
-            chartFoodTypes.data.datasets[0].backgroundColor = granularData.colors;
-            chartFoodTypes.update();
+            chartTimeline.data.labels = labelsTimeline; chartTimeline.data.datasets[0].data = dataTimeline; chartTimeline.update();
+            chartCategories.data.datasets[0].data = dataCategoriesGrams; chartCategories.update();
+            chartFoodTypes.data.labels = granularData.labels; chartFoodTypes.data.datasets[0].data = granularData.data; chartFoodTypes.data.datasets[0].backgroundColor = granularData.colors; chartFoodTypes.update();
         }
 
         async function initCamera() {
@@ -687,63 +429,28 @@
             } catch (err) { document.getElementById('instruction-text').innerText = "🤖 MODE SIMULATION ACTIVÉ"; }
         }
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
-
-        function resetBorneUI() {
-            isScanningProcess = false;
-            document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ICI";
-            document.getElementById('instruction-text').className = "instruction-banner state-searching";
-            document.getElementById('student-light').className = "traffic-light light-searching";
-            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px; letter-spacing: 1px;">ATTENTE</span>';
-            document.getElementById('bar-container').style.display = "none";
-            document.getElementById('action-progress').style.width = "0%";
-        }
+        function resetBorneUI() { isScanningProcess = false; document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ICI"; document.getElementById('instruction-text').className = "instruction-banner state-searching"; document.getElementById('student-light').className = "traffic-light light-searching"; document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">ATTENTE</span>'; document.getElementById('bar-container').style.display = "none"; document.getElementById('action-progress').style.width = "0%"; }
 
         function triggerAutomaticCapture() {
-            if (isScanningProcess) return; 
-            isScanningProcess = true;
+            if (isScanningProcess) return; isScanningProcess = true;
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; 
-            banner.className = "instruction-banner state-detected";
-            document.getElementById('student-light').className = "traffic-light light-detected";
-            document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 18px; font-weight: 900; display: block; margin-top: 5px; letter-spacing: 1px;">STOP</span>';
-            document.getElementById('bar-container').style.display = "block";
-            document.getElementById('action-progress').style.width = '100%';
-
-            const b64Image = captureFrameFromWebcam();
+            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; banner.className = "instruction-banner state-detected";
+            document.getElementById('student-light').className = "traffic-light light-detected"; document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 18px; font-weight: 900; display: block; margin-top: 5px;">STOP</span>';
+            document.getElementById('bar-container').style.display = "block"; document.getElementById('action-progress').style.width = '100%';
+            
             setTimeout(() => {
-                banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI";
-                banner.className = "instruction-banner state-success";
-                document.getElementById('student-light').className = "traffic-light light-success";
-                document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">VIDER</span>';
-                sendDataToCloudAsynchronously(b64Image);
+                banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI"; banner.className = "instruction-banner state-success";
+                document.getElementById('student-light').className = "traffic-light light-success"; document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">VIDER</span>';
+                
+                const menuText = document.getElementById('borne-menu-active').innerText;
+                const school = document.getElementById('select-etablissement').value;
+                const simType = document.getElementById('sim-plateau-type').value;
+                
+                const payload = { action: "logScanImage", etablissement: school, menu_jour: menuText, image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" };
+                fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
+                
                 setTimeout(() => resetBorneUI(), 1200);
             }, 250);
-        }
-
-        function captureFrameFromWebcam() {
-            const video = document.getElementById('camera-feed');
-            const canvas = document.createElement('canvas'); canvas.width = 640; canvas.height = 480;
-            const ctx = canvas.getContext('2d');
-            try { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); return canvas.toDataURL('image/jpeg', 0.7); } 
-            catch (e) { return "data:image/jpeg;base64,demo_simulation_no_camera_attached"; }
-        }
-
-        function sendDataToCloudAsynchronously(base64Data) {
-            const menuText = document.getElementById('borne-menu-active').innerText;
-            const simType = document.getElementById('sim-plateau-type').value;
-            const school = document.getElementById('select-etablissement').value;
-
-            if (simType === 'vide') {
-                const emptyPayload = { action: "logScanImage", etablissement: school, menu_jour: menuText, image_base64: "empty", entree_g: 0, plat_g: 0, dessert_g: 0, pain_g: 0, perte_euro: 0 };
-                fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(emptyPayload) });
-                return;
-            }
-
-            let mockWeight = Math.floor(Math.random() * 120) + 30; 
-            const payload = {
-                action: "logScanImage", etablissement: school, menu_jour: menuText, image_base64: base64Data, simulated_type: simType, poids_total_g: mockWeight, perte_euro: parseFloat(((mockWeight/1000)*4.50).toFixed(2))
-            };
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) }).catch(err => console.log("Sauvegarde active."));
         }
     </script>
 </body>
