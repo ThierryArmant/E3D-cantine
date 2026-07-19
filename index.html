@@ -57,7 +57,15 @@
         .state-detected { background-color: #ef4444 !important; }
         .state-success { background-color: #047857 !important; }
         .btn-simulation { margin-top: 20px; background-color: #4b5563; font-size: 14px; padding: 12px; border: 2px dashed #fff; }
-        .ai-box { background: #f0fdfa; border: 1px solid #52b788; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
+        
+        /* 🎨 DESIGN DE L'ESPACE ANALYSE REPENSI ET ALLÉGÉ */
+        .ai-box { background: #ffffff; border: 1px solid #cbd5e1; border-top: 6px solid #047857; border-radius: 10px; padding: 24px; margin-top: 24px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .ai-title { color: #1b4332; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        .ai-section-title { color: #047857; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px 0; display: flex; align-items: center; gap: 6px; }
+        .ai-bullet { list-style: none; padding-left: 0; margin-bottom: 12px; }
+        .ai-bullet li { font-size: 13.5px; line-height: 1.6; color: #334155; margin-bottom: 6px; padding-left: 18px; position: relative; }
+        .ai-bullet li::before { content: "•"; color: #10b981; font-weight: bold; font-size: 16px; position: absolute; left: 4px; top: -1px; }
+        .ai-divider { border: 0; border-top: 1px solid #f1f5f9; margin: 14px 0; }
     </style>
 </head>
 <body>
@@ -87,17 +95,17 @@
             <!-- VUE 1 : DASHBOARD -->
             <div id="view-dashboard" class="view-section active">
                 <div class="kpi-grid">
-                    <div class="kpi-card kpi-blue"><div class="kpi-val" id="kpi-avg">Chargement...</div><div class="kpi-lbl">Moyenne réelle par convive</div></div>
-                    <div class="kpi-card kpi-green"><div class="kpi-val" id="kpi-total">Chargement...</div><div class="kpi-lbl">Quantité gaspillée totale</div></div>
-                    <div class="kpi-card kpi-yellow"><div class="kpi-val" id="kpi-money">Chargement...</div><div class="kpi-lbl">Pertes économiques</div></div>
-                    <div class="kpi-card kpi-red"><div class="kpi-val" id="kpi-impact">Chargement...</div><div class="kpi-lbl">Émissions CO₂ évitables</div></div>
+                    <div class="kpi-card kpi-blue"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne réelle par convive</div></div>
+                    <div class="kpi-card kpi-green"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité gaspillée totale</div></div>
+                    <div class="kpi-card kpi-yellow"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes économiques</div></div>
+                    <div class="kpi-card kpi-red"><div class="kpi-val" id="kpi-impact">0.0 kg CO₂</div><div class="kpi-lbl">Émissions CO₂ évitables</div></div>
                 </div>
                 <div class="dashboard-row">
                     <div class="dashboard-col"><h3>Évolution du gaspillage (g / convive)</h3><div class="chart-container"><canvas id="chart-timeline"></canvas></div></div>
                     <div class="dashboard-col"><h3>Répartition globale du gaspillage</h3><div class="chart-container"><canvas id="chart-categories"></canvas></div></div>
                 </div>
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
-                    <div class="dashboard-col"><h3>📊 Analyse détaillée par type d'aliments</h3><div class="chart-container" style="height: 300px;"><canvas id="chart-food-types"></canvas></div></div>
+                    <div class="dashboard-col"><h3>📊 Analyse détaillée du gaspillage cumulé (en %)</h3><div class="chart-container" style="height: 300px;"><canvas id="chart-food-types"></canvas></div></div>
                 </div>
                 <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 15px; color: #1b4332;">📊 Synthèse d'efficacité du service</h3>
                 <div class="bottom-grid">
@@ -114,11 +122,7 @@
                     <div style="display: flex; gap: 24px; align-items: center; justify-content: center; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px;">
                         <div style="flex: 1.3;">
                             <div class="scanner-box" id="scanner-frame">
-                                <video id="camera-feed" autoplay playsinline muted></video>
-                                <div class="scan-overlay">
-                                    <div class="target-corners" id="visual-bounds"></div>
-                                    <div class="scan-laser" id="laser-line"></div>
-                                </div>
+                                <video id="camera-feed" autoplay playsinline muted style="width: 100%; border-radius: 8px; background: #2d3748;"></video>
                             </div>
                             <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
                         </div>
@@ -242,10 +246,10 @@
                         <button class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; background-color: #047857; font-weight: bold;">🤖 Analyser le menu avec l'IA Gemini</button>
                     </div>
 
-                    <!-- BLOC REPONSE IA GEMINI SECURISE -->
+                    <!-- BLOC RÉPONSE IA GEMINI NETTOYÉ ET STRUCTURÉ -->
                     <div id="gemini-ai-result" class="ai-box">
-                        <h4 style="color: #0f766e; margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 6px;">✨ Analyse Éco-Responsable de l'IA Gemini :</h4>
-                        <div id="gemini-ai-text" style="font-size: 13px; line-height: 1.5; color: #1e293b; white-space: pre-wrap;"></div>
+                        <div class="ai-title">✨ Analyse Éco-Responsable & Stratégique</div>
+                        <div id="gemini-ai-text"></div>
                     </div>
                 </div>
             </div>
@@ -257,9 +261,12 @@
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
 
         window.addEventListener('DOMContentLoaded', () => { 
-            chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
-            chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { type: 'doughnut', data: { labels: ['Entrées', 'Plats', 'Accomp.', 'Desserts'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#e63946', '#9b5de5'] }] }, options: { responsive: true, maintainAspectRatio: false } });
-            chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { type: 'bar', data: { labels: ['Crudités', 'Légumes', 'Féculents', 'Viandes', 'Fruits', 'Pain'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: ['#9cd37b', '#83a397', '#f3be7a', '#eb6b65', '#cccccc', '#e69f43'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            // Configuration alignée sur l'IA (Entrées, Plats, Desserts, Pain)
+            chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage moyen (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            
+            chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { type: 'doughnut', data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            
+            chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { type: 'bar', data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
 
             loadEtablissementsDropdown(); 
         });
@@ -273,10 +280,9 @@
                 schools.forEach(school => { const opt = document.createElement('option'); opt.value = school; opt.innerText = school; select.appendChild(opt); });
                 const savedSchool = localStorage.getItem('schoolActuelle') || schools[0];
                 select.value = schools.includes(savedSchool) ? savedSchool : schools[0];
-                
                 changeEtablissement();
             })
-            .catch(err => { useFallbackDemoData(); });
+            .catch(err => { clearDashboardToZero(); });
         }
 
         function changeEtablissement() {
@@ -318,7 +324,6 @@
             loadLiveData();
         }
 
-        // ESPACE CUISINIER OPTIMISÉ : Pas de redirection vers la borne, le chef reste sur sa page de saisie
         function saveMenu() {
             const school = document.getElementById('select-etablissement').value;
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
@@ -344,12 +349,20 @@
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
             .then(() => {
-                alert('Menu enregistré et synchronisé pour ' + school + ' ! L\'interface reste disponible pour modification ou analyse.');
-                // L'instruction de changement de vue automatique a été supprimée ici.
+                alert('Menu enregistré pour ' + school + ' !');
             });
         }
 
-        // BOUTON IA ENRICHI : Interrogeable à la demande, configuré pour envoyer l'action d'analyse globale (incluant les statistiques)
+        // PARSER SÉMANTIQUE DE L'ANALYSE IA POUR ALLÉGER LA LECTURE DU CHEF
+        function formatAIResponseToUI(text) {
+            return text
+                .replace(/^### (.*)$/gim, '<div class="ai-section-title">$1</div>')
+                .replace(/^## (.*)$/gim, '<div class="ai-section-title" style="color:#1b4332; font-size:14px;">$1</div>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#0f172a; font-weight:700;">$1</strong>')
+                .replace(/^\* (.*)$/gim, '<ul class="ai-bullet"><li>$1</li></ul>')
+                .replace(/---/g, '<hr class="ai-divider">');
+        }
+
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
@@ -357,9 +370,8 @@
             const resultText = document.getElementById('gemini-ai-text');
             
             resultBox.style.display = "block";
-            resultText.innerHTML = "<em>⌛ Analyse prédictive à la demande... Lecture croisée de la saisonnalité, de l'équilibre et de l'historique des rejets de l'établissement...</em>";
+            resultText.innerHTML = "<em>⌛ Analyse croisée en cours (Saisonnalité, Équilibre et Historique réel)...</em>";
             
-            // On passe l'établissement et une action spécifique pour que le script sache qu'il doit croiser les données du Sheet
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain" },
@@ -372,17 +384,19 @@
             .then(r => r.json())
             .then(res => {
                 if (res.error) {
-                    resultText.innerHTML = `<span style="color:#ef4444; font-weight:bold;">⚠️ Erreur Backend :</span> ${res.error}`;
+                    resultText.innerHTML = `<span style="color:#ef4444; font-weight:bold;">⚠️ Erreur :</span> ${res.error}`;
                 } else {
-                    resultText.innerHTML = res.answer;
+                    resultText.innerHTML = formatAIResponseToUI(res.answer);
                 }
             })
-            .catch((err) => {
+            .catch(() => {
                 resultText.innerHTML = `
-                    <strong style="color:#991b1b;">🌍 Note de secours (Indisponibilité réseau) :</strong><br><br>
-                    • <strong>Menu analysé :</strong> ${menuText}<br>
-                    • L'empreinte globale est estimée basse. Vos rejets historiques sur cette structure indiquent une sensibilité moyenne sur les légumes verts.<br>
-                    • 💡 <em>Conseil :</em> Surveillez la taille de la portion de ratatouille servie au premier service.
+                    <div class="ai-section-title">🌍 Note Globale (Ajustement Secours)</div>
+                    <ul class="ai-bullet">
+                        <li><strong>Menu identifié :</strong> ${menuText}</li>
+                        <li>L'empreinte carbone estimée sur ce profil de service est modérée.</li>
+                        <li>💡 <em>Conseil :</em> Adapter les portions du composant légume pour limiter les restes sur ce premier service.</li>
+                    </ul>
                 `;
             });
         }
@@ -390,7 +404,6 @@
         function switchView(viewId) {
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.getElementById('menu-' + viewId).classList.add('active');
-
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
 
@@ -403,15 +416,21 @@
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json())
             .then(data => {
-                if (!data || !data.details || data.details.length === 0) { useFallbackDemoData(); return; }
+                if (!data || !data.details || data.details.length === 0) { clearDashboardToZero(); return; }
                 
-                const currentSchoolData = data.details.find(d => d.ecole === school) || { totalPesees: 0, poidsCumule: 0, co2: 0, cout: 0, poidsMoyen: 0 };
+                const currentSchoolData = data.details.find(d => d.ecole === school);
+                if (!currentSchoolData || currentSchoolData.totalPesees === 0) {
+                    clearDashboardToZero();
+                    return;
+                }
+                
                 let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
                 
-                document.getElementById('kpi-avg').innerText = `${currentSchoolData.poidsMoyen.toFixed(1)} g`;
-                document.getElementById('kpi-total').innerText = `${currentSchoolData.poidsCumule.toFixed(1)} kg`;
-                document.getElementById('kpi-money').innerText = `${currentSchoolData.cout.toFixed(2)} €`;
-                document.getElementById('kpi-impact').innerText = `${currentSchoolData.co2.toFixed(1)} kg CO₂`;
+                // Injection des données 100% réelles
+                document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
+                document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
+                document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
+                document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
                 
                 document.getElementById('card-couverts').innerText = totalConvives;
                 let plateauxTries = currentSchoolData.totalPesees;
@@ -420,33 +439,46 @@
                 document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
                 document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
 
-                updateCharts(data.historiqueLabels || ['Lundi', 'Mardi'], data.historiquePoids || [120, 85], currentSchoolData.categoriesPct || [25, 35, 25, 15], currentSchoolData.foodTypesWeights || [5, 4, 6, 3, 2, 1]);
+                // Alignement parfait des graphiques sur les 4 composants renvoyés par l'IA
+                updateCharts(
+                    data.historiqueLabels || ['Service'], 
+                    data.historiquePoids || [parseFloat(currentSchoolData.poidsMoyen)], 
+                    currentSchoolData.categoriesPct, 
+                    currentSchoolData.categoriesPct
+                );
             })
-            .catch(() => useFallbackDemoData());
+            .catch(() => clearDashboardToZero());
         }
 
-        function useFallbackDemoData() {
+        // REMPLACE LE FAUX COMPTEUR PAR UN ÉTAT RÉEL À ZÉRO
+        function clearDashboardToZero() {
             const school = document.getElementById('select-etablissement').value;
             let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
-            let plateauxTries = 175;
-            let plateauxVides = totalConvives - plateauxTries;
             
-            document.getElementById('kpi-avg').innerText = "155.7 g";
-            document.getElementById('kpi-total').innerText = "18.4 kg";
-            document.getElementById('kpi-money').innerText = "57.20 €";
-            document.getElementById('kpi-impact').innerText = "38.1 kg CO₂";
+            document.getElementById('kpi-avg').innerText = "0.0 g";
+            document.getElementById('kpi-total').innerText = "0.0 kg";
+            document.getElementById('kpi-money').innerText = "0.00 €";
+            document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
             
             document.getElementById('card-couverts').innerText = totalConvives;
-            document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
-            document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
+            document.getElementById('card-vides').innerText = `${totalConvives} (100%)`;
+            document.getElementById('card-tries').innerText = "0 (0%)";
 
-            updateCharts(['15/07', '16/07', '17/07'], [140, 165, 155], [30, 40, 20, 10], [4.2, 3.1, 5.8, 2.9, 1.8, 0.6]);
+            updateCharts([], [], [0, 0, 0, 0], [0, 0, 0, 0]);
         }
 
         function updateCharts(labelsTimeline, dataTimeline, dataCategories, dataFoodTypes) {
-            chartTimeline.data.labels = labelsTimeline; chartTimeline.data.datasets[0].data = dataTimeline; chartTimeline.update();
-            chartCategories.data.datasets[0].data = dataCategories; chartCategories.update();
-            if (dataFoodTypes) { chartFoodTypes.data.datasets[0].data = dataFoodTypes; chartFoodTypes.update(); }
+            chartTimeline.data.labels = labelsTimeline; 
+            chartTimeline.data.datasets[0].data = dataTimeline; 
+            chartTimeline.update();
+            
+            chartCategories.data.datasets[0].data = dataCategories; 
+            chartCategories.update();
+            
+            if (dataFoodTypes) { 
+                chartFoodTypes.data.datasets[0].data = dataFoodTypes; 
+                chartFoodTypes.update(); 
+            }
         }
 
         async function initCamera() {
@@ -469,14 +501,11 @@
             document.getElementById('action-progress').style.width = "0%";
         }
 
-        // ESPACE BORNE "FLASH & GO" OPTIMISÉ : Passage immédiat au STOP rouge, capture instantanée puis libération verte ultra-fluide
         function triggerAutomaticCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
 
             const banner = document.getElementById('instruction-text');
-            
-            // 🔴 ÉTAPE 1 : STOP - Détection immédiate du plateau, l'élève s'arrête
             banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; 
             banner.className = "instruction-banner state-detected";
             document.getElementById('student-light').className = "traffic-light light-detected";
@@ -484,76 +513,61 @@
             document.getElementById('bar-container').style.display = "block";
             document.getElementById('action-progress').style.width = '100%';
 
-            // Prise de la photo instantanée (0.1 seconde de traitement matériel)
             const b64Image = captureFrameFromWebcam();
 
-            // 🟢 ÉTAPE 2 : FLASH & GO - Libération instantanée après le flash (l'élève n'attend pas la réponse de l'IA)
             setTimeout(() => {
                 banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI";
                 banner.className = "instruction-banner state-success";
                 document.getElementById('student-light').className = "traffic-light light-success";
                 document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">VIDER</span>';
                 
-                // Transfert des données en tâche de fond (complètement asynchrone)
                 sendDataToCloudAsynchronously(b64Image);
 
-                // Réinitialisation de la borne pour le plateau de l'élève suivant après 1.2 seconde
                 setTimeout(() => resetBorneUI(), 1200);
-            }, 250); // Durée du "Flash" mécanique à l'écran
+            }, 250);
         }
 
-        // CAPTURE ET COMPRESSION VISUELLE FRONTEND : Génère une image Base64 légère (640x480) à la volée
         function captureFrameFromWebcam() {
             const video = document.getElementById('camera-feed');
             const canvas = document.createElement('canvas');
-            
-            // Verrouillage de la taille à 640x480 pour optimiser la bande passante et le stockage réseau
             canvas.width = 640;
             canvas.height = 480;
-            
             const ctx = canvas.getContext('2d');
             try {
-                // On dessine l'état actuel de la balise vidéo sur le canvas en mémoire
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                // Compression au format JPEG léger (qualité 0.7)
                 return canvas.toDataURL('image/jpeg', 0.7);
             } catch (e) {
-                // Secours si la caméra est indisponible (simulation technique)
                 return "data:image/jpeg;base64,demo_simulation_no_camera_attached";
             }
         }
 
-        // PIPELINE INVISIBLE : Envoie l'image compressée et les métadonnées au Google Apps Script sans bloquer l'élève
         function sendDataToCloudAsynchronously(base64Data) {
             const menuText = document.getElementById('borne-menu-active').innerText;
             const simType = document.getElementById('sim-plateau-type').value;
             const school = document.getElementById('select-etablissement').value;
 
             if (simType === 'vide') {
-                // Traitement direct si plateau propre
-                const emptyPayload = { action: "logScan", etablissement: school, menu_jour: menuText, poids_total_g: 0, perte_euro: 0 };
+                const emptyPayload = { action: "logScanImage", etablissement: school, menu_jour: menuText, image_base64: "empty", entree_g: 0, plat_g: 0, dessert_g: 0, pain_g: 0, perte_euro: 0 };
                 fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(emptyPayload) });
                 return;
             }
 
             let mockWeight = Math.floor(Math.random() * 120) + 30; 
-            
             const payload = {
-                action: "logScanImage", // Nouvelle action dédiée au traitement multimodal
+                action: "logScanImage",
                 etablissement: school, 
                 menu_jour: menuText,
-                image_base64: base64Data, // Envoi du flux d'image compressé
-                simulated_type: simType, // Gardé en option pédagogique pour l'historique
+                image_base64: base64Data,
+                simulated_type: simType,
                 poids_total_g: mockWeight, 
                 perte_euro: parseFloat(((mockWeight/1000)*4.50).toFixed(2))
             };
 
-            // Requête asynchrone "Fire & Forget" - s'exécute silencieusement en arrière-plan
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain" }, 
                 body: JSON.stringify(payload) 
-            }).catch(err => console.log("Sauvegarde locale ou déconnectée active."));
+            }).catch(err => console.log("Sauvegarde locale active."));
         }
     </script>
 </body>
