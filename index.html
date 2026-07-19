@@ -52,7 +52,7 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        /* Grilles KPI Fluides adaptées aux petits écrans */
+        /* Grilles KPI Fluides */
         .kpi-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
@@ -77,7 +77,7 @@
         .dashboard-col { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .dashboard-col h3 { font-size: 14px; color: #1f2937; margin-bottom: 6px; font-weight: 700; }
         
-        /* Conteneurs graphiques compactés pour éviter le scroll vertical forcé */
+        /* Conteneurs graphiques compactés */
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
         
@@ -86,7 +86,7 @@
         
         .form-section { background-color: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
         
-        /* Grille des sacs adaptative de 1 à 5 colonnes */
+        /* Grille des sacs adaptative */
         .form-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); 
@@ -138,7 +138,7 @@
         .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 10px; height: 12px; overflow: hidden; display: none; }
         .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; }
         
-        /* 📱 RESPONSIVE MEDIA QUERIES (TABLETTES & MOBILES) */
+        /* 📱 RESPONSIVE MEDIA QUERIES */
         @media (max-width: 1024px) {
             body { flex-direction: column; height: auto; overflow: auto; }
             .sidebar { width: 100%; height: auto; padding: 12px; }
@@ -755,7 +755,7 @@
             for (let line of lines) {
                 let currentLine = line.trim(); if (currentLine === "" || currentLine.startsWith('---')) continue;
                 currentLine = currentLine.replace(/^#+\s*/g, '');
-                let isTitle1 = currentLine.startsWith('### 1'), isTitle2 = currentLine.startsWith('startsWith(### 2)'), isTitle3 = currentLine.startsWith('### 3'), isTitle4 = currentLine.startsWith('### 4');
+                
                 if (currentLine.startsWith('### 1') || currentLine.startsWith('### 2') || currentLine.startsWith('### 3') || currentLine.startsWith('### 4')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
                     if (blockActuel > 0) output += '</div>';
@@ -785,7 +785,47 @@
             } catch (err) { document.getElementById('instruction-text').innerText = "🤖 MODE SIMULATION ACTIVÉ"; }
         }
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
-        function resetBorneUI() { isScanningProcess = false; document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ICI"; document.getElementById('instruction-text').className = "instruction-banner state-searching"; document.getElementById('student-light').className = "traffic-light light-searching"; document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>'; document.getElementById('bar-container').style.display = "none"; document.getElementById('action-progress').style.width = "0%"; }
+        
+        function resetBorneUI() { 
+            isScanningProcess = false; 
+            document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ICI"; 
+            document.getElementById('instruction-text').className = "instruction-banner state-searching"; 
+            document.getElementById('student-light').className = "traffic-light light-searching"; 
+            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>'; 
+            document.getElementById('bar-container').style.display = "none"; 
+            document.getElementById('action-progress').style.width = "0%"; 
+        }
+
+        // 🌟 RESTAURATION DE LA FONCTION DE CAPTURE AUTOMATIQUE
+        function triggerAutomaticCapture() {
+            if (isScanningProcess) return; isScanningProcess = true;
+            const banner = document.getElementById('instruction-text');
+            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; banner.className = "instruction-banner state-detected";
+            document.getElementById('student-light').className = "traffic-light light-detected"; 
+            document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 16px; font-weight: 900; display: block; margin-top: 4px;">STOP</span>';
+            document.getElementById('bar-container').style.display = "block"; 
+            document.getElementById('action-progress').style.width = '100%';
+            
+            setTimeout(() => {
+                banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI"; banner.className = "instruction-banner state-success";
+                document.getElementById('student-light').className = "traffic-light light-success"; 
+                document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">VIDER</span>';
+                
+                const menuText = document.getElementById('borne-menu-active').innerText;
+                const school = document.getElementById('select-etablissement').value;
+                const simType = document.getElementById('sim-plateau-type').value;
+                
+                const payload = { 
+                    action: "logScanImage", 
+                    etablissement: school, 
+                    menu_jour: menuText, 
+                    image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" 
+                };
+                
+                fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
+                setTimeout(() => resetBorneUI(), 1200);
+            }, 250);
+        }
 
         function switchView(viewId) {
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); document.getElementById('menu-' + viewId).classList.add('active');
