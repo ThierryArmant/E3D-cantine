@@ -36,15 +36,18 @@
         .btn:hover { background-color: #1b4332; }
         
         .form-section { background-color: #f8fafc; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 14px; }
-        .waste-control-card { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .waste-control-card label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; text-align: center; min-height: 32px; display: flex; align-items: center; justify-content: center; letter-spacing: 0.3px; }
-        .spinner-container { display: flex; align-items: center; gap: 10px; }
-        .btn-spinner { width: 48px; height: 32px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: background 0.1s; display: flex; align-items: center; justify-content: center; }
-        .btn-kg { background-color: #1b4332; } .btn-kg:hover { background-color: #2d6a4f; }
-        .btn-g { background-color: #2a9d8f; } .btn-g:hover { background-color: #e76f51; }
-        .btn-down { background-color: #4b5563; } .btn-down:hover { background-color: #374151; }
-        .input-center { width: 95px; height: 68px; text-align: center; font-size: 20px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 8px; color: #0f172a; -moz-appearance: textfield; }
+        .form-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 14px; }
+        
+        .waste-control-card { padding: 16px 10px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .waste-control-card label { font-size: 10.5px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 38px; display: flex; align-items: center; justify-content: center; letter-spacing: 0.2px; line-height: 1.3; }
+        .spinner-container { display: flex; align-items: center; gap: 6px; }
+        .btn-spinner { width: 42px; height: 28px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center; transition: opacity 0.1s; }
+        .btn-spinner:hover { opacity: 0.9; }
+        .btn-kg { background-color: #1e3a8a; } 
+        .btn-g { background-color: #0d9488; } 
+        .btn-down { background-color: #4b5563; } 
+        
+        .input-center { width: 80px; height: 58px; text-align: center; font-size: 19px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 8px; color: #0f172a; background-color: #ffffff; -moz-appearance: textfield; }
         .input-center::-webkit-outer-spin-button, .input-center::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
         .menu-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; }
@@ -116,18 +119,18 @@
                 
                 <div class="dashboard-row">
                     <div class="dashboard-col">
-                        <h3>📈 Évolution du gaspillage (g / convive)</h3>
+                        <h3>📈 Évolution historique du taux de gâchis (%)</h3>
                         <div class="chart-container" style="margin-top: 10px;"><canvas id="chart-timeline"></canvas></div>
                     </div>
                     <div class="dashboard-col">
-                        <h3>📊 Analyse globale du gaspillage par composant (Moyenne en g / élève)</h3>
+                        <h3>📊 Taux moyen de rejet par grande composante (%)</h3>
                         <div class="chart-container" style="margin-top: 10px;"><canvas id="chart-categories"></canvas></div>
                     </div>
                 </div>
                 
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
-                        <h3>📊 Analyse détaillée du gaspillage par type d'aliment (Moyenne en g / élève)</h3>
+                        <h3>📊 Palmarès statistique des aliments les plus délaissés (%)</h3>
                         <div class="chart-container" style="height: 340px; margin-top: 10px;"><canvas id="chart-food-types"></canvas></div>
                     </div>
                 </div>
@@ -157,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER -->
+            <!-- PÔLE 3 : ESPACE CUISINIER (Catalogue Réaligné Complet) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -190,8 +193,17 @@
                                     <div class="sub-theme">🥧 Entrées Cuites</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Friand"> Friand 🥧</label>
                                 </td>
                                 <td>
+                                    <!-- NOUVELLE FRACTION INTÉGRÉE POUR LES PLATS UNIQUES COMPLETS -->
+                                    <div class="sub-theme">🍲 Plats Uniques / Complets</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Gardianne"> Gardianne</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Couscous"> Couscous 🍢</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Paella"> Paella 🥘</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Bœuf bourguignon"> Bœuf bourguignon</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Blanquette de veau"> Blanquette de veau</label>
+                                    
                                     <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
@@ -254,9 +266,9 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : ESPACE DE SAISIE AVEC COMMANDES TACTILES ULTRA-RAPIDES (DUAL COLUMNS KG/G) -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - UNE LIGNE - CODES PASTELS -->
             <div id="view-saisie-dechets" class="view-section">
-                <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
+                <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 6px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
                         <h2 style="color: #1b4332; font-size: 18px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 13px; color: #475569; margin-top: 4px; margin-bottom: 20px; line-height: 1.5;">
@@ -265,15 +277,15 @@
                         
                         <div class="form-grid">
                             <!-- BLOC 1 : DECHETS ALIMENTAIRES -->
-                            <div class="waste-control-card">
+                            <div class="waste-control-card" style="background-color: #ffe5d9; border: 1px solid #ffcad4;">
                                 <label>🍖 Déchets Alimentaires (Plats/Chauds) [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-alimentaire', 1.00)">▲ kg</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -1.00)">▼ kg</button>
                                     </div>
                                     <input type="number" id="sac-alimentaire" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-alimentaire', 0.10)">▲ g</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -0.10)">▼ g</button>
                                     </div>
@@ -281,15 +293,15 @@
                             </div>
 
                             <!-- BLOC 2 : DECHETS FRUITS -->
-                            <div class="waste-control-card">
+                            <div class="waste-control-card" style="background-color: #e8f5e9; border: 1px solid #c8e6c9;">
                                 <label>🍏 Déchets Fruits (Restes & Peaux) [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-fruits', 1.00)">▲ kg</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -1.00)">▼ kg</button>
                                     </div>
                                     <input type="number" id="sac-fruits" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-fruits', 0.10)">▲ g</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -0.10)">▼ g</button>
                                     </div>
@@ -297,15 +309,15 @@
                             </div>
 
                             <!-- BLOC 3 : DECHETS PAIN -->
-                            <div class="waste-control-card">
+                            <div class="waste-control-card" style="background-color: #fefae0; border: 1px solid #e9d8a6;">
                                 <label>🥖 Déchets Pain (Fraction délaissée) [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-pain', 1.00)">▲ kg</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -1.00)">▼ kg</button>
                                     </div>
                                     <input type="number" id="sac-pain" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-pain', 0.10)">▲ g</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -0.10)">▼ g</button>
                                     </div>
@@ -313,15 +325,15 @@
                             </div>
 
                             <!-- BLOC 4 : DECHETS EMBALLAGES -->
-                            <div class="waste-control-card">
+                            <div class="waste-control-card" style="background-color: #e0f2fe; border: 1px solid #bae6fd;">
                                 <label>📦 Déchets Emballages (Yaourts/Plastiques) [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-emballages', 1.00)">▲ kg</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -1.00)">▼ kg</button>
                                     </div>
                                     <input type="number" id="sac-emballages" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-emballages', 0.10)">▲ g</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -0.10)">▼ g</button>
                                     </div>
@@ -329,15 +341,15 @@
                             </div>
 
                             <!-- BLOC 5 : DECHETS SERVIETTES PAPIER -->
-                            <div class="waste-control-card">
+                            <div class="waste-control-card" style="background-color: #faf5ff; border: 1px solid #e9d5ff;">
                                 <label>🧻 Déchets Serviettes Papier (Cellulose) [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-serviettes', 1.00)">▲ kg</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -1.00)">▼ kg</button>
                                     </div>
                                     <input type="number" id="sac-serviettes" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;">
                                         <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-serviettes', 0.10)">▲ g</button>
                                         <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -0.10)">▼ g</button>
                                     </div>
@@ -362,24 +374,27 @@
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
 
         window.addEventListener('DOMContentLoaded', () => { 
-            chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage moyen (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
+                type: 'line', 
+                data: { labels: [], datasets: [{ label: 'Taux global de rejet (%)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } 
+            });
             
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels],
                 data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 35 }] }, 
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grace: '15%' } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(1)} g`, font: { weight: 'bold' } } } }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold', size: 12 } } } }
             });
             
             chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] }, 
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, grace: '20%' } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (val) => `${parseFloat(val).toFixed(1)} g`, font: { weight: 'bold' } } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold', size: 11 } } } }
             });
 
             loadEtablissementsDropdown(); 
         });
 
-        // FONCTION MAGIQUE D'AJUSTEMENT DISCORDANT KG/G POUR LES ELEVES
         function adjustWeight(id, value) {
             const input = document.getElementById(id);
             let currentVal = parseFloat(input.value) || 0;
@@ -499,13 +514,13 @@
             if (viewId === 'view-dashboard') { loadLiveData(); }
         }
 
-        function computeGranularFoodTypes(school, categoriesGrams) {
+        function computeGranularFoodTypes(school, categoriesPct) {
             const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
             let itemLabels = []; let itemValues = []; let itemColors = [];
             const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
             
-            let gE = parseFloat(categoriesGrams[0]) || 0; let gP = parseFloat(categoriesGrams[1]) || 0;
-            let gD = parseFloat(categoriesGrams[2]) || 0; let gPain = parseFloat(categoriesGrams[3]) || 0;
+            let pctE = parseFloat(categoriesPct[0]) || 0; let pctP = parseFloat(categoriesPct[1]) || 0;
+            let pctD = parseFloat(categoriesPct[2]) || 0; let pctPain = parseFloat(categoriesPct[3]) || 0;
             
             if (savedMenu && savedMenu !== 'Non configuré') {
                 const parts = savedMenu.split(' / ');
@@ -514,22 +529,20 @@
                 const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
                 const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
                 
-                if (entrees.length > 0) entrees.forEach(item => { itemLabels.push(item); itemValues.push((gE / entrees.length).toFixed(1)); itemColors.push(colors.entree); });
-                else if (gE > 0) { itemLabels.push("Entrée"); itemValues.push(gE.toFixed(1)); itemColors.push(colors.entree); }
+                if (entrees.length > 0) entrees.forEach(item => { itemLabels.push(item); itemValues.push(pctE.toFixed(0)); itemColors.push(colors.entree); });
+                else if (pctE > 0) { itemLabels.push("Entrée"); itemValues.push(pctE.toFixed(0)); itemColors.push(colors.entree); }
                 
-                const totalPlatItems = plats.length + accomps.length;
-                if (totalPlatItems > 0) {
-                    const share = gP / totalPlatItems;
-                    plats.forEach(item => { itemLabels.push(item); itemValues.push(share.toFixed(1)); itemColors.push(colors.plat); });
-                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push(share.toFixed(1)); itemColors.push(colors.accomp); });
-                } else if (gP > 0) { itemLabels.push("Plat principal"); itemValues.push(gP.toFixed(1)); itemColors.push(colors.plat); }
+                if (plats.length > 0 || accomps.length > 0) {
+                    plats.forEach(item => { itemLabels.push(item); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); });
+                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.accomp); });
+                } else if (pctP > 0) { itemLabels.push("Plat principal"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); }
                 
-                if (desserts.length > 0) desserts.forEach(item => { itemLabels.push(item); itemValues.push((gD / desserts.length).toFixed(1)); itemColors.push(colors.dessert); });
-                else if (gD > 0) { itemLabels.push("Dessert"); itemValues.push(gD.toFixed(1)); itemColors.push(colors.dessert); }
+                if (desserts.length > 0) desserts.forEach(item => { itemLabels.push(item); itemValues.push(pctD.toFixed(0)); itemColors.push(colors.dessert); });
+                else if (pctD > 0) { itemLabels.push("Dessert"); itemValues.push(pctD.toFixed(0)); itemColors.push(colors.dessert); }
             } else {
-                itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [gE.toFixed(1), gP.toFixed(1), gD.toFixed(1)]; itemColors = [colors.entree, colors.plat, colors.dessert];
+                itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [pctE.toFixed(0), pctP.toFixed(0), pctD.toFixed(0)]; itemColors = [colors.entree, colors.plat, colors.dessert];
             }
-            itemLabels.push("Pain"); itemValues.push(gPain.toFixed(1)); itemColors.push(colors.pain);
+            itemLabels.push("Pain"); itemValues.push(pctPain.toFixed(0)); itemColors.push(colors.pain);
             return { labels: itemLabels, data: itemValues, colors: itemColors };
         }
 
@@ -541,14 +554,16 @@
                 const currentSchoolData = data.details.find(d => d.ecole === school);
                 if (!currentSchoolData || currentSchoolData.poidsMoyen == 0) { clearDashboardToZero(); return; }
                 
-                let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
                 document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
                 document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
                 document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
 
-                const granularData = computeGranularFoodTypes(school, currentSchoolData.categoriesPct);
-                updateCharts(data.historiqueLabels, data.historiquePoids, currentSchoolData.categoriesPct, granularData);
+                const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
+                let globalAvgPct = rawPercentages.reduce((a,b) => a+b, 0) / 4;
+                const granularData = computeGranularFoodTypes(school, rawPercentages);
+                
+                updateCharts(data.historiqueLabels || ['Ce service'], [globalAvgPct.toFixed(0)], rawPercentages, granularData);
             }).catch(() => clearDashboardToZero());
         }
 
