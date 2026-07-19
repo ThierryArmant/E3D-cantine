@@ -380,7 +380,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL DE GESTION APPLICATIVE JAVASCRIPT -->
+    <!-- SCRIPT DE FILTRAGE LEXICAL PAR DICTIONNAIRE ET AGREGATION -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
@@ -399,7 +399,6 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
             });
 
-            // Palmarès statistique horizontal
             chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] }, 
@@ -551,12 +550,115 @@
 
                 const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
                 
-                // 🌟 HYDRATATION DU PALMARÈS DIRECTEMENT REÇU DEPUIS L'ONGLET SUIVI_GASPILLAGE
-                if (data.palmares && data.palmares.labels && data.palmares.labels.length > 0) {
-                    chartFoodTypes.data.labels = data.palmares.labels;
-                    chartFoodTypes.data.datasets[0].data = data.palmares.values;
+                // 🧠 MOTOR D'EXTRACTION LEXICALE DE L'ESPACE CUISINIER (ANTI-PHRASES IA)
+                if (data.rawGaspillage && data.rawGaspillage.length > 0) {
+                    const masterKeywords = [
+                        { key: "tomate", label: "Tomates" },
+                        { key: "carotte", label: "Carottes râpées" },
+                        { key: "salade", label: "Salade verte" },
+                        { key: "céleri", label: "Céleri rémoulade" },
+                        { key: "oeuf", label: "Œuf mayonnaise" },
+                        { key: "saucisson", label: "Saucisson" },
+                        { key: "jambon de pays", label: "Jambon de pays" },
+                        { key: "jambon blanc", label: "Jambon blanc" },
+                        { key: "jambon", label: "Jambon blanc" },
+                        { key: "pâté", label: "Pâté / Terrine" },
+                        { key: "terrine", label: "Pâté / Terrine" },
+                        { key: "quiche", label: "Quiche / Tarte" },
+                        { key: "tarte salée", label: "Quiche / Tarte" },
+                        { key: "pizza", label: "Pizza" },
+                        { key: "friand", label: "Friand" },
+                        { key: "gardianne", label: "Gardianne" },
+                        { key: "couscous", label: "Couscous" },
+                        { key: "paella", label: "Paella" },
+                        { key: "bourguignon", label: "Bœuf bourguignon" },
+                        { key: "veau", label: "Blanquette de veau" },
+                        { key: "blanquette", label: "Blanquette de veau" },
+                        { key: "poulet", label: "Poulet rôti" },
+                        { key: "nugget", label: "Nuggets" },
+                        { key: "dinde", label: "Escalope de dinde" },
+                        { key: "steak", label: "Steak haché" },
+                        { key: "rôti", label: "Rôti de porc/bœuf" },
+                        { key: "sauté", label: "Sauté de porc" },
+                        { key: "boulette", label: "Boulettes de bœuf" },
+                        { key: "pané", label: "Poisson pané" },
+                        { key: "colin", label: "Filet de colin" },
+                        { key: "céréale", label: "Galette de céréales" },
+                        { key: "lasagne", label: "Lasagnes végétariennes" },
+                        { key: "frite", label: "Frites" },
+                        { key: "pâte", label: "Pâtes" },
+                        { key: "riz", label: "Riz" },
+                        { key: "semoule", label: "Semoule" },
+                        { key: "purée", label: "Purée" },
+                        { key: "haricot", label: "Haricots verts" },
+                        { key: "ratatouille", label: "Ratatouille" },
+                        { key: "brocoli", label: "Brocolis" },
+                        { key: "petits pois", label: "Petits pois / Carottes" },
+                        { key: "pois", label: "Petits pois / Carottes" },
+                        { key: "courgette", label: "Courgettes" },
+                        { key: "melon", label: "Melon" },
+                        { key: "pastèque", label: "Pastèque" },
+                        { key: "pomme", label: "Pomme / Banane" },
+                        { key: "banane", label: "Pomme / Banane" },
+                        { key: "fruit", label: "Fruit de saison" },
+                        { key: "compote", label: "Compote" },
+                        { key: "yaourt", label: "Yaourt" },
+                        { key: "fromage", label: "Portion Fromage" },
+                        { key: "kiri", label: "Portion Fromage" },
+                        { key: "cantal", label: "Portion Fromage" },
+                        { key: "gouda", label: "Portion Fromage" },
+                        { key: "liégeois", label: "Crème dessert" },
+                        { key: "crème", label: "Crème dessert" },
+                        { key: "sauce", label: "Sauce / Potage" },
+                        { key: "potage", label: "Sauce / Potage" },
+                        { key: "chocolat", label: "Gâteau au chocolat" },
+                        { key: "éclair", label: "Éclair" },
+                        { key: "tarte aux fruits", label: "Tarte aux fruits" },
+                        { key: "pain", label: "Pain" }
+                    ];
+
+                    let aggregatedMap = {};
+                    data.rawGaspillage.forEach(scan => {
+                        let textRaw = scan.commentaire.toLowerCase();
+                        let targetLabel = null;
+                        
+                        for (let item of masterKeywords) {
+                            if (textRaw.includes(item.key)) {
+                                targetLabel = item.label;
+                                break;
+                            }
+                        }
+                        
+                        // Sécurité si aucun mot-clé direct n'est trouvé
+                        if (!targetLabel) {
+                            if (scan.entree > 0) targetLabel = "Autre Entrée";
+                            else if (scan.plat > 0) targetLabel = "Autre Plat";
+                            else if (scan.dessert > 0) targetLabel = "Autre Dessert";
+                            else if (scan.pain > 0) targetLabel = "Pain";
+                            else targetLabel = "Divers";
+                        }
+                        
+                        let valMax = Math.max(scan.entree, scan.plat, scan.dessert, scan.pain);
+                        if (!aggregatedMap[targetLabel]) {
+                            aggregatedMap[targetLabel] = { total: 0, count: 0 };
+                        }
+                        aggregatedMap[targetLabel].total += valMax;
+                        aggregatedMap[targetLabel].count++;
+                    });
+
+                    let palmaresFinalList = [];
+                    for (let label in aggregatedMap) {
+                        palmaresFinalList.push({
+                            label: label,
+                            value: Math.round(aggregatedMap[label].total / aggregatedMap[label].count)
+                        });
+                    }
+                    palmaresFinalList.sort((a, b) => b.value - a.value);
+
+                    chartFoodTypes.data.labels = palmaresFinalList.map(item => item.label).slice(0, 8);
+                    chartFoodTypes.data.datasets[0].data = palmaresFinalList.map(item => item.value).slice(0, 8);
                     const palette = ['#3b82f6', '#ffb703', '#9b5de5', '#e63946', '#2a9d8f', '#f4a261', '#e76f51', '#7209b7'];
-                    chartFoodTypes.data.datasets[0].backgroundColor = data.palmares.labels.map((_, i) => palette[i % palette.length]);
+                    chartFoodTypes.data.datasets[0].backgroundColor = chartFoodTypes.data.labels.map((_, i) => palette[i % palette.length]);
                 } else {
                     chartFoodTypes.data.labels = [];
                     chartFoodTypes.data.datasets[0].data = [];
