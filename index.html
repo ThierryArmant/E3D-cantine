@@ -436,7 +436,7 @@
                             </button>
                         </div>
 
-                        <!-- 📈 ACCUMULATEUR CHRONOLOGIQUE ET COMMUTATEUR TEMPOREL ÉVOLUTIF (JOUR / MOIS / ANNÉE) -->
+                        <!-- 📈 ACCUMULATEUR CHRONOLOGIQUE ET COMMUTATEUR TEMPOREL ÉVOLUTIF -->
                         <div style="border-top: 2px solid #e2e8f0; padding-top: 16px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                                 <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">📈 Historique d'évolution des flux massiques (kg)</h3>
@@ -796,7 +796,7 @@
             document.getElementById('action-progress').style.width = "0%"; 
         }
 
-        // 🌟 RESTAURATION DE LA FONCTION DE CAPTURE AUTOMATIQUE
+        // 🌟 CORRECTION DE SÉCURITÉ : AJOUT DE MODE: "NO-CORS" POUR EXPÉDIER LES DONNÉES SUR SHEET
         function triggerAutomaticCapture() {
             if (isScanningProcess) return; isScanningProcess = true;
             const banner = document.getElementById('instruction-text');
@@ -822,7 +822,13 @@
                     image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" 
                 };
                 
-                fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
+                // Exécution réseau étanchéifiée avec mode: "no-cors"
+                fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                    method: "POST", 
+                    mode: "no-cors", 
+                    body: JSON.stringify(payload) 
+                });
+                
                 setTimeout(() => resetBorneUI(), 1200);
             }, 250);
         }
