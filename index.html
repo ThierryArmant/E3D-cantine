@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.B.C. - Assiette Bas Carbone</title>
+    <!-- Chargement de Chart.js et du plugin de labels intégrés -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         body { background-color: #f3f4f6; color: #1f2937; display: flex; height: 100vh; overflow: hidden; }
@@ -58,14 +60,37 @@
         .state-success { background-color: #047857 !important; }
         .btn-simulation { margin-top: 20px; background-color: #4b5563; font-size: 14px; padding: 12px; border: 2px dashed #fff; }
         
-        /* 🎨 DESIGN DE L'ESPACE ANALYSE REPENSI ET ALLÉGÉ */
-        .ai-box { background: #ffffff; border: 1px solid #cbd5e1; border-top: 6px solid #047857; border-radius: 10px; padding: 24px; margin-top: 24px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .ai-title { color: #1b4332; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
-        .ai-section-title { color: #047857; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px 0; display: flex; align-items: center; gap: 6px; }
-        .ai-bullet { list-style: none; padding-left: 0; margin-bottom: 12px; }
+        /* 🎨 CONTENEUR GLOBAL DE L'ANALYSE IA */
+        .ai-box { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-top: 24px; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
+        .ai-title { color: #1b4332; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
+        
+        /* 📦 STRUCTURES DES 4 BLOCS PASTELS STRUCTURES DYNAMIQUEMENT */
+        .ai-card-block { padding: 18px; border-radius: 8px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.01); }
+        .ai-block-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .ai-bullet { list-style: none; padding-left: 0; margin-bottom: 8px; }
         .ai-bullet li { font-size: 13.5px; line-height: 1.6; color: #334155; margin-bottom: 6px; padding-left: 18px; position: relative; }
-        .ai-bullet li::before { content: "•"; color: #10b981; font-weight: bold; font-size: 16px; position: absolute; left: 4px; top: -1px; }
-        .ai-divider { border: 0; border-top: 1px solid #f1f5f9; margin: 14px 0; }
+        .ai-bullet li::before { content: "•"; font-weight: bold; font-size: 16px; position: absolute; left: 4px; top: -1px; }
+        .ai-divider { border: 0; border-top: 1px solid rgba(0,0,0,0.05); margin: 14px 0; }
+
+        /* 🟦 Zone 1 : Analyse structurelle (Bleu Pastel) */
+        .ai-block-blue { background-color: #f0f9ff; border: 1px solid #bae6fd; border-left: 6px solid #0284c7; }
+        .ai-block-blue .ai-block-title { color: #0369a1; }
+        .ai-block-blue .ai-bullet li::before { color: #0284c7; }
+
+        /* 🟨 Zone 2 : Diagnostic Gâchis (Orange/Ambre Pastel) */
+        .ai-block-orange { background-color: #fffbeb; border: 1px solid #fef08a; border-left: 6px solid #d97706; }
+        .ai-block-orange .ai-block-title { color: #b45309; }
+        .ai-block-orange .ai-bullet li::before { color: #d97706; }
+
+        /* 🟪 Zone 3 : Predictions (Violet Pastel) */
+        .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 6px solid #9333ea; }
+        .ai-block-purple .ai-block-title { color: #6b21a8; }
+        .ai-block-purple .ai-bullet li::before { color: #9333ea; }
+
+        /* 🟩 Zone 4 : Recommandations Chef (Vert Menthe Pastel) */
+        .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 6px solid #16a34a; }
+        .ai-block-green .ai-block-title { color: #166534; font-size: 14.5px; }
+        .ai-block-green .ai-bullet li::before { color: #16a34a; }
     </style>
 </head>
 <body>
@@ -104,9 +129,17 @@
                     <div class="dashboard-col"><h3>Évolution du gaspillage (g / convive)</h3><div class="chart-container"><canvas id="chart-timeline"></canvas></div></div>
                     <div class="dashboard-col"><h3>Répartition globale du gaspillage</h3><div class="chart-container"><canvas id="chart-categories"></canvas></div></div>
                 </div>
+                
+                <!-- 📊 GRAPHIQUE HORIZONTAL PRÉCIS AU SCALPEL -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
-                    <div class="dashboard-col"><h3>📊 Analyse détaillée du gaspillage cumulé (en %)</h3><div class="chart-container" style="height: 300px;"><canvas id="chart-food-types"></canvas></div></div>
+                    <div class="dashboard-col">
+                        <h3>📊 Analyse détaillée du gaspillage par type d'aliment (Moyenne en g / élève)</h3>
+                        <div class="chart-container" style="height: 320px; margin-top: 10px;">
+                            <canvas id="chart-food-types"></canvas>
+                        </div>
+                    </div>
                 </div>
+                
                 <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 15px; color: #1b4332;">📊 Synthèse d'efficacité du service</h3>
                 <div class="bottom-grid">
                     <div class="bottom-card"><div class="bottom-card-val" id="card-couverts">--</div><div class="bottom-card-lbl">Couverts totaux attendus</div></div>
@@ -246,9 +279,9 @@
                         <button class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; background-color: #047857; font-weight: bold;">🤖 Analyser le menu avec l'IA Gemini</button>
                     </div>
 
-                    <!-- BLOC RÉPONSE IA GEMINI NETTOYÉ ET STRUCTURÉ -->
+                    <!-- BLOC RÉPONSE IA AVEC TITRE PRINCIPAL GÉNÉRAL -->
                     <div id="gemini-ai-result" class="ai-box">
-                        <div class="ai-title">✨ Analyse Éco-Responsable & Stratégique</div>
+                        <div class="ai-title">🧠 Plan de Vol Éco-Responsable du Chef</div>
                         <div id="gemini-ai-text"></div>
                     </div>
                 </div>
@@ -261,12 +294,36 @@
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
 
         window.addEventListener('DOMContentLoaded', () => { 
-            // Configuration alignée sur l'IA (Entrées, Plats, Desserts, Pain)
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { type: 'line', data: { labels: [], datasets: [{ label: 'Gaspillage moyen (g)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, options: { responsive: true, maintainAspectRatio: false } });
             
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { type: 'doughnut', data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'] }] }, options: { responsive: true, maintainAspectRatio: false } });
             
-            chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { type: 'bar', data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
+            chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
+                type: 'bar', 
+                plugins: [ChartDataLabels], 
+                data: { 
+                    labels: [], 
+                    datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] 
+                }, 
+                options: { 
+                    indexAxis: 'y', 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: {
+                        x: { beginAtZero: true, grace: '20%' } 
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        datalabels: { 
+                            anchor: 'end',
+                            align: 'right',
+                            formatter: (val) => `${parseFloat(val).toFixed(1)} g`,
+                            font: { weight: 'bold', size: 12 },
+                            color: '#1e293b'
+                        }
+                    } 
+                } 
+            });
 
             loadEtablissementsDropdown(); 
         });
@@ -350,17 +407,70 @@
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) })
             .then(() => {
                 alert('Menu enregistré pour ' + school + ' !');
+                loadLiveData(); 
             });
         }
 
-        // PARSER SÉMANTIQUE DE L'ANALYSE IA POUR ALLÉGER LA LECTURE DU CHEF
+        // 🧠 DECOUPEUR SEMANTIQUE AVANCÉ EN 4 BLOCS PASTELS INDÉPENDANTS
         function formatAIResponseToUI(text) {
-            return text
-                .replace(/^### (.*)$/gim, '<div class="ai-section-title">$1</div>')
-                .replace(/^## (.*)$/gim, '<div class="ai-section-title" style="color:#1b4332; font-size:14px;">$1</div>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#0f172a; font-weight:700;">$1</strong>')
-                .replace(/^\* (.*)$/gim, '<ul class="ai-bullet"><li>$1</li></ul>')
-                .replace(/---/g, '<hr class="ai-divider">');
+            // Nettoyage standard du gras markdown
+            let cleanMarkdown = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:700; color:#0f172a;">$1</strong>')
+                .replace(/^\* (.*)$/gim, '<li>$1</li>');
+
+            const lines = cleanMarkdown.split('\n');
+            let output = "";
+            let blockActuel = 0;
+            let listeOuverte = false;
+
+            for (let line of lines) {
+                let currentLine = line.trim();
+                if (currentLine === "") continue;
+
+                // 🟥 Détection chirurgicale des titres de blocs Gemini
+                let isTitle1 = currentLine.startsWith('### 1') || currentLine.toLowerCase().includes('analyse de la structure');
+                let isTitle2 = currentLine.startsWith('### 2') || currentLine.toLowerCase().includes('diagnostic du gâchis');
+                let isTitle3 = currentLine.startsWith('### 3') || currentLine.toLowerCase().includes('prédiction');
+                let isTitle4 = currentLine.startsWith('### 4') || currentLine.toLowerCase().includes('conseils stratégiques') || currentLine.toLowerCase().includes('recommandations');
+
+                if (isTitle1 || isTitle2 || isTitle3 || isTitle4) {
+                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
+                    if (blockActuel > 0) { output += '</div>'; }
+
+                    if (isTitle1) {
+                        blockActuel = 1;
+                        output += '<div class="ai-card-block ai-block-blue"><div class="ai-block-title">🥗 1. Analyse Structurelle du Menu</div>';
+                    } else if (isTitle2) {
+                        blockActuel = 2;
+                        output += '<div class="ai-card-block ai-block-orange"><div class="ai-block-title">🔍 2. Diagnostic Réel du Gâchis</div>';
+                    } else if (isTitle3) {
+                        blockActuel = 3;
+                        output += '<div class="ai-card-block ai-block-purple"><div class="ai-block-title">🔮 3. Prédictions pour ce Service</div>';
+                    } else if (isTitle4) {
+                        blockActuel = 4;
+                        output += '<div class="ai-card-block ai-block-green"><div class="ai-block-title">👨‍🍳 4. Conseils & Recommandations au Chef</div>';
+                    }
+                    continue;
+                }
+
+                if (currentLine.startsWith('<hr')) continue;
+
+                // Tri et injection des éléments de liste ou paragraphes simples
+                if (currentLine.startsWith('<li>')) {
+                    if (!listeOuverte) { output += '<ul class="ai-bullet">'; listeOuverte = true; }
+                    output += currentLine;
+                } else {
+                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
+                    if (blockActuel > 0) {
+                        output += `<p style="margin-bottom: 8px; font-size: 13.5px; line-height: 1.5; color:#334155;">${currentLine}</p>`;
+                    }
+                }
+            }
+
+            if (listeOuverte) { output += '</ul>'; }
+            if (blockActuel > 0) { output += '</div>'; }
+
+            return output || text;
         }
 
         function runGeminiAIAnalysis() {
@@ -391,12 +501,13 @@
             })
             .catch(() => {
                 resultText.innerHTML = `
-                    <div class="ai-section-title">🌍 Note Globale (Ajustement Secours)</div>
-                    <ul class="ai-bullet">
-                        <li><strong>Menu identifié :</strong> ${menuText}</li>
-                        <li>L'empreinte carbone estimée sur ce profil de service est modérée.</li>
-                        <li>💡 <em>Conseil :</em> Adapter les portions du composant légume pour limiter les restes sur ce premier service.</li>
-                    </ul>
+                    <div class="ai-card-block ai-block-blue">
+                        <div class="ai-block-title">🌍 Note Globale Secours (Réseau indisponible)</div>
+                        <ul class="ai-bullet">
+                            <li><strong>Menu identifié :</strong> ${menuText}</li>
+                            <li>L'empreinte carbone estimée sur ce profil de service est modérée.</li>
+                        </ul>
+                    </div>
                 `;
             });
         }
@@ -409,6 +520,77 @@
 
             if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
             if (viewId === 'view-dashboard') { loadLiveData(); }
+        }
+
+        function computeGranularFoodTypes(school, poidsMoyen, categoriesPct) {
+            const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
+            
+            let itemLabels = [];
+            let itemValues = [];
+            let itemColors = [];
+            
+            const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
+            
+            let totalAvgGrams = parseFloat(poidsMoyen) || 0;
+            let gramsE = (totalAvgGrams * (parseFloat(categoriesPct[0]) || 0)) / 100;
+            let gramsP = (totalAvgGrams * (parseFloat(categoriesPct[1]) || 0)) / 100;
+            let gramsD = (totalAvgGrams * (parseFloat(categoriesPct[2]) || 0)) / 100;
+            let gramsPain = (totalAvgGrams * (parseFloat(categoriesPct[3]) || 0)) / 100;
+            
+            if (savedMenu && savedMenu !== 'Non configuré') {
+                const parts = savedMenu.split(' / ');
+                const entrees = parts[0] && parts[0] !== 'Sans entrée' ? parts[0].split('+') : [];
+                const plats = parts[1] && parts[1] !== 'Sans plat' ? parts[1].split('+') : [];
+                const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
+                const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
+                
+                if (entrees.length > 0) {
+                    entrees.forEach(item => {
+                        itemLabels.push(item);
+                        itemValues.push((gramsE / entrees.length).toFixed(1));
+                        itemColors.push(colors.entree);
+                    });
+                } else if (gramsE > 0) {
+                    itemLabels.push("Entrée (indéterminée)"); itemValues.push(gramsE.toFixed(1)); itemColors.push(colors.entree);
+                }
+                
+                const totalPlatItems = plats.length + accomps.length;
+                if (totalPlatItems > 0) {
+                    const share = gramsP / totalPlatItems;
+                    plats.forEach(item => {
+                        itemLabels.push(item);
+                        itemValues.push(share.toFixed(1));
+                        itemColors.push(colors.plat);
+                    });
+                    accomps.forEach(item => {
+                        itemLabels.push(item + " (Acc.)");
+                        itemValues.push(share.toFixed(1));
+                        itemColors.push(colors.accomp);
+                    });
+                } else if (gramsP > 0) {
+                    itemLabels.push("Plat principal"); itemValues.push(gramsP.toFixed(1)); itemColors.push(colors.plat);
+                }
+                
+                if (desserts.length > 0) {
+                    desserts.forEach(item => {
+                        itemLabels.push(item);
+                        itemValues.push((gramsD / desserts.length).toFixed(1));
+                        itemColors.push(colors.dessert);
+                    });
+                } else if (gramsD > 0) {
+                    itemLabels.push("Dessert / Laitage"); itemValues.push(gramsD.toFixed(1)); itemColors.push(colors.dessert);
+                }
+            } else {
+                itemLabels = ['Entrées', 'Plats', 'Desserts'];
+                itemValues = [gramsE.toFixed(1), gramsP.toFixed(1), gramsD.toFixed(1)];
+                itemColors = [colors.entree, colors.plat, colors.dessert];
+            }
+            
+            itemLabels.push("Pain");
+            itemValues.push(gramsPain.toFixed(1));
+            itemColors.push(colors.pain);
+            
+            return { labels: itemLabels, data: itemValues, colors: itemColors };
         }
 
         function loadLiveData() {
@@ -426,7 +608,6 @@
                 
                 let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
                 
-                // Injection des données 100% réelles
                 document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
                 document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
@@ -439,18 +620,18 @@
                 document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
                 document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
 
-                // Alignement parfait des graphiques sur les 4 composants renvoyés par l'IA
+                const granularData = computeGranularFoodTypes(school, currentSchoolData.poidsMoyen, currentSchoolData.categoriesPct);
+
                 updateCharts(
                     data.historiqueLabels || ['Service'], 
                     data.historiquePoids || [parseFloat(currentSchoolData.poidsMoyen)], 
                     currentSchoolData.categoriesPct, 
-                    currentSchoolData.categoriesPct
+                    granularData
                 );
             })
             .catch(() => clearDashboardToZero());
         }
 
-        // REMPLACE LE FAUX COMPTEUR PAR UN ÉTAT RÉEL À ZÉRO
         function clearDashboardToZero() {
             const school = document.getElementById('select-etablissement').value;
             let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
@@ -464,10 +645,10 @@
             document.getElementById('card-vides').innerText = `${totalConvives} (100%)`;
             document.getElementById('card-tries').innerText = "0 (0%)";
 
-            updateCharts([], [], [0, 0, 0, 0], [0, 0, 0, 0]);
+            updateCharts([], [], [0, 0, 0, 0], { labels: [], data: [], colors: [] });
         }
 
-        function updateCharts(labelsTimeline, dataTimeline, dataCategories, dataFoodTypes) {
+        function updateCharts(labelsTimeline, dataTimeline, dataCategories, granularData) {
             chartTimeline.data.labels = labelsTimeline; 
             chartTimeline.data.datasets[0].data = dataTimeline; 
             chartTimeline.update();
@@ -475,10 +656,10 @@
             chartCategories.data.datasets[0].data = dataCategories; 
             chartCategories.update();
             
-            if (dataFoodTypes) { 
-                chartFoodTypes.data.datasets[0].data = dataFoodTypes; 
-                chartFoodTypes.update(); 
-            }
+            chartFoodTypes.data.labels = granularData.labels;
+            chartFoodTypes.data.datasets[0].data = granularData.data;
+            chartFoodTypes.data.datasets[0].backgroundColor = granularData.colors;
+            chartFoodTypes.update();
         }
 
         async function initCamera() {
