@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.B.C. - Assiette Bas Carbone</title>
+    <!-- Chargement de Chart.js et du plugin de labels intégrés -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
@@ -31,22 +32,26 @@
         .dashboard-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
         .dashboard-col { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .chart-container { position: relative; height: 260px; width: 100%; }
-        .bottom-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; margin-bottom: 16px; }
-        .bottom-card { background: #f3f4f6; border-radius: 8px; padding: 15px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .bottom-card-val { font-size: 22px; font-weight: 700; color: #1f2937; }
-        .bottom-card-lbl { font-size: 12px; color: #4b5563; margin-top: 4px; font-weight: 500; }
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 15px;}
         .btn:hover { background-color: #1b4332; }
         
-        .form-section { background-color: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 10px; }
-        .form-group label { font-size: 12px; font-weight: 700; color: #334155; display: block; margin-bottom: 6px; }
-        .form-group input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: 700; color: #0f172a; font-size: 14px; }
+        .form-section { background-color: #f8fafc; padding: 24px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 24px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 14px; }
+        .waste-control-card { background: #ffffff; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .waste-control-card label { font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; text-align: center; min-height: 32px; display: flex; align-items: center; justify-content: center; letter-spacing: 0.3px; }
+        .spinner-container { display: flex; align-items: center; gap: 10px; }
+        .btn-spinner { width: 48px; height: 32px; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 13px; transition: background 0.1s; display: flex; align-items: center; justify-content: center; }
+        .btn-kg { background-color: #1b4332; } .btn-kg:hover { background-color: #2d6a4f; }
+        .btn-g { background-color: #2a9d8f; } .btn-g:hover { background-color: #e76f51; }
+        .btn-down { background-color: #4b5563; } .btn-down:hover { background-color: #374151; }
+        .input-center { width: 95px; height: 68px; text-align: center; font-size: 20px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 8px; color: #0f172a; -moz-appearance: textfield; }
+        .input-center::-webkit-outer-spin-button, .input-center::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
         .menu-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; table-layout: fixed; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 12px; text-align: left; font-size: 13px; font-weight: 600; border: 1px solid #e5e7eb; }
         .menu-table td { padding: 12px; vertical-align: top; border: 1px solid #e5e7eb; background-color: #f9fafb; }
         .sub-theme { font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 12px 0 6px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
+        .sub-theme:first-child { margin-top: 0; }
         .checkbox-label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer; color: #374151; }
         .checkbox-label input { width: 16px; height: 16px; cursor: pointer; accent-color: #2d6a4f; }
         
@@ -62,6 +67,17 @@
         .ai-block-orange { background-color: #fffbeb; border: 1px solid #fef08a; border-left: 6px solid #d97706; }.ai-block-orange .ai-block-title { color: #b45309; }.ai-block-orange .ai-bullet li::before { color: #d97706; }
         .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 6px solid #9333ea; }.ai-block-purple .ai-block-title { color: #6b21a8; }.ai-block-purple .ai-bullet li::before { color: #9333ea; }
         .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 6px solid #16a34a; }.ai-block-green .ai-block-title { color: #166534; }
+        .borne-container { max-width: 850px; margin: 0 auto; }
+        .instruction-banner { background-color: #1e3a8a; color: white; padding: 14px; border-radius: 8px; font-size: 20px; font-weight: 800; margin-bottom: 20px; text-align: center; text-transform: uppercase; }
+        .traffic-light { width: 180px; height: 180px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 26px; color: white; border: 8px solid #ffffff; }
+        .light-searching { background-color: #6b7280; } 
+        .light-detected { background-color: #ef4444; } 
+        .light-success { background-color: #10b981; } 
+        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 12px; height: 16px; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; }
+        .state-searching { background-color: #4b5563 !important; }
+        .state-detected { background-color: #ef4444 !important; }
+        .state-success { background-color: #047857 !important; }
     </style>
 </head>
 <body>
@@ -72,14 +88,15 @@
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
-            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier / Sacs</li>
+            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
+            <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖️ Saisie des Déchets</li>
         </ul>
     </div>
 
     <div class="main-container">
         <div class="top-bar">
             <div style="display: flex; align-items: center; gap: 16px;">
-                <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT :</label>
+                <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT ACTIF :</label>
                 <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc; cursor: pointer;">
                     <option>Chargement...</option>
                 </select>
@@ -88,7 +105,7 @@
         </div>
 
         <div class="content-area">
-            <!-- VUE 1 : DASHBOARD -->
+            <!-- PÔLE 1 : DASHBOARD -->
             <div id="view-dashboard" class="view-section active">
                 <div class="kpi-grid">
                     <div class="kpi-card kpi-blue"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne réelle par convive</div></div>
@@ -116,9 +133,8 @@
                 </div>
             </div>
 
-            <!-- VUE 2 : BORNE -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
-                <!-- Code caméra de la borne préservé à l'identique pour les scans élèves -->
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DEPOSE TON PLATEAU ICI</div>
                     <div style="display: flex; gap: 24px; align-items: center; justify-content: center; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px;">
@@ -137,64 +153,90 @@
                         </select>
                         <button class="btn" onclick="triggerAutomaticCapture()" style="width: auto; padding: 10px 20px; margin-left: 10px;">📸 Simuler le scan visuel</button>
                     </div>
-                    <div style="margin-top: 10px; font-size: 13px; color: #475569;">Menu actif borne: <span id="borne-menu-active" style="font-weight: bold;">--</span></div>
+                    <div style="margin-top: 10px; font-size: 13px; color: #475569;">Configuration active borne : <span id="borne-menu-active" style="font-weight: bold;">--</span></div>
                 </div>
             </div>
 
-            <!-- VUE 3 : ESPACE CUISINIER & DIALOGUE ÉLÈVES BALANCES -->
+            <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
-                    
-                    <!-- ⚖️ PANNEAU DE SAISIE PÉDAGOGIQUE DES SACS PAR LES ÉLÈVES -->
-                    <div class="form-section" style="border-top: 5px solid #2d6a4f;">
-                        <h3 style="color: #1b4332;">⚖️ Écran de saisie Balance Élèves (Sacs Poubelles en kg)</h3>
-                        <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Reporte le chiffre affiché sur l'écran de la balance avec ses trois décimales (ex: 04.230)</p>
-                        <div class="form-grid">
-                            <div class="form-group"><label>🍖 Sac Alimentaire (Plats/Restes) [kg]</label><input type="number" id="sac-alimentaire" step="0.001" placeholder="0.000" value="0.000"></div>
-                            <div class="form-group"><label>🍏 Sac Déchets Fruits [kg]</label><input type="number" id="sac-fruits" step="0.001" placeholder="0.000" value="0.000"></div>
-                            <div class="form-group"><label>🥖 Sac Déchets Pain [kg]</label><input type="number" id="sac-pain" step="0.001" placeholder="0.000" value="0.000"></div>
-                            <div class="form-group"><label>📦 Sac Emballages [kg]</label><input type="number" id="sac-emballages" step="0.001" placeholder="0.000" value="0.000"></div>
-                            <div class="form-group"><label>🧻 Sac Serviettes Papier [kg]</label><input type="number" id="sac-serviettes" step="0.001" placeholder="0.000" value="0.000"></div>
+                    <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des prévisions d'effectifs</h3>
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px; background-color: #f8fafc; padding: 16px; border-radius: 6px;">
+                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
+                        <div style="flex: 1;"><label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 6px;">Midi - Service 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;"></div>
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+                            <div style="margin-bottom: 6px; font-size: 13px;">Total attendus : <span id="lbl-total-attendus" style="font-weight: bold; color: #2d6a4f;">450</span></div>
+                            <button class="btn" onclick="saveExpectedMeals()" style="padding: 10px; font-size: 13px;">💾 Enregistrer Effectifs</button>
                         </div>
-                        <button class="btn" onclick="saveBagWeights()" style="margin-top: 16px; background-color: #047857;">💾 Valider et Enregistrer les pesées de fin de service</button>
                     </div>
 
-                    <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Prévisions couverts attendus</h3>
-                    <div style="display: flex; gap: 16px; margin-bottom: 24px;">
-                        <div style="flex: 1;"><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1;"></div>
-                        <div style="flex: 1;"><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width:100%; padding:10px; border-radius:6px; border:1px solid #cbd5e1;"></div>
-                        <div style="flex: 1; font-weight: bold; padding-top: 10px;">Total attendus : <span id="lbl-total-attendus" style="color:#2d6a4f;">450</span></div>
-                    </div>
-
-                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">📋 Composition du menu du jour</h3>
+                    <h3 style="margin-bottom: 20px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">📋 Composition du menu du jour (Grand Catalogue)</h3>
                     <table class="menu-table">
-                        <thead><tr><th> Entrées</th><th> Plats</th><th> Accompagnements</th><th> Desserts</th></tr></thead>
+                        <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS & LAITAGES</th></tr></thead>
                         <tbody>
                             <tr>
                                 <td>
-                                    <div class="sub-theme">🍅 Crudités</div>
+                                    <div class="sub-theme">🍅 Crudités / Salades</div>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes râpées"> Carottes râpées</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
+                                    <div class="sub-theme">🐷 Charcuterie</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
+                                    <div class="sub-theme">🥧 Entrées Cuites</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
                                 </td>
                                 <td>
-                                    <div class="sub-theme">🥩 Viandes & Poissons</div>
+                                    <div class="sub-theme">🐓 Volailles</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
+                                    <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
+                                    <div class="sub-theme">🐟 Poissons</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin</label>
+                                    <div class="sub-theme">🌱 Végétarien</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
                                 </td>
                                 <td>
-                                    <div class="sub-theme">🥔 Féculents & Légumes</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
+                                    <div class="sub-theme">🥔 Féculents</div>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes"> Pâtes</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
+                                    <div class="sub-theme">🌿 Légumes</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
                                     <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Brocolis"> Brocolis</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
                                 </td>
                                 <td>
-                                    <div class="sub-theme">🍏 Fruits & Douceurs</div>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme"> Pomme</label>
-                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt</label>
+                                    <div class="sub-theme">🍏 Vergers & Fruits</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme"> Pomme / Banane</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote</label>
+                                    <div class="sub-theme">🥛 Laitages & Fromages</div>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage (Kiri/Cantal/Gouda)</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert</label>
+                                    <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
                                     <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
+                                    <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte aux fruits"> Tarte aux fruits</label>
                                 </td>
                             </tr>
                         </tbody>
@@ -211,6 +253,107 @@
                     </div>
                 </div>
             </div>
+
+            <!-- PÔLE 4 : ESPACE DE SAISIE AVEC COMMANDES TACTILES ULTRA-RAPIDES (DUAL COLUMNS KG/G) -->
+            <div id="view-saisie-dechets" class="view-section">
+                <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
+                    <div class="form-section" style="border-top: 6px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
+                        <h2 style="color: #1b4332; font-size: 18px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
+                        <p style="font-size: 13px; color: #475569; margin-top: 4px; margin-bottom: 20px; line-height: 1.5;">
+                            Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les **Kilos (±1.00)**, à droite pour les **Grammes (±0.10)**.
+                        </p>
+                        
+                        <div class="form-grid">
+                            <!-- BLOC 1 : DECHETS ALIMENTAIRES -->
+                            <div class="waste-control-card">
+                                <label>🍖 Déchets Alimentaires (Plats/Chauds) [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-alimentaire', 1.00)">▲ kg</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -1.00)">▼ kg</button>
+                                    </div>
+                                    <input type="number" id="sac-alimentaire" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-alimentaire', 0.10)">▲ g</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -0.10)">▼ g</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOC 2 : DECHETS FRUITS -->
+                            <div class="waste-control-card">
+                                <label>🍏 Déchets Fruits (Restes & Peaux) [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-fruits', 1.00)">▲ kg</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -1.00)">▼ kg</button>
+                                    </div>
+                                    <input type="number" id="sac-fruits" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-fruits', 0.10)">▲ g</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -0.10)">▼ g</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOC 3 : DECHETS PAIN -->
+                            <div class="waste-control-card">
+                                <label>🥖 Déchets Pain (Fraction délaissée) [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-pain', 1.00)">▲ kg</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -1.00)">▼ kg</button>
+                                    </div>
+                                    <input type="number" id="sac-pain" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-pain', 0.10)">▲ g</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -0.10)">▼ g</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOC 4 : DECHETS EMBALLAGES -->
+                            <div class="waste-control-card">
+                                <label>📦 Déchets Emballages (Yaourts/Plastiques) [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-emballages', 1.00)">▲ kg</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -1.00)">▼ kg</button>
+                                    </div>
+                                    <input type="number" id="sac-emballages" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-emballages', 0.10)">▲ g</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -0.10)">▼ g</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BLOC 5 : DECHETS SERVIETTES PAPIER -->
+                            <div class="waste-control-card">
+                                <label>🧻 Déchets Serviettes Papier (Cellulose) [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-serviettes', 1.00)">▲ kg</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -1.00)">▼ kg</button>
+                                    </div>
+                                    <input type="number" id="sac-serviettes" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                                        <button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-serviettes', 0.10)">▲ g</button>
+                                        <button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -0.10)">▼ g</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 15px; padding: 14px 24px; border-radius: 8px;">
+                                💾 Enregistrer la caractérisation de fin de service
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -235,6 +378,14 @@
 
             loadEtablissementsDropdown(); 
         });
+
+        // FONCTION MAGIQUE D'AJUSTEMENT DISCORDANT KG/G POUR LES ELEVES
+        function adjustWeight(id, value) {
+            const input = document.getElementById(id);
+            let currentVal = parseFloat(input.value) || 0;
+            let newVal = Math.max(0, currentVal + value);
+            input.value = newVal.toFixed(2);
+        }
 
         function loadEtablissementsDropdown() {
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getEtablissements`).then(res => res.json()).then(schools => {
@@ -265,7 +416,6 @@
             alert("Effectifs enregistrés !"); loadLiveData();
         }
 
-        // JS ENVOI SAISIE BALANCE ÉLÈVES AU SCRIPT
         function saveBagWeights() {
             const school = document.getElementById('select-etablissement').value;
             const payload = {
@@ -277,11 +427,12 @@
                 sac_serviettes: document.getElementById('sac-serviettes').value
             };
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                alert("Pesées des sacs transmises avec succès. Calcul du tableau de bord actualisé !");
-                // Réinitialisation des champs après validation
-                document.getElementById('sac-alimentaire').value = "0.000";
-                document.getElementById('sac-fruits').value = "0.000";
-                document.getElementById('sac-pain').value = "0.000";
+                alert("Données des pesées transmises avec succès.");
+                document.getElementById('sac-alimentaire').value = "0.00";
+                document.getElementById('sac-fruits').value = "0.00";
+                document.getElementById('sac-pain').value = "0.00";
+                document.getElementById('sac-emballages').value = "0.00";
+                document.getElementById('sac-serviettes').value = "0.00";
                 loadLiveData();
             });
         }
@@ -395,11 +546,6 @@
                 document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
                 document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
                 document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
-                
-                document.getElementById('card-couverts').innerText = totalConvives;
-                let plateauxTries = currentSchoolData.totalPesees; let plateauxVides = Math.max(0, totalConvives - plateauxTries);
-                document.getElementById('card-vides').innerText = `${plateauxVides} (${((plateauxVides/totalConvives)*100).toFixed(0)}%)`;
-                document.getElementById('card-tries').innerText = `${plateauxTries} (${((plateauxTries/totalConvives)*100).toFixed(0)}%)`;
 
                 const granularData = computeGranularFoodTypes(school, currentSchoolData.categoriesPct);
                 updateCharts(data.historiqueLabels, data.historiquePoids, currentSchoolData.categoriesPct, granularData);
@@ -407,10 +553,7 @@
         }
 
         function clearDashboardToZero() {
-            const school = document.getElementById('select-etablissement').value;
-            let totalConvives = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
             document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
-            document.getElementById('card-couverts').innerText = totalConvives; document.getElementById('card-vides').innerText = `${totalConvives} (100%)`; document.getElementById('card-tries').innerText = "0 (0%)";
             updateCharts([], [], [0, 0, 0, 0], { labels: [], data: [], colors: [] });
         }
 
