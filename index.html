@@ -81,6 +81,9 @@
         .state-searching { background-color: #4b5563 !important; }
         .state-detected { background-color: #ef4444 !important; }
         .state-success { background-color: #047857 !important; }
+        
+        /* Boutons commutateurs d'échelles de temps J/M/A */
+        .btn-toggle-hist { padding: 6px 14px; font-size: 11.5px; font-weight: 700; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
     </style>
 </head>
 <body>
@@ -160,7 +163,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER (Catalogue Réaligné Complet) -->
+            <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -196,7 +199,6 @@
                                     <label class="checkbox-label"><input type="checkbox" name="entree" value="Friand"> Friand 🥧</label>
                                 </td>
                                 <td>
-                                    <!-- NOUVELLE FRACTION INTÉGRÉE POUR LES PLATS UNIQUES COMPLETS -->
                                     <div class="sub-theme">🍲 Plats Uniques / Complets</div>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Gardianne"> Gardianne</label>
                                     <label class="checkbox-label"><input type="checkbox" name="plat" value="Couscous"> Couscous 🍢</label>
@@ -266,7 +268,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS - UNE LIGNE - CODES PASTELS -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - OPTIMISÉE SUR UNE LIGNE AVEC CODES PASTELS -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 6px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
@@ -276,7 +278,6 @@
                         </p>
                         
                         <div class="form-grid">
-                            <!-- BLOC 1 : DECHETS ALIMENTAIRES -->
                             <div class="waste-control-card" style="background-color: #ffe5d9; border: 1px solid #ffcad4;">
                                 <label>🍖 Déchets Alimentaires (Plats/Chauds) [kg]</label>
                                 <div class="spinner-container">
@@ -292,7 +293,6 @@
                                 </div>
                             </div>
 
-                            <!-- BLOC 2 : DECHETS FRUITS -->
                             <div class="waste-control-card" style="background-color: #e8f5e9; border: 1px solid #c8e6c9;">
                                 <label>🍏 Déchets Fruits (Restes & Peaux) [kg]</label>
                                 <div class="spinner-container">
@@ -308,7 +308,6 @@
                                 </div>
                             </div>
 
-                            <!-- BLOC 3 : DECHETS PAIN -->
                             <div class="waste-control-card" style="background-color: #fefae0; border: 1px solid #e9d8a6;">
                                 <label>🥖 Déchets Pain (Fraction délaissée) [kg]</label>
                                 <div class="spinner-container">
@@ -324,7 +323,6 @@
                                 </div>
                             </div>
 
-                            <!-- BLOC 4 : DECHETS EMBALLAGES -->
                             <div class="waste-control-card" style="background-color: #e0f2fe; border: 1px solid #bae6fd;">
                                 <label>📦 Déchets Emballages (Yaourts/Plastiques) [kg]</label>
                                 <div class="spinner-container">
@@ -340,7 +338,6 @@
                                 </div>
                             </div>
 
-                            <!-- BLOC 5 : DECHETS SERVIETTES PAPIER -->
                             <div class="waste-control-card" style="background-color: #faf5ff; border: 1px solid #e9d5ff;">
                                 <label>🧻 Déchets Serviettes Papier (Cellulose) [kg]</label>
                                 <div class="spinner-container">
@@ -357,11 +354,27 @@
                             </div>
                         </div>
                         
-                        <div style="margin-top: 30px;">
+                        <div style="margin-top: 24px; margin-bottom: 30px;">
                             <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 15px; padding: 14px 24px; border-radius: 8px;">
                                 💾 Enregistrer la caractérisation de fin de service
                             </button>
                         </div>
+
+                        <!-- 📈 ACCUMULATEUR CHRONOLOGIQUE ET COMMUTATEUR TEMPOREL ÉVOLUTIF (JOUR / MOIS / ANNÉE) -->
+                        <div style="border-top: 2px solid #e2e8f0; padding-top: 24px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                <h3 style="font-size: 14px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px;">📈 Historique d'évolution des flux massiques (kg)</h3>
+                                <div style="display: flex; gap: 6px; background-color: #f1f5f9; padding: 4px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryChartMode('day')" style="background-color: #2d6a4f; color: white;">Jour</button>
+                                    <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryChartMode('month')" style="background-color: transparent; color: #475569; border: none;">Mois</button>
+                                    <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryChartMode('year')" style="background-color: transparent; color: #475569; border: none;">Année</button>
+                                </div>
+                            </div>
+                            <div class="chart-container" style="height: 290px; position: relative; width: 100%;">
+                                <canvas id="chart-history-sacs"></canvas>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -369,37 +382,124 @@
         </div>
     </div>
 
+    <!-- CODE INTEGRAL DU SCRIPT JAVASCRIPT FRONT-END -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
-        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes;
+        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
+        let cacheSacsHistory = null; // Structure tampon mémoire globale pour l'agrégateur temporel
 
         window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'line', 
-                data: { labels: [], datasets: [{ label: 'Taux global de rejet (%)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, 
+                data: { labels: [], datasets: [{ label: 'Taux global de gâchis (%)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, 
                 options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } 
             });
-            
+
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
-                type: 'bar', plugins: [ChartDataLabels],
+                type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 35 }] }, 
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold', size: 12 } } } }
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
             });
-            
+
             chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] }, 
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold', size: 11 } } } }
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold', size: 11 } } } } 
+            });
+
+            chartHistorySacs = new Chart(document.getElementById('chart-history-sacs').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [
+                        { label: '🍖 Alimentaires', data: [], backgroundColor: '#ffe5d9', borderColor: '#ffcad4', borderWidth: 1 },
+                        { label: '🍏 Fruits', data: [], backgroundColor: '#e8f5e9', borderColor: '#c8e6c9', borderWidth: 1 },
+                        { label: '🥖 Pain', data: [], backgroundColor: '#fefae0', borderColor: '#e9d8a6', borderWidth: 1 },
+                        { label: '📦 Emballages', data: [], backgroundColor: '#e0f2fe', borderColor: '#bae6fd', borderWidth: 1 },
+                        { label: '🧻 Serviettes', data: [], backgroundColor: '#faf5ff', borderColor: '#e9d5ff', borderWidth: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }, datalabels: { display: false } },
+                    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Masse totale (kg)', font: { weight: 'bold' } } } }
+                }
             });
 
             loadEtablissementsDropdown(); 
         });
 
+        // 🧠 ALGORITHME D'AGRÉGATION CHRONOLOGIQUE ÉVOLUTIF (ANTI-SATURATION DU GRAPHIQUE)
+        function updateHistoryChartMode(mode) {
+            if (!cacheSacsHistory || !cacheSacsHistory.labels || cacheSacsHistory.labels.length === 0) return;
+            
+            let finalLabels = [];
+            let outAlim = [], outFruits = [], outPain = [], outEmb = [], outServ = [];
+            
+            if (mode === 'day') {
+                // Affichage brut quotidien des 15 derniers jours pour garder une lecture fluide
+                finalLabels = cacheSacsHistory.labels.slice(-15);
+                outAlim = cacheSacsHistory.alimentaire.slice(-15);
+                outFruits = cacheSacsHistory.fruits.slice(-15);
+                outPain = cacheSacsHistory.pain.slice(-15);
+                outEmb = cacheSacsHistory.emballages.slice(-15);
+                outServ = cacheSacsHistory.serviettes.slice(-15);
+            } else {
+                let mapAccumulator = {};
+                for (let i = 0; i < cacheSacsHistory.labels.length; i++) {
+                    let isoDate = cacheSacsHistory.datesRaw[i]; // Format "yyyy-MM-dd"
+                    if (!isoDate) continue;
+                    
+                    let timeKey = "";
+                    if (mode === 'month') {
+                        timeKey = isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4); // "MM/YYYY"
+                    } else if (mode === 'year') {
+                        timeKey = isoDate.substring(0, 4); // "YYYY"
+                    }
+                    
+                    if (!mapAccumulator[timeKey]) {
+                        mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
+                    }
+                    mapAccumulator[timeKey].alim += parseFloat(cacheSacsHistory.alimentaire[i]) || 0;
+                    mapAccumulator[timeKey].fruits += parseFloat(cacheSacsHistory.fruits[i]) || 0;
+                    mapAccumulator[timeKey].pain += parseFloat(cacheSacsHistory.pain[i]) || 0;
+                    mapAccumulator[timeKey].emb += parseFloat(cacheSacsHistory.emballages[i]) || 0;
+                    mapAccumulator[timeKey].serv += parseFloat(cacheSacsHistory.serviettes[i]) || 0;
+                }
+                
+                finalLabels = Object.keys(mapAccumulator);
+                finalLabels.forEach(key => {
+                    outAlim.push(mapAccumulator[key].alim.toFixed(1));
+                    outFruits.push(mapAccumulator[key].fruits.toFixed(1));
+                    outPain.push(mapAccumulator[key].pain.toFixed(1));
+                    outEmb.push(mapAccumulator[key].emb.toFixed(1));
+                    outServ.push(mapAccumulator[key].serv.toFixed(1));
+                });
+            }
+            
+            chartHistorySacs.data.labels = finalLabels;
+            chartHistorySacs.data.datasets[0].data = outAlim;
+            chartHistorySacs.data.datasets[1].data = outFruits;
+            chartHistorySacs.data.datasets[2].data = outPain;
+            chartHistorySacs.data.datasets[3].data = outEmb;
+            chartHistorySacs.data.datasets[4].data = outServ;
+            chartHistorySacs.update();
+            
+            // Mutation cosmétique des boutons de contrôle front-end
+            document.querySelectorAll('.btn-toggle-hist').forEach(b => {
+                b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none';
+            });
+            let targetBtn = document.getElementById('btn-hist-' + mode);
+            if (targetBtn) {
+                targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f';
+            }
+        }
+
         function adjustWeight(id, value) {
             const input = document.getElementById(id);
             let currentVal = parseFloat(input.value) || 0;
-            let newVal = Math.max(0, currentVal + value);
-            input.value = newVal.toFixed(2);
+            input.value = Math.max(0, currentVal + value).toFixed(2);
         }
 
         function loadEtablissementsDropdown() {
@@ -428,7 +528,7 @@
             const school = document.getElementById('select-etablissement').value;
             const s1 = parseInt(document.getElementById('convives-s1').value)||0; const s2 = parseInt(document.getElementById('convives-s2').value)||0;
             localStorage.setItem(`convives-s1-${school}`, s1); localStorage.setItem(`convives-s2-${school}`, s2); localStorage.setItem(`totalConvives-${school}`, s1 + s2);
-            alert("Effectifs enregistrés !"); loadLiveData();
+            alert("Effectifs enregistrés avec succès !"); loadLiveData();
         }
 
         function saveBagWeights() {
@@ -448,7 +548,7 @@
                 document.getElementById('sac-pain').value = "0.00";
                 document.getElementById('sac-emballages').value = "0.00";
                 document.getElementById('sac-serviettes').value = "0.00";
-                loadLiveData();
+                loadLiveData(); 
             });
         }
 
@@ -458,13 +558,60 @@
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
             const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
-            
             const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
             document.getElementById('borne-menu-active').innerText = menuFinal;
             localStorage.setItem(`menuActive-${school}`, menuFinal);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "logMenu", ecole: school, effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450, menu_complet: menuFinal }) })
             .then(() => { alert('Menu activé pour le service !'); loadLiveData(); });
+        }
+
+        function loadLiveData() {
+            const school = document.getElementById('select-etablissement').value;
+            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
+            .then(response => response.json()).then(data => {
+                if (!data || !data.details || data.details.length === 0) { clearDashboardToZero(); return; }
+                const currentSchoolData = data.details.find(d => d.ecole === school);
+                if (!currentSchoolData || currentSchoolData.poidsMoyen == 0) { clearDashboardToZero(); return; }
+                
+                document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
+                document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
+                document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
+                document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
+
+                const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
+                const granularData = computeGranularFoodTypes(school, rawPercentages);
+                
+                updateCharts(data.historiqueLabels || ['Ce service'], data.historiquePoids || [0], rawPercentages, granularData);
+                
+                // Archivage dans le tampon et rendu de la vue temporelle par défaut (Jour)
+                if (data.sacsHistory) {
+                    cacheSacsHistory = data.sacsHistory;
+                    updateHistoryChartMode('day');
+                }
+            }).catch(() => clearDashboardToZero());
+        }
+
+        function clearDashboardToZero() {
+            document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
+            updateCharts([], [], [0, 0, 0, 0], { labels: [], data: [], colors: [] });
+            chartHistorySacs.data.labels = []; chartHistorySacs.update();
+            cacheSacsHistory = null;
+        }
+
+        function updateCharts(labelsTimeline, dataTimeline, dataCategoriesGrams, granularData) {
+            chartTimeline.data.labels = labelsTimeline; chartTimeline.data.datasets[0].data = dataTimeline; chartTimeline.update();
+            chartCategories.data.datasets[0].data = dataCategoriesGrams; chartCategories.update();
+            chartFoodTypes.data.labels = granularData.labels; chartFoodTypes.data.datasets[0].data = granularData.data; chartFoodTypes.data.datasets[0].backgroundColor = granularData.colors; chartFoodTypes.update();
+        }
+
+        function runGeminiAIAnalysis() {
+            const school = document.getElementById('select-etablissement').value;
+            const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
+            const resBox = document.getElementById('gemini-ai-result'); const resText = document.getElementById('gemini-ai-text');
+            resBox.style.display = "block"; resText.innerHTML = "<em>Analyse prédictive croisée en cours...</em>";
+            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, menu: menuText }) })
+            .then(r => r.json()).then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); });
         }
 
         function formatAIResponseToUI(text) {
@@ -498,84 +645,34 @@
             if (listeOuverte) output += '</ul>'; if (blockActuel > 0) output += '</div>'; return output;
         }
 
-        function runGeminiAIAnalysis() {
-            const school = document.getElementById('select-etablissement').value;
-            const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
-            const resultBox = document.getElementById('gemini-ai-result'); const resultText = document.getElementById('gemini-ai-text');
-            resultBox.style.display = "block"; resultText.innerHTML = "<em>Analyse en cours...</em>";
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, menu: menuText }) })
-            .then(r => r.json()).then(res => { resultText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); });
-        }
-
         function switchView(viewId) {
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); document.getElementById('menu-' + viewId).classList.add('active');
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active');
             if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
-            if (viewId === 'view-dashboard') { loadLiveData(); }
+            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets') { loadLiveData(); }
         }
 
         function computeGranularFoodTypes(school, categoriesPct) {
             const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
             let itemLabels = []; let itemValues = []; let itemColors = [];
             const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
-            
-            let pctE = parseFloat(categoriesPct[0]) || 0; let pctP = parseFloat(categoriesPct[1]) || 0;
-            let pctD = parseFloat(categoriesPct[2]) || 0; let pctPain = parseFloat(categoriesPct[3]) || 0;
-            
+            let pctE = parseFloat(categoriesPct[0]) || 0; let pctP = parseFloat(categoriesPct[1]) || 0; let pctD = parseFloat(categoriesPct[2]) || 0; let pctPain = parseFloat(categoriesPct[3]) || 0;
             if (savedMenu && savedMenu !== 'Non configuré') {
                 const parts = savedMenu.split(' / ');
                 const entrees = parts[0] && parts[0] !== 'Sans entrée' ? parts[0].split('+') : [];
                 const plats = parts[1] && parts[1] !== 'Sans plat' ? parts[1].split('+') : [];
                 const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
                 const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
-                
-                if (entrees.length > 0) entrees.forEach(item => { itemLabels.push(item); itemValues.push(pctE.toFixed(0)); itemColors.push(colors.entree); });
-                else if (pctE > 0) { itemLabels.push("Entrée"); itemValues.push(pctE.toFixed(0)); itemColors.push(colors.entree); }
-                
-                if (plats.length > 0 || accomps.length > 0) {
-                    plats.forEach(item => { itemLabels.push(item); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); });
-                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.accomp); });
+                if (entrees.length > 0) entrees.forEach(item => { itemLabels.push(item); itemValues.push((pctE / entrees.length).toFixed(0)); itemColors.push(colors.entree); });
+                if (plats.length > 0 || accomps.length > 0) { 
+                    let subCount = plats.length + accomps.length;
+                    plats.forEach(item => { itemLabels.push(item); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.plat); }); 
+                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.accomp); }); 
                 } else if (pctP > 0) { itemLabels.push("Plat principal"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); }
-                
-                if (desserts.length > 0) desserts.forEach(item => { itemLabels.push(item); itemValues.push(pctD.toFixed(0)); itemColors.push(colors.dessert); });
-                else if (pctD > 0) { itemLabels.push("Dessert"); itemValues.push(pctD.toFixed(0)); itemColors.push(colors.dessert); }
-            } else {
-                itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [pctE.toFixed(0), pctP.toFixed(0), pctD.toFixed(0)]; itemColors = [colors.entree, colors.plat, colors.dessert];
-            }
+                if (desserts.length > 0) desserts.forEach(item => { itemLabels.push(item); itemValues.push((pctD / desserts.length).toFixed(0)); itemColors.push(colors.dessert); });
+            } else { itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [pctE.toFixed(0), pctP.toFixed(0), pctD.toFixed(0)]; itemColors = [colors.entree, colors.plat, colors.dessert]; }
             itemLabels.push("Pain"); itemValues.push(pctPain.toFixed(0)); itemColors.push(colors.pain);
             return { labels: itemLabels, data: itemValues, colors: itemColors };
-        }
-
-        function loadLiveData() {
-            const school = document.getElementById('select-etablissement').value;
-            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
-            .then(response => response.json()).then(data => {
-                if (!data || !data.details || data.details.length === 0) { clearDashboardToZero(); return; }
-                const currentSchoolData = data.details.find(d => d.ecole === school);
-                if (!currentSchoolData || currentSchoolData.poidsMoyen == 0) { clearDashboardToZero(); return; }
-                
-                document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
-                document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
-                document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
-                document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
-
-                const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
-                let globalAvgPct = rawPercentages.reduce((a,b) => a+b, 0) / 4;
-                const granularData = computeGranularFoodTypes(school, rawPercentages);
-                
-                updateCharts(data.historiqueLabels || ['Ce service'], [globalAvgPct.toFixed(0)], rawPercentages, granularData);
-            }).catch(() => clearDashboardToZero());
-        }
-
-        function clearDashboardToZero() {
-            document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
-            updateCharts([], [], [0, 0, 0, 0], { labels: [], data: [], colors: [] });
-        }
-
-        function updateCharts(labelsTimeline, dataTimeline, dataCategoriesGrams, granularData) {
-            chartTimeline.data.labels = labelsTimeline; chartTimeline.data.datasets[0].data = dataTimeline; chartTimeline.update();
-            chartCategories.data.datasets[0].data = dataCategoriesGrams; chartCategories.update();
-            chartFoodTypes.data.labels = granularData.labels; chartFoodTypes.data.datasets[0].data = granularData.data; chartFoodTypes.data.datasets[0].backgroundColor = granularData.colors; chartFoodTypes.update();
         }
 
         async function initCamera() {
@@ -595,18 +692,14 @@
             banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; banner.className = "instruction-banner state-detected";
             document.getElementById('student-light').className = "traffic-light light-detected"; document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 18px; font-weight: 900; display: block; margin-top: 5px;">STOP</span>';
             document.getElementById('bar-container').style.display = "block"; document.getElementById('action-progress').style.width = '100%';
-            
             setTimeout(() => {
                 banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI"; banner.className = "instruction-banner state-success";
                 document.getElementById('student-light').className = "traffic-light light-success"; document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">VIDER</span>';
-                
                 const menuText = document.getElementById('borne-menu-active').innerText;
                 const school = document.getElementById('select-etablissement').value;
                 const simType = document.getElementById('sim-plateau-type').value;
-                
                 const payload = { action: "logScanImage", etablissement: school, menu_jour: menuText, image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" };
                 fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
-                
                 setTimeout(() => resetBorneUI(), 1200);
             }, 250);
         }
