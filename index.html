@@ -380,7 +380,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL UNIQUEMENT DÉFIÉ AUX SCRIPTINGS INTERNES -->
+    <!-- CODE CENTRAL DE GESTION APPLICATIVE JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
@@ -399,6 +399,7 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
             });
 
+            // Palmarès statistique horizontal
             chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 14 }] }, 
@@ -427,52 +428,6 @@
 
             loadEtablissementsDropdown(); 
         });
-
-        // 🧠 ALGORITHME ET STRUCTURE UNIQUE DU SYSTÈME GRANULAIRE ALIMENTAIRE (CORRIGÉ & SÉCURISÉ)
-        function computeGranularFoodTypes(school, categoriesPct) {
-            const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
-            let itemLabels = []; let itemValues = []; let itemColors = [];
-            const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
-            
-            let pctE = parseFloat(categoriesPct[0]) || 0; 
-            let pctP = parseFloat(categoriesPct[1]) || 0; 
-            let pctD = parseFloat(categoriesPct[2]) || 0; 
-            let pctPain = parseFloat(categoriesPct[3]) || 0;
-            
-            if (savedMenu && savedMenu !== 'Non configuré') {
-                const parts = savedMenu.split(' / ');
-                const entrees = parts[0] && parts[0] !== 'Sans entrée' ? parts[0].split('+') : [];
-                const plats = parts[1] && parts[1] !== 'Sans plat' ? parts[1].split('+') : [];
-                const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
-                const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
-                
-                if (entrees.length > 0) {
-                    entrees.forEach(item => { itemLabels.push(item); itemValues.push((pctE / entrees.length).toFixed(0)); itemColors.push(colors.entree); });
-                } else if (pctE > 0) {
-                    itemLabels.push("Entrée"); itemValues.push(pctE.toFixed(0)); itemColors.push(colors.entree);
-                }
-                
-                if (plats.length > 0 || accomps.length > 0) { 
-                    let subCount = plats.length + accomps.length;
-                    plats.forEach(item => { itemLabels.push(item); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.plat); }); 
-                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.accomp); }); 
-                } else if (pctP > 0) { 
-                    itemLabels.push("Plat principal"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); 
-                }
-                
-                if (desserts.length > 0) {
-                    desserts.forEach(item => { itemLabels.push(item); itemValues.push((pctD / desserts.length).toFixed(0)); itemColors.push(colors.dessert); });
-                }
-            } else { 
-                itemLabels = ['Entrées', 'Plats', 'Desserts']; 
-                itemValues = [pctE.toFixed(0), pctP.toFixed(0), pctD.toFixed(0)]; 
-                itemColors = [colors.entree, colors.plat, colors.dessert]; 
-            }
-            itemLabels.push("Pain"); 
-            itemValues.push(pctPain.toFixed(0)); 
-            itemColors.push(colors.pain);
-            return { labels: itemLabels, data: itemValues, colors: itemColors };
-        }
 
         function updateHistoryChartMode(mode) {
             if (!cacheSacsHistory || !cacheSacsHistory.labels || cacheSacsHistory.labels.length === 0) return;
@@ -509,6 +464,12 @@
             document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
             let targetBtn = document.getElementById('btn-hist-' + mode);
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
+        }
+
+        function adjustWeight(id, value) {
+            const input = document.getElementById(id);
+            let currentVal = parseFloat(input.value) || 0;
+            input.value = Math.max(0, currentVal + value).toFixed(2);
         }
 
         function loadEtablissementsDropdown() {
@@ -589,9 +550,20 @@
                 document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
 
                 const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
-                const granularData = computeGranularFoodTypes(school, rawPercentages);
                 
-                updateCharts(data.historiqueLabels || ['Ce service'], data.historiquePoids || [0], rawPercentages, granularData);
+                // 🌟 HYDRATATION DU PALMARÈS DIRECTEMENT REÇU DEPUIS L'ONGLET SUIVI_GASPILLAGE
+                if (data.palmares && data.palmares.labels && data.palmares.labels.length > 0) {
+                    chartFoodTypes.data.labels = data.palmares.labels;
+                    chartFoodTypes.data.datasets[0].data = data.palmares.values;
+                    const palette = ['#3b82f6', '#ffb703', '#9b5de5', '#e63946', '#2a9d8f', '#f4a261', '#e76f51', '#7209b7'];
+                    chartFoodTypes.data.datasets[0].backgroundColor = data.palmares.labels.map((_, i) => palette[i % palette.length]);
+                } else {
+                    chartFoodTypes.data.labels = [];
+                    chartFoodTypes.data.datasets[0].data = [];
+                }
+                chartFoodTypes.update();
+                
+                updateCharts(data.historiqueLabels || ['Ce service'], data.historiquePoids || [0], rawPercentages);
                 
                 if (data.sacsHistory) {
                     cacheSacsHistory = data.sacsHistory;
@@ -602,15 +574,15 @@
 
         function clearDashboardToZero() {
             document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
-            updateCharts([], [], [0, 0, 0, 0], { labels: [], data: [], colors: [] });
+            updateCharts([], [], [0, 0, 0, 0]);
             chartHistorySacs.data.labels = []; chartHistorySacs.update();
+            chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update();
             cacheSacsHistory = null;
         }
 
-        function updateCharts(labelsTimeline, dataTimeline, dataCategoriesGrams, granularData) {
+        function updateCharts(labelsTimeline, dataTimeline, dataCategoriesGrams) {
             chartTimeline.data.labels = labelsTimeline; chartTimeline.data.datasets[0].data = dataTimeline; chartTimeline.update();
             chartCategories.data.datasets[0].data = dataCategoriesGrams; chartCategories.update();
-            chartFoodTypes.data.labels = granularData.labels; chartFoodTypes.data.datasets[0].data = granularData.data; chartFoodTypes.data.datasets[0].backgroundColor = granularData.colors; chartFoodTypes.update();
         }
 
         function runGeminiAIAnalysis() {
