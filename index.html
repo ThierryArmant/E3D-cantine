@@ -81,8 +81,6 @@
         .state-searching { background-color: #4b5563 !important; }
         .state-detected { background-color: #ef4444 !important; }
         .state-success { background-color: #047857 !important; }
-        
-        /* Boutons commutateurs d'échelles de temps J/M/A */
         .btn-toggle-hist { padding: 6px 14px; font-size: 11.5px; font-weight: 700; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
     </style>
 </head>
@@ -103,7 +101,7 @@
         <div class="top-bar">
             <div style="display: flex; align-items: center; gap: 16px;">
                 <label style="font-weight: 700; font-size: 13px; color: #1b4332;">🏫 ÉTABLISSEMENT ACTIF :</label>
-                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc; cursor: pointer;">
+                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 8px 16px; border-radius: 6px; border: 2px solid #2d6a4f; font-weight: 700; font-size: 13px; color: #1b4332; background-color: #f8fafc; pointer-events: auto; opacity: 1;">
                     <option>Chargement...</option>
                 </select>
             </div>
@@ -268,7 +266,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS - OPTIMISÉE SUR UNE LIGNE AVEC CODES PASTELS -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - OPTIMISÉE PASTEL -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 24px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 6px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);">
@@ -370,7 +368,7 @@
                                     <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryChartMode('year')" style="background-color: transparent; color: #475569; border: none;">Année</button>
                                 </div>
                             </div>
-                            <div class="chart-container" style="height: 290px; position: relative; width: 100%;">
+                            <div class="chart-container" style="height: 280px; position: relative; width: 100%;">
                                 <canvas id="chart-history-sacs"></canvas>
                             </div>
                         </div>
@@ -382,11 +380,11 @@
         </div>
     </div>
 
-    <!-- CODE INTEGRAL DU SCRIPT JAVASCRIPT FRONT-END -->
+    <!-- CODE CENTRAL UNIQUEMENT DÉFIÉ AUX SCRIPTINGS INTERNES -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
-        let cacheSacsHistory = null; // Structure tampon mémoire globale pour l'agrégateur temporel
+        let cacheSacsHistory = null; 
 
         window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
@@ -430,76 +428,87 @@
             loadEtablissementsDropdown(); 
         });
 
-        // 🧠 ALGORITHME D'AGRÉGATION CHRONOLOGIQUE ÉVOLUTIF (ANTI-SATURATION DU GRAPHIQUE)
+        // 🧠 ALGORITHME ET STRUCTURE UNIQUE DU SYSTÈME GRANULAIRE ALIMENTAIRE (CORRIGÉ & SÉCURISÉ)
+        function computeGranularFoodTypes(school, categoriesPct) {
+            const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
+            let itemLabels = []; let itemValues = []; let itemColors = [];
+            const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
+            
+            let pctE = parseFloat(categoriesPct[0]) || 0; 
+            let pctP = parseFloat(categoriesPct[1]) || 0; 
+            let pctD = parseFloat(categoriesPct[2]) || 0; 
+            let pctPain = parseFloat(categoriesPct[3]) || 0;
+            
+            if (savedMenu && savedMenu !== 'Non configuré') {
+                const parts = savedMenu.split(' / ');
+                const entrees = parts[0] && parts[0] !== 'Sans entrée' ? parts[0].split('+') : [];
+                const plats = parts[1] && parts[1] !== 'Sans plat' ? parts[1].split('+') : [];
+                const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
+                const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
+                
+                if (entrees.length > 0) {
+                    entrees.forEach(item => { itemLabels.push(item); itemValues.push((pctE / entrees.length).toFixed(0)); itemColors.push(colors.entree); });
+                } else if (pctE > 0) {
+                    itemLabels.push("Entrée"); itemValues.push(pctE.toFixed(0)); itemColors.push(colors.entree);
+                }
+                
+                if (plats.length > 0 || accomps.length > 0) { 
+                    let subCount = plats.length + accomps.length;
+                    plats.forEach(item => { itemLabels.push(item); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.plat); }); 
+                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.accomp); }); 
+                } else if (pctP > 0) { 
+                    itemLabels.push("Plat principal"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); 
+                }
+                
+                if (desserts.length > 0) {
+                    desserts.forEach(item => { itemLabels.push(item); itemValues.push((pctD / desserts.length).toFixed(0)); itemColors.push(colors.dessert); });
+                }
+            } else { 
+                itemLabels = ['Entrées', 'Plats', 'Desserts']; 
+                itemValues = [pctE.toFixed(0), pctP.toFixed(0), pctD.toFixed(0)]; 
+                itemColors = [colors.entree, colors.plat, colors.dessert]; 
+            }
+            itemLabels.push("Pain"); 
+            itemValues.push(pctPain.toFixed(0)); 
+            itemColors.push(colors.pain);
+            return { labels: itemLabels, data: itemValues, colors: itemColors };
+        }
+
         function updateHistoryChartMode(mode) {
             if (!cacheSacsHistory || !cacheSacsHistory.labels || cacheSacsHistory.labels.length === 0) return;
-            
-            let finalLabels = [];
-            let outAlim = [], outFruits = [], outPain = [], outEmb = [], outServ = [];
+            let finalLabels = []; let outAlim = [], outFruits = [], outPain = [], outEmb = [], outServ = [];
             
             if (mode === 'day') {
-                // Affichage brut quotidien des 15 derniers jours pour garder une lecture fluide
                 finalLabels = cacheSacsHistory.labels.slice(-15);
-                outAlim = cacheSacsHistory.alimentaire.slice(-15);
-                outFruits = cacheSacsHistory.fruits.slice(-15);
-                outPain = cacheSacsHistory.pain.slice(-15);
-                outEmb = cacheSacsHistory.emballages.slice(-15);
-                outServ = cacheSacsHistory.serviettes.slice(-15);
+                outAlim = cacheSacsHistory.alimentaire.slice(-15); outFruits = cacheSacsHistory.fruits.slice(-15);
+                outPain = cacheSacsHistory.pain.slice(-15); outEmb = cacheSacsHistory.emballages.slice(-15); outServ = cacheSacsHistory.serviettes.slice(-15);
             } else {
                 let mapAccumulator = {};
                 for (let i = 0; i < cacheSacsHistory.labels.length; i++) {
-                    let isoDate = cacheSacsHistory.datesRaw[i]; // Format "yyyy-MM-dd"
-                    if (!isoDate) continue;
-                    
-                    let timeKey = "";
-                    if (mode === 'month') {
-                        timeKey = isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4); // "MM/YYYY"
-                    } else if (mode === 'year') {
-                        timeKey = isoDate.substring(0, 4); // "YYYY"
-                    }
-                    
-                    if (!mapAccumulator[timeKey]) {
-                        mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
-                    }
+                    let isoDate = cacheSacsHistory.datesRaw[i]; if (!isoDate) continue;
+                    let timeKey = mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4);
+                    if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
                     mapAccumulator[timeKey].alim += parseFloat(cacheSacsHistory.alimentaire[i]) || 0;
                     mapAccumulator[timeKey].fruits += parseFloat(cacheSacsHistory.fruits[i]) || 0;
                     mapAccumulator[timeKey].pain += parseFloat(cacheSacsHistory.pain[i]) || 0;
                     mapAccumulator[timeKey].emb += parseFloat(cacheSacsHistory.emballages[i]) || 0;
                     mapAccumulator[timeKey].serv += parseFloat(cacheSacsHistory.serviettes[i]) || 0;
                 }
-                
                 finalLabels = Object.keys(mapAccumulator);
                 finalLabels.forEach(key => {
-                    outAlim.push(mapAccumulator[key].alim.toFixed(1));
-                    outFruits.push(mapAccumulator[key].fruits.toFixed(1));
-                    outPain.push(mapAccumulator[key].pain.toFixed(1));
-                    outEmb.push(mapAccumulator[key].emb.toFixed(1));
-                    outServ.push(mapAccumulator[key].serv.toFixed(1));
+                    outAlim.push(mapAccumulator[key].alim.toFixed(1)); outFruits.push(mapAccumulator[key].fruits.toFixed(1));
+                    outPain.push(mapAccumulator[key].pain.toFixed(1)); outEmb.push(mapAccumulator[key].emb.toFixed(1)); outServ.push(mapAccumulator[key].serv.toFixed(1));
                 });
             }
             
             chartHistorySacs.data.labels = finalLabels;
-            chartHistorySacs.data.datasets[0].data = outAlim;
-            chartHistorySacs.data.datasets[1].data = outFruits;
-            chartHistorySacs.data.datasets[2].data = outPain;
-            chartHistorySacs.data.datasets[3].data = outEmb;
-            chartHistorySacs.data.datasets[4].data = outServ;
+            chartHistorySacs.data.datasets[0].data = outAlim; chartHistorySacs.data.datasets[1].data = outFruits;
+            chartHistorySacs.data.datasets[2].data = outPain; chartHistorySacs.data.datasets[3].data = outEmb; chartHistorySacs.data.datasets[4].data = outServ;
             chartHistorySacs.update();
             
-            // Mutation cosmétique des boutons de contrôle front-end
-            document.querySelectorAll('.btn-toggle-hist').forEach(b => {
-                b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none';
-            });
+            document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
             let targetBtn = document.getElementById('btn-hist-' + mode);
-            if (targetBtn) {
-                targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f';
-            }
-        }
-
-        function adjustWeight(id, value) {
-            const input = document.getElementById(id);
-            let currentVal = parseFloat(input.value) || 0;
-            input.value = Math.max(0, currentVal + value).toFixed(2);
+            if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
         function loadEtablissementsDropdown() {
@@ -584,7 +593,6 @@
                 
                 updateCharts(data.historiqueLabels || ['Ce service'], data.historiquePoids || [0], rawPercentages, granularData);
                 
-                // Archivage dans le tampon et rendu de la vue temporelle par défaut (Jour)
                 if (data.sacsHistory) {
                     cacheSacsHistory = data.sacsHistory;
                     updateHistoryChartMode('day');
@@ -645,36 +653,6 @@
             if (listeOuverte) output += '</ul>'; if (blockActuel > 0) output += '</div>'; return output;
         }
 
-        function switchView(viewId) {
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); document.getElementById('menu-' + viewId).classList.add('active');
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active');
-            if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
-            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets') { loadLiveData(); }
-        }
-
-        function computeGranularFoodTypes(school, categoriesPct) {
-            const savedMenu = localStorage.getItem(`menuActive-${school}`) || '';
-            let itemLabels = []; let itemValues = []; let itemColors = [];
-            const colors = { entree: '#3b82f6', plat: '#ffb703', accomp: '#f4a261', dessert: '#9b5de5', pain: '#e63946' };
-            let pctE = parseFloat(categoriesPct[0]) || 0; let pctP = parseFloat(categoriesPct[1]) || 0; let pctD = parseFloat(categoriesPct[2]) || 0; let pctPain = parseFloat(categoriesPct[3]) || 0;
-            if (savedMenu && savedMenu !== 'Non configuré') {
-                const parts = savedMenu.split(' / ');
-                const entrees = parts[0] && parts[0] !== 'Sans entrée' ? parts[0].split('+') : [];
-                const plats = parts[1] && parts[1] !== 'Sans plat' ? parts[1].split('+') : [];
-                const accomps = parts[2] && parts[2] !== 'Sans accomp.' ? parts[2].split('+') : [];
-                const desserts = parts[3] && parts[3] !== 'Sans dessert' ? parts[3].split('+') : [];
-                if (entrees.length > 0) entrees.forEach(item => { itemLabels.push(item); itemValues.push((pctE / entrees.length).toFixed(0)); itemColors.push(colors.entree); });
-                if (plats.length > 0 || accomps.length > 0) { 
-                    let subCount = plats.length + accomps.length;
-                    plats.forEach(item => { itemLabels.push(item); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.plat); }); 
-                    accomps.forEach(item => { itemLabels.push(item + " (Acc.)"); itemValues.push((pctP / subCount).toFixed(0)); itemColors.push(colors.accomp); }); 
-                } else if (pctP > 0) { itemLabels.push("Plat principal"); itemValues.push(pctP.toFixed(0)); itemColors.push(colors.plat); }
-                if (desserts.length > 0) desserts.forEach(item => { itemLabels.push(item); itemValues.push((pctD / desserts.length).toFixed(0)); itemColors.push(colors.dessert); });
-            } else { itemLabels = ['Entrées', 'Plats', 'Desserts']; itemValues = [pctE.toFixed(0), pctP.toFixed(0), pctD.toFixed(0)]; itemColors = [colors.entree, colors.plat, colors.dessert]; }
-            itemLabels.push("Pain"); itemValues.push(pctPain.toFixed(0)); itemColors.push(colors.pain);
-            return { labels: itemLabels, data: itemValues, colors: itemColors };
-        }
-
         async function initCamera() {
             const video = document.getElementById('camera-feed');
             try {
@@ -686,22 +664,11 @@
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
         function resetBorneUI() { isScanningProcess = false; document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ICI"; document.getElementById('instruction-text').className = "instruction-banner state-searching"; document.getElementById('student-light').className = "traffic-light light-searching"; document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">ATTENTE</span>'; document.getElementById('bar-container').style.display = "none"; document.getElementById('action-progress').style.width = "0%"; }
 
-        function triggerAutomaticCapture() {
-            if (isScanningProcess) return; isScanningProcess = true;
-            const banner = document.getElementById('instruction-text');
-            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; banner.className = "instruction-banner state-detected";
-            document.getElementById('student-light').className = "traffic-light light-detected"; document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 18px; font-weight: 900; display: block; margin-top: 5px;">STOP</span>';
-            document.getElementById('bar-container').style.display = "block"; document.getElementById('action-progress').style.width = '100%';
-            setTimeout(() => {
-                banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI"; banner.className = "instruction-banner state-success";
-                document.getElementById('student-light').className = "traffic-light light-success"; document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 16px; font-weight: 800; display: block; margin-top: 5px;">VIDER</span>';
-                const menuText = document.getElementById('borne-menu-active').innerText;
-                const school = document.getElementById('select-etablissement').value;
-                const simType = document.getElementById('sim-plateau-type').value;
-                const payload = { action: "logScanImage", etablissement: school, menu_jour: menuText, image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" };
-                fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) });
-                setTimeout(() => resetBorneUI(), 1200);
-            }, 250);
+        function switchView(viewId) {
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); document.getElementById('menu-' + viewId).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active');
+            if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
+            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets') { loadLiveData(); }
         }
     </script>
 </body>
