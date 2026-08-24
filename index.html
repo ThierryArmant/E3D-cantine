@@ -52,6 +52,37 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
         
+        /* 🗓️ BARRE DE FILTRAGE DES PÉRIODES */
+        .filter-period-bar {
+            background: white;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-left: 4px solid #2d6a4f;
+        }
+        .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .btn-period {
+            padding: 6px 12px;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #334155;
+            font-size: 11.5px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-period:hover { background: #e2e8f0; }
+        .btn-period.active { background: #2d6a4f; color: white; border-color: #2d6a4f; }
+        .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
+        .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; }
+
         /* Grilles KPI Fluides */
         .kpi-grid { 
             display: grid; 
@@ -77,7 +108,6 @@
         .dashboard-col { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .dashboard-col h3 { font-size: 14px; color: #1f2937; margin-bottom: 6px; font-weight: 700; }
         
-        /* Conteneurs graphiques compactés */
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
         
@@ -86,7 +116,6 @@
         
         .form-section { background-color: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
         
-        /* Grille des sacs adaptative */
         .form-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); 
@@ -106,7 +135,6 @@
         .input-center { width: 70px; height: 48px; text-align: center; font-size: 16px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #ffffff; -moz-appearance: textfield; }
         .input-center::-webkit-outer-spin-button, .input-center::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Conteneur de tableau défilant sur mobile */
         .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 16px; border-radius: 6px; border: 1px solid #e5e7eb; }
         .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 10px; text-align: left; font-size: 12px; font-weight: 600; border: 1px solid #e5e7eb; }
@@ -185,8 +213,26 @@
         </div>
 
         <div class="content-area">
-            <!-- PÔLE 1 : DASHBOARD -->
+            <!-- PÔLE 1 : DASHBOARD AVEC FILTRE TEMPOREL DYNAMIQUE -->
             <div id="view-dashboard" class="view-section active">
+                
+                <!-- 🗓️ BARRE DE SÉLECTION DE PÉRIODE -->
+                <div class="filter-period-bar">
+                    <div class="filter-btn-group">
+                        <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
+                        <button type="button" class="btn-period" onclick="setQuickPeriod('3months', this)">3 derniers mois</button>
+                        <button type="button" class="btn-period" onclick="setQuickPeriod('month', this)">Ce mois-ci</button>
+                        <button type="button" class="btn-period" onclick="setQuickPeriod('7days', this)">7 derniers jours</button>
+                    </div>
+                    <div class="custom-date-box">
+                        <span>Du :</span>
+                        <input type="date" id="filter-start-date" class="input-date">
+                        <span>Au :</span>
+                        <input type="date" id="filter-end-date" class="input-date">
+                        <button type="button" class="btn-period" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332;">Filtrer</button>
+                    </div>
+                </div>
+
                 <div class="kpi-grid">
                     <div class="kpi-card kpi-blue"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne réelle par convive</div></div>
                     <div class="kpi-card kpi-green"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité gaspillée totale</div></div>
@@ -344,7 +390,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS - OPTIMISÉE PASTEL & DYNAMIQUE -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - SIMPLIFIÉE POUR LES ÉLÈVES -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
@@ -430,9 +476,10 @@
                             </div>
                         </div>
                         
+                        <!-- 🌟 BOUTON SIMPLIFIÉ POUR LES ÉLÈVES -->
                         <div style="margin-top: 16px; margin-bottom: 24px;">
                             <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">
-                                💾 Enregistrer la caractérisation de fin de service
+                                💾 Enregistrer les modifications
                             </button>
                         </div>
 
@@ -462,7 +509,7 @@
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
-        let cacheSacsHistory = null; 
+        let globalRawData = null; // Cache mémoire brut pour les recalculs dynamiques de dates
 
         window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
@@ -506,6 +553,124 @@
             loadEtablissementsDropdown(); 
         });
 
+        // =========================================================================
+        // 🗓️ MOTEUR DE GESTION DES PÉRIODES TEMPORELLES (DU / AU / 3 MOIS / ETC.)
+        // =========================================================================
+        function setQuickPeriod(type, btnElem) {
+            document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
+            if (btnElem) btnElem.classList.add('active');
+
+            if (!globalRawData || !globalRawData.sacsHistory || globalRawData.sacsHistory.datesRaw.length === 0) return;
+            
+            const today = new Date();
+            let startDate = "";
+            let endDate = today.toISOString().split('T')[0];
+
+            if (type === 'all') {
+                startDate = "2000-01-01";
+            } else if (type === '3months') {
+                let d = new Date();
+                d.setMonth(d.getMonth() - 3);
+                startDate = d.toISOString().split('T')[0];
+            } else if (type === 'month') {
+                let d = new Date(today.getFullYear(), today.getMonth(), 1);
+                startDate = d.toISOString().split('T')[0];
+            } else if (type === '7days') {
+                let d = new Date();
+                d.setDate(d.getDate() - 7);
+                startDate = d.toISOString().split('T')[0];
+            }
+
+            document.getElementById('filter-start-date').value = startDate !== "2000-01-01" ? startDate : "";
+            document.getElementById('filter-end-date').value = endDate;
+
+            applyCalculationsForDateRange(startDate, endDate);
+        }
+
+        function applyCustomDateFilter() {
+            document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
+            let startDate = document.getElementById('filter-start-date').value || "2000-01-01";
+            let endDate = document.getElementById('filter-end-date').value || "2099-12-31";
+            applyCalculationsForDateRange(startDate, endDate);
+        }
+
+        function applyCalculationsForDateRange(startDate, endDate) {
+            if (!globalRawData || !globalRawData.sacsHistory) return;
+
+            const sh = globalRawData.sacsHistory;
+            const effectif = globalRawData.effectifCouverts || 450;
+            
+            let filteredLabels = [];
+            let filteredAlim = [], filteredFruits = [], filteredPain = [], filteredEmb = [], filteredServ = [];
+            let filteredDatesRaw = [];
+            let filteredTimelineScores = [];
+
+            let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
+            let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
+
+            for (let i = 0; i < sh.datesRaw.length; i++) {
+                let d = sh.datesRaw[i];
+                if (d >= startDate && d <= endDate) {
+                    filteredLabels.push(sh.labels[i]);
+                    filteredDatesRaw.push(d);
+                    
+                    let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i], emb = sh.emballages[i], s = sh.serviettes[i];
+                    filteredAlim.push(a); filteredFruits.push(f); filteredPain.push(p); filteredEmb.push(emb); filteredServ.push(s);
+                    
+                    totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
+                    lastAlimG = a * 1000; lastFruitsG = f * 1000; lastPainG = p * 1000;
+
+                    let totalS = a + f + p;
+                    let score = effectif > 0 ? ((totalS * 1000) / effectif) : 0;
+                    filteredTimelineScores.push(Math.min(100, score).toFixed(0));
+                }
+            }
+
+            // Filtrage des scans pour le Palmarès
+            let filteredScans = [];
+            if (globalRawData.rawGaspillage) {
+                filteredScans = globalRawData.rawGaspillage.filter(s => !s.dateRaw || (s.dateRaw >= startDate && s.dateRaw <= endDate));
+            }
+
+            // 1. Recalcul des 4 KPI Maîtres
+            let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
+            let totalLastNourritureG = lastAlimG + lastFruitsG + lastPainG;
+            let avgGrams = effectif > 0 ? (totalLastNourritureG / effectif) : 0;
+
+            document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
+            document.getElementById('kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
+            document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
+            document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg CO₂`;
+
+            // 2. Recalcul du Palmarès Aliments
+            runGranularExtraction(filteredScans);
+
+            // 3. Recalcul de l'Évolution temporelle
+            chartTimeline.data.labels = filteredLabels.slice(-15);
+            chartTimeline.data.datasets[0].data = filteredTimelineScores.slice(-15);
+            chartTimeline.update();
+
+            // 4. Recalcul des Grandes Composantes (%)
+            let statPctEntree = totalLastNourritureG > 0 ? ((lastAlimG * 0.3) / totalLastNourritureG) * 100 : 0;
+            let statPctPlat = totalLastNourritureG > 0 ? ((lastAlimG * 0.7) / totalLastNourritureG) * 100 : 0;
+            let statPctFruits = totalLastNourritureG > 0 ? (lastFruitsG / totalLastNourritureG) * 100 : 0;
+            let statPctPain = totalLastNourritureG > 0 ? (lastPainG / totalLastNourritureG) * 100 : 0;
+            chartCategories.data.datasets[0].data = [statPctEntree.toFixed(1), statPctPlat.toFixed(1), statPctFruits.toFixed(1), statPctPain.toFixed(1)];
+            chartCategories.update();
+
+            // 5. Mise à jour du cache pour le graphique des sacs
+            cacheSacsHistory = {
+                labels: filteredLabels,
+                datesRaw: filteredDatesRaw,
+                alimentaire: filteredAlim,
+                fruits: filteredFruits,
+                pain: filteredPain,
+                emballages: filteredEmb,
+                serviettes: filteredServ
+            };
+            updateHistoryChartMode('day');
+        }
+
         function updateHistoryChartMode(mode) {
             if (!cacheSacsHistory || !cacheSacsHistory.labels || cacheSacsHistory.labels.length === 0) return;
             let finalLabels = []; let outAlim = [], outFruits = [], outPain = [], outEmb = [], outServ = [];
@@ -543,116 +708,59 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🧠 MOTEUR CENTRAL EXTRACTEUR RÉVISÉ : FILTRAGE MULTI-RUBRIQUES PARALLÈLE
+        // 🧠 MOTEUR CENTRAL EXTRACTEUR MULTI-RUBRIQUES
         function runGranularExtraction(rawGaspillage) {
             if (!rawGaspillage || rawGaspillage.length === 0) {
                 chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update(); return;
             }
 
-            // Catalogues segmentés par type de composant pour éviter les collusions
             const keywordsEntree = [
-                { key: "tomate", label: "Tomates" },
-                { key: "carotte", label: "Carottes râpées" },
-                { key: "salade", label: "Salade verte" },
-                { key: "céleri", label: "Céleri rémoulade" },
-                { key: "oeuf", label: "Œuf mayonnaise" },
-                { key: "saucisson", label: "Saucisson" },
-                { key: "jambon de pays", label: "Jambon de pays" },
-                { key: "jambon blanc", label: "Jambon blanc" },
-                { key: "pâté", label: "Pâté / Terrine" },
-                { key: "terrine", label: "Pâté / Terrine" },
-                { key: "quiche", label: "Quiche / Tarte" },
-                { key: "pizza", label: "Pizza" },
-                { key: "friand", label: "Friand" }
+                { key: "tomate", label: "Tomates" }, { key: "carotte", label: "Carottes râpées" }, { key: "salade", label: "Salade verte" },
+                { key: "céleri", label: "Céleri rémoulade" }, { key: "oeuf", label: "Œuf mayonnaise" }, { key: "saucisson", label: "Saucisson" },
+                { key: "jambon de pays", label: "Jambon de pays" }, { key: "jambon blanc", label: "Jambon blanc" }, { key: "pâté", label: "Pâté / Terrine" },
+                { key: "terrine", label: "Pâté / Terrine" }, { key: "quiche", label: "Quiche / Tarte" }, { key: "pizza", label: "Pizza" }, { key: "friand", label: "Friand" }
             ];
 
             const keywordsPlat = [
-                { key: "gardianne", label: "Gardianne" },
-                { key: "couscous", label: "Couscous" },
-                { key: "paella", label: "Paella" },
-                { key: "bourguignon", label: "Bœuf bourguignon" },
-                { key: "blanquette", label: "Blanquette de veau" },
-                { key: "poulet rôti", label: "Poulet rôti" },
-                { key: "poulet", label: "Poulet rôti" },
-                { key: "nugget", label: "Nuggets" },
-                { key: "dinde", label: "Escalope de dinde" },
-                { key: "steak", label: "Steak haché" },
-                { key: "rôti de porc", label: "Rôti de porc/bœuf" },
-                { key: "rôti de bœuf", label: "Rôti de porc/bœuf" },
-                { key: "sauté de porc", label: "Sauté de porc" }, 
-                { key: "boulette", label: "Boulettes de bœuf" },
-                { key: "pané", label: "Poisson pané" },
-                { key: "colin", label: "Filet de colin" },
-                { key: "lasagne", label: "Lasagnes végétariennes" },
-                { key: "ratatouille", label: "Ratatouille" },
-                { key: "légumes sautés", label: "Ratatouille" }, 
-                { key: "sauté de légumes", label: "Ratatouille" },
-                { key: "frite", label: "Frites" },
-                { key: "pâte", label: "Pâtes" },
-                { key: "riz", label: "Riz" },
-                { key: "semoule", label: "Semoule" },
-                { key: "purée", label: "Purée" },
-                { key: "haricot", label: "Haricots verts" },
-                { key: "brocoli", label: "Brocolis" },
-                { key: "courgette", label: "Courgettes" }
+                { key: "gardianne", label: "Gardianne" }, { key: "couscous", label: "Couscous" }, { key: "paella", label: "Paella" },
+                { key: "bourguignon", label: "Bœuf bourguignon" }, { key: "blanquette", label: "Blanquette de veau" }, { key: "poulet rôti", label: "Poulet rôti" },
+                { key: "poulet", label: "Poulet rôti" }, { key: "nugget", label: "Nuggets" }, { key: "dinde", label: "Escalope de dinde" },
+                { key: "steak", label: "Steak haché" }, { key: "rôti de porc", label: "Rôti de porc/bœuf" }, { key: "rôti de bœuf", label: "Rôti de porc/bœuf" },
+                { key: "sauté de porc", label: "Sauté de porc" }, { key: "boulette", label: "Boulettes de bœuf" }, { key: "pané", label: "Poisson pané" },
+                { key: "colin", label: "Filet de colin" }, { key: "lasagne", label: "Lasagnes végétariennes" }, { key: "ratatouille", label: "Ratatouille" },
+                { key: "légumes sautés", label: "Ratatouille" }, { key: "sauté de légumes", label: "Ratatouille" }, { key: "frite", label: "Frites" },
+                { key: "pâte", label: "Pâtes" }, { key: "riz", label: "Riz" }, { key: "semoule", label: "Semoule" }, { key: "purée", label: "Purée" },
+                { key: "haricot", label: "Haricots verts" }, { key: "brocoli", label: "Brocolis" }, { key: "courgette", label: "Courgettes" }
             ];
 
             const keywordsDessert = [
-                { key: "melon", label: "Melon" },
-                { key: "pastèque", label: "Pastèque" },
-                { key: "pomme", label: "Pomme / Banane" },
-                { key: "banane", label: "Pomme / Banane" },
-                { key: "fruit", label: "Fruit de saison" },
-                { key: "compote", label: "Compote" },
-                { key: "yaourt", label: "Yaourt" },
-                { key: "fromage", label: "Portion Fromage" },
-                { key: "chocolat", label: "Gâteau au chocolat" },
-                { key: "éclair", label: "Éclair" },
-                { key: "tarte aux fruits", label: "Tarte aux fruits" }
+                { key: "melon", label: "Melon" }, { key: "pastèque", label: "Pastèque" }, { key: "pomme", label: "Pomme / Banane" },
+                { key: "banane", label: "Pomme / Banane" }, { key: "fruit", label: "Fruit de saison" }, { key: "compote", label: "Compote" },
+                { key: "yaourt", label: "Yaourt" }, { key: "fromage", label: "Portion Fromage" }, { key: "chocolat", label: "Gâteau au chocolat" },
+                { key: "éclair", label: "Éclair" }, { key: "tarte aux fruits", label: "Tarte aux fruits" }
             ];
 
             let aggregatedMap = {};
-
             function addMetric(label, val) {
                 if (!aggregatedMap[label]) aggregatedMap[label] = { total: 0, count: 0 };
-                aggregatedMap[label].total += val;
-                aggregatedMap[label].count++;
+                aggregatedMap[label].total += val; aggregatedMap[label].count++;
             }
 
             rawGaspillage.forEach(scan => {
                 let textRaw = scan.commentaire ? scan.commentaire.toLowerCase() : "";
-
-                // 1. Extraction Entrée distincte
                 if (scan.entree > 0) {
-                    let matched = false;
-                    for (let item of keywordsEntree) {
-                        if (textRaw.includes(item.key)) { addMetric(item.label, scan.entree); matched = true; break; }
-                    }
-                    if (!matched) addMetric("Autre Entrée", scan.entree);
+                    let m = false; for (let item of keywordsEntree) { if (textRaw.includes(item.key)) { addMetric(item.label, scan.entree); m = true; break; } }
+                    if (!m) addMetric("Autre Entrée", scan.entree);
                 }
-
-                // 2. Extraction Plat / Accompagnement distinct
                 if (scan.plat > 0) {
-                    let matched = false;
-                    for (let item of keywordsPlat) {
-                        if (textRaw.includes(item.key)) { addMetric(item.label, scan.plat); matched = true; break; }
-                    }
-                    if (!matched) addMetric("Autre Plat", scan.plat);
+                    let m = false; for (let item of keywordsPlat) { if (textRaw.includes(item.key)) { addMetric(item.label, scan.plat); m = true; break; } }
+                    if (!m) addMetric("Autre Plat", scan.plat);
                 }
-
-                // 3. Extraction Dessert distinct
                 if (scan.dessert > 0) {
-                    let matched = false;
-                    for (let item of keywordsDessert) {
-                        if (textRaw.includes(item.key)) { addMetric(item.label, scan.dessert); matched = true; break; }
-                    }
-                    if (!matched) addMetric("Autre Dessert", scan.dessert);
+                    let m = false; for (let item of keywordsDessert) { if (textRaw.includes(item.key)) { addMetric(item.label, scan.dessert); m = true; break; } }
+                    if (!m) addMetric("Autre Dessert", scan.dessert);
                 }
-
-                // 4. Extraction Pain autonome
-                if (scan.pain > 0) {
-                    addMetric("Pain", scan.pain);
-                }
+                if (scan.pain > 0) { addMetric("Pain", scan.pain); }
             });
 
             let palmaresFinalList = [];
@@ -738,35 +846,21 @@
             const school = document.getElementById('select-etablissement').value;
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
-                if (!data || !data.details || data.details.length === 0) { clearDashboardToZero(); return; }
-                const currentSchoolData = data.details.find(d => d.ecole === school);
-                if (!currentSchoolData || currentSchoolData.poidsMoyen == 0) { clearDashboardToZero(); return; }
+                if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 
-                document.getElementById('kpi-avg').innerText = `${parseFloat(currentSchoolData.poidsMoyen).toFixed(1)} g`;
-                document.getElementById('kpi-total').innerText = `${parseFloat(currentSchoolData.poidsCumule).toFixed(1)} kg`;
-                document.getElementById('kpi-money').innerText = `${parseFloat(currentSchoolData.cout).toFixed(2)} €`;
-                document.getElementById('kpi-impact').innerText = `${parseFloat(currentSchoolData.co2).toFixed(1)} kg CO₂`;
-
-                const rawPercentages = currentSchoolData.categoriesPct.map(v => parseFloat(v) || 0);
-                
-                runGranularExtraction(data.rawGaspillage);
-                updateCharts(data.historiqueLabels || ['Ce service'], data.historiquePoids || [0], rawPercentages);
-                
-                if (data.sacsHistory) { cacheSacsHistory = data.sacsHistory; updateHistoryChartMode('day'); }
+                globalRawData = data; // Enregistrement en cache
+                setQuickPeriod('all', document.querySelector('.btn-period')); // Vue initiale : Tout l'historique
             }).catch(() => clearDashboardToZero());
         }
 
         function clearDashboardToZero() {
             document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
-            updateCharts([], [], [0, 0, 0, 0]);
+            chartTimeline.data.labels = []; chartTimeline.data.datasets[0].data = []; chartTimeline.update();
+            chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
             chartHistorySacs.data.labels = []; chartHistorySacs.update();
             chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update();
             cacheSacsHistory = null;
-        }
-
-        function updateCharts(labelsTimeline, dataTimeline, dataCategoriesGrams) {
-            chartTimeline.data.labels = labelsTimeline; chartTimeline.data.datasets[0].data = dataTimeline; chartTimeline.update();
-            chartCategories.data.datasets[0].data = dataCategoriesGrams; chartCategories.update();
+            globalRawData = null;
         }
 
         function runGeminiAIAnalysis() {
@@ -795,7 +889,7 @@
                     if (currentLine.startsWith('### 1')) { blockActuel = 1; output += '<div class="ai-card-block ai-block-blue"><div class="ai-block-title">Analyse du Menu</div>'; }
                     else if (currentLine.startsWith('### 2')) { blockActuel = 2; output += '<div class="ai-card-block ai-block-orange"><div class="ai-block-title">Diagnostic du Gâchis</div>'; }
                     else if (currentLine.startsWith('### 3')) { blockActuel = 3; output += '<div class="ai-card-block ai-block-purple"><div class="ai-block-title">Prédictions</div>'; }
-                    else if (currentLine.startsWith('### 4')) { blockActuel = 4; output += '<div class="ai-card-block ai-block-green"><div class="ai-card-block-title">Recommandations au Chef</div>'; }
+                    else if (currentLine.startsWith('### 4')) { blockActuel = 4; output += '<div class="ai-card-block ai-block-green"><div class="ai-block-title">Recommandations au Chef</div>'; }
                     continue;
                 }
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
