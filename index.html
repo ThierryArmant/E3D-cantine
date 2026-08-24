@@ -203,6 +203,96 @@
             transform: translateY(2px);
             box-shadow: 0 4px 10px rgba(4, 120, 87, 0.2);
         }
+
+        /* 🏆 MODULE BILAN ÉLÈVES & ANALYSE IA SOUS LES PESÉES */
+        .bilan-eleves-wrapper {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bilan-header-box {
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+            background: linear-gradient(135deg, #059669, #047857);
+            transition: background 0.3s ease;
+        }
+        .bilan-header-box.zone-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .bilan-header-box.zone-rouge  { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .score-pill {
+            display: inline-block;
+            padding: 5px 14px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .score-title { font-size: 2.2rem; font-weight: 900; margin: 0; }
+        .score-sub { font-size: 11px; opacity: 0.9; margin-top: 4px; }
+        
+        .eq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            padding: 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .eq-card {
+            background: #ffffff;
+            padding: 12px 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .eq-card-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+        .eq-card-val { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+        .eq-card-lbl { font-size: 10.5px; color: #64748b; font-weight: 600; margin-top: 2px; }
+
+        .ia-feedback-area {
+            padding: 16px;
+        }
+        .ia-feedback-area h4 {
+            font-size: 12px;
+            color: #1b4332;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+        .ia-diag-box {
+            background: #f0fdf4;
+            border-left: 4px solid #059669;
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .ia-challenge-box {
+            background: #fffbeb;
+            border: 1px dashed #d97706;
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: #92400e;
+            font-size: 11.5px;
+            line-height: 1.45;
+        }
         
         /* 📱 RESPONSIVE MEDIA QUERIES */
         @media (max-width: 1024px) {
@@ -300,7 +390,7 @@
             <!-- PÔLE 2 : BORNE ET SMARTPHONE AVEC CAMERA LIVE ET GROS BOUTON -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
-                    <div id="instruction-text" class="instruction-banner state-searching">🤖 DEPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
+                    <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
                     
                     <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
                         <div style="flex: 1.2; min-width: 280px; position: relative;">
@@ -439,7 +529,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS - SIMPLIFIÉE POUR LES ÉLÈVES -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - AVEC BILAN ÉLÈVES ET ANALYSE IA -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
@@ -525,10 +615,47 @@
                             </div>
                         </div>
                         
-                        <div style="margin-top: 16px; margin-bottom: 24px;">
+                        <div style="margin-top: 16px; margin-bottom: 16px;">
                             <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">
-                                💾 Enregistrer les modifications
+                                💾 Enregistrer les pesées & Afficher le bilan élèves
                             </button>
+                        </div>
+
+                        <!-- 🏆 NOUVEAU MODULE : GRAND BILAN VISUEL ÉLÈVES & DIAGNOSTIC IA -->
+                        <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
+                            <div class="bilan-header-box" id="bilan-header-color">
+                                <div class="score-pill" id="bilan-score-pill">🟢 DÉFI RÉUSSI</div>
+                                <div class="score-title" id="bilan-score-val">0 g / convive</div>
+                                <div class="score-sub">Seuil national de référence EGAlim : 80 g / repas</div>
+                            </div>
+
+                            <div class="eq-grid">
+                                <div class="eq-card">
+                                    <span class="eq-card-icon">🥖</span>
+                                    <div class="eq-card-val" id="bilan-eq-pain">0</div>
+                                    <div class="eq-card-lbl">Baguettes de pain jetées</div>
+                                </div>
+                                <div class="eq-card">
+                                    <span class="eq-card-icon">🍽️</span>
+                                    <div class="eq-card-val" id="bilan-eq-repas">0</div>
+                                    <div class="eq-card-lbl">Repas complets perdus</div>
+                                </div>
+                                <div class="eq-card">
+                                    <span class="eq-card-icon">💶</span>
+                                    <div class="eq-card-val" id="bilan-eq-euros">0.00 €</div>
+                                    <div class="eq-card-lbl">Coût financier estimé</div>
+                                </div>
+                            </div>
+
+                            <div class="ia-feedback-area">
+                                <h4>🤖 L'Œil de l'IA sur le service du jour :</h4>
+                                <div class="ia-diag-box" id="bilan-ia-diag">
+                                    En attente de la saisie des données de pesée...
+                                </div>
+                                <div class="ia-challenge-box" id="bilan-ia-defi">
+                                    🎯 <strong>Défi éco-délégués :</strong> Moins de pain jeté dès le prochain service !
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 📈 ACCUMULATEUR CHRONOLOGIQUE ET COMMUTATEUR TEMPOREL ÉVOLUTIF -->
@@ -536,9 +663,9 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                                 <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">📈 Historique d'évolution des flux massiques (kg)</h3>
                                 <div style="display: flex; gap: 4px; background-color: #f1f5f9; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                    <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryChartMode('day')" style="background-color: #2d6a4f; color: white;">Jour</button>
-                                    <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryChartMode('month')" style="background-color: transparent; color: #475569; border: none;">Mois</button>
-                                    <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryChartMode('year')" style="background-color: transparent; color: #475569; border: none;">Année</button>
+                                    <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryChartMode('day')" style="background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; border: none;">Jour</button>
+                                    <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryChartMode('month')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Mois</button>
+                                    <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryChartMode('year')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Année</button>
                                 </div>
                             </div>
                             <div class="chart-container-large">
@@ -553,7 +680,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT DE SCRIPTING FRONTEND -->
+    <!-- CODE CENTRAL JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
@@ -710,6 +837,12 @@
                 serviettes: filteredServ
             };
             updateHistoryChartMode('day');
+
+            // Mise à jour automatique de la carte bilan élèves avec le dernier service
+            if (filteredAlim.length > 0) {
+                const idx = filteredAlim.length - 1;
+                renderBilanEleves(filteredAlim[idx], filteredFruits[idx], filteredPain[idx], effectif);
+            }
         }
 
         function updateHistoryChartMode(mode) {
@@ -852,25 +985,90 @@
             alert("Effectifs enregistrés avec succès !"); loadLiveData();
         }
 
+        // 🏆 MOTEUR DE CALCUL DU BILAN ÉLÈVES ET DIAGNOSTIC IA
+        function renderBilanEleves(alimKg, fruitsKg, painKg, effectif) {
+            const card = document.getElementById('bilan-eleves-container');
+            const header = document.getElementById('bilan-header-color');
+            const pill = document.getElementById('bilan-score-pill');
+            const val = document.getElementById('bilan-score-val');
+            
+            const totalKg = alimKg + fruitsKg + painKg;
+            if (totalKg <= 0 || !effectif || effectif <= 0) {
+                card.style.display = "none";
+                return;
+            }
+
+            const gramsPerPupil = Math.round((totalKg * 1000) / effectif);
+            val.innerText = `${gramsPerPupil} g / convive`;
+
+            header.className = "bilan-header-box";
+            if (gramsPerPupil <= 70) {
+                pill.innerText = "🟢 EXCELLENT — DÉFI RÉUSSI";
+            } else if (gramsPerPupil <= 95) {
+                header.classList.add("zone-orange");
+                pill.innerText = "🟠 VIGILANCE — OBJECTIF DÉPASSÉ";
+            } else {
+                header.classList.add("zone-rouge");
+                pill.innerText = "🔴 ALERTE — GASPILLAGE ÉLEVÉ";
+            }
+
+            const baguettes = Math.round((painKg * 1000) / 200);
+            const repasGaspilles = Math.round((totalKg * 1000) / 450);
+            const eurosGaspilles = (totalKg * 2.30).toFixed(2);
+
+            document.getElementById('bilan-eq-pain').innerText = `${baguettes}`;
+            document.getElementById('bilan-eq-repas').innerText = `${repasGaspilles}`;
+            document.getElementById('bilan-eq-euros').innerText = `${eurosGaspilles} €`;
+
+            let diagText = "";
+            let defiText = "";
+
+            if (gramsPerPupil <= 70) {
+                diagText = `Bravo à tous ! Avec seulement ${gramsPerPupil} g par convive, le collège est sous le seuil national (80 g). Les assiettes ont été très bien terminées.`;
+                defiText = `🎯 <strong>Défi du prochain repas :</strong> Gardons cette dynamique en continuant à adapter la quantité de pain prise au départ !`;
+            } else if (baguettes > 10) {
+                diagText = `Le plat principal a été bien mangé, mais le pain représente une part notable du gâchis aujourd'hui (${baguettes} baguettes entières non consommées).`;
+                defiText = `🎯 <strong>Défi du prochain repas :</strong> Ne prends qu'un seul morceau de pain au self. Tu pourras en reprendre si tu as encore faim !`;
+            } else {
+                diagText = `Le niveau de restes est au-dessus du seuil cible (${gramsPerPupil} g / repas). Une partie des accompagnements ou légumes a été délaissée.`;
+                defiText = `🎯 <strong>Défi du prochain repas :</strong> Demande une « petite portion » si tu as un petit appétit, et goûte avant de laisser !`;
+            }
+
+            document.getElementById('bilan-ia-diag').innerHTML = diagText;
+            document.getElementById('bilan-ia-defi').innerHTML = defiText;
+            card.style.display = "block";
+        }
+
         function saveBagWeights() {
             const school = document.getElementById('select-etablissement').value;
+            const alim = parseFloat(document.getElementById('sac-alimentaire').value) || 0;
+            const fruits = parseFloat(document.getElementById('sac-fruits').value) || 0;
+            const pain = parseFloat(document.getElementById('sac-pain').value) || 0;
+            const emb = parseFloat(document.getElementById('sac-emballages').value) || 0;
+            const serv = parseFloat(document.getElementById('sac-serviettes').value) || 0;
+            const effectif = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
+
             const payload = {
                 action: "logBagWeights", etablissement: school,
-                sac_alimentaire: document.getElementById('sac-alimentaire').value,
-                sac_fruits: document.getElementById('sac-fruits').value,
-                sac_pain: document.getElementById('sac-pain').value,
-                sac_emballages: document.getElementById('sac-emballages').value,
-                sac_serviettes: document.getElementById('sac-serviettes').value
+                sac_alimentaire: alim.toFixed(2),
+                sac_fruits: fruits.toFixed(2),
+                sac_pain: pain.toFixed(2),
+                sac_emballages: emb.toFixed(2),
+                sac_serviettes: serv.toFixed(2)
             };
+
+            // Rendu instantané du bilan pour les élèves
+            renderBilanEleves(alim, fruits, pain, effectif);
+
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                alert("Données des pesées enregistrées avec succès !");
+                alert("✅ Pesées enregistrées et bilan élèves mis à jour !");
                 document.getElementById('sac-alimentaire').value = "0.00"; document.getElementById('sac-fruits').value = "0.00";
                 document.getElementById('sac-pain').value = "0.00"; document.getElementById('sac-emballages').value = "0.00";
                 document.getElementById('sac-serviettes').value = "0.00"; loadLiveData(); 
             });
         }
 
-        // 🧠 FONCTION UTILITAIRE : RÉCUPÈRE LE MENU COCHÉ À L'ÉCRAN
+        // 🧠 RÉCUPÉRATION DU MENU COCHÉ
         function getCurrentCheckedMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
@@ -883,7 +1081,6 @@
             return `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
         }
 
-        // 💾 2. VALIDATION ET ENREGISTREMENT DU MENU PAR LE CUISINIER
         function saveMenu() {
             const school = document.getElementById('select-etablissement').value;
             const menuFinal = getCurrentCheckedMenu();
@@ -912,7 +1109,6 @@
             });
         }
 
-        // 🤖 1. ANALYSE IA EN DIRECT SUR LES CASES COCHÉES (SANS ACTIVER LE MENU)
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = getCurrentCheckedMenu();
@@ -964,6 +1160,7 @@
             chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update();
             cacheSacsHistory = null;
             globalRawData = null;
+            document.getElementById('bilan-eleves-container').style.display = "none";
         }
 
         function formatAIResponseToUI(text) {
@@ -1012,7 +1209,7 @@
                 resetBorneUI();
             } catch (err) { 
                 console.warn("Caméra indisponible ou permissions refusées:", err);
-                document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DESACTIVEE"; 
+                document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
             }
         }
 
@@ -1025,7 +1222,7 @@
         
         function resetBorneUI() { 
             isScanningProcess = false; 
-            document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
+            document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
             document.getElementById('instruction-text').className = "instruction-banner state-searching"; 
             document.getElementById('student-light').className = "traffic-light light-searching"; 
             document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 13px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>'; 
