@@ -34,7 +34,6 @@
       min-height: 100vh;
     }
 
-    /* Barre supérieure de navigation */
     header {
       background: #ffffff;
       border-bottom: 1px solid var(--border);
@@ -89,7 +88,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
 
-    /* Conteneur principal */
     main {
       flex: 1;
       max-width: 900px;
@@ -129,9 +127,6 @@
       gap: 8px;
     }
 
-    /* ========================================= */
-    /* ONGLET 1 : BORNE & SMARTPHONE            */
-    /* ========================================= */
     .camera-wrapper {
       position: relative;
       width: 100%;
@@ -149,7 +144,6 @@
       object-fit: cover;
     }
 
-    /* Voyant d'état lumineux */
     .status-banner {
       position: absolute;
       top: 12px;
@@ -164,7 +158,7 @@
       letter-spacing: 0.5px;
       color: #ffffff;
       transition: background 0.3s ease;
-      background: rgba(16, 185, 129, 0.9);
+      background: rgba(16, 185, 129, 0.95);
       backdrop-filter: blur(4px);
     }
 
@@ -193,7 +187,6 @@
       border-color: var(--primary);
     }
 
-    /* Gros bouton d'action élève */
     .btn-scan {
       width: 100%;
       padding: 22px;
@@ -223,9 +216,6 @@
       cursor: not-allowed;
     }
 
-    /* ========================================= */
-    /* ONGLET 2 : ESPACE CUISINIER               */
-    /* ========================================= */
     .form-group {
       margin-bottom: 16px;
     }
@@ -254,9 +244,6 @@
       background: var(--primary-dark);
     }
 
-    /* ========================================= */
-    /* ONGLET 3 : ESPACE PESÉE & BILAN ÉLÈVES    */
-    /* ========================================= */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -267,7 +254,6 @@
       .grid-2 { grid-template-columns: 1fr; }
     }
 
-    /* Carte d'affichage grand format */
     .bilan-container {
       margin-top: 24px;
       background: #ffffff;
@@ -380,7 +366,6 @@
       margin-top: 20px;
     }
 
-    /* Canvas masqué pour la capture */
     #hidden-canvas {
       display: none;
     }
@@ -388,7 +373,6 @@
 </head>
 <body>
 
-  <!-- En-tête -->
   <header>
     <div class="brand">
       <span>🍽️</span> Collège Jean Giono
@@ -402,17 +386,13 @@
 
   <main>
 
-    <!-- ======================================================= -->
-    <!-- TAB 1 : BORNE & SMARTPHONE                             -->
-    <!-- ======================================================= -->
     <section id="tab-borne" class="tab-content active">
       <div class="card">
         <h2>📸 Débarrassage du plateau</h2>
 
-        <!-- Sélecteur de webcam pour la EMEET C960 / caméra externe -->
         <div class="camera-select-row">
           <label for="camera-select" style="margin:0; min-width: 90px;">Caméra :</label>
-          <select id="camera-select" onchange="startCamera()"></select>
+          <select id="camera-select" onchange="changerCameraDepuisSelect()"></select>
         </div>
 
         <div class="camera-wrapper">
@@ -426,26 +406,23 @@
       </div>
     </section>
 
-    <!-- ======================================================= -->
-    <!-- TAB 2 : ESPACE CUISINIER                               -->
-    <!-- ======================================================= -->
     <section id="tab-cuisinier" class="tab-content">
       <div class="card">
         <h2>👨‍🍳 Configuration du service</h2>
         
         <div class="form-group">
           <label for="menu-entree">Entrée :</label>
-          <input type="text" id="menu-entree" placeholder="Ex: Salade de tomates bio">
+          <input type="text" id="menu-entree" placeholder="Ex : Salade de tomates bio">
         </div>
 
         <div class="form-group">
           <label for="menu-plat">Plat principal & Accompagnement :</label>
-          <input type="text" id="menu-plat" placeholder="Ex: Filet de poulet rôti, haricots verts">
+          <input type="text" id="menu-plat" placeholder="Ex : Filet de poulet rôti, haricots verts">
         </div>
 
         <div class="form-group">
           <label for="menu-dessert">Dessert :</label>
-          <input type="text" id="menu-dessert" placeholder="Ex: Yaourt nature ou Fruit de saison">
+          <input type="text" id="menu-dessert" placeholder="Ex : Yaourt nature ou fruit de saison">
         </div>
 
         <div class="form-group">
@@ -459,9 +436,6 @@
       </div>
     </section>
 
-    <!-- ======================================================= -->
-    <!-- TAB 3 : ESPACE PESÉE & BILAN ÉLÈVES                    -->
-    <!-- ======================================================= -->
     <section id="tab-pesee" class="tab-content">
       <div class="card">
         <h2>⚖️ Saisie de fin de service</h2>
@@ -469,12 +443,12 @@
         <div class="grid-2">
           <div class="form-group">
             <label for="poids-nourriture">Masse bac repas / restes (kg) :</label>
-            <input type="number" id="poids-nourriture" step="0.1" placeholder="Ex: 18.5">
+            <input type="number" id="poids-nourriture" step="0.1" placeholder="Ex : 18.5">
           </div>
 
           <div class="form-group">
             <label for="poids-pain">Masse bac pain (kg) :</label>
-            <input type="number" id="poids-pain" step="0.1" placeholder="Ex: 3.2">
+            <input type="number" id="poids-pain" step="0.1" placeholder="Ex : 3.2">
           </div>
         </div>
 
@@ -488,7 +462,6 @@
         </button>
       </div>
 
-      <!-- CARTE GRAND FORMAT : BILAN VISUEL POUR LES ÉLÈVES -->
       <div id="bilan-eleves-card" class="bilan-container" style="display: none;">
         
         <div class="bilan-header" id="bilan-header-bg">
@@ -528,7 +501,6 @@
         </div>
       </div>
 
-      <!-- Configuration Google Apps Script -->
       <div class="config-box">
         <label for="apps-script-url" style="font-size: 0.85rem; color: var(--text-muted);">
           ⚙️ URL Déploiement Google Apps Script (Webhook Sheets) :
@@ -542,9 +514,6 @@
   <canvas id="hidden-canvas"></canvas>
 
   <script>
-    // =========================================================
-    // ÉTAT GLOBAL DE L'APPLICATION
-    // =========================================================
     let streamActuel = null;
     let menuDuJour = {
       entree: "Salade",
@@ -553,125 +522,151 @@
       convives: 350
     };
 
-    // =========================================================
-    // INITIALISATION AU CHARGEMENT
-    // =========================================================
-    window.addEventListener("DOMContentLoaded", () => {
-      // Charger la configuration sauvegardée
+    window.addEventListener("DOMContentLoaded", async () => {
       const savedUrl = localStorage.getItem("apps_script_url");
       if (savedUrl) {
-        document.getElementById("apps-script-url").value = savedUrl;
+        const inputUrl = document.getElementById("apps-script-url");
+        if (inputUrl) inputUrl.value = savedUrl;
       }
-      
+
       const savedMenu = localStorage.getItem("menu_du_jour");
       if (savedMenu) {
-        menuDuJour = JSON.parse(savedMenu);
-        document.getElementById("menu-entree").value = menuDuJour.entree;
-        document.getElementById("menu-plat").value = menuDuJour.plat;
-        document.getElementById("menu-dessert").value = menuDuJour.dessert;
-        document.getElementById("menu-convives").value = menuDuJour.convives;
-        document.getElementById("nb-repas-servis").value = menuDuJour.convives;
+        try {
+          menuDuJour = JSON.parse(savedMenu);
+          if (document.getElementById("menu-entree")) document.getElementById("menu-entree").value = menuDuJour.entree || "";
+          if (document.getElementById("menu-plat")) document.getElementById("menu-plat").value = menuDuJour.plat || "";
+          if (document.getElementById("menu-dessert")) document.getElementById("menu-dessert").value = menuDuJour.dessert || "";
+          if (document.getElementById("menu-convives")) document.getElementById("menu-convives").value = menuDuJour.convives || 350;
+          if (document.getElementById("nb-repas-servis")) document.getElementById("nb-repas-servis").value = menuDuJour.convives || 350;
+        } catch (e) {
+          console.error("Erreur lecture menu", e);
+        }
       }
 
-      // Lister et démarrer les caméras
-      listerCameras();
+      await demarrerFluxCamera();
     });
 
-    // =========================================================
-    // GESTION DES ONGLETS
-    // =========================================================
-    function switchTab(tabId) {
-      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    async function demarrerFluxCamera(deviceId = null) {
+      const status = document.getElementById("status-light");
+      const video = document.getElementById("webcam");
 
-      document.getElementById(`tab-${tabId}`).classList.add("active");
-      
-      const buttons = document.querySelectorAll("nav button");
-      if (tabId === 'borne') buttons[0].classList.add("active");
-      if (tabId === 'cuisinier') buttons[1].classList.add("active");
-      if (tabId === 'pesee') buttons[2].classList.add("active");
+      if (streamActuel) {
+        streamActuel.getTracks().forEach(track => track.stop());
+        streamActuel = null;
+      }
+
+      const constraints = {
+        video: deviceId 
+          ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }
+          : { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      };
+
+      try {
+        streamActuel = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = streamActuel;
+        await video.play();
+
+        if (status) {
+          status.innerText = "🍏 ATTENTE — POSE TON PLATEAU";
+          status.className = "status-banner attente";
+        }
+
+        await mettreAJourListeCameras();
+
+      } catch (err) {
+        console.warn("Secours caméra par défaut...", err);
+        try {
+          streamActuel = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          video.srcObject = streamActuel;
+          await video.play();
+
+          if (status) {
+            status.innerText = "🍏 ATTENTE — POSE TON PLATEAU";
+            status.className = "status-banner attente";
+          }
+          await mettreAJourListeCameras();
+        } catch (e2) {
+          console.error("Accès caméra impossible :", e2);
+          if (status) {
+            status.innerText = "❌ CAMÉRA BLOQUÉE : AUTORISE L'ACCÈS DANS LE NAVIGATEUR";
+            status.className = "status-banner analyse";
+          }
+        }
+      }
     }
 
-    // =========================================================
-    // GESTION DU FLUX VIDÉO & WEBCAM EXTERNE (EMEET C960)
-    // =========================================================
-    async function listerCameras() {
+    async function mettreAJourListeCameras() {
       try {
         const select = document.getElementById("camera-select");
-        select.innerHTML = "";
-        
-        // Demande d'accès initial pour récupérer les libellés
-        await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        if (!select) return;
 
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(d => d.kind === "videoinput");
+
+        if (select.children.length === videoDevices.length && videoDevices.length > 0) {
+          return;
+        }
+
+        select.innerHTML = "";
         videoDevices.forEach((device, index) => {
           const option = document.createElement("option");
           option.value = device.deviceId;
           option.text = device.label || `Caméra ${index + 1}`;
-          // Prioriser une caméra externe / arrière si détectée
-          if (device.label.toLowerCase().includes("emeet") || 
-              device.label.toLowerCase().includes("back") || 
-              device.label.toLowerCase().includes("arri")) {
+
+          const nom = (device.label || "").toLowerCase();
+          if (nom.includes("emeet") || nom.includes("back") || nom.includes("arri") || nom.includes("usb")) {
             option.selected = true;
           }
           select.appendChild(option);
         });
-
-        startCamera();
       } catch (err) {
-        console.error("Erreur lors de l'accès à la caméra :", err);
-        document.getElementById("status-light").innerText = "❌ ERREUR CAMÉRA : VÉRIFIE LES ACCÈS";
-        document.getElementById("status-light").className = "status-banner analyse";
+        console.error("Erreur énumération périphériques :", err);
       }
     }
 
-    async function startCamera() {
-      if (streamActuel) {
-        streamActuel.getTracks().forEach(track => track.stop());
-      }
-
+    function changerCameraDepuisSelect() {
       const select = document.getElementById("camera-select");
-      const deviceId = select.value;
-      const constraints = {
-        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" }
-      };
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        streamActuel = stream;
-        const video = document.getElementById("webcam");
-        video.srcObject = stream;
-      } catch (err) {
-        console.error("Impossible de démarrer la caméra :", err);
+      if (select && select.value) {
+        demarrerFluxCamera(select.value);
       }
     }
 
-    // =========================================================
-    // SCAN DU PLATEAU & ANALYSE
-    // =========================================================
+    function switchTab(tabId) {
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      if (targetTab) targetTab.classList.add("active");
+
+      const buttons = document.querySelectorAll("nav button");
+      if (tabId === "borne" && buttons[0]) buttons[0].classList.add("active");
+      if (tabId === "cuisinier" && buttons[1]) buttons[1].classList.add("active");
+      if (tabId === "pesee" && buttons[2]) buttons[2].classList.add("active");
+    }
+
     async function declencherScan() {
       const btn = document.getElementById("btn-scan-main");
       const status = document.getElementById("status-light");
       const video = document.getElementById("webcam");
       const canvas = document.getElementById("hidden-canvas");
 
-      // Verrouillage de l'interface
-      btn.disabled = true;
-      status.innerText = "🛑 ANALYSE EN COURS...";
-      status.className = "status-banner analyse";
+      if (!video || !canvas) return;
 
-      // Capture de l'image
+      if (btn) btn.disabled = true;
+      if (status) {
+        status.innerText = "🛑 ANALYSE EN COURS...";
+        status.className = "status-banner analyse";
+      }
+
       canvas.width = 640;
       canvas.height = 480;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const base64Image = canvas.toDataURL("image/jpeg", 0.75).split(",")[1];
 
-      // Envoi asynchrone vers Google Apps Script
       const scriptUrl = localStorage.getItem("apps_script_url");
-      if (scriptUrl) {
+      if (scriptUrl && scriptUrl.startsWith("http")) {
         fetch(scriptUrl, {
           method: "POST",
           mode: "no-cors",
@@ -684,44 +679,44 @@
         }).catch(e => console.error("Erreur d'envoi Sheets :", e));
       }
 
-      // Simulation du temps de traitement & Signalétique tricolore
       setTimeout(() => {
-        status.innerText = "🟢 PARFAIT ! TU PEUX VIDER TON PLATEAU";
-        status.className = "status-banner vider";
+        if (status) {
+          status.innerText = "🟢 PARFAIT ! TU PEUX VIDER TON PLATEAU";
+          status.className = "status-banner vider";
+        }
 
         setTimeout(() => {
-          status.innerText = "🍏 ATTENTE — POSE TON PLATEAU";
-          status.className = "status-banner attente";
-          btn.disabled = false;
-        }, 2500);
+          if (status) {
+            status.innerText = "🍏 ATTENTE — POSE TON PLATEAU";
+            status.className = "status-banner attente";
+          }
+          if (btn) btn.disabled = false;
+        }, 2200);
 
-      }, 1200);
+      }, 1000);
     }
 
-    // =========================================================
-    // GESTION DU MENU (ESPACE CUISINIER)
-    // =========================================================
     function sauvegarderMenu() {
-      menuDuJour = {
-        entree: document.getElementById("menu-entree").value || "Non spécifié",
-        plat: document.getElementById("menu-plat").value || "Non spécifié",
-        dessert: document.getElementById("menu-dessert").value || "Non spécifié",
-        convives: parseInt(document.getElementById("menu-convives").value) || 350
-      };
+      const entree = document.getElementById("menu-entree")?.value.trim() || "Non spécifié";
+      const plat = document.getElementById("menu-plat")?.value.trim() || "Non spécifié";
+      const dessert = document.getElementById("menu-dessert")?.value.trim() || "Non spécifié";
+      const convives = parseInt(document.getElementById("menu-convives")?.value) || 350;
+
+      menuDuJour = { entree, plat, dessert, convives };
 
       localStorage.setItem("menu_du_jour", JSON.stringify(menuDuJour));
-      document.getElementById("nb-repas-servis").value = menuDuJour.convives;
+
+      const inputServis = document.getElementById("nb-repas-servis");
+      if (inputServis) inputServis.value = convives;
+
       alert("✅ Menu du jour enregistré avec succès !");
       switchTab("borne");
     }
 
-    // =========================================================
-    // GESTION DES PESÉES & BILAN ÉLÈVES
-    // =========================================================
     function validerPeseeService() {
-      const pNourriture = parseFloat(document.getElementById("poids-nourriture").value) || 0;
-      const pPain = parseFloat(document.getElementById("poids-pain").value) || 0;
-      const nbRepas = parseInt(document.getElementById("nb-repas-servis").value) || 350;
+      const pNourriture = parseFloat(document.getElementById("poids-nourriture")?.value) || 0;
+      const pPain = parseFloat(document.getElementById("poids-pain")?.value) || 0;
+      const nbRepas = parseInt(document.getElementById("nb-repas-servis")?.value) || 350;
 
       const pTotal = pNourriture + pPain;
 
@@ -730,62 +725,66 @@
         return;
       }
 
-      // 1. Calcul du ratio réglementaire EGAlim
       const grammesParPlateau = Math.round((pTotal * 1000) / nbRepas);
 
-      // 2. Mise à jour de l'en-tête et du code couleur
       const header = document.getElementById("bilan-header-bg");
       const badge = document.getElementById("badge-score");
       const titre = document.getElementById("titre-score");
 
-      header.className = "bilan-header";
-      titre.innerText = `${grammesParPlateau} g / plateau`;
+      if (header && badge && titre) {
+        header.className = "bilan-header";
+        titre.innerText = `${grammesParPlateau} g / plateau`;
 
-      if (grammesParPlateau <= 70) {
-        badge.innerText = "🟢 DÉFI RÉUSSI — EXCELLENT !";
-      } else if (grammesParPlateau <= 100) {
-        header.classList.add("zone-orange");
-        badge.innerText = "🟠 ATTENTION — EN HAUSSE";
-      } else {
-        header.classList.add("zone-rouge");
-        badge.innerText = "🔴 ALERTE GASPILLAGE";
+        if (grammesParPlateau <= 70) {
+          badge.innerText = "🟢 DÉFI RÉUSSI — EXCELLENT !";
+        } else if (grammesParPlateau <= 100) {
+          header.classList.add("zone-orange");
+          badge.innerText = "🟠 ATTENTION — EN HAUSSE";
+        } else {
+          header.classList.add("zone-rouge");
+          badge.innerText = "🔴 ALERTE GASPILLAGE";
+        }
       }
 
-      // 3. Calcul des équivalences
       const baguettes = Math.round((pPain * 1000) / 200);
       const repasGaspilles = Math.round((pTotal * 1000) / 450);
       const coutPerte = (pTotal * 2.30).toFixed(2);
 
-      document.getElementById("eq-pain-val").innerText = `${baguettes}`;
-      document.getElementById("eq-repas-val").innerText = `${repasGaspilles}`;
-      document.getElementById("eq-cout-val").innerText = `${coutPerte} €`;
+      const elPain = document.getElementById("eq-pain-val");
+      const elRepas = document.getElementById("eq-repas-val");
+      const elCout = document.getElementById("eq-cout-val");
 
-      // 4. Génération du diagnostic IA et défi du jour
+      if (elPain) elPain.innerText = `${baguettes}`;
+      if (elRepas) elRepas.innerText = `${repasGaspilles}`;
+      if (elCout) elCout.innerText = `${coutPerte} €`;
+
       let diagnostic = "";
       let defi = "";
 
       if (grammesParPlateau <= 70) {
-        diagnostic = `Excellent service pour le collège ! Avec ${grammesParPlateau} g par convive, vous êtes bien en dessous de l'objectif national des 80 g. Le plat (${menuDuJour.plat}) a été particulièrement bien consommé.`;
-        defi = "Maintenons ce cap en continuant à adapter la quantité de pain prise au self !";
+        diagnostic = `Excellent service pour le collège ! Avec ${grammesParPlateau} g par convive, vous êtes bien en dessous du seuil national des 80 g. Le plat (${menuDuJour.plat}) a été très bien consommé.`;
+        defi = "Maintenons ce super résultat demain en continuant de doser notre pain !";
       } else if (baguettes > 12) {
-        diagnostic = `Le plat principal est bien passé, mais le pain représente une part importante du gaspillage aujourd'hui (${baguettes} baguettes entières non consommées).`;
-        defi = "Prends un seul morceau de pain au départ. Tu pourras toujours en reprendre si nécessaire !";
+        diagnostic = `Le plat principal a été bien mangé, mais le pain représente une part importante du gaspillage aujourd'hui (${baguettes} baguettes entières non consommées).`;
+        defi = "Prends un seul morceau de pain au départ. Tu pourras en reprendre si tu as encore faim !";
       } else {
-        diagnostic = `Le niveau de restes est au-dessus du seuil cible (${grammesParPlateau} g / plateau). Une part importante de l'accompagnement n'a pas été terminée.`;
-        defi = "Demain, défi assiette nette : demande une petite portion si tu as un petit appétit !";
+        diagnostic = `Le niveau de restes est au-dessus du seuil cible (${grammesParPlateau} g / plateau). Une part notable de l'accompagnement n'a pas été terminée.`;
+        defi = "Demain, défi assiette nette : demande une portion adaptée à ton appétit !";
       }
 
-      document.getElementById("ia-message-texte").innerText = diagnostic;
-      document.getElementById("ia-defi-texte").innerText = defi;
+      const elMsg = document.getElementById("ia-message-texte");
+      const elDefi = document.getElementById("ia-defi-texte");
+      if (elMsg) elMsg.innerText = diagnostic;
+      if (elDefi) elDefi.innerText = defi;
 
-      // Affichage de la carte
       const card = document.getElementById("bilan-eleves-card");
-      card.style.display = "block";
-      card.scrollIntoView({ behavior: "smooth" });
+      if (card) {
+        card.style.display = "block";
+        card.scrollIntoView({ behavior: "smooth" });
+      }
 
-      // Envoi des pesées vers Google Sheets
       const scriptUrl = localStorage.getItem("apps_script_url");
-      if (scriptUrl) {
+      if (scriptUrl && scriptUrl.startsWith("http")) {
         fetch(scriptUrl, {
           method: "POST",
           mode: "no-cors",
@@ -800,17 +799,17 @@
             menu: menuDuJour,
             diagnostic: diagnostic
           })
-        }).catch(e => console.error("Erreur Sheets :", e));
+        }).catch(e => console.error("Erreur d'enregistrement Sheets :", e));
       }
     }
 
-    // =========================================================
-    // CONFIGURATION
-    // =========================================================
     function sauvegarderConfig() {
-      const url = document.getElementById("apps-script-url").value.trim();
-      localStorage.setItem("apps_script_url", url);
-      alert("⚙️ URL Google Apps Script enregistrée !");
+      const inputUrl = document.getElementById("apps-script-url");
+      if (inputUrl) {
+        const url = inputUrl.value.trim();
+        localStorage.setItem("apps_script_url", url);
+        alert("⚙️ Configuration enregistrée !");
+      }
     }
   </script>
 </body>
