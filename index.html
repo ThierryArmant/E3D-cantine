@@ -173,7 +173,6 @@
         .state-detected { background-color: #ef4444 !important; }
         .state-success { background-color: #047857 !important; }
 
-        /* 🔘 LE GROS BOUTON D'ACTION VISIBLE POUR LES ÉLÈVES */
         .btn-scan-trigger {
             background: linear-gradient(135deg, #059669 0%, #047857 100%);
             color: white;
@@ -256,7 +255,6 @@
             <!-- PÔLE 1 : DASHBOARD AVEC FILTRE TEMPOREL DYNAMIQUE -->
             <div id="view-dashboard" class="view-section active">
                 
-                <!-- 🗓️ BARRE DE SÉLECTION DE PÉRIODE -->
                 <div class="filter-period-bar">
                     <div class="filter-btn-group">
                         <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
@@ -305,13 +303,11 @@
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DEPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
                     
                     <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
-                        <!-- Flux vidéo live -->
                         <div style="flex: 1.2; min-width: 280px; position: relative;">
                             <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 280px; object-fit: cover; border-radius: 10px; background: #1e293b; border: 2px solid #cbd5e1;"></video>
                             <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
                         </div>
                         
-                        <!-- Feu tricolore d'état -->
                         <div style="flex: 0.8; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 160px; gap: 10px;">
                             <div id="student-light" class="traffic-light light-searching">
                                 🍏<br><span style="font-size: 13px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>
@@ -320,7 +316,6 @@
                         </div>
                     </div>
 
-                    <!-- 🌟 LE GROS BOUTON D'ACTION VISIBLE -->
                     <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()">
                         <span>📸</span>
                         <span>Appuyer pour scanner mon plateau</span>
@@ -332,7 +327,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER -->
+            <!-- PÔLE 3 : ESPACE CUISINIER AVEC ANALYSE DIRECTE DES CASES COCHÉES -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -427,9 +422,14 @@
                         </table>
                     </div>
                     
+                    <!-- 🌟 BOUTONS ORGANISÉS EN ÉTAPES LOGIQUES -->
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <button class="btn" onclick="saveMenu()" style="flex: 1; min-width: 200px;">💾 Activer le Menu & Lancer le service</button>
-                        <button class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; min-width: 200px; background-color: #047857;">🤖 Analyser le menu avec l'IA Gemini</button>
+                        <button type="button" class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; min-width: 220px; background-color: #047857;">
+                            🤖 1. Analyser le projet de menu avec l'IA Gemini
+                        </button>
+                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #1e3a8a;">
+                            💾 2. Valider & Lancer le service
+                        </button>
                     </div>
 
                     <div id="gemini-ai-result" class="ai-box">
@@ -525,7 +525,6 @@
                             </div>
                         </div>
                         
-                        <!-- 🌟 BOUTON SIMPLIFIÉ POUR LES ÉLÈVES -->
                         <div style="margin-top: 16px; margin-bottom: 24px;">
                             <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">
                                 💾 Enregistrer les modifications
@@ -871,17 +870,79 @@
             });
         }
 
-        function saveMenu() {
-            const school = document.getElementById('select-etablissement').value;
+        // 🧠 FONCTION UTILITAIRE : RÉCUPÈRE LE MENU COCHÉ À L'ÉCRAN
+        function getCurrentCheckedMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const  accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
-            const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
-            document.getElementById('borne-menu-active').innerText = menuFinal; localStorage.setItem(`menuActive-${school}`, menuFinal);
+            
+            if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) {
+                return null;
+            }
+            return `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
+        }
 
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify({ action: "logMenu", ecole: school, effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450, menu_complet: menuFinal }) })
-            .then(() => { alert('Menu activé pour le service !'); loadLiveData(); });
+        // 💾 2. VALIDATION ET ENREGISTREMENT DU MENU PAR LE CUISINIER
+        function saveMenu() {
+            const school = document.getElementById('select-etablissement').value;
+            const menuFinal = getCurrentCheckedMenu();
+            
+            if (!menuFinal) {
+                alert("Veuillez cocher au moins un élément pour activer le menu du jour.");
+                return;
+            }
+
+            document.getElementById('borne-menu-active').innerText = menuFinal; 
+            localStorage.setItem(`menuActive-${school}`, menuFinal);
+
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                mode: "no-cors", 
+                body: JSON.stringify({ 
+                    action: "logMenu", 
+                    ecole: school, 
+                    effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450, 
+                    menu_complet: menuFinal 
+                }) 
+            })
+            .then(() => { 
+                alert('✅ Menu validé et activé pour le service !'); 
+                loadLiveData(); 
+            });
+        }
+
+        // 🤖 1. ANALYSE IA EN DIRECT SUR LES CASES COCHÉES (SANS ACTIVER LE MENU)
+        function runGeminiAIAnalysis() {
+            const school = document.getElementById('select-etablissement').value;
+            const menuText = getCurrentCheckedMenu();
+            const resBox = document.getElementById('gemini-ai-result'); 
+            const resText = document.getElementById('gemini-ai-text');
+
+            if (!menuText) {
+                alert("⚠️ Veuillez cocher au moins un aliment dans le tableau pour analyser votre projet de menu.");
+                return;
+            }
+
+            resBox.style.display = "block"; 
+            resText.innerHTML = "<em>🤖 Analyse prédictive croisée en cours avec l'IA Gemini sur votre projet de menu...</em>";
+            
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                headers: { "Content-Type": "text/plain" }, 
+                body: JSON.stringify({ 
+                    action: "analyzeMenuWithStats", 
+                    etablissement: school, 
+                    menu: menuText 
+                }) 
+            })
+            .then(r => r.json())
+            .then(res => { 
+                resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); 
+            })
+            .catch(err => {
+                resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>";
+            });
         }
 
         function loadLiveData() {
@@ -903,15 +964,6 @@
             chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update();
             cacheSacsHistory = null;
             globalRawData = null;
-        }
-
-        function runGeminiAIAnalysis() {
-            const school = document.getElementById('select-etablissement').value;
-            const menuText = localStorage.getItem(`menuActive-${school}`) || 'Non configuré';
-            const resBox = document.getElementById('gemini-ai-result'); const resText = document.getElementById('gemini-ai-text');
-            resBox.style.display = "block"; resText.innerHTML = "<em>Analyse prédictive croisée en cours...</em>";
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, menu: menuText }) })
-            .then(r => r.json()).then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); });
         }
 
         function formatAIResponseToUI(text) {
@@ -981,27 +1033,25 @@
             document.getElementById('action-progress').style.width = "0%"; 
         }
 
-        // Extraction d'une image fixe depuis le flux live
         function getBase64FromLiveVideo() {
             const video = document.getElementById('camera-feed');
             if (!video || !localStream || video.readyState < 2) {
-                return "data:image/jpeg;base64,image_active_simulee"; // Repli automatique si caméra absente
+                return "data:image/jpeg;base64,image_active_simulee"; 
             }
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            return canvas.toDataURL('image/jpeg', 0.7); // Compression optimisée pour Gemini
+            return canvas.toDataURL('image/jpeg', 0.7); 
         }
 
-        // 🌟 DÉCLENCHEMENT LORS DE L'APPUI SUR LE GROS BOUTON
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
             
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "🛑 NE BOUGE PLUS ! ANALYSE EN COURS..."; 
+            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE EN COURS..."; 
             banner.className = "instruction-banner state-detected";
             
             const light = document.getElementById('student-light');
@@ -1013,9 +1063,7 @@
             barContainer.style.display = "block"; 
             bar.style.width = '100%';
             
-            // 1. Capture instantanée de l'image vidéo
             const imageBase64Data = getBase64FromLiveVideo();
-            
             const menuText = document.getElementById('borne-menu-active').innerText;
             const school = document.getElementById('select-etablissement').value;
             
@@ -1026,14 +1074,12 @@
                 image_base64: imageBase64Data 
             };
             
-            // 2. Envoi direct à Apps Script
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
                 mode: "no-cors", 
                 body: JSON.stringify(payload) 
             });
 
-            // 3. Animation du passage au Vert
             setTimeout(() => {
                 banner.innerText = "🟢 MERCI ! TU PEUX ALLER VIDER TON PLATEAU"; 
                 banner.className = "instruction-banner state-success";
