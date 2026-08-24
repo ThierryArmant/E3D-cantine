@@ -157,14 +157,53 @@
         .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 5px solid #9333ea; }.ai-block-purple .ai-block-title { color: #6b21a8; }.ai-block-purple .ai-bullet li::before { color: #9333ea; }
         .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; }.ai-block-green .ai-block-title { color: #166534; }
         
-        .borne-container { max-width: 750px; margin: 0 auto; }
-        .instruction-banner { background-color: #1e3a8a; color: white; padding: 10px; border-radius: 6px; font-size: 16px; font-weight: 800; margin-bottom: 14px; text-align: center; text-transform: uppercase; }
-        .traffic-light { width: 140px; height: 140px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: white; border: 6px solid #ffffff; }
+        /* 📸 SECTION BORNE & SMARTPHONE */
+        .borne-container { max-width: 800px; margin: 0 auto; text-align: center; }
+        .instruction-banner { background-color: #1e3a8a; color: white; padding: 12px; border-radius: 8px; font-size: 18px; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; transition: all 0.3s; }
+        
+        .traffic-light { width: 140px; height: 140px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 22px; color: white; border: 6px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .light-searching { background-color: #6b7280; } 
         .light-detected { background-color: #ef4444; } 
         .light-success { background-color: #10b981; } 
-        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 10px; height: 12px; overflow: hidden; display: none; }
-        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; }
+        
+        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 10px; height: 14px; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.3s ease; }
+        
+        .state-searching { background-color: #4b5563 !important; }
+        .state-detected { background-color: #ef4444 !important; }
+        .state-success { background-color: #047857 !important; }
+
+        /* 🔘 LE GROS BOUTON D'ACTION VISIBLE POUR LES ÉLÈVES */
+        .btn-scan-trigger {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            color: white;
+            font-size: 20px;
+            font-weight: 900;
+            padding: 20px 32px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 600px;
+            margin: 18px auto 8px auto;
+            box-shadow: 0 8px 20px rgba(4, 120, 87, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.15s ease;
+        }
+        .btn-scan-trigger:hover {
+            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(4, 120, 87, 0.45);
+        }
+        .btn-scan-trigger:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.2);
+        }
         
         /* 📱 RESPONSIVE MEDIA QUERIES */
         @media (max-width: 1024px) {
@@ -179,6 +218,7 @@
             .content-area { padding: 12px; overflow-y: visible; }
             .chart-container, .chart-container-large { height: 220px; }
             .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .btn-scan-trigger { font-size: 17px; padding: 16px 24px; }
         }
         
         @media (max-width: 480px) {
@@ -259,27 +299,36 @@
                 </div>
             </div>
 
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE AVEC CAMERA LIVE ET GROS BOUTON -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
-                    <div id="instruction-text" class="instruction-banner state-searching">🤖 DEPOSE TON PLATEAU ICI</div>
-                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 280px;">
-                            <video id="camera-feed" autoplay playsinline muted style="width: 100%; border-radius: 8px; background: #2d3748;"></video>
+                    <div id="instruction-text" class="instruction-banner state-searching">🤖 DEPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
+                    
+                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
+                        <!-- Flux vidéo live -->
+                        <div style="flex: 1.2; min-width: 280px; position: relative;">
+                            <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 280px; object-fit: cover; border-radius: 10px; background: #1e293b; border: 2px solid #cbd5e1;"></video>
                             <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
                         </div>
-                        <div style="display: flex; justify-content: center; align-items: center; min-width: 160px;">
-                            <div id="student-light" class="traffic-light light-searching">🍏<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span></div>
+                        
+                        <!-- Feu tricolore d'état -->
+                        <div style="flex: 0.8; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 160px; gap: 10px;">
+                            <div id="student-light" class="traffic-light light-searching">
+                                🍏<br><span style="font-size: 13px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>
+                            </div>
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Statut de la borne</span>
                         </div>
                     </div>
-                    <div style="background: white; padding: 14px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                        <select id="sim-plateau-type" style="padding: 8px; font-size: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                            <option value="complet">🍽️ Plateau avec Restes</option>
-                            <option value="vide">✨ Plateau Vide (0% gâchis)</option>
-                        </select>
-                        <button class="btn" onclick="triggerAutomaticCapture()" style="width: auto; padding: 8px 16px; margin-left: 10px; font-size: 12px;">📸 Simuler le scan visuel</button>
+
+                    <!-- 🌟 LE GROS BOUTON D'ACTION VISIBLE -->
+                    <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()">
+                        <span>📸</span>
+                        <span>Appuyer pour scanner mon plateau</span>
+                    </button>
+                    
+                    <div style="margin-top: 14px; font-size: 12px; color: #475569;">
+                        Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span>
                     </div>
-                    <div style="margin-top: 10px; font-size: 12px; color: #475569;">Configuration active borne : <span id="borne-menu-active" style="font-weight: bold;">--</span></div>
                 </div>
             </div>
 
@@ -509,7 +558,8 @@
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
-        let globalRawData = null; // Cache mémoire brut pour les recalculs dynamiques de dates
+        let cacheSacsHistory = null;
+        let globalRawData = null; 
 
         window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
@@ -553,9 +603,7 @@
             loadEtablissementsDropdown(); 
         });
 
-        // =========================================================================
-        // 🗓️ MOTEUR DE GESTION DES PÉRIODES TEMPORELLES (DU / AU / 3 MOIS / ETC.)
-        // =========================================================================
+        // 🗓️ GESTION DU FILTRE DE PÉRIODES
         function setQuickPeriod(type, btnElem) {
             document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
             if (btnElem) btnElem.classList.add('active');
@@ -626,13 +674,11 @@
                 }
             }
 
-            // Filtrage des scans pour le Palmarès
             let filteredScans = [];
             if (globalRawData.rawGaspillage) {
                 filteredScans = globalRawData.rawGaspillage.filter(s => !s.dateRaw || (s.dateRaw >= startDate && s.dateRaw <= endDate));
             }
 
-            // 1. Recalcul des 4 KPI Maîtres
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
             let totalLastNourritureG = lastAlimG + lastFruitsG + lastPainG;
             let avgGrams = effectif > 0 ? (totalLastNourritureG / effectif) : 0;
@@ -642,15 +688,12 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg CO₂`;
 
-            // 2. Recalcul du Palmarès Aliments
             runGranularExtraction(filteredScans);
 
-            // 3. Recalcul de l'Évolution temporelle
             chartTimeline.data.labels = filteredLabels.slice(-15);
             chartTimeline.data.datasets[0].data = filteredTimelineScores.slice(-15);
             chartTimeline.update();
 
-            // 4. Recalcul des Grandes Composantes (%)
             let statPctEntree = totalLastNourritureG > 0 ? ((lastAlimG * 0.3) / totalLastNourritureG) * 100 : 0;
             let statPctPlat = totalLastNourritureG > 0 ? ((lastAlimG * 0.7) / totalLastNourritureG) * 100 : 0;
             let statPctFruits = totalLastNourritureG > 0 ? (lastFruitsG / totalLastNourritureG) * 100 : 0;
@@ -658,7 +701,6 @@
             chartCategories.data.datasets[0].data = [statPctEntree.toFixed(1), statPctPlat.toFixed(1), statPctFruits.toFixed(1), statPctPain.toFixed(1)];
             chartCategories.update();
 
-            // 5. Mise à jour du cache pour le graphique des sacs
             cacheSacsHistory = {
                 labels: filteredLabels,
                 datesRaw: filteredDatesRaw,
@@ -822,7 +864,7 @@
                 sac_serviettes: document.getElementById('sac-serviettes').value
             };
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                alert("Données des pesées transmises avec succès.");
+                alert("Données des pesées enregistrées avec succès !");
                 document.getElementById('sac-alimentaire').value = "0.00"; document.getElementById('sac-fruits').value = "0.00";
                 document.getElementById('sac-pain').value = "0.00"; document.getElementById('sac-emballages').value = "0.00";
                 document.getElementById('sac-serviettes').value = "0.00"; loadLiveData(); 
@@ -833,7 +875,7 @@
             const school = document.getElementById('select-etablissement').value;
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const  accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
             const menuFinal = `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
             document.getElementById('borne-menu-active').innerText = menuFinal; localStorage.setItem(`menuActive-${school}`, menuFinal);
@@ -848,8 +890,8 @@
             .then(response => response.json()).then(data => {
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 
-                globalRawData = data; // Enregistrement en cache
-                setQuickPeriod('all', document.querySelector('.btn-period')); // Vue initiale : Tout l'historique
+                globalRawData = data; 
+                setQuickPeriod('all', document.querySelector('.btn-period'));
             }).catch(() => clearDashboardToZero());
         }
 
@@ -903,66 +945,120 @@
             if (listeOuverte) output += '</ul>'; if (blockActuel > 0) output += '</div>'; return output;
         }
 
+        // =========================================================================
+        // 📸 MOTEUR CAMERA EN DIRECT ET CAPTURE VIA LE GROS BOUTON
+        // =========================================================================
         async function initCamera() {
             const video = document.getElementById('camera-feed');
             try {
                 if (localStream) stopCamera();
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } }, audio: false });
-                video.srcObject = localStream; resetBorneUI();
-            } catch (err) { document.getElementById('instruction-text').innerText = "🤖 MODE SIMULATION ACTIVÉ"; }
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } }, 
+                    audio: false 
+                });
+                video.srcObject = localStream;
+                resetBorneUI();
+            } catch (err) { 
+                console.warn("Caméra indisponible ou permissions refusées:", err);
+                document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DESACTIVEE"; 
+            }
         }
-        function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
+
+        function stopCamera() { 
+            if (localStream) { 
+                localStream.getTracks().forEach(t => t.stop()); 
+                localStream = null; 
+            } 
+        }
         
         function resetBorneUI() { 
             isScanningProcess = false; 
-            document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ICI"; 
+            document.getElementById('instruction-text').innerText = "🤖 DEPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
             document.getElementById('instruction-text').className = "instruction-banner state-searching"; 
             document.getElementById('student-light').className = "traffic-light light-searching"; 
-            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>'; 
+            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 13px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>'; 
             document.getElementById('bar-container').style.display = "none"; 
             document.getElementById('action-progress').style.width = "0%"; 
         }
 
-        function triggerAutomaticCapture() {
-            if (isScanningProcess) return; isScanningProcess = true;
-            const banner = document.getElementById('instruction-text');
-            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE..."; banner.className = "instruction-banner state-detected";
-            document.getElementById('student-light').className = "traffic-light light-detected"; 
-            document.getElementById('student-light').innerHTML = '🛑<br><span style="font-size: 16px; font-weight: 900; display: block; margin-top: 4px;">STOP</span>';
-            document.getElementById('bar-container').style.display = "block"; 
-            document.getElementById('action-progress').style.width = '100%';
+        // Extraction d'une image fixe depuis le flux live
+        function getBase64FromLiveVideo() {
+            const video = document.getElementById('camera-feed');
+            if (!video || !localStream || video.readyState < 2) {
+                return "data:image/jpeg;base64,image_active_simulee"; // Repli automatique si caméra absente
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            return canvas.toDataURL('image/jpeg', 0.7); // Compression optimisée pour Gemini
+        }
+
+        // 🌟 DÉCLENCHEMENT LORS DE L'APPUI SUR LE GROS BOUTON
+        function triggerManualCapture() {
+            if (isScanningProcess) return; 
+            isScanningProcess = true;
             
+            const banner = document.getElementById('instruction-text');
+            banner.innerText = "🛑 NE BOUGE PLUS ! ANALYSE EN COURS..."; 
+            banner.className = "instruction-banner state-detected";
+            
+            const light = document.getElementById('student-light');
+            light.className = "traffic-light light-detected"; 
+            light.innerHTML = '🛑<br><span style="font-size: 16px; font-weight: 900; display: block; margin-top: 4px;">STOP</span>';
+            
+            const barContainer = document.getElementById('bar-container');
+            const bar = document.getElementById('action-progress');
+            barContainer.style.display = "block"; 
+            bar.style.width = '100%';
+            
+            // 1. Capture instantanée de l'image vidéo
+            const imageBase64Data = getBase64FromLiveVideo();
+            
+            const menuText = document.getElementById('borne-menu-active').innerText;
+            const school = document.getElementById('select-etablissement').value;
+            
+            const payload = { 
+                action: "logScanImage", 
+                etablissement: school, 
+                menu_jour: menuText, 
+                image_base64: imageBase64Data 
+            };
+            
+            // 2. Envoi direct à Apps Script
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                mode: "no-cors", 
+                body: JSON.stringify(payload) 
+            });
+
+            // 3. Animation du passage au Vert
             setTimeout(() => {
-                banner.innerText = "🟢 TU PEUX ALLER VIDER ! MERCI"; banner.className = "instruction-banner state-success";
-                document.getElementById('student-light').className = "traffic-light light-success"; 
-                document.getElementById('student-light').innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">VIDER</span>';
+                banner.innerText = "🟢 MERCI ! TU PEUX ALLER VIDER TON PLATEAU"; 
+                banner.className = "instruction-banner state-success";
                 
-                const menuText = document.getElementById('borne-menu-active').innerText;
-                const school = document.getElementById('select-etablissement').value;
-                const simType = document.getElementById('sim-plateau-type').value;
+                light.className = "traffic-light light-success"; 
+                light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">VIDER</span>';
                 
-                const payload = { 
-                    action: "logScanImage", 
-                    etablissement: school, 
-                    menu_jour: menuText, 
-                    image_base64: simType === 'vide' ? "empty" : "data:image/jpeg;base64,image_active_simulee" 
-                };
-                
-                fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                    method: "POST", 
-                    mode: "no-cors", 
-                    body: JSON.stringify(payload) 
-                });
-                
-                setTimeout(() => resetBorneUI(), 1200);
-            }, 250);
+                setTimeout(() => resetBorneUI(), 1400);
+            }, 600);
         }
 
         function switchView(viewId) {
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); document.getElementById('menu-' + viewId).classList.add('active');
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); document.getElementById(viewId).classList.add('active');
-            if (viewId === 'view-borne') { initCamera(); } else { stopCamera(); }
-            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets') { loadLiveData(); }
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); 
+            document.getElementById('menu-' + viewId).classList.add('active');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
+            document.getElementById(viewId).classList.add('active');
+            
+            if (viewId === 'view-borne') { 
+                initCamera(); 
+            } else { 
+                stopCamera(); 
+            }
+            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets') { 
+                loadLiveData(); 
+            }
         }
     </script>
 </body>
