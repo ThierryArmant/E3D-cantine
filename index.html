@@ -106,10 +106,78 @@
             margin-bottom: 12px; 
         }
         .dashboard-col { background: white; border-radius: 8px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .dashboard-col h3 { font-size: 14px; color: #1f2937; margin-bottom: 6px; font-weight: 700; }
+        .dashboard-col h3 { font-size: 14px; color: #1f2937; margin-bottom: 10px; font-weight: 700; }
         
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
+
+        /* 🍽️ PALMARÈS VISUEL DES ALIMENTS (IMAGE + CHIFFRE AU MILIEU) */
+        .palmares-visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            padding: 8px 0;
+        }
+        .food-badge-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .food-badge-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
+        }
+        .food-icon-wrapper {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 6px;
+        }
+        .food-big-emoji {
+            font-size: 50px;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+            user-select: none;
+        }
+        .food-percent-badge {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.90);
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 900;
+            padding: 3px 7px;
+            border-radius: 14px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+            white-space: nowrap;
+            letter-spacing: 0.3px;
+        }
+        .food-name-label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #334155;
+            line-height: 1.25;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
         
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 14px;}
         .btn:hover { background-color: #1b4332; }
@@ -204,7 +272,7 @@
             box-shadow: 0 4px 10px rgba(4, 120, 87, 0.2);
         }
 
-        /* 🏆 MODULE BILAN ÉLÈVES & ANALYSE IA SOUS LES PESÉES */
+        /* 🏆 MODULE BILAN ÉLÈVES & ANALYSE IA */
         .bilan-eleves-wrapper {
             background: #ffffff;
             border-radius: 12px;
@@ -379,10 +447,13 @@
                     </div>
                 </div>
                 
+                <!-- 🌟 NOUVEAU : PALMARÈS VISUEL AVEC IMAGES ET CHIFFRES AU CENTRE -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
-                        <h3>📊 Palmarès statistique des aliments les plus délaissés (%)</h3>
-                        <div class="chart-container-large"><canvas id="chart-food-types"></canvas></div>
+                        <h3>📊 Palmarès visuel des aliments les plus délaissés (%)</h3>
+                        <div id="palmares-badges-grid" class="palmares-visual-grid">
+                            <!-- Rempli dynamiquement en direct -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -512,7 +583,6 @@
                         </table>
                     </div>
                     
-                    <!-- 🌟 BOUTONS ORGANISÉS EN ÉTAPES LOGIQUES -->
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <button type="button" class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; min-width: 220px; background-color: #047857;">
                             🤖 1. Analyser le projet de menu avec l'IA Gemini
@@ -621,7 +691,7 @@
                             </button>
                         </div>
 
-                        <!-- 🏆 NOUVEAU MODULE : GRAND BILAN VISUEL ÉLÈVES & DIAGNOSTIC IA -->
+                        <!-- 🏆 GRAND BILAN VISUEL ÉLÈVES & DIAGNOSTIC IA -->
                         <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
                             <div class="bilan-header-box" id="bilan-header-color">
                                 <div class="score-pill" id="bilan-score-pill">🟢 DÉFI RÉUSSI</div>
@@ -683,9 +753,24 @@
     <!-- CODE CENTRAL JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
-        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartFoodTypes, chartHistorySacs;
+        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartHistorySacs;
         let cacheSacsHistory = null;
         let globalRawData = null; 
+
+        // Dictionnaire d'icônes réalistes pour le rendu visuel
+        const FOOD_ICONS_MAP = {
+            "Tomates": "🍅", "Carottes râpées": "🥕", "Salade verte": "🥗", "Céleri rémoulade": "🥗", "Œuf mayonnaise": "🥚",
+            "Saucisson": "🥖", "Jambon de pays": "🥓", "Jambon blanc": "🥓", "Pâté / Terrine": "🥩", "Quiche / Tarte": "🥧",
+            "Pizza": "🍕", "Friand": "🥟", "Gardianne": "🍲", "Couscous": "🍢", "Paella": "🥘",
+            "Bœuf bourguignon": "🍲", "Blanquette de veau": "🍲", "Poulet rôti": "🍗", "Nuggets": "🍗",
+            "Escalope de dinde": "🍗", "Steak haché": "🥩", "Rôti de porc/bœuf": "🥩", "Sauté de porc": "🥩",
+            "Boulettes de bœuf": "🧆", "Poisson pané": "🐟", "Filet de colin": "🐟", "Galette de céréales": "🥞",
+            "Lasagnes végétariennes": "🍝", "Frites": "🍟", "Pâtes": "🍝", "Riz": "🍚", "Semoule": "🥣",
+            "Purée": "🥔", "Haricots verts": "🥦", "Ratatouille": "🍆", "Brocolis": "🥦", "Petits pois / Carottes": "🥕",
+            "Courgettes": "🥒", "Melon": "🍈", "Pastèque": "🍉", "Pomme / Banane": "🍎", "Fruit de saison": "🍓",
+            "Compote": "🍎", "Yaourt": "🥛", "Portion Fromage": "🧀", "Gâteau au chocolat": "🍫", "Éclair": "🥖",
+            "Tarte aux fruits": "🥧", "Pain": "🥖", "Autre Entrée": "🥗", "Autre Plat": "🍽️", "Autre Dessert": "🍰"
+        };
 
         window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
@@ -698,12 +783,6 @@
                 type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 30 }] }, 
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
-            });
-
-            chartFoodTypes = new Chart(document.getElementById('chart-food-types').getContext('2d'), { 
-                type: 'bar', plugins: [ChartDataLabels], 
-                data: { labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 12 }] }, 
-                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'right', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold', size: 10 } } } } 
             });
 
             chartHistorySacs = new Chart(document.getElementById('chart-history-sacs').getContext('2d'), {
@@ -814,6 +893,7 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg CO₂`;
 
+            // Rendu de la grille visuelle du palmarès
             runGranularExtraction(filteredScans);
 
             chartTimeline.data.labels = filteredLabels.slice(-15);
@@ -838,7 +918,6 @@
             };
             updateHistoryChartMode('day');
 
-            // Mise à jour automatique de la carte bilan élèves avec le dernier service
             if (filteredAlim.length > 0) {
                 const idx = filteredAlim.length - 1;
                 renderBilanEleves(filteredAlim[idx], filteredFruits[idx], filteredPain[idx], effectif);
@@ -882,10 +961,14 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🧠 MOTEUR CENTRAL EXTRACTEUR MULTI-RUBRIQUES
+        // 🧠 MOTEUR VISUEL DU PALMARÈS (IMAGES + CHIFFRES AU CENTRE)
         function runGranularExtraction(rawGaspillage) {
+            const grid = document.getElementById('palmares-badges-grid');
+            if (!grid) return;
+
             if (!rawGaspillage || rawGaspillage.length === 0) {
-                chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update(); return;
+                grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée de scan pour cette période.</p>";
+                return;
             }
 
             const keywordsEntree = [
@@ -943,11 +1026,21 @@
             }
             palmaresFinalList.sort((a, b) => b.value - a.value);
 
-            chartFoodTypes.data.labels = palmaresFinalList.map(item => item.label).slice(0, 8);
-            chartFoodTypes.data.datasets[0].data = palmaresFinalList.map(item => item.value).slice(0, 8);
-            const palette = ['#3b82f6', '#ffb703', '#9b5de5', '#e63946', '#2a9d8f', '#f4a261', '#e76f51', '#7209b7'];
-            chartFoodTypes.data.datasets[0].backgroundColor = chartFoodTypes.data.labels.map((_, i) => palette[i % palette.length]);
-            chartFoodTypes.update();
+            // Génération dynamique des cartes visuelles
+            grid.innerHTML = "";
+            palmaresFinalList.slice(0, 10).forEach(item => {
+                const emoji = FOOD_ICONS_MAP[item.label] || "🍽️";
+                const card = document.createElement('div');
+                card.className = "food-badge-card";
+                card.innerHTML = `
+                    <div class="food-icon-wrapper">
+                        <span class="food-big-emoji">${emoji}</span>
+                        <span class="food-percent-badge">${item.value}%</span>
+                    </div>
+                    <div class="food-name-label">${item.label}</div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
         function adjustWeight(id, value) {
@@ -1057,7 +1150,6 @@
                 sac_serviettes: serv.toFixed(2)
             };
 
-            // Rendu instantané du bilan pour les élèves
             renderBilanEleves(alim, fruits, pain, effectif);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
@@ -1068,7 +1160,6 @@
             });
         }
 
-        // 🧠 RÉCUPÉRATION DU MENU COCHÉ
         function getCurrentCheckedMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
@@ -1157,7 +1248,10 @@
             chartTimeline.data.labels = []; chartTimeline.data.datasets[0].data = []; chartTimeline.update();
             chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
             chartHistorySacs.data.labels = []; chartHistorySacs.update();
-            chartFoodTypes.data.labels = []; chartFoodTypes.data.datasets[0].data = []; chartFoodTypes.update();
+            
+            const grid = document.getElementById('palmares-badges-grid');
+            if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
+            
             cacheSacsHistory = null;
             globalRawData = null;
             document.getElementById('bilan-eleves-container').style.display = "none";
