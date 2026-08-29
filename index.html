@@ -110,7 +110,7 @@
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
 
-        /* 🍽️ PALMARÈS VISUEL PONDÉRÉ : IMAGES CLAIRES + CHIFFRES EN DESSOUS */
+        /* 🍽️ PALMARÈS VISUEL PONDÉRÉ : IMAGES VISIBLES + BADGES EN DESSOUS */
         .palmares-visual-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -436,7 +436,7 @@
                     </div>
                 </div>
                 
-                <!-- PALMARÈS VISUEL PONDÉRÉ : IMAGES CLAIRES + CHIFFRES EN DESSOUS -->
+                <!-- PALMARÈS VISUEL PONDÉRÉ : IMAGES VISIBLES + BADGES EN DESSOUS -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
@@ -758,6 +758,22 @@
         let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartHistorySacs;
         let cacheSacsHistory = null;
         let globalRawData = null; 
+
+        // 🔊 MODULE DE SYNTHÈSE VOCALE FLASH (1,2x - ULTRA-RAPIDE)
+        function prononcerMessage(texte) {
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel(); // Coupe toute voix précédente
+                    const voix = new SpeechSynthesisUtterance(texte);
+                    voix.lang = 'fr-FR';
+                    voix.rate = 1.2;  // Débit accéléré et dynamique pour ne pas bloquer le flux
+                    voix.pitch = 1.0;
+                    window.speechSynthesis.speak(voix);
+                } catch(e) {
+                    console.warn("Synthèse vocale indisponible :", e);
+                }
+            }
+        }
 
         // Dictionnaire des icônes
         const FOOD_ICONS_MAP = {
@@ -1389,6 +1405,7 @@
             return canvas.toDataURL('image/jpeg', 0.7); 
         }
 
+        // ⚡ CAPTURE FLASH ET MESSAGE VOCAL ULTRA-COURT
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
@@ -1424,14 +1441,18 @@
             });
 
             setTimeout(() => {
-                banner.innerText = "🟢 MERCI ! TU PEUX ALLER VIDER TON PLATEAU"; 
+                banner.innerText = "🟢 MERCI ! PLATEAU SUIVANT !"; 
                 banner.className = "instruction-banner state-success";
                 
                 light.className = "traffic-light light-success"; 
-                light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">VIDER</span>';
+                light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">SUIVANT</span>';
                 
-                setTimeout(() => resetBorneUI(), 1400);
-            }, 600);
+                // 🔊 Annonce flash (1,5 seconde max)
+                prononcerMessage("Merci ! Plateau suivant !");
+                
+                // Retour immédiat à l'attente pour le convive suivant
+                setTimeout(() => resetBorneUI(), 1000);
+            }, 500);
         }
 
         function switchView(viewId) {
