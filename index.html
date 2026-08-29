@@ -759,19 +759,59 @@
         let cacheSacsHistory = null;
         let globalRawData = null; 
 
-        // 🔊 MODULE DE SYNTHÈSE VOCALE FLASH (1,2x - ULTRA-RAPIDE)
+        // 🔊 MOTEUR VOCAL RENFORCÉ AVEC CHARGEMENT ET DÉBLOCAGE NAVIGATEUR
+        let systemVoices = [];
+        let frenchVoice = null;
+        let audioUnlocked = false;
+
+        function initSystemVoices() {
+            if (!('speechSynthesis' in window)) return;
+            systemVoices = window.speechSynthesis.getVoices();
+            if (systemVoices.length > 0) {
+                frenchVoice = systemVoices.find(v => v.lang === 'fr-FR' || v.lang.startsWith('fr')) || null;
+            }
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = initSystemVoices;
+            initSystemVoices();
+        }
+
+        // Déverrouille la politique audio du navigateur dès la première interaction
+        function unlockAudioContext() {
+            if (audioUnlocked || !('speechSynthesis' in window)) return;
+            try {
+                const dummy = new SpeechSynthesisUtterance('');
+                dummy.volume = 0;
+                window.speechSynthesis.speak(dummy);
+                audioUnlocked = true;
+            } catch(e) {}
+        }
+        window.addEventListener('click', unlockAudioContext, { once: true });
+        window.addEventListener('touchstart', unlockAudioContext, { once: true });
+
         function prononcerMessage(texte) {
-            if ('speechSynthesis' in window) {
-                try {
-                    window.speechSynthesis.cancel(); // Coupe toute voix précédente
-                    const voix = new SpeechSynthesisUtterance(texte);
-                    voix.lang = 'fr-FR';
-                    voix.rate = 1.2;  // Débit accéléré et dynamique pour ne pas bloquer le flux
-                    voix.pitch = 1.0;
-                    window.speechSynthesis.speak(voix);
-                } catch(e) {
-                    console.warn("Synthèse vocale indisponible :", e);
+            if (!('speechSynthesis' in window)) return;
+            try {
+                window.speechSynthesis.cancel(); // Annule tout message bloqué
+
+                const msg = new SpeechSynthesisUtterance(texte);
+                msg.lang = 'fr-FR';
+                msg.rate = 1.25;  // Débit flash pour passage rapide des élèves
+                msg.pitch = 1.0;
+                msg.volume = 1.0;
+
+                if (!frenchVoice) initSystemVoices();
+                if (frenchVoice) msg.voice = frenchVoice;
+
+                window.speechSynthesis.speak(msg);
+
+                // Déblocage si le navigateur l'a mis en pause
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
                 }
+            } catch(e) {
+                console.warn("Audio non disponible :", e);
             }
         }
 
@@ -1233,7 +1273,7 @@
         function getCurrentCheckedMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const  accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
             
             if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) {
@@ -1447,10 +1487,10 @@
                 light.className = "traffic-light light-success"; 
                 light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">SUIVANT</span>';
                 
-                // 🔊 Annonce flash (1,5 seconde max)
+                // 🔊 Annonce flash sonore
                 prononcerMessage("Merci ! Plateau suivant !");
                 
-                // Retour immédiat à l'attente pour le convive suivant
+                // Réinitialisation rapide pour l'élève suivant
                 setTimeout(() => resetBorneUI(), 1000);
             }, 500);
         }
