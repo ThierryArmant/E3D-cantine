@@ -83,20 +83,32 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
         .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; }
 
-        /* Grilles KPI */
+        /* Grilles KPI repensées : Alignement gauche / droite */
         .kpi-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
             gap: 12px; 
             margin-bottom: 16px; 
         }
-        .kpi-card { background: white; border-radius: 8px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .kpi-card { 
+            background: white; 
+            border-radius: 8px; 
+            padding: 14px 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+        }
         .kpi-blue { border-top: 4px solid #3b82f6; }
         .kpi-green { border-top: 4px solid #10b981; }
         .kpi-yellow { border-top: 4px solid #eab308; }
         .kpi-red { border-top: 4px solid #ef4444; }
-        .kpi-val { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
-        .kpi-lbl { font-size: 11px; color: #6b7280; font-weight: 500; }
+        
+        .kpi-left { text-align: left; }
+        .kpi-val { font-size: 22px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
+        .kpi-lbl { font-size: 11.5px; font-weight: 700; color: #1e293b; }
+        
+        .kpi-right { text-align: right; max-width: 130px; font-size: 10px; color: #64748b; line-height: 1.25; font-style: italic; }
         
         .dashboard-row { 
             display: grid; 
@@ -418,11 +430,36 @@
                     </div>
                 </div>
 
+                <!-- 📊 CARTES KPI AVEC CHIFFRE À GAUCHE ET EXPLICATION À DROITE -->
                 <div class="kpi-grid">
-                    <div class="kpi-card kpi-blue"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne réelle par convive</div></div>
-                    <div class="kpi-card kpi-green"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité gaspillée totale</div></div>
-                    <div class="kpi-card kpi-yellow"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes économiques</div></div>
-                    <div class="kpi-card kpi-red"><div class="kpi-val" id="kpi-impact">0.0 kg CO₂</div><div class="kpi-lbl">Émissions CO₂ évitables</div></div>
+                    <div class="kpi-card kpi-blue">
+                        <div class="kpi-left">
+                            <div class="kpi-val" id="kpi-avg">0 g</div>
+                            <div class="kpi-lbl">Moyenne / convive</div>
+                        </div>
+                        <div class="kpi-right">Total restes divisé par le nb de convives</div>
+                    </div>
+                    <div class="kpi-card kpi-green">
+                        <div class="kpi-left">
+                            <div class="kpi-val" id="kpi-total">0.0 kg</div>
+                            <div class="kpi-lbl">Quantité totale</div>
+                        </div>
+                        <div class="kpi-right">Somme pesée des sacs (plats, fruits, pain)</div>
+                    </div>
+                    <div class="kpi-card kpi-yellow">
+                        <div class="kpi-left">
+                            <div class="kpi-val" id="kpi-money">0.00 €</div>
+                            <div class="kpi-lbl">Pertes financières</div>
+                        </div>
+                        <div class="kpi-right">Base estimée à 4,50 € le kg gaspillé</div>
+                    </div>
+                    <div class="kpi-card kpi-red">
+                        <div class="kpi-left">
+                            <div class="kpi-val" id="kpi-impact">0.0 kg</div>
+                            <div class="kpi-lbl">Émissions CO₂</div>
+                        </div>
+                        <div class="kpi-right">Facteur d'impact GES (2 kg CO₂ / kg)</div>
+                    </div>
                 </div>
                 
                 <div class="dashboard-row">
@@ -759,7 +796,7 @@
         let cacheSacsHistory = null;
         let globalRawData = null; 
 
-        // 🔊 MOTEUR VOCAL FLUIDE & NATUREL (SÉLECTION VOCALE AMÉLIORÉE)
+        // 🔊 MOTEUR VOCAL FLUIDE & NATUREL ("SUIVANT !")
         let systemVoices = [];
         let naturalVoice = null;
 
@@ -767,7 +804,6 @@
             if (!('speechSynthesis' in window)) return;
             systemVoices = window.speechSynthesis.getVoices();
             if (systemVoices.length > 0) {
-                // Recherche en priorité d'une voix naturelle/Google française pour éviter l'effet robotique
                 naturalVoice = systemVoices.find(v => v.lang === 'fr-FR' && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Thomas') || v.name.includes('Audrey'))) ||
                                systemVoices.find(v => v.lang.startsWith('fr')) || null;
             }
@@ -778,7 +814,6 @@
             initSystemVoices();
         }
 
-        // Déverrouille la politique audio du navigateur dès la première interaction
         function unlockAudioContext() {
             if (!('speechSynthesis' in window)) return;
             try {
@@ -793,12 +828,11 @@
         function prononcerMessage(texte) {
             if (!('speechSynthesis' in window)) return;
             try {
-                window.speechSynthesis.cancel(); // Coupe l'ancienne lecture pour zéro latence
-
+                window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(texte);
                 msg.lang = 'fr-FR';
-                msg.rate = 1.3;  // Rythme vif et naturel pour le self
-                msg.pitch = 1.05; // Tonalité légèrement plus humaine
+                msg.rate = 1.35;  // Rythme très vif
+                msg.pitch = 1.05;
                 msg.volume = 1.0;
 
                 if (!naturalVoice) initSystemVoices();
@@ -944,7 +978,7 @@
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
-            document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg CO₂`;
+            document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
 
             // Rendu de la grille visuelle avec images visibles et badges en dessous
             runGranularExtraction(filteredScans);
@@ -1229,7 +1263,7 @@
                 defiText = `🎯 <strong>Défi du prochain repas :</strong> Ne prends qu'un seul morceau de pain au self. Tu pourras en reprendre si tu as encore faim !`;
             } else {
                 diagText = `Service classé en 🔴 Niveau 1 (Alerte). Le niveau de restes est au-dessus du seuil cible (${gramsPerPupil} g / repas). Une partie des accompagnements ou légumes a été délaissée.`;
-                defiText = `🎯 <strong>Défi du prochain repas :</strong> Demande une « petite portion » si tu un petit appétit, et goûte avant de laisser !`;
+                defiText = `🎯 <strong>Défi du prochain repas :</strong> Demande une « petite portion » si tu as un petit appétit, et goûte avant de laisser !`;
             }
 
             document.getElementById('bilan-ia-diag').innerHTML = diagText;
@@ -1349,7 +1383,7 @@
         }
 
         function clearDashboardToZero() {
-            document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg CO₂";
+            document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg";
             chartTimeline.data.labels = []; chartTimeline.data.datasets[0].data = []; chartTimeline.update();
             chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
             chartHistorySacs.data.labels = []; chartHistorySacs.update();
@@ -1482,10 +1516,10 @@
                 light.className = "traffic-light light-success"; 
                 light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">SUIVANT</span>';
                 
-                // 🔊 Annonce immédiate, percutante et naturelle (1 seul mot)
+                // 🔊 Annonce immédiate
                 prononcerMessage("Suivant !");
                 
-                // Retour rapide à l'attente pour fluidifier le passage
+                // Réinitialisation rapide pour l'élève suivant
                 setTimeout(() => resetBorneUI(), 800);
             }, 400);
         }
