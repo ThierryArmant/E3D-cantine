@@ -18,7 +18,7 @@
             overflow: hidden; 
         }
         
-        /* Barre latérale adaptative */
+        /* Barre latérale */
         .sidebar { 
             width: 240px; 
             background-color: #1b4332; 
@@ -83,7 +83,7 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
         .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; }
 
-        /* Grilles KPI Fluides */
+        /* Grilles KPI */
         .kpi-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
@@ -92,13 +92,12 @@
         }
         .kpi-card { background: white; border-radius: 8px; padding: 14px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .kpi-blue { border-top: 4px solid #3b82f6; }
-        .kpi-green { border-top: 4px solid #52b788; }
-        .kpi-yellow { border-top: 4px solid #f59e0b; }
+        .kpi-green { border-top: 4px solid #10b981; }
+        .kpi-yellow { border-top: 4px solid #eab308; }
         .kpi-red { border-top: 4px solid #ef4444; }
         .kpi-val { font-size: 20px; font-weight: 700; margin-bottom: 2px; }
         .kpi-lbl { font-size: 11px; color: #6b7280; font-weight: 500; }
         
-        /* Lignes graphiques auto-alignées */
         .dashboard-row { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); 
@@ -111,10 +110,10 @@
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
 
-        /* 🍽️ PALMARÈS VISUEL DES ALIMENTS (IMAGE + CHIFFRE AU MILIEU) */
+        /* 🍽️ PALMARÈS VISUEL PONDÉRÉ : ÉCHELLE 4 COULEURS */
         .palmares-visual-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 12px;
             padding: 8px 0;
         }
@@ -122,7 +121,7 @@
             background: #ffffff;
             border: 1.5px solid #e2e8f0;
             border-radius: 12px;
-            padding: 12px 6px;
+            padding: 14px 8px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -133,20 +132,19 @@
         }
         .food-badge-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
-            border-color: #cbd5e1;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
         }
         .food-icon-wrapper {
             position: relative;
-            width: 70px;
-            height: 70px;
+            width: 72px;
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 6px;
         }
         .food-big-emoji {
-            font-size: 50px;
+            font-size: 52px;
             line-height: 1;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
             user-select: none;
@@ -156,27 +154,33 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(15, 23, 42, 0.90);
             color: #ffffff;
-            font-size: 13px;
+            font-size: 12.5px;
             font-weight: 900;
-            padding: 3px 7px;
+            padding: 3px 8px;
             border-radius: 14px;
             border: 2px solid #ffffff;
             box-shadow: 0 2px 6px rgba(0,0,0,0.35);
             white-space: nowrap;
-            letter-spacing: 0.3px;
         }
         .food-name-label {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #334155;
+            font-size: 12px;
+            font-weight: 800;
+            color: #1e293b;
             line-height: 1.25;
             min-height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
+        }
+        .food-status-tag {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 4px;
+            display: inline-block;
         }
         
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 14px;}
@@ -191,8 +195,8 @@
             margin-top: 10px; 
         }
         
-        .waste-control-card { padding: 12px 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.01); }
-        .waste-control-card label { font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 32px; display: flex; align-items: center; justify-content: center; letter-spacing: 0.2px; line-height: 1.2; }
+        .waste-control-card { padding: 12px 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .waste-control-card label { font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
         .spinner-container { display: flex; align-items: center; gap: 4px; }
         .btn-spinner { width: 36px; height: 24px; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
         .btn-spinner:hover { opacity: 0.9; }
@@ -225,7 +229,7 @@
         .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 5px solid #9333ea; }.ai-block-purple .ai-block-title { color: #6b21a8; }.ai-block-purple .ai-bullet li::before { color: #9333ea; }
         .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; }.ai-block-green .ai-block-title { color: #166534; }
         
-        /* 📸 SECTION BORNE & SMARTPHONE */
+        /* 📸 BORNE & SMARTPHONE */
         .borne-container { max-width: 800px; margin: 0 auto; text-align: center; }
         .instruction-banner { background-color: #1e3a8a; color: white; padding: 12px; border-radius: 8px; font-size: 18px; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; transition: all 0.3s; }
         
@@ -265,14 +269,9 @@
         .btn-scan-trigger:hover {
             background: linear-gradient(135deg, #047857 0%, #065f46 100%);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(4, 120, 87, 0.45);
-        }
-        .btn-scan-trigger:active {
-            transform: translateY(2px);
-            box-shadow: 0 4px 10px rgba(4, 120, 87, 0.2);
         }
 
-        /* 🏆 MODULE BILAN ÉLÈVES & ANALYSE IA */
+        /* 🏆 MODULE BILAN ÉLÈVES (GRILLE 4 COULEURS & 4 ÉQUIVALENCES) */
         .bilan-eleves-wrapper {
             background: #ffffff;
             border-radius: 12px;
@@ -291,18 +290,20 @@
             padding: 20px;
             text-align: center;
             color: #ffffff;
-            background: linear-gradient(135deg, #059669, #047857);
+            background: linear-gradient(135deg, #10b981, #059669); /* Vert par défaut */
             transition: background 0.3s ease;
         }
-        .bilan-header-box.zone-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .bilan-header-box.zone-jaune  { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .bilan-header-box.zone-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
         .bilan-header-box.zone-rouge  { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
         .score-pill {
             display: inline-block;
             padding: 5px 14px;
             background: rgba(255, 255, 255, 0.25);
             border-radius: 20px;
             font-weight: 800;
-            font-size: 11px;
+            font-size: 11.5px;
             letter-spacing: 0.5px;
             margin-bottom: 6px;
             text-transform: uppercase;
@@ -329,9 +330,7 @@
         .eq-card-val { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
         .eq-card-lbl { font-size: 10.5px; color: #64748b; font-weight: 600; margin-top: 2px; }
 
-        .ia-feedback-area {
-            padding: 16px;
-        }
+        .ia-feedback-area { padding: 16px; }
         .ia-feedback-area h4 {
             font-size: 12px;
             color: #1b4332;
@@ -344,7 +343,7 @@
         }
         .ia-diag-box {
             background: #f0fdf4;
-            border-left: 4px solid #059669;
+            border-left: 4px solid #10b981;
             padding: 12px 14px;
             border-radius: 6px;
             font-size: 12px;
@@ -354,15 +353,14 @@
         }
         .ia-challenge-box {
             background: #fffbeb;
-            border: 1px dashed #d97706;
+            border: 1px dashed #eab308;
             padding: 10px 14px;
             border-radius: 6px;
-            color: #92400e;
+            color: #854d0e;
             font-size: 11.5px;
             line-height: 1.45;
         }
         
-        /* 📱 RESPONSIVE MEDIA QUERIES */
         @media (max-width: 1024px) {
             body { flex-direction: column; height: auto; overflow: auto; }
             .sidebar { width: 100%; height: auto; padding: 12px; }
@@ -377,7 +375,6 @@
             .kpi-grid { grid-template-columns: repeat(2, 1fr); }
             .btn-scan-trigger { font-size: 17px; padding: 16px 24px; }
         }
-        
         @media (max-width: 480px) {
             .kpi-grid { grid-template-columns: 1fr; }
             .sidebar-menu { flex-direction: column; width: 100%; align-items: stretch; }
@@ -410,7 +407,7 @@
         </div>
 
         <div class="content-area">
-            <!-- PÔLE 1 : DASHBOARD AVEC FILTRE TEMPOREL DYNAMIQUE -->
+            <!-- PÔLE 1 : DASHBOARD -->
             <div id="view-dashboard" class="view-section active">
                 
                 <div class="filter-period-bar">
@@ -442,23 +439,31 @@
                         <div class="chart-container"><canvas id="chart-timeline"></canvas></div>
                     </div>
                     <div class="dashboard-col">
-                        <h3>📊 Taux moyen de rejet par grande composante (%)</h3>
+                        <h3>📊 Répartition des restes par composante (%)</h3>
                         <div class="chart-container"><canvas id="chart-categories"></canvas></div>
                     </div>
                 </div>
                 
-                <!-- 🌟 NOUVEAU : PALMARÈS VISUEL AVEC IMAGES ET CHIFFRES AU CENTRE -->
+                <!-- PALMARÈS VISUEL PONDÉRÉ : GRILLE 4 COULEURS (VERT, JAUNE, ORANGE, ROUGE) -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
-                        <h3>📊 Palmarès visuel des aliments les plus délaissés (%)</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                            <h3>🍽️ Taux d'adhésion réel aux composantes du menu</h3>
+                            <div style="font-size: 11px; font-weight: 700; color: #64748b; display: flex; gap: 8px;">
+                                <span>🟢 &gt;90% (Excellent)</span>
+                                <span>🟡 75-90% (Satisfaisant)</span>
+                                <span>🟠 50-75% (Fragile)</span>
+                                <span>🔴 &lt;50% (Insuffisant)</span>
+                            </div>
+                        </div>
                         <div id="palmares-badges-grid" class="palmares-visual-grid">
-                            <!-- Rempli dynamiquement en direct -->
+                            <!-- Rempli dynamiquement -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE AVEC CAMERA LIVE ET GROS BOUTON -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
@@ -488,7 +493,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER AVEC ANALYSE DIRECTE DES CASES COCHÉES -->
+            <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -599,7 +604,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS - AVEC BILAN ÉLÈVES ET ANALYSE IA -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - AVEC BILAN 4 COULEURS & SOLIDARITÉ PAM -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
@@ -691,12 +696,12 @@
                             </button>
                         </div>
 
-                        <!-- 🏆 GRAND BILAN VISUEL ÉLÈVES & DIAGNOSTIC IA -->
+                        <!-- 🏆 GRAND BILAN VISUEL 4 COULEURS & 4 ÉQUIVALENCES (DONT SOLIDARITÉ PAM) -->
                         <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
                             <div class="bilan-header-box" id="bilan-header-color">
-                                <div class="score-pill" id="bilan-score-pill">🟢 DÉFI RÉUSSI</div>
+                                <div class="score-pill" id="bilan-score-pill">🟢 NIVEAU 4 — EXCELLENT</div>
                                 <div class="score-title" id="bilan-score-val">0 g / convive</div>
-                                <div class="score-sub">Seuil national de référence EGAlim : 80 g / repas</div>
+                                <div class="score-sub">Objectif national EGAlim : &lt; 80 g / repas</div>
                             </div>
 
                             <div class="eq-grid">
@@ -715,20 +720,25 @@
                                     <div class="eq-card-val" id="bilan-eq-euros">0.00 €</div>
                                     <div class="eq-card-lbl">Coût financier estimé</div>
                                 </div>
+                                <div class="eq-card" style="border-top: 3px solid #0284c7;">
+                                    <span class="eq-card-icon">🌍</span>
+                                    <div class="eq-card-val" id="bilan-eq-monde">0</div>
+                                    <div class="eq-card-lbl">Rations d'écoliers (base PAM)</div>
+                                </div>
                             </div>
 
                             <div class="ia-feedback-area">
-                                <h4>🤖 L'Œil de l'IA sur le service du jour :</h4>
+                                <h4>🤖 L'Œil de l'IA sur le service :</h4>
                                 <div class="ia-diag-box" id="bilan-ia-diag">
-                                    En attente de la saisie des données de pesée...
+                                    En attente des données de pesée...
                                 </div>
                                 <div class="ia-challenge-box" id="bilan-ia-defi">
-                                    🎯 <strong>Défi éco-délégués :</strong> Moins de pain jeté dès le prochain service !
+                                    🎯 <strong>Défi du jour :</strong> Moins de pain jeté dès le prochain service !
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 📈 ACCUMULATEUR CHRONOLOGIQUE ET COMMUTATEUR TEMPOREL ÉVOLUTIF -->
+                        <!-- HISTORIQUE GRAPHIQUE -->
                         <div style="border-top: 2px solid #e2e8f0; padding-top: 16px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                                 <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">📈 Historique d'évolution des flux massiques (kg)</h3>
@@ -757,19 +767,19 @@
         let cacheSacsHistory = null;
         let globalRawData = null; 
 
-        // Dictionnaire d'icônes réalistes pour le rendu visuel
+        // Dictionnaire des icônes
         const FOOD_ICONS_MAP = {
             "Tomates": "🍅", "Carottes râpées": "🥕", "Salade verte": "🥗", "Céleri rémoulade": "🥗", "Œuf mayonnaise": "🥚",
-            "Saucisson": "🥖", "Jambon de pays": "🥓", "Jambon blanc": "🥓", "Pâté / Terrine": "🥩", "Quiche / Tarte": "🥧",
+            "Saucisson": "🥖", "Jambon": "🥓", "Jambon de pays": "🥓", "Jambon blanc": "🥓", "Pâté / Terrine": "🥩", "Quiche / Tarte": "🥧",
             "Pizza": "🍕", "Friand": "🥟", "Gardianne": "🍲", "Couscous": "🍢", "Paella": "🥘",
             "Bœuf bourguignon": "🍲", "Blanquette de veau": "🍲", "Poulet rôti": "🍗", "Nuggets": "🍗",
-            "Escalope de dinde": "🍗", "Steak haché": "🥩", "Rôti de porc/bœuf": "🥩", "Sauté de porc": "🥩",
-            "Boulettes de bœuf": "🧆", "Poisson pané": "🐟", "Filet de colin": "🐟", "Galette de céréales": "🥞",
+            "Escalope de dinde": "🍗", "Steak haché": "🥩", "Rôti / Sauté": "🥩", "Rôti de porc/bœuf": "🥩", "Sauté de porc": "🥩",
+            "Boulettes de bœuf": "🧆", "Poisson": "🐟", "Poisson pané": "🐟", "Filet de colin": "🐟", "Galette de céréales": "🥞",
             "Lasagnes végétariennes": "🍝", "Frites": "🍟", "Pâtes": "🍝", "Riz": "🍚", "Semoule": "🥣",
             "Purée": "🥔", "Haricots verts": "🥦", "Ratatouille": "🍆", "Brocolis": "🥦", "Petits pois / Carottes": "🥕",
             "Courgettes": "🥒", "Melon": "🍈", "Pastèque": "🍉", "Pomme / Banane": "🍎", "Fruit de saison": "🍓",
-            "Compote": "🍎", "Yaourt": "🥛", "Portion Fromage": "🧀", "Gâteau au chocolat": "🍫", "Éclair": "🥖",
-            "Tarte aux fruits": "🥧", "Pain": "🥖", "Autre Entrée": "🥗", "Autre Plat": "🍽️", "Autre Dessert": "🍰"
+            "Compote": "🍎", "Yaourt": "🥛", "Fromage": "🧀", "Dessert chocolat": "🍫", "Gâteau au chocolat": "🍫", "Dessert ramequin": "🍮",
+            "Éclair": "🥖", "Tarte aux fruits": "🥧", "Pain": "🥖", "Entrée du jour": "🥗", "Plat du jour": "🍽️", "Dessert du jour": "🍰"
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -893,7 +903,7 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg CO₂`;
 
-            // Rendu de la grille visuelle du palmarès
+            // Rendu de la grille 4 couleurs pondérée
             runGranularExtraction(filteredScans);
 
             chartTimeline.data.labels = filteredLabels.slice(-15);
@@ -961,83 +971,130 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🧠 MOTEUR VISUEL DU PALMARÈS (IMAGES + CHIFFRES AU CENTRE)
+        // 🧠 MOTEUR VISUEL PONDÉRÉ : ÉCHELLE 4 COULEURS (ROUGE / ORANGE / JAUNE / VERT)
         function runGranularExtraction(rawGaspillage) {
             const grid = document.getElementById('palmares-badges-grid');
             if (!grid) return;
 
-            if (!rawGaspillage || rawGaspillage.length === 0) {
-                grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée de scan pour cette période.</p>";
+            // Filtrage des scans noirs ou inexploitables
+            const scansValides = (rawGaspillage || []).filter(s => {
+                const c = (s.commentaire || "").toLowerCase();
+                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre");
+            });
+
+            const nbPlateaux = scansValides.length;
+
+            if (nbPlateaux === 0) {
+                grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucun plateau valide scanné pour cette période.</p>";
                 return;
             }
 
             const keywordsEntree = [
                 { key: "tomate", label: "Tomates" }, { key: "carotte", label: "Carottes râpées" }, { key: "salade", label: "Salade verte" },
                 { key: "céleri", label: "Céleri rémoulade" }, { key: "oeuf", label: "Œuf mayonnaise" }, { key: "saucisson", label: "Saucisson" },
-                { key: "jambon de pays", label: "Jambon de pays" }, { key: "jambon blanc", label: "Jambon blanc" }, { key: "pâté", label: "Pâté / Terrine" },
-                { key: "terrine", label: "Pâté / Terrine" }, { key: "quiche", label: "Quiche / Tarte" }, { key: "pizza", label: "Pizza" }, { key: "friand", label: "Friand" }
+                { key: "jambon", label: "Jambon" }, { key: "quiche", label: "Quiche / Tarte" }, { key: "pizza", label: "Pizza" }
             ];
 
             const keywordsPlat = [
-                { key: "gardianne", label: "Gardianne" }, { key: "couscous", label: "Couscous" }, { key: "paella", label: "Paella" },
-                { key: "bourguignon", label: "Bœuf bourguignon" }, { key: "blanquette", label: "Blanquette de veau" }, { key: "poulet rôti", label: "Poulet rôti" },
-                { key: "poulet", label: "Poulet rôti" }, { key: "nugget", label: "Nuggets" }, { key: "dinde", label: "Escalope de dinde" },
-                { key: "steak", label: "Steak haché" }, { key: "rôti de porc", label: "Rôti de porc/bœuf" }, { key: "rôti de bœuf", label: "Rôti de porc/bœuf" },
-                { key: "sauté de porc", label: "Sauté de porc" }, { key: "boulette", label: "Boulettes de bœuf" }, { key: "pané", label: "Poisson pané" },
-                { key: "colin", label: "Filet de colin" }, { key: "lasagne", label: "Lasagnes végétariennes" }, { key: "ratatouille", label: "Ratatouille" },
-                { key: "légumes sautés", label: "Ratatouille" }, { key: "sauté de légumes", label: "Ratatouille" }, { key: "frite", label: "Frites" },
-                { key: "pâte", label: "Pâtes" }, { key: "riz", label: "Riz" }, { key: "semoule", label: "Semoule" }, { key: "purée", label: "Purée" },
+                { key: "poulet", label: "Poulet rôti" }, { key: "nugget", label: "Nuggets" }, { key: "steak", label: "Steak haché" },
+                { key: "porc", label: "Rôti / Sauté" }, { key: "poisson", label: "Poisson" }, { key: "colin", label: "Poisson" },
+                { key: "frite", label: "Frites" }, { key: "pâte", label: "Pâtes" }, { key: "riz", label: "Riz" },
                 { key: "haricot", label: "Haricots verts" }, { key: "brocoli", label: "Brocolis" }, { key: "courgette", label: "Courgettes" }
             ];
 
             const keywordsDessert = [
                 { key: "melon", label: "Melon" }, { key: "pastèque", label: "Pastèque" }, { key: "pomme", label: "Pomme / Banane" },
-                { key: "banane", label: "Pomme / Banane" }, { key: "fruit", label: "Fruit de saison" }, { key: "compote", label: "Compote" },
-                { key: "yaourt", label: "Yaourt" }, { key: "fromage", label: "Portion Fromage" }, { key: "chocolat", label: "Gâteau au chocolat" },
-                { key: "éclair", label: "Éclair" }, { key: "tarte aux fruits", label: "Tarte aux fruits" }
+                { key: "fruit", label: "Fruit de saison" }, { key: "yaourt", label: "Yaourt" }, { key: "fromage", label: "Fromage" },
+                { key: "chocolat", label: "Dessert chocolat" }, { key: "ramequin", label: "Dessert ramequin" }
             ];
 
-            let aggregatedMap = {};
-            function addMetric(label, val) {
-                if (!aggregatedMap[label]) aggregatedMap[label] = { total: 0, count: 0 };
-                aggregatedMap[label].total += val; aggregatedMap[label].count++;
+            let cumulsRestes = {};
+
+            function ajouterMesure(label, pourcentageReste) {
+                if (!cumulsRestes[label]) cumulsRestes[label] = 0;
+                cumulsRestes[label] += pourcentageReste;
             }
 
-            rawGaspillage.forEach(scan => {
-                let textRaw = scan.commentaire ? scan.commentaire.toLowerCase() : "";
-                if (scan.entree > 0) {
-                    let m = false; for (let item of keywordsEntree) { if (textRaw.includes(item.key)) { addMetric(item.label, scan.entree); m = true; break; } }
-                    if (!m) addMetric("Autre Entrée", scan.entree);
+            scansValides.forEach(scan => {
+                let textRaw = (scan.commentaire || "").toLowerCase();
+
+                // Entrée
+                let mE = false;
+                for (let item of keywordsEntree) {
+                    if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.entree); mE = true; break; }
                 }
-                if (scan.plat > 0) {
-                    let m = false; for (let item of keywordsPlat) { if (textRaw.includes(item.key)) { addMetric(item.label, scan.plat); m = true; break; } }
-                    if (!m) addMetric("Autre Plat", scan.plat);
+                if (!mE && scan.entree > 0) ajouterMesure("Entrée du jour", scan.entree);
+
+                // Plat
+                let mP = false;
+                for (let item of keywordsPlat) {
+                    if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.plat); mP = true; break; }
                 }
-                if (scan.dessert > 0) {
-                    let m = false; for (let item of keywordsDessert) { if (textRaw.includes(item.key)) { addMetric(item.label, scan.dessert); m = true; break; } }
-                    if (!m) addMetric("Autre Dessert", scan.dessert);
+                if (!mP && scan.plat > 0) ajouterMesure("Plat du jour", scan.plat);
+
+                // Dessert
+                let mD = false;
+                for (let item of keywordsDessert) {
+                    if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.dessert); mD = true; break; }
                 }
-                if (scan.pain > 0) { addMetric("Pain", scan.pain); }
+                if (!mD && scan.dessert > 0) ajouterMesure("Dessert du jour", scan.dessert);
+
+                // Pain
+                if (textRaw.includes("pain") || scan.pain > 0) {
+                    ajouterMesure("Pain", scan.pain);
+                }
             });
 
+            // Calcul du taux d'adhésion pondéré sur l'ensemble des plateaux
             let palmaresFinalList = [];
-            for (let label in aggregatedMap) {
-                palmaresFinalList.push({ label: label, value: Math.round(aggregatedMap[label].total / aggregatedMap[label].count) });
-            }
-            palmaresFinalList.sort((a, b) => b.value - a.value);
+            for (let label in cumulsRestes) {
+                const resteMoyenPondere = cumulsRestes[label] / nbPlateaux;
+                const tauxConsommation = Math.max(0, Math.min(100, Math.round(100 - resteMoyenPondere)));
 
-            // Génération dynamique des cartes visuelles
+                palmaresFinalList.push({
+                    label: label,
+                    tauxMange: tauxConsommation
+                });
+            }
+
+            palmaresFinalList.sort((a, b) => b.tauxMange - a.tauxMange);
+
+            // Rendu visuel avec le barème 4 couleurs (Vert / Jaune / Orange / Rouge)
             grid.innerHTML = "";
             palmaresFinalList.slice(0, 10).forEach(item => {
                 const emoji = FOOD_ICONS_MAP[item.label] || "🍽️";
+                
+                let badgeColor = "#10b981"; // 🟢 Vert (>90%)
+                let tagColor = "#dcfce7";
+                let tagTextColor = "#166534";
+                let tagText = "🟢 Excellent";
+
+                if (item.tauxMange >= 75 && item.tauxMange < 90) {
+                    badgeColor = "#eab308"; // 🟡 Jaune (75-90%)
+                    tagColor = "#fef9c3";
+                    tagTextColor = "#854d0e";
+                    tagText = "🟡 Satisfaisant";
+                } else if (item.tauxMange >= 50 && item.tauxMange < 75) {
+                    badgeColor = "#f97316"; // 🟠 Orange (50-75%)
+                    tagColor = "#ffedd5";
+                    tagTextColor = "#9a3412";
+                    tagText = "🟠 Fragile";
+                } else if (item.tauxMange < 50) {
+                    badgeColor = "#ef4444"; // 🔴 Rouge (<50%)
+                    tagColor = "#fee2e2";
+                    tagTextColor = "#991b1b";
+                    tagText = "🔴 Insuffisant";
+                }
+
                 const card = document.createElement('div');
                 card.className = "food-badge-card";
                 card.innerHTML = `
                     <div class="food-icon-wrapper">
                         <span class="food-big-emoji">${emoji}</span>
-                        <span class="food-percent-badge">${item.value}%</span>
+                        <span class="food-percent-badge" style="background: ${badgeColor};">${item.tauxMange}%</span>
                     </div>
                     <div class="food-name-label">${item.label}</div>
+                    <span class="food-status-tag" style="background: ${tagColor}; color: ${tagTextColor};">${tagText}</span>
                 `;
                 grid.appendChild(card);
             });
@@ -1078,7 +1135,7 @@
             alert("Effectifs enregistrés avec succès !"); loadLiveData();
         }
 
-        // 🏆 MOTEUR DE CALCUL DU BILAN ÉLÈVES ET DIAGNOSTIC IA
+        // 🏆 MOTEUR DU GRAND BILAN ÉLÈVES (4 COULEURS + ÉQUIVALENCE PAM)
         function renderBilanEleves(alimKg, fruitsKg, painKg, effectif) {
             const card = document.getElementById('bilan-eleves-container');
             const header = document.getElementById('bilan-header-color');
@@ -1095,35 +1152,43 @@
             val.innerText = `${gramsPerPupil} g / convive`;
 
             header.className = "bilan-header-box";
-            if (gramsPerPupil <= 70) {
-                pill.innerText = "🟢 EXCELLENT — DÉFI RÉUSSI";
-            } else if (gramsPerPupil <= 95) {
+            if (gramsPerPupil <= 30) {
+                pill.innerText = "🟢 NIVEAU 4 — EXCELLENT";
+            } else if (gramsPerPupil <= 70) {
+                header.classList.add("zone-jaune");
+                pill.innerText = "🟡 NIVEAU 3 — SATISFAISANT";
+            } else if (gramsPerPupil <= 100) {
                 header.classList.add("zone-orange");
-                pill.innerText = "🟠 VIGILANCE — OBJECTIF DÉPASSÉ";
+                pill.innerText = "🟠 NIVEAU 2 — FRAGILE";
             } else {
                 header.classList.add("zone-rouge");
-                pill.innerText = "🔴 ALERTE — GASPILLAGE ÉLEVÉ";
+                pill.innerText = "🔴 NIVEAU 1 — INSUFFISANT";
             }
 
             const baguettes = Math.round((painKg * 1000) / 200);
             const repasGaspilles = Math.round((totalKg * 1000) / 450);
             const eurosGaspilles = (totalKg * 2.30).toFixed(2);
+            const enfantsNourris = Math.round((totalKg * 1000) / 200); // Rations scolaires PAM (base 200 g)
 
             document.getElementById('bilan-eq-pain').innerText = `${baguettes}`;
             document.getElementById('bilan-eq-repas').innerText = `${repasGaspilles}`;
             document.getElementById('bilan-eq-euros').innerText = `${eurosGaspilles} €`;
+            document.getElementById('bilan-eq-monde').innerText = `${enfantsNourris}`;
 
             let diagText = "";
             let defiText = "";
 
-            if (gramsPerPupil <= 70) {
-                diagText = `Bravo à tous ! Avec seulement ${gramsPerPupil} g par convive, le collège est sous le seuil national (80 g). Les assiettes ont été très bien terminées.`;
-                defiText = `🎯 <strong>Défi du prochain repas :</strong> Gardons cette dynamique en continuant à adapter la quantité de pain prise au départ !`;
+            if (gramsPerPupil <= 30) {
+                diagText = `Bravo à tous ! Avec seulement ${gramsPerPupil} g par convive, le collège est classé en 🟢 Niveau 4 (Excellent). Les assiettes ont été remarquablement bien terminées.`;
+                defiText = `🎯 <strong>Défi du prochain repas :</strong> Conservons ce niveau 4 en continuant à adapter les quantités !`;
+            } else if (gramsPerPupil <= 70) {
+                diagText = `Très bon service classé en 🟡 Niveau 3 (Satisfaisant). Le gaspillage est bien maîtrisé et reste inférieur au seuil national (80 g).`;
+                defiText = `🎯 <strong>Défi du prochain repas :</strong> Visons le niveau vert en réduisant encore les petits restes de pain !`;
             } else if (baguettes > 10) {
-                diagText = `Le plat principal a été bien mangé, mais le pain représente une part notable du gâchis aujourd'hui (${baguettes} baguettes entières non consommées).`;
+                diagText = `Service en 🟠 Niveau 2 (Fragile). Le pain représente une part notable du gâchis aujourd'hui (${baguettes} baguettes entières non consommées).`;
                 defiText = `🎯 <strong>Défi du prochain repas :</strong> Ne prends qu'un seul morceau de pain au self. Tu pourras en reprendre si tu as encore faim !`;
             } else {
-                diagText = `Le niveau de restes est au-dessus du seuil cible (${gramsPerPupil} g / repas). Une partie des accompagnements ou légumes a été délaissée.`;
+                diagText = `Service classé en 🔴 Niveau 1 (Alerte). Le niveau de restes est au-dessus du seuil cible (${gramsPerPupil} g / repas). Une partie des accompagnements ou légumes a été délaissée.`;
                 defiText = `🎯 <strong>Défi du prochain repas :</strong> Demande une « petite portion » si tu as un petit appétit, et goûte avant de laisser !`;
             }
 
@@ -1163,7 +1228,7 @@
         function getCurrentCheckedMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const  accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
             
             if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) {
@@ -1288,9 +1353,7 @@
             if (listeOuverte) output += '</ul>'; if (blockActuel > 0) output += '</div>'; return output;
         }
 
-        // =========================================================================
-        // 📸 MOTEUR CAMERA EN DIRECT ET CAPTURE VIA LE GROS BOUTON
-        // =========================================================================
+        // 📸 MOTEUR CAMERA
         async function initCamera() {
             const video = document.getElementById('camera-feed');
             try {
@@ -1302,7 +1365,7 @@
                 video.srcObject = localStream;
                 resetBorneUI();
             } catch (err) { 
-                console.warn("Caméra indisponible ou permissions refusées:", err);
+                console.warn("Caméra indisponible ou permissions refusées :", err);
                 document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
             }
         }
