@@ -110,7 +110,7 @@
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
 
-        /* 🍽️ PALMARÈS VISUEL PONDÉRÉ : ÉCHELLE 4 COULEURS */
+        /* 🍽️ PALMARÈS VISUEL PONDÉRÉ : IMAGES CLAIRES + CHIFFRES EN DESSOUS */
         .palmares-visual-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -127,41 +127,34 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 6px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.03);
             transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
         .food-badge-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
         }
-        .food-icon-wrapper {
-            position: relative;
-            width: 72px;
-            height: 72px;
+        .food-icon-box {
+            font-size: 46px;
+            line-height: 1;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 6px;
-        }
-        .food-big-emoji {
-            font-size: 52px;
-            line-height: 1;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.12));
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.10));
             user-select: none;
         }
         .food-percent-badge {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             color: #ffffff;
             font-size: 12.5px;
             font-weight: 900;
-            padding: 3px 8px;
-            border-radius: 14px;
-            border: 2px solid #ffffff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-            white-space: nowrap;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            letter-spacing: 0.3px;
         }
         .food-name-label {
             font-size: 12px;
@@ -179,7 +172,6 @@
             font-weight: 700;
             padding: 2px 8px;
             border-radius: 10px;
-            margin-top: 4px;
             display: inline-block;
         }
         
@@ -271,7 +263,7 @@
             transform: translateY(-2px);
         }
 
-        /* 🏆 MODULE BILAN ÉLÈVES (GRILLE 4 COULEURS & 4 ÉQUIVALENCES) */
+        /* 🏆 MODULE BILAN ÉLÈVES */
         .bilan-eleves-wrapper {
             background: #ffffff;
             border-radius: 12px;
@@ -444,7 +436,7 @@
                     </div>
                 </div>
                 
-                <!-- PALMARÈS VISUEL PONDÉRÉ : GRILLE 4 COULEURS (VERT, JAUNE, ORANGE, ROUGE) -->
+                <!-- PALMARÈS VISUEL PONDÉRÉ : IMAGES CLAIRES + CHIFFRES EN DESSOUS -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
@@ -696,7 +688,7 @@
                             </button>
                         </div>
 
-                        <!-- 🏆 GRAND BILAN VISUEL 4 COULEURS & 4 ÉQUIVALENCES (DONT SOLIDARITÉ PAM) -->
+                        <!-- 🏆 GRAND BILAN VISUEL 4 COULEURS & 4 ÉQUIVALENCES -->
                         <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
                             <div class="bilan-header-box" id="bilan-header-color">
                                 <div class="score-pill" id="bilan-score-pill">🟢 NIVEAU 4 — EXCELLENT</div>
@@ -903,7 +895,7 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg CO₂`;
 
-            // Rendu de la grille 4 couleurs pondérée
+            // Rendu de la grille visuelle avec images visibles et badges en dessous
             runGranularExtraction(filteredScans);
 
             chartTimeline.data.labels = filteredLabels.slice(-15);
@@ -971,12 +963,11 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🧠 MOTEUR VISUEL PONDÉRÉ : ÉCHELLE 4 COULEURS (ROUGE / ORANGE / JAUNE / VERT)
+        // 🧠 MOTEUR VISUEL PONDÉRÉ : IMAGES 100% VISIBLES + BADGES DE CHIFFRES EN DESSOUS
         function runGranularExtraction(rawGaspillage) {
             const grid = document.getElementById('palmares-badges-grid');
             if (!grid) return;
 
-            // Filtrage des scans noirs ou inexploitables
             const scansValides = (rawGaspillage || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre");
@@ -1045,7 +1036,7 @@
                 }
             });
 
-            // Calcul du taux d'adhésion pondéré sur l'ensemble des plateaux
+            // Calcul pondéré
             let palmaresFinalList = [];
             for (let label in cumulsRestes) {
                 const resteMoyenPondere = cumulsRestes[label] / nbPlateaux;
@@ -1059,7 +1050,7 @@
 
             palmaresFinalList.sort((a, b) => b.tauxMange - a.tauxMange);
 
-            // Rendu visuel avec le barème 4 couleurs (Vert / Jaune / Orange / Rouge)
+            // Rendu visuel propre avec l'image bien dégagée
             grid.innerHTML = "";
             palmaresFinalList.slice(0, 10).forEach(item => {
                 const emoji = FOOD_ICONS_MAP[item.label] || "🍽️";
@@ -1089,10 +1080,8 @@
                 const card = document.createElement('div');
                 card.className = "food-badge-card";
                 card.innerHTML = `
-                    <div class="food-icon-wrapper">
-                        <span class="food-big-emoji">${emoji}</span>
-                        <span class="food-percent-badge" style="background: ${badgeColor};">${item.tauxMange}%</span>
-                    </div>
+                    <div class="food-icon-box">${emoji}</div>
+                    <div class="food-percent-badge" style="background: ${badgeColor};">${item.tauxMange}%</div>
                     <div class="food-name-label">${item.label}</div>
                     <span class="food-status-tag" style="background: ${tagColor}; color: ${tagTextColor};">${tagText}</span>
                 `;
@@ -1135,7 +1124,7 @@
             alert("Effectifs enregistrés avec succès !"); loadLiveData();
         }
 
-        // 🏆 MOTEUR DU GRAND BILAN ÉLÈVES (4 COULEURS + ÉQUIVALENCE PAM)
+        // 🏆 MOTEUR DU GRAND BILAN ÉLÈVES
         function renderBilanEleves(alimKg, fruitsKg, painKg, effectif) {
             const card = document.getElementById('bilan-eleves-container');
             const header = document.getElementById('bilan-header-color');
@@ -1228,7 +1217,7 @@
         function getCurrentCheckedMenu() {
             const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
             const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const  accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
+            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
             const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
             
             if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) {
