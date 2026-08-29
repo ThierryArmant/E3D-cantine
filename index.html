@@ -83,7 +83,7 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
         .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; }
 
-        /* Grilles KPI repensées : Alignement gauche / droite */
+        /* Grilles KPI */
         .kpi-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
@@ -107,7 +107,6 @@
         .kpi-left { text-align: left; }
         .kpi-val { font-size: 22px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
         .kpi-lbl { font-size: 11.5px; font-weight: 700; color: #1e293b; }
-        
         .kpi-right { text-align: right; max-width: 130px; font-size: 10px; color: #64748b; line-height: 1.25; font-style: italic; }
         
         .dashboard-row { 
@@ -121,6 +120,55 @@
         
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
+
+        /* 🏆 NOUVEAU STYLE : HISTORIQUE DU PRINCIPAL DÉCHET PAR JOUR */
+        .history-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 8px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .history-day-card {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .history-day-date {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 1px solid #cbd5e1;
+            width: 100%;
+            padding-bottom: 4px;
+        }
+        .history-day-icon {
+            font-size: 36px;
+            line-height: 1;
+            margin: 4px 0;
+        }
+        .history-day-name {
+            font-size: 11.5px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+        .history-day-val {
+            font-size: 13px;
+            font-weight: 900;
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
 
         /* 🍽️ PALMARÈS VISUEL PONDÉRÉ : IMAGES VISIBLES + BADGES EN DESSOUS */
         .palmares-visual-grid {
@@ -430,7 +478,6 @@
                     </div>
                 </div>
 
-                <!-- 📊 CARTES KPI AVEC CHIFFRE À GAUCHE ET EXPLICATION À DROITE -->
                 <div class="kpi-grid">
                     <div class="kpi-card kpi-blue">
                         <div class="kpi-left">
@@ -451,7 +498,7 @@
                             <div class="kpi-val" id="kpi-money">0.00 €</div>
                             <div class="kpi-lbl">Pertes financières</div>
                         </div>
-                        <div class="kpi-right">Base estimée à 4,50 € le kg gaspillé, par les gestionnaires de restauration scolaire et les études de l'ADEME.</div>
+                        <div class="kpi-right">Base estimée à 4,50 € le kg gaspillé</div>
                     </div>
                     <div class="kpi-card kpi-red">
                         <div class="kpi-left">
@@ -633,7 +680,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS - AVEC BILAN 4 COULEURS & SOLIDARITÉ PAM -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS - AVEC HISTORIQUE VISUEL DU PRINCIPAL DÉCHET -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
@@ -767,18 +814,20 @@
                             </div>
                         </div>
 
-                        <!-- HISTORIQUE GRAPHIQUE -->
+                        <!-- NOUVEL HISTORIQUE VISUEL : PRINCIPAL DÉCHET PAR JOUR -->
                         <div style="border-top: 2px solid #e2e8f0; padding-top: 16px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                                <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">📈 Historique d'évolution des flux massiques (kg)</h3>
+                                <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">🏆 Historique du principal déchet par jour</h3>
                                 <div style="display: flex; gap: 4px; background-color: #f1f5f9; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                                    <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryChartMode('day')" style="background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; border: none;">Jour</button>
-                                    <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryChartMode('month')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Mois</button>
-                                    <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryChartMode('year')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Année</button>
+                                    <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryMode('day')" style="background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; border: none;">Jour</button>
+                                    <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryMode('month')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Mois</button>
+                                    <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryMode('year')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Année</button>
                                 </div>
                             </div>
-                            <div class="chart-container-large">
-                                <canvas id="chart-history-sacs"></canvas>
+                            
+                            <!-- Conteneur des cartes de l'élément le plus jeté -->
+                            <div id="history-main-waste-grid" class="history-cards-grid">
+                                <p style="color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;">Chargement de l'historique...</p>
                             </div>
                         </div>
 
@@ -792,7 +841,7 @@
     <!-- CODE CENTRAL JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
-        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories, chartHistorySacs;
+        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories;
         let cacheSacsHistory = null;
         let globalRawData = null; 
 
@@ -831,7 +880,7 @@
                 window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(texte);
                 msg.lang = 'fr-FR';
-                msg.rate = 1.35;  // Rythme très vif
+                msg.rate = 1.35; 
                 msg.pitch = 1.05;
                 msg.volume = 1.0;
 
@@ -870,26 +919,6 @@
                 type: 'bar', plugins: [ChartDataLabels], 
                 data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 30 }] }, 
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
-            });
-
-            chartHistorySacs = new Chart(document.getElementById('chart-history-sacs').getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: [],
-                    datasets: [
-                        { label: '🍖 Alimentaires', data: [], backgroundColor: '#ffe5d9', borderColor: '#ffcad4', borderWidth: 1 },
-                        { label: '🍏 Fruits', data: [], backgroundColor: '#e8f5e9', borderColor: '#c8e6c9', borderWidth: 1 },
-                        { label: '🥖 Pain', data: [], backgroundColor: '#fefae0', borderColor: '#e9d8a6', borderWidth: 1 },
-                        { label: '📦 Emballages', data: [], backgroundColor: '#e0f2fe', borderColor: '#bae6fd', borderWidth: 1 },
-                        { label: '🧻 Serviettes', data: [], backgroundColor: '#faf5ff', borderColor: '#e9d5ff', borderWidth: 1 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, datalabels: { display: false } },
-                    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Masse totale (kg)', font: { weight: 'bold', size: 11 } } } }
-                }
             });
 
             loadEtablissementsDropdown(); 
@@ -980,7 +1009,6 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
 
-            // Rendu de la grille visuelle avec images visibles et badges en dessous
             runGranularExtraction(filteredScans);
 
             chartTimeline.data.labels = filteredLabels.slice(-15);
@@ -1003,7 +1031,7 @@
                 emballages: filteredEmb,
                 serviettes: filteredServ
             };
-            updateHistoryChartMode('day');
+            updateHistoryMode('day');
 
             if (filteredAlim.length > 0) {
                 const idx = filteredAlim.length - 1;
@@ -1011,38 +1039,64 @@
             }
         }
 
-        function updateHistoryChartMode(mode) {
+        // 🏆 AFFICHAGE DE L'ÉLÉMENT LE PLUS JETÉ DU JOUR (ICÔNE + CHIFFRE)
+        function updateHistoryMode(mode) {
             if (!cacheSacsHistory || !cacheSacsHistory.labels || cacheSacsHistory.labels.length === 0) return;
-            let finalLabels = []; let outAlim = [], outFruits = [], outPain = [], outEmb = [], outServ = [];
             
-            if (mode === 'day') {
-                finalLabels = cacheSacsHistory.labels.slice(-15);
-                outAlim = cacheSacsHistory.alimentaire.slice(-15); outFruits = cacheSacsHistory.fruits.slice(-15);
-                outPain = cacheSacsHistory.pain.slice(-15); outEmb = cacheSacsHistory.emballages.slice(-15); outServ = cacheSacsHistory.serviettes.slice(-15);
-            } else {
-                let mapAccumulator = {};
-                for (let i = 0; i < cacheSacsHistory.labels.length; i++) {
-                    let isoDate = cacheSacsHistory.datesRaw[i]; if (!isoDate) continue;
-                    let timeKey = mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4);
-                    if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
-                    mapAccumulator[timeKey].alim += parseFloat(cacheSacsHistory.alimentaire[i]) || 0;
-                    mapAccumulator[timeKey].fruits += parseFloat(cacheSacsHistory.fruits[i]) || 0;
-                    mapAccumulator[timeKey].pain += parseFloat(cacheSacsHistory.pain[i]) || 0;
-                    mapAccumulator[timeKey].emb += parseFloat(cacheSacsHistory.emballages[i]) || 0;
-                    mapAccumulator[timeKey].serv += parseFloat(cacheSacsHistory.serviettes[i]) || 0;
+            const gridContainer = document.getElementById('history-main-waste-grid');
+            gridContainer.innerHTML = "";
+
+            let mapAccumulator = {};
+
+            for (let i = 0; i < cacheSacsHistory.labels.length; i++) {
+                let isoDate = cacheSacsHistory.datesRaw[i]; 
+                let labelDate = cacheSacsHistory.labels[i];
+                if (!isoDate) continue;
+
+                let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
+
+                if (!mapAccumulator[timeKey]) {
+                    mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
                 }
-                finalLabels = Object.keys(mapAccumulator);
-                finalLabels.forEach(key => {
-                    outAlim.push(mapAccumulator[key].alim.toFixed(1)); outFruits.push(mapAccumulator[key].fruits.toFixed(1));
-                    outPain.push(mapAccumulator[key].pain.toFixed(1)); outEmb.push(mapAccumulator[key].emb.toFixed(1)); outServ.push(mapAccumulator[key].serv.toFixed(1));
-                });
+                mapAccumulator[timeKey].alim += parseFloat(cacheSacsHistory.alimentaire[i]) || 0;
+                mapAccumulator[timeKey].fruits += parseFloat(cacheSacsHistory.fruits[i]) || 0;
+                mapAccumulator[timeKey].pain += parseFloat(cacheSacsHistory.pain[i]) || 0;
+                mapAccumulator[timeKey].emb += parseFloat(cacheSacsHistory.emballages[i]) || 0;
+                mapAccumulator[timeKey].serv += parseFloat(cacheSacsHistory.serviettes[i]) || 0;
             }
-            
-            chartHistorySacs.data.labels = finalLabels;
-            chartHistorySacs.data.datasets[0].data = outAlim; chartHistorySacs.data.datasets[1].data = outFruits;
-            chartHistorySacs.data.datasets[2].data = outPain; chartHistorySacs.data.datasets[3].data = outEmb; chartHistorySacs.data.datasets[4].data = outServ;
-            chartHistorySacs.update();
-            
+
+            const keys = Object.keys(mapAccumulator);
+            if (keys.length === 0) {
+                gridContainer.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée sur cette période.</p>";
+                return;
+            }
+
+            keys.forEach(dateKey => {
+                let data = mapAccumulator[dateKey];
+                
+                // Détermination de l'élément le plus lourd
+                let items = [
+                    { name: "Plats alim.", val: data.alim, icon: "🍖" },
+                    { name: "Fruits", val: data.fruits, icon: "🍏" },
+                    { name: "Pain", val: data.pain, icon: "🥖" },
+                    { name: "Emballages", val: data.emb, icon: "📦" },
+                    { name: "Serviettes", val: data.serv, icon: "🧻" }
+                ];
+
+                items.sort((a, b) => b.val - a.val);
+                let topItem = items[0];
+
+                const card = document.createElement('div');
+                card.className = "history-day-card";
+                card.innerHTML = `
+                    <div class="history-day-date">${dateKey}</div>
+                    <div class="history-day-icon">${topItem.icon}</div>
+                    <div class="history-day-name">${topItem.name}</div>
+                    <div class="history-day-val">${topItem.val.toFixed(1)} kg</div>
+                `;
+                gridContainer.appendChild(card);
+            });
+
             document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
             let targetBtn = document.getElementById('btn-hist-' + mode);
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
@@ -1094,34 +1148,29 @@
             scansValides.forEach(scan => {
                 let textRaw = (scan.commentaire || "").toLowerCase();
 
-                // Entrée
                 let mE = false;
                 for (let item of keywordsEntree) {
                     if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.entree); mE = true; break; }
                 }
                 if (!mE && scan.entree > 0) ajouterMesure("Entrée du jour", scan.entree);
 
-                // Plat
                 let mP = false;
                 for (let item of keywordsPlat) {
                     if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.plat); mP = true; break; }
                 }
                 if (!mP && scan.plat > 0) ajouterMesure("Plat du jour", scan.plat);
 
-                // Dessert
                 let mD = false;
                 for (let item of keywordsDessert) {
                     if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.dessert); mD = true; break; }
                 }
                 if (!mD && scan.dessert > 0) ajouterMesure("Dessert du jour", scan.dessert);
 
-                // Pain
                 if (textRaw.includes("pain") || scan.pain > 0) {
                     ajouterMesure("Pain", scan.pain);
                 }
             });
 
-            // Calcul pondéré
             let palmaresFinalList = [];
             for (let label in cumulsRestes) {
                 const resteMoyenPondere = cumulsRestes[label] / nbPlateaux;
@@ -1135,28 +1184,27 @@
 
             palmaresFinalList.sort((a, b) => b.tauxMange - a.tauxMange);
 
-            // Rendu visuel propre avec l'image bien dégagée
             grid.innerHTML = "";
             palmaresFinalList.slice(0, 10).forEach(item => {
                 const emoji = FOOD_ICONS_MAP[item.label] || "🍽️";
                 
-                let badgeColor = "#10b981"; // 🟢 Vert (>90%)
+                let badgeColor = "#10b981"; 
                 let tagColor = "#dcfce7";
                 let tagTextColor = "#166534";
                 let tagText = "🟢 Excellent";
 
                 if (item.tauxMange >= 75 && item.tauxMange < 90) {
-                    badgeColor = "#eab308"; // 🟡 Jaune (75-90%)
+                    badgeColor = "#eab308"; 
                     tagColor = "#fef9c3";
                     tagTextColor = "#854d0e";
                     tagText = "🟡 Satisfaisant";
                 } else if (item.tauxMange >= 50 && item.tauxMange < 75) {
-                    badgeColor = "#f97316"; // 🟠 Orange (50-75%)
+                    badgeColor = "#f97316"; 
                     tagColor = "#ffedd5";
                     tagTextColor = "#9a3412";
                     tagText = "🟠 Fragile";
                 } else if (item.tauxMange < 50) {
-                    badgeColor = "#ef4444"; // 🔴 Rouge (<50%)
+                    badgeColor = "#ef4444"; 
                     tagColor = "#fee2e2";
                     tagTextColor = "#991b1b";
                     tagText = "🔴 Insuffisant";
@@ -1242,7 +1290,7 @@
             const baguettes = Math.round((painKg * 1000) / 200);
             const repasGaspilles = Math.round((totalKg * 1000) / 450);
             const eurosGaspilles = (totalKg * 2.30).toFixed(2);
-            const enfantsNourris = Math.round((totalKg * 1000) / 200); // Rations scolaires PAM (base 200 g)
+            const enfantsNourris = Math.round((totalKg * 1000) / 200); 
 
             document.getElementById('bilan-eq-pain').innerText = `${baguettes}`;
             document.getElementById('bilan-eq-repas').innerText = `${repasGaspilles}`;
@@ -1386,11 +1434,13 @@
             document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg";
             chartTimeline.data.labels = []; chartTimeline.data.datasets[0].data = []; chartTimeline.update();
             chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
-            chartHistorySacs.data.labels = []; chartHistorySacs.update();
             
             const grid = document.getElementById('palmares-badges-grid');
             if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
             
+            const historyGrid = document.getElementById('history-main-waste-grid');
+            if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
+
             cacheSacsHistory = null;
             globalRawData = null;
             document.getElementById('bilan-eleves-container').style.display = "none";
@@ -1516,10 +1566,8 @@
                 light.className = "traffic-light light-success"; 
                 light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">SUIVANT</span>';
                 
-                // 🔊 Annonce immédiate
                 prononcerMessage("Suivant !");
                 
-                // Réinitialisation rapide pour l'élève suivant
                 setTimeout(() => resetBorneUI(), 800);
             }, 400);
         }
