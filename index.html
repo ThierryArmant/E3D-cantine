@@ -282,7 +282,6 @@
                     <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
                 </div>
                 
-                <!-- 🎯 Grille ajustée : le donut à gauche est réduit (1fr) et le bar chart à droite est plus large (1.8fr) -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr 1.8fr;">
                     <div class="dashboard-col">
                         <h3>♻️ Répartition des biodéchets</h3>
@@ -342,7 +341,7 @@
                         </div>
                     </div>
 
-                    <!-- 👇 COLLE LE LABORATOIRE CSV ICI (JUSTE LÀ) -->
+                    <!-- 🧪 LABORATOIRE DE SIMULATION INDÉPENDANT (CYCLE 20 REPAS / CSV) -->
                     <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
                         <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Format .CSV)</h4>
                         <p style="font-size: 11.5px; color: #334155; margin-bottom: 12px; line-height: 1.5;">
@@ -631,6 +630,9 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
     <!-- CODE CENTRAL JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
@@ -640,6 +642,7 @@
 
         let systemVoices = [];
         let naturalVoice = null;
+        let importedCSVText = ""; // 👈 Gestion du texte CSV importé par le chef
 
         function initSystemVoices() {
             if (!('speechSynthesis' in window)) return;
@@ -696,10 +699,9 @@
         };
 
       window.addEventListener('DOMContentLoaded', () => { 
-            // 🎯 Graphique Donut "Répartition des biodéchets" avec chiffres continus et légende latérale
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
-                plugins: [ChartDataLabels], // 👈 Activation indispensable pour afficher les chiffres en continu
+                plugins: [ChartDataLabels], 
                 data: { 
                     labels: ['Évitables', 'Inévitables'], 
                     datasets: [{ 
@@ -715,7 +717,7 @@
                     cutout: '65%',
                     plugins: { 
                         legend: { 
-                            display: true, // 👈 Affichage de la légende Évitables / Inévitables
+                            display: true, 
                             position: 'right', 
                             labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } 
                         }, 
@@ -724,7 +726,7 @@
                                 let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 if (sum === 0) return '0%';
                                 let percentage = (val * 100 / sum).toFixed(0) + "%";
-                                return percentage; // Affiche directement les pourcentages en continu sur les parts
+                                return percentage; 
                             },
                             color: '#0f172a', 
                             font: { weight: '800', size: 11 },
@@ -804,7 +806,6 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
 
-            // 🎯 Calcul biodéchets évitables (Plats + Pain) vs inévitables (Fruits)
             let evitablesG = lastAlimG + lastPainG;
             let inevitablesG = lastFruitsG;
             let totalBioG = evitablesG + inevitablesG;
@@ -814,7 +815,6 @@
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
             chartTimeline.update();
 
-            // Mise à jour du rapport institutionnel
             document.getElementById('report-school-name').innerText = document.getElementById('select-etablissement').value;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('rep-kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
@@ -1104,6 +1104,45 @@
             .then(r => r.json())
             .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
+        }
+
+        // 📁 Fonctions pour l'import et l'analyse indépendante du fichier CSV (Laboratoire de Simulation)
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                importedCSVText = e.target.result;
+                alert("✅ Fichier CSV du cycle chargé avec succès ! Vous pouvez lancer l'audit indépendant.");
+            };
+            reader.readAsText(file, "UTF-8");
+        }
+
+        function runCSVAIAnalysis() {
+            const school = document.getElementById('select-etablissement').value;
+            const resBox = document.getElementById('gemini-ai-result'); 
+            const resText = document.getElementById('gemini-ai-text');
+
+            if (!importedCSVText) {
+                alert("⚠️ Veuillez d'abord sélectionner un fichier CSV contenant le cycle de menus du chef.");
+                return;
+            }
+
+            resBox.style.display = "block"; 
+            resText.innerHTML = "<em>🤖 Analyse RAG globale (Lecture de la bible GitHub & Audit du cycle CSV complet) en cours...</em>";
+            
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                headers: { "Content-Type": "text/plain" }, 
+                body: JSON.stringify({ 
+                    action: "analyzeMenuWithStats", 
+                    etablissement: school, 
+                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n" + importedCSVText 
+                }) 
+            })
+            .then(r => r.json())
+            .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
+            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
         function loadLiveData() {
