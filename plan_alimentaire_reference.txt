@@ -3,41 +3,39 @@ RÉFÉRENTIEL OFFICIEL DU PLAN ALIMENTAIRE & GRCN (VALÉRIE BRIANÇON)
 DIRECTION DES COLLÈGES ET DES SPORTS
 ====================================================================
 
-OBJECTIF : Le plan alimentaire est un outil pour fabriquer des menus garantissant l'équilibre nutritionnel sur une séquence de 20 repas consécutifs (cycle).
+OBJECTIF : Le plan alimentaire est un outil pour « fabriquer » des menus garantissant l'équilibre nutritionnel sur une séquence de 20 repas consécutifs (cycle).
 
---- 1. LES ENTRÉES ---
-- Maximum 4 sur 20 à plus de 15% de lipides (charcuterie, friands, quiches, pizzas riches en graisses, etc.).
-- Minimum 10 sur 20 à base d'au moins 50% de crudités (légumes ou fruits crus). (Distinct des desserts de fruits crus).
-- Le reste des entrées est libre (cuidités, entrées de féculents, entrées protidiques comme jambon ou poisson froid).
+--- 1. TABLEAU OFFICIEL DES FRÉQUENCES DE CONTRÔLE (SUR 20 REPAS) ---
 
---- 2. LES PLATS PROTIDIQUES (VPO : Viande, Poisson, Œuf) ---
-- Minimum 4 sur 20 : Poissons ou préparations à base de poisson (au moins 70% de poisson) ayant un rapport Protéines/Lipides (P/L) >= 2 (poissons gras sources d'oméga-3).
-- Minimum 4 sur 20 : Viandes non hachées de bœuf, veau, agneau ou abats de boucherie.
-- Maximums à respecter :
-  * Max 4 sur 20 : Produits frits ou pré-frits à plus de 15% de lipides (plats et garnitures confondus).
-  * Max 2 sur 20 : Plats dont le rapport P/L <= 1.
-  * Max 3 sur 20 : Plats préparés ou prêts à consommer contenant moins de 70% du grammage recommandé pour la denrée protidique (pizzas, quiches, cordons bleus, nuggets industriels, hachis parmentier, etc.). Attention : certains plats comptent dans plusieurs catégories de limites (ex: un cordon bleu cumule plusieurs critères).
-- Les autres plats (porc, volaille, œufs, viandes hachées) ne sont ni incités ni limités.
+| Catégorie d'aliment / Spécificité | Entrée | Plat protidique | Garniture ou accompagnement | Produit laitier | Dessert | Fréquence recommandée |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Entrées contenant >15% de lipides** (charcuteries, feuilletés, quiches, pizzas, friands, salades de charcuterie/fromage) | X | | | | | **4 / 20 maxi** |
+| **Crudités de légumes ou de fruits** (au moins 50% de crudités/fruits crus, distinct des desserts de fruits) | X | | | | | **10 / 20 mini** |
+| **Produits à frire ou pré-frits** (>15% lipides, panés, frites, cordons bleus, beignets) | | X | X | | | **4 / 20 maxi** |
+| **Plats protidiques avec rapport P/L < ou = 1** | | X | | | | **2 / 20 maxi** |
+| **Poissons ou prép. à base de poisson** (au moins 70% de poisson, P/L >= 2, ex: poissons gras oméga-3) | | X | | | | **4 / 20 mini** |
+| **Viandes non hachées** (bœuf, veau, agneau, abats de boucherie) | | X | | | | **4 / 20 mini** |
+| **Plats prêts à consommer** (< 70% du grammage recommandé pour la denrée protidique, ex: pizzas, quiches, cordons bleus) | | X | | | | **3 / 20 maxi** (ados) |
+| **Plats végétariens** (céréales + légumineuses, œufs, laitages, soja) | | X | | | | **4 / 20 mini** |
+| **Légumes cuits** (au moins 50% de légumes) | | | X | | | **10 / 20** |
+| **Légumes secs, féculents ou céréales** | | | X | | | **10 / 20** |
+| **Fromages riches en calcium** (>= 150 mg par portion) | X | | | X | | **8 / 20 mini** |
+| **Fromages à teneur moyenne en calcium** (100 à 150 mg par portion) | X | | | X | | **4 / 20 mini** |
+| **Laitages** (> 100 mg calcium, < 5g lipides, ex: yaourts, faisselles, crèmes desserts) | | | | X | | **6 / 20 mini** |
+| **Desserts riches en matières grasses** (> 15% MG, pâtisseries, viennoiseries) | | | | | X | **3 / 20 maxi** |
+| **Desserts ou laitages riches en sucres simples** (> 20g sucres, < 15% lipides) | | | | | X | **4 / 20 maxi** |
+| **Desserts de fruits crus 100%** (sans sucre ajouté) | | | | | X | **8 / 20 mini** |
 
---- 3. LES GARNITURES ---
-- Minimum 10 sur 20 : Légumes cuits.
-- Minimum 10 sur 20 : Féculents ou légumes secs (privilégier les légumineuses et céréales semi-complètes/complètes). 
-- Note : Les pommes de terre, même frites, restent des féculents. Un mélange de légumes et féculents compte selon la denrée majoritaire.
+--- 2. RÈGLES COMPLÉMENTAIRES & SEUILS ---
+- PRODUITS LAITIERS : Obligatoires à chaque repas. Le total ci-dessus impose 18 produits laitiers sur 20. Les 2 restants sont libres. Si un produit laitier est positionné en entrée, il doit peser au moins 16g par convive et respecter les seuils de calcium.
+- PAIN : Présence continue en service (suivi global du gâchis).
+- MÉTHODOLOGIE DE CONSTRUCTION DES MENUS : 
+  1. Commencer par positionner les VPO (Viande, Poisson, Œuf).
+  2. Poursuivre avec les garnitures (alternance légumes cuits / féculents ou légumineuses).
+  3. Positionner les produits laitiers.
+  4. Positionner les crudités (entrées et fruits crus).
+  5. Terminer par les ajustements.
+- CHOIX MULTIPLES ET DIRIGÉS : Ne pas proposer uniquement des plats limités (ex: pas de choix multiple 100% charcuterie en entrée ou 100% pâtisseries en dessert). Toujours équilibrer avec une option favorable obligatoire.
 
---- 4. LES PRODUITS LAITIERS ---
-- Le produit laitier est obligatoire à chaque repas. Sur 20 repas :
-  * Min 8 sur 20 : Fromages contenant au moins 150 mg de calcium par portion (Reblochon, Cantal, Beaufort, Emmental, Comté, Parmesan, Saint-Nectaire, etc.).
-  * Min 4 sur 20 : Fromages contenant entre 100 et 150 mg de calcium par portion (Camembert allégé, Brie, Chaource, etc.).
-  * Min 6 sur 20 : Laitages (yaourts, faisselles, petits-suisses, crèmes desserts lactées, riz au lait) contenant plus de 100 mg de calcium et moins de 5 g de lipides par portion.
-  * Total = 18 produits laitiers imposés. Les 2 restants sont libres (fromages <100mg calcium comme la cancoillotte ou le chèvre frais).
-- Si proposé en entrée : le produit laitier doit peser au moins 16g par convive et respecter les seuils de calcium.
-
---- 5. LES DESSERTS ---
-- Minimum 8 sur 20 : Desserts de fruits crus 100%.
-- Maximum 3 sur 20 : Desserts à plus de 15% de matières grasses (pâtisseries, viennoiseries, gâteaux au chocolat, crêpes).
-- Maximum 4 sur 20 : Desserts à plus de 20g de sucres simples et moins de 15% de lipides (entremets, crèmes desserts, flans, îles flottantes, compotes avec ajouts).
-
---- 6. RÈGLES DE CONSTRUCTION ET METHODOLOGIE ---
-- Ordre de construction du menu : 1) Commencer par les VPO (Plats protidiques) -> 2) Continuer avec les garnitures -> 3) Positionner les produits laitiers -> 4) Positionner les crudités et fruits -> 5) Terminer par les ajustements (féculents, légumes cuits).
-- Menu végétarien : Option végétarienne obligatoire dans les choix ou tous les menus du jour végétariens.
-- ALERTE SANITAIRE (ANSES - AVIS DE JANVIER 2025) : L'Anses ne recommande pas l'utilisation d'aliments à base de soja en restauration collective en raison d'un risque d'exposition collective aux isoflavones (phyto-estrogènes) faisant entrer les convives dans la catégorie « consommateur de soja ».
+--- 3. ALERTE SANITAIRE OFFICIELLE (ANSES - JANVIER 2025) ---
+- AVIS ANSES (Saisine n° 2022-SA-0221) : L'Anses ne recommande pas l'utilisation d'aliments à base de soja en restauration collective en raison d'un risque d'exposition collective aux isoflavones (phyto-estrogènes) faisant entrer les convives dans la catégorie « consommateur de soja ».
