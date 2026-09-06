@@ -10,9 +10,10 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         
-        /* 1. Fond d'écran global avec la photo de la borne */
+        /* 1. Fond d'écran global avec la photo de la borne et un voile tamisé */
         body { 
-            background-image: url('image_1_borneABC.jpg');
+            background-color: #1b4332;
+            background-image: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url('image_1_borneABC.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -23,7 +24,7 @@
             margin: 0;
         }
         
-        /* Barre latérale (Vert Collège) */
+        /* Barre latérale (Vert Collège semi-transparent) */
         .sidebar { 
             width: 240px; 
             background-color: rgba(27, 67, 50, 0.92) !important; 
@@ -46,7 +47,7 @@
         
         .top-bar { 
             height: 55px; 
-            background-color: rgba(255, 255, 255, 0.82) !important; 
+            background-color: rgba(255, 255, 255, 0.85) !important; 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(229, 231, 235, 0.6); 
@@ -57,13 +58,13 @@
             flex-shrink: 0;
         }
         
-        .content-area { padding: 16px; overflow-y: auto; flex-grow: 1; background-color: rgba(243, 244, 246, 0.15); }
+        .content-area { padding: 16px; overflow-y: auto; flex-grow: 1; background-color: rgba(0, 0, 0, 0.03); }
         .view-section { display: none; }
         .view-section.active { display: block; }
         
         /* 🗓️ BARRE DE FILTRAGE DES PÉRIODES (Glossy transparent) */
         .filter-period-bar {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 8px;
@@ -74,7 +75,7 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             border-left: 4px solid #2d6a4f;
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
@@ -95,7 +96,7 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
         .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; background: rgba(255,255,255,0.9); }
 
-        /* Grilles KPI & Blocs (Effet Verre Poli / Glossy transparent à ~78-82%) */
+        /* Grilles KPI & Blocs (Effet Verre Poli semi-transparent) */
         .kpi-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
@@ -103,7 +104,7 @@
             margin-bottom: 16px; 
         }
         .kpi-card, .dashboard-col, .form-section, .report-paper, .bilan-eleves-wrapper, .ai-box { 
-            background: rgba(255, 255, 255, 0.80) !important; 
+            background: rgba(255, 255, 255, 0.82) !important; 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 8px; 
@@ -111,8 +112,8 @@
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08); 
-            border: 1px solid rgba(255, 255, 255, 0.65);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06); 
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
         .kpi-blue { border-top: 4px solid #3b82f6; }
         .kpi-green { border-top: 4px solid #10b981; }
@@ -122,7 +123,7 @@
         .kpi-left { text-align: left; }
         .kpi-val { font-size: 22px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
         .kpi-lbl { font-size: 11.5px; font-weight: 700; color: #1e293b; }
-        .kpi-right { text-align: right; max-width: 130px; font-size: 10px; color: #475569; line-height: 1.25; font-style: italic; }
+        .kpi-right { text-align: right; max-width: 130px; font-size: 10px; color: #64748b; line-height: 1.25; font-style: italic; }
         
         .dashboard-row { 
             display: grid; 
@@ -130,20 +131,20 @@
             gap: 12px; 
             margin-bottom: 12px; 
         }
-        .dashboard-col { background: rgba(255, 255, 255, 0.80) !important; backdrop-filter: blur(10px); display: block; }
+        .dashboard-col { background: rgba(255, 255, 255, 0.82) !important; backdrop-filter: blur(10px); display: block; }
         .dashboard-col h3 { font-size: 14px; color: #1f2937; margin-bottom: 10px; font-weight: 700; }
         
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
 
-        /* 📋 RAPPORT INSTITUTIONNEL */
+        /* 📋 STYLE DU RAPPORT INSTITUTIONNEL APPROFONDI */
         .report-paper {
-            background: rgba(255, 255, 255, 0.85) !important;
+            background: rgba(255, 255, 255, 0.88) !important;
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            border: 1px solid rgba(203, 213, 225, 0.7);
+            border: 1px solid #cbd5e1;
             padding: 28px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             max-width: 1100px;
             margin: 0 auto;
             display: block;
@@ -288,7 +289,7 @@
         .btn-scan-trigger { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; font-size: 20px; font-weight: 900; padding: 20px 32px; border: none; border-radius: 14px; cursor: pointer; width: 100%; max-width: 600px; margin: 18px auto 8px auto; box-shadow: 0 8px 20px rgba(4, 120, 87, 0.35); display: flex; align-items: center; justify-content: center; gap: 12px; text-transform: uppercase; transition: all 0.15s ease; }
 
         /* 🏆 BILAN ÉLÈVES */
-        .bilan-eleves-wrapper { background: rgba(255, 255, 255, 0.88); border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(0,0,0,0.06); overflow: hidden; margin: 20px 0; display: none; }
+        .bilan-eleves-wrapper { background: rgba(255, 255, 255, 0.90); border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(0,0,0,0.06); overflow: hidden; margin: 20px 0; display: none; }
         .bilan-header-box { padding: 20px; text-align: center; color: #ffffff; background: linear-gradient(135deg, #10b981, #059669); }
         .bilan-header-box.zone-jaune { background: linear-gradient(135deg, #eab308, #ca8a04); }
         .bilan-header-box.zone-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
@@ -296,7 +297,7 @@
         .score-pill { display: inline-block; padding: 5px 14px; background: rgba(255, 255, 255, 0.25); border-radius: 20px; font-weight: 800; font-size: 11.5px; text-transform: uppercase; margin-bottom: 6px; }
         .score-title { font-size: 2.2rem; font-weight: 900; margin: 0; }
         .score-sub { font-size: 11px; opacity: 0.9; margin-top: 4px; }
-        .eq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; padding: 16px; background: rgba(248, 250, 252, 0.85); border-bottom: 1px solid #e2e8f0; }
+        .eq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; padding: 16px; background: rgba(248, 250, 252, 0.9); border-bottom: 1px solid #e2e8f0; }
         .eq-card { background: #ffffff; padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid #e2e8f0; }
         .eq-card-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
         .eq-card-val { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
@@ -518,7 +519,7 @@
             <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
-                    <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                    <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: rgba(255,255,255,0.95); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
                         
@@ -616,7 +617,7 @@
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter PDF officiel</button>
                     </div>
 
-                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: rgba(248, 250, 252, 0.9); padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
                         <p><strong>Cadre normatif :</strong> Référentiel CNRC et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
                         <p><strong>Objectif de l'enquête :</strong> Croiser la rigueur des obligations nutritionnelles avec la mesure physique du gaspillage et l'adhésion réelle des élèves par vision par ordinateur.</p>
@@ -977,9 +978,7 @@
                 for (let item of keywordsDessert) {
                     if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.dessert); }
                 }
-                if (scan.dessert > 0) {
-                    // Comptabilisation générique si pas de mot clé
-                }
+                if (scan.dessert > 0) {}
 
                 if (textRaw.includes("pain") || scan.pain > 0) ajouterMesure("Pain", scan.pain);
             });
