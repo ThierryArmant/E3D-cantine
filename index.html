@@ -63,10 +63,10 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        /* 🗓️ Conteneur global centré et harmonisé pour le Dashboard */
+        /* 🗓️ Conteneur global aligné à gauche pour le Dashboard */
         .dashboard-wrapper {
-            max-width: 1100px;
-            margin: 0 auto;
+            max-width: 1050px;
+            margin: 0;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -151,7 +151,7 @@
         
         .chart-container { position: relative; height: 160px; width: 100%; }
 
-        /* 📋 Style du rapport et blocs semi-transparents */
+        /* 📋 Style du rapport et blocs alignés à gauche */
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
             background: rgba(255, 255, 255, 0.85) !important;
             backdrop-filter: blur(10px);
@@ -159,8 +159,8 @@
             border: 1px solid rgba(255, 255, 255, 0.6);
             padding: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            max-width: 1100px;
-            margin: 0 auto;
+            max-width: 1050px;
+            margin: 0;
             display: block;
         }
         .report-header {
@@ -329,7 +329,7 @@
 
             <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
-                <div class="borne-container">
+                <div class="borne-container" style="max-width: 1050px; margin: 0;">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
                     <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
                         <div style="flex: 1.2; min-width: 280px; position: relative;">
@@ -348,7 +348,7 @@
 
             <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
-                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
+                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
                     <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
@@ -471,7 +471,7 @@
 
             <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
             <div id="view-saisie-dechets" class="view-section">
-                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
+                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
