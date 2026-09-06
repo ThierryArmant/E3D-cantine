@@ -664,10 +664,11 @@
             "Éclair": "🥖", "Tarte aux fruits": "🥧", "Pain": "🥖", "Entrée du jour": "🥗", "Plat du jour": "🍽️", "Dessert du jour": "🍰"
         };
 
-       window.addEventListener('DOMContentLoaded', () => { 
-            // 🎯 Graphique Donut "Répartition des biodéchets" optimisé avec labels extérieurs et tirets
+      window.addEventListener('DOMContentLoaded', () => { 
+            // 🎯 Graphique Donut "Répartition des biodéchets" avec chiffres continus et légende latérale
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
+                plugins: [ChartDataLabels], // 👈 Activation indispensable pour afficher les chiffres en continu
                 data: { 
                     labels: ['Évitables', 'Inévitables'], 
                     datasets: [{ 
@@ -683,21 +684,21 @@
                     cutout: '65%',
                     plugins: { 
                         legend: { 
-                            display: false // Masqué pour laisser place aux labels directs sur les parts
+                            display: true, // 👈 Affichage de la légende Évitables / Inévitables
+                            position: 'right', 
+                            labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } 
                         }, 
                         datalabels: { 
                             formatter: (val, ctx) => {
                                 let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 if (sum === 0) return '0%';
                                 let percentage = (val * 100 / sum).toFixed(0) + "%";
-                                let label = ctx.chart.data.labels[ctx.dataIndex];
-                                return `${percentage} - ${label}`;
+                                return percentage; // Affiche directement les pourcentages en continu sur les parts
                             },
                             color: '#0f172a', 
                             font: { weight: '800', size: 11 },
-                            anchor: 'end',
-                            align: 'end',
-                            offset: 4
+                            anchor: 'center',
+                            align: 'center'
                         } 
                     } 
                 } 
