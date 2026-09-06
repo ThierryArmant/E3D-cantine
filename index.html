@@ -73,6 +73,87 @@
             gap: 10px;
         }
 
+        /* 📸 Styles spécifiques restaurés pour la Borne */
+        .borne-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 1050px;
+            margin: 0;
+        }
+        .instruction-banner {
+            font-size: 15px;
+            font-weight: 800;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .state-searching { background-color: #2563eb; }
+        .state-detected { background-color: #d97706; }
+        .state-success { background-color: #059669; }
+
+        .traffic-light {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            font-size: 12px;
+        }
+        .light-searching { background-color: #3b82f6; }
+        .light-detected { background-color: #f59e0b; }
+        .light-success { background-color: #10b981; }
+
+        .progress-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            height: 8px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #10b981;
+            transition: width 0.4s ease;
+        }
+
+        .btn-scan-trigger {
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 800;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transition: background-color 0.2s;
+        }
+        .btn-scan-trigger:hover {
+            background-color: #059669;
+        }
+
         /* 🗓️ Barre de filtrage */
         .filter-period-bar {
             background: rgba(255, 255, 255, 0.78);
@@ -330,7 +411,7 @@
 
             <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
-                <div class="borne-container" style="max-width: 1050px; margin: 0;">
+                <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
                     <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
                         <div style="flex: 1.2; min-width: 280px; position: relative;">
