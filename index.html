@@ -45,7 +45,7 @@
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* BARRE SUPÉRIEURE ULTRA-SLIM */
+        /* Barre supérieure ultra-slim */
         .top-bar { 
             height: 42px; 
             background-color: rgba(255, 255, 255, 0.72) !important; 
@@ -63,7 +63,7 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        /* 🗓️ BARRE DE FILTRAGE DES PÉRIODES */
+        /* 🗓️ Barre de filtrage */
         .filter-period-bar {
             background: rgba(255, 255, 255, 0.70);
             backdrop-filter: blur(10px);
@@ -97,7 +97,7 @@
         .custom-date-box { display: flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: #475569; }
         .input-date { padding: 2px 5px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 10px; background: rgba(255,255,255,0.85); }
 
-        /* 📏 MICRO-BANDEAUX KPI RÉDUITS & SEMI-TRANSPARENTS (Moins larges/envahissants) */
+        /* 📏 Micro-bandeaux KPI réduits */
         .kpi-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -139,7 +139,7 @@
         .chart-container { position: relative; height: 160px; width: 100%; }
         .chart-container-large { position: relative; height: 210px; width: 100%; }
 
-        /* 📋 STYLE DU RAPPORT ET BLOCS SEMI-TRANSPARENTS */
+        /* 📋 Style du rapport et blocs semi-transparents */
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
             background: rgba(255, 255, 255, 0.78) !important;
             backdrop-filter: blur(10px);
@@ -283,14 +283,12 @@
                 </div>
                 
                 <div class="dashboard-row">
-                    <div class="dashboard-col" style="position: relative;">
-                        <h3>🎯 Historique journalier & Score de la veille</h3>
-                        <div class="chart-container" style="position: relative;">
+                    <!-- 🎯 NOUVEAU GRAPHIQUE : Répartition des biodéchets (Évitables vs Inévitables) -->
+                    <div class="dashboard-col">
+                        <h3>♻️ Répartition des biodéchets</h3>
+                        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;" id="biodiff-total">Total : 0 g</div>
+                        <div class="chart-container" style="height: 145px; display: flex; align-items: center; justify-content: center;">
                             <canvas id="chart-timeline"></canvas>
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                                <div style="font-size: 9.5px; font-weight: 800; color: #475569; text-transform: uppercase;">HIER</div>
-                                <div id="center-score-val" style="font-size: 16px; font-weight: 900; color: #1b4332;">-- g</div>
-                            </div>
                         </div>
                     </div>
                     <div class="dashboard-col">
@@ -316,7 +314,7 @@
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
-                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
                         <div style="flex: 1.2; min-width: 280px; position: relative;">
                             <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 280px; object-fit: cover; border-radius: 10px; background: #1e293b; border: 2px solid #cbd5e1;"></video>
                             <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
@@ -333,9 +331,9 @@
 
             <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
-                <div style="background: rgba(255,255,255,0.88); padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
+                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
-                    <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: rgba(248, 250, 252, 0.8); padding: 12px; border-radius: 6px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
                         <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
                         <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; justify-content: flex-end;">
@@ -439,7 +437,7 @@
 
             <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
             <div id="view-saisie-dechets" class="view-section">
-                <div style="background: rgba(255,255,255,0.88); padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
+                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
@@ -538,7 +536,7 @@
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter PDF officiel</button>
                     </div>
 
-                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: rgba(248,250,252,0.9); padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
                         <p><strong>Cadre normatif :</strong> Référentiel CNRC et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
                         <p><strong>Objectif de l'enquête :</strong> Croiser la rigueur des obligations nutritionnelles avec la mesure physique du gaspillage et l'adhésion réelle des élèves par vision par ordinateur.</p>
@@ -667,20 +665,32 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
-            // 🎯 Remplacement du graphique linéaire par un Donut Chart pour l'historique journalier
+            // 🎯 Graphique Donut "Répartition des biodéchets" (Évitables vs Inévitables)
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
-                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#2d6a4f', '#52b788', '#74c69d', '#95d5b2', '#b7e4c7', '#40916c', '#1b4332', '#081c15'] }] }, 
+                data: { 
+                    labels: ['Déchets évitables', 'Déchets inévitables'], 
+                    datasets: [{ 
+                        data: [0, 0], 
+                        backgroundColor: ['#38bdf8', '#cbd5e1'],
+                        borderWidth: 0
+                    }] 
+                }, 
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    cutout: '68%',
+                    cutout: '72%',
                     plugins: { 
-                        legend: { display: false }, 
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }, 
                         datalabels: { 
+                            formatter: (val, ctx) => {
+                                let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                if (sum === 0) return '0%';
+                                let percentage = (val * 100 / sum).toFixed(0) + "%";
+                                return percentage;
+                            },
                             color: '#0f172a', 
-                            font: { weight: 'bold', size: 10 }, 
-                            formatter: (val, ctx) => `${ctx.chart.data.labels[ctx.dataIndex]}: ${val}g` 
+                            font: { weight: 'bold', size: 11 } 
                         } 
                     } 
                 } 
@@ -729,32 +739,15 @@
             const sh = globalRawData.sacsHistory;
             const effectif = globalRawData.effectifCouverts || 450;
             
-            let filteredLabels = [];
-            let filteredAlim = [], filteredFruits = [], filteredPain = [], filteredEmb = [], filteredServ = [];
-            let filteredDatesRaw = [];
-            let donutLabels = [];
-            let donutData = [];
-
             let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
             let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = sh.datesRaw[i];
                 if (d >= startDate && d <= endDate) {
-                    filteredLabels.push(sh.labels[i]);
-                    filteredDatesRaw.push(d);
-                    
-                    let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i], emb = sh.emballages[i], s = sh.serviettes[i];
-                    filteredAlim.push(a); filteredFruits.push(f); filteredPain.push(p); filteredEmb.push(emb); filteredServ.push(s);
-                    
+                    let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i];
                     totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
                     lastAlimG = a * 1000; lastFruitsG = f * 1000; lastPainG = p * 1000;
-
-                    let totalS = a + f + p;
-                    let score = effectif > 0 ? Math.round((totalS * 1000) / effectif) : 0;
-                    
-                    donutLabels.push(sh.labels[i]);
-                    donutData.push(score);
                 }
             }
 
@@ -772,12 +765,15 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
 
-            // Score de la veille au centre du donut
-            let yesterdayVal = "0 g";
-            if (donutData.length > 0) {
-                yesterdayVal = donutData[donutData.length - 1] + " g";
-            }
-            document.getElementById('center-score-val').innerText = yesterdayVal;
+            // 🎯 Calcul biodéchets évitables (Plats + Pain) vs inévitables (Fruits/épluchures)
+            let evitablesG = lastAlimG + lastPainG;
+            let inevitablesG = lastFruitsG;
+            let totalBioG = evitablesG + inevitablesG;
+
+            document.getElementById('biodiff-total').innerText = `Total : ${totalBioG.toFixed(0)} g`;
+
+            chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
+            chartTimeline.update();
 
             // Mise à jour du rapport institutionnel
             document.getElementById('report-school-name').innerText = document.getElementById('select-etablissement').value;
@@ -787,11 +783,6 @@
 
             runGranularExtraction(filteredScans);
 
-            // Mise à jour du donut chart
-            chartTimeline.data.labels = donutLabels.slice(-7);
-            chartTimeline.data.datasets[0].data = donutData.slice(-7);
-            chartTimeline.update();
-
             let statPctEntree = totalLastNourritureG > 0 ? ((lastAlimG * 0.3) / totalLastNourritureG) * 100 : 0;
             let statPctPlat = totalLastNourritureG > 0 ? ((lastAlimG * 0.7) / totalLastNourritureG) * 100 : 0;
             let statPctFruits = totalLastNourritureG > 0 ? (lastFruitsG / totalLastNourritureG) * 100 : 0;
@@ -799,12 +790,12 @@
             chartCategories.data.datasets[0].data = [statPctEntree.toFixed(1), statPctPlat.toFixed(1), statPctFruits.toFixed(1), statPctPain.toFixed(1)];
             chartCategories.update();
 
-            cacheSacsHistory = { labels: filteredLabels, datesRaw: filteredDatesRaw, alimentaire: filteredAlim, fruits: filteredFruits, pain: filteredPain, emballages: filteredEmb, serviettes: filteredServ };
+            cacheSacsHistory = { labels: sh.labels, datesRaw: sh.datesRaw, alimentaire: sh.alimentaire, fruits: sh.fruits, pain: sh.pain, emballages: sh.emballages, serviettes: sh.serviettes };
             updateHistoryMode('day');
 
-            if (filteredAlim.length > 0) {
-                const idx = filteredAlim.length - 1;
-                renderBilanEleves(filteredAlim[idx], filteredFruits[idx], filteredPain[idx], effectif);
+            if (sh.alimentaire.length > 0) {
+                const idx = sh.alimentaire.length - 1;
+                renderBilanEleves(sh.alimentaire[idx], sh.fruits[idx], sh.pain[idx], effectif);
             }
         }
 
@@ -923,7 +914,6 @@
                 for (let item of keywordsDessert) {
                     if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.dessert); }
                 }
-                if (scan.dessert > 0) {}
 
                 if (textRaw.includes("pain") || scan.pain > 0) ajouterMesure("Pain", scan.pain);
             });
@@ -1089,7 +1079,7 @@
 
         function clearDashboardToZero() {
             document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg";
-            chartTimeline.data.labels = []; chartTimeline.data.datasets[0].data = []; chartTimeline.update();
+            chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update();
             chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
             const grid = document.getElementById('palmares-badges-grid'); if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
             const historyGrid = document.getElementById('history-main-waste-grid'); if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
