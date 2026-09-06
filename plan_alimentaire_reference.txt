@@ -55,3 +55,45 @@ OBJECTIF : Le plan alimentaire est un outil pour « fabriquer » des menus garan
 
 --- 5. INSTRUCTION DE CITATION POUR L'IA ---
 - Dans ton rapport d'audit, cite explicitement l'article, le décret ou l'avis officiel correspondant pour justifier chaque non-conformité relevée (ex: « Conformément au décret n° 2011-1227... » ou « Suivant les recommandations du GRCN et de l'avis ANSES de janvier 2025... »).
+====================================================================
+BASE DOCUMENTAIRE OFFICIELLE : GRCN (CNRC) & CADRE LÉGISLATIF
+====================================================================
+
+1. CADRE JURIDIQUE ET RÉFÉRENCES OFFICIELLES (À CITER DANS LES RAPPORTS) :
+- Décret n° 2011-1227 du 30 septembre 2011 relatif aux conditions de restauration scolaire et aux exigences nutritionnelles.
+- Guide des Recommandations en matière de Nutrition (GRCN) édité par le Conseil National de la Restauration Collective (CNRC).
+- Lois EGALim (Loi n° 2018-938) et Climat & Résilience (Loi n° 2021-1104) : Objectifs de 50% de produits durables/qualitatifs dont 20% bio, et obligation du menu végétarien hebdomadaire.
+- Loi AGEC (Loi n° 2020-105) : Lutte contre le gaspillage et gestion des biodéchets.
+- Veille Sanitaire ANSES (Saisine n° 2022-SA-0221 - Janvier 2025) : Recommandations sur les restrictions d'exposition au soja (isoflavones) en restauration collective.
+
+2. GRAMMAGES DE RÉFÉRENCE PAR PORTION (COLLÈGE / ADOLESCENTS - 11 à 18 ans) :
+- Viandes de boucherie, volailles et poissons cuits : 80 à 100 g.
+- Féculents cuits (riz, pâtes, semoule) : 150 à 180 g (pommes de terre : 170 à 200 g ; légumineuses : 100 à 130 g).
+- Légumes cuits d'accompagnement : 100 à 120 g.
+- Crudités / Entrées de légumes : 60 à 80 g (salades composées : 100 à 120 g).
+- Produits laitiers : 
+  * Fromage en portion : 25 à 30 g.
+  * Yaourt : 1 pot de 125 g.
+  * Fromage blanc : 120 à 150 g.
+  * Crème dessert / lacté : 100 à 120 g.
+- Fruits et Desserts :
+  * Fruit frais entier : 150 à 180 g.
+  * Compote : 100 à 120 g.
+  * Pâtisserie / tarte : 80 à 100 g.
+- Pain : 40 à 50 g par repas.
+
+3. RÈGLES DE CONTRÔLE DES FRÉQUENCES (SUR 20 REPAS CONSÉCUTIFS) :
+- Entrées riches en lipides (>15%) : Max 4 / 20.
+- Crudités / fruits crus : Min 10 / 20.
+- Produits à frire ou pré-frits (>15% lipides) : Max 4 / 20.
+- Plats protidiques rapport P/L <= 1 : Max 2 / 20.
+- Poissons (au moins 70% de poisson, P/L >= 2) : Min 4 / 20.
+- Viandes non hachées (bœuf, veau, agneau, abats) : Min 4 / 20.
+- Plats végétariens : Min 4 / 20.
+- Légumes cuits : 10 / 20.
+- Légumes secs / féculents / céréales : 10 / 20.
+- Fromages riches en calcium (>=150 mg) : Min 8 / 20.
+- Fromages moyens (100-150 mg) : Min 4 / 20.
+- Laitages (<5g lipides, >100mg calcium) : Min 6 / 20.
+- Desserts riches en matières grasses (>15% MG) : Max 3 / 20.
+- Desserts fruits crus 100% : Min 8 / 20.
