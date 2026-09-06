@@ -282,19 +282,20 @@
                     <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
                 </div>
                 
+                <!-- 🎯 Grille ajustée : le donut à gauche est réduit (1fr) et le bar chart à droite est plus large (1.8fr) -->
                 <div class="dashboard-row" style="grid-template-columns: 1fr 1.8fr;">
-    <div class="dashboard-col">
-        <h3>♻️ Répartition des biodéchets</h3>
-        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;" id="biodiff-total">Total : 0 g</div>
-        <div class="chart-container" style="height: 145px; display: flex; align-items: center; justify-content: center;">
-            <canvas id="chart-timeline"></canvas>
-        </div>
-    </div>
-    <div class="dashboard-col">
-        <h3>📊 Répartition des restes par composante (%)</h3>
-        <div class="chart-container"><canvas id="chart-categories"></canvas></div>
-    </div>
-</div>
+                    <div class="dashboard-col">
+                        <h3>♻️ Répartition des biodéchets</h3>
+                        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;" id="biodiff-total">Total : 0 g</div>
+                        <div class="chart-container" style="height: 145px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="chart-timeline"></canvas>
+                        </div>
+                    </div>
+                    <div class="dashboard-col">
+                        <h3>📊 Répartition des restes par composante (%)</h3>
+                        <div class="chart-container"><canvas id="chart-categories"></canvas></div>
+                    </div>
+                </div>
                 
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
@@ -664,7 +665,7 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
-            // 🎯 Graphique Donut "Répartition des biodéchets" avec scores et libellés reliés par un tiret
+            // 🎯 Graphique Donut "Répartition des biodéchets" (Évitables vs Inévitables avec tiret)
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 data: { 
@@ -690,7 +691,6 @@
                                 if (sum === 0) return '0%';
                                 let percentage = (val * 100 / sum).toFixed(0) + "%";
                                 let label = ctx.chart.data.labels[ctx.dataIndex];
-                                // Ajout du tiret reliant le score à la légende/partie
                                 return `${percentage} - ${label}`;
                             },
                             color: '#0f172a', 
@@ -699,15 +699,6 @@
                     } 
                 } 
             });
-
-            chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
-                type: 'bar', plugins: [ChartDataLabels], 
-                data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 28 }] }, 
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
-            });
-
-            loadEtablissementsDropdown(); 
-        });
 
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
@@ -778,7 +769,7 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
 
-            // 🎯 Calcul biodéchets évitables (Plats + Pain) vs inévitables (Fruits/épluchures)
+            // 🎯 Calcul biodéchets évitables (Plats + Pain) vs inévitables (Fruits)
             let evitablesG = lastAlimG + lastPainG;
             let inevitablesG = lastFruitsG;
             let totalBioG = evitablesG + inevitablesG;
