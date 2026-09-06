@@ -1253,7 +1253,7 @@
             }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG globale et mise en forme du rapport en cours...</em>";
+            resText.innerHTML = "<em>🤖 Analyse RAG sécurisée et enrichie avec les références réglementaires en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1261,7 +1261,7 @@
                 body: JSON.stringify({ 
                     action: "analyzeMenuWithStats", 
                     etablissement: school, 
-                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n[CONSIGNES STRICTES DE MISE EN FORME ET D'AUDIT] :\n1. Utilise un tableau de synthèse épuré utilisant strictement la notation de fraction officielle 'X/20' (ex: 12/20 constatés vs max 4/20 ou min 10/20).\n2. Structure obligatoirement ta réponse en 4 sections distinctes utilisant des blocs HTML colorés (div style='background-color: [couleur]; padding: 12px; border-radius: 6px; margin-bottom: 12px;') :\n   - Partie 1 : Analyse des Fréquences Globales -> Fond saumon clair (#ffe5d9)\n   - Partie 2 : Conformité au Référentiel Officiel -> Fond bleu ciel (#e0f2fe)\n   - Partie 3 : Risques de Gaspillage Terrain -> Fond orange clair (#ffedd5)\n   - Partie 4 : Avis de Pré-Validation & Aides de Remplacement (avec propositions concrètes de substitution jour par jour) -> Fond vert clair (#f0fdf4).\n\n" + importedCSVText 
+                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n[CONSIGNES STRICTES DE MISE EN FORME ET D'AUDIT SÉCURISÉ] :\n1. Utilise un tableau de synthèse épuré utilisant strictement la notation de fraction officielle 'X/20' (ex: 12/20 constatés vs max 4/20 ou min 10/20).\n2. Cite explicitement les textes officiels de référence (Décret n° 2011-1227, Lois EGALim / Climat-Résilience, Loi AGEC et avis ANSES janvier 2025) pour justifier rigoureusement chaque non-conformité relevée.\n3. Structure obligatoirement ta réponse en 4 sections distinctes utilisant des blocs HTML colorés (div style='background-color: [couleur]; padding: 12px; border-radius: 6px; margin-bottom: 12px;') :\n   - Partie 1 : Analyse des Fréquences Globales -> Fond saumon clair (#ffe5d9)\n   - Partie 2 : Conformité au Référentiel Officiel -> Fond bleu ciel (#e0f2fe)\n   - Partie 3 : Risques de Gaspillage Terrain -> Fond orange clair (#ffedd5)\n   - Partie 4 : Avis de Pré-Validation & Aides de Remplacement (avec propositions concrètes de substitution jour par jour) -> Fond vert clair (#f0fdf4).\n\n" + importedCSVText 
                 }) 
             })
             .then(r => r.json())
