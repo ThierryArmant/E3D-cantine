@@ -45,10 +45,10 @@
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* BARRE SUPÉRIEURE ULTRA-SLIM (Hauteur réduite) */
+        /* BARRE SUPÉRIEURE ULTRA-SLIM */
         .top-bar { 
             height: 42px; 
-            background-color: rgba(255, 255, 255, 0.68) !important; 
+            background-color: rgba(255, 255, 255, 0.72) !important; 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
@@ -63,9 +63,9 @@
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        /* 🗓️ BARRE DE FILTRAGE DES PÉRIODES ULTRA-SLIM & TRANSPARENTE */
+        /* 🗓️ BARRE DE FILTRAGE DES PÉRIODES */
         .filter-period-bar {
-            background: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.70);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 6px;
@@ -97,19 +97,19 @@
         .custom-date-box { display: flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; color: #475569; }
         .input-date { padding: 2px 5px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 10px; background: rgba(255,255,255,0.85); }
 
-        /* 📏 MICRO-BANDEAUX KPI ULTRA-FINS ET SEMI-TRANSPARENTS (Hauteur ~40px) */
+        /* 📏 MICRO-BANDEAUX KPI RÉDUITS & SEMI-TRANSPARENTS (Moins larges/envahissants) */
         .kpi-grid { 
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            grid-template-columns: repeat(4, 1fr); 
             gap: 8px; 
             margin-bottom: 8px; 
         }
         .kpi-card { 
-            background: rgba(255, 255, 255, 0.58) !important; 
+            background: rgba(255, 255, 255, 0.62) !important; 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 6px; 
-            padding: 5px 10px; 
+            padding: 5px 8px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
@@ -123,9 +123,9 @@
         .kpi-red { border-top: 3px solid #ef4444; }
         
         .kpi-left { text-align: left; display: flex; flex-direction: column; justify-content: center; }
-        .kpi-val { font-size: 15px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 1px; }
-        .kpi-lbl { font-size: 9.5px; font-weight: 700; color: #1e293b; }
-        .kpi-right { text-align: right; max-width: 105px; font-size: 8px; color: #475569; line-height: 1.1; font-style: italic; }
+        .kpi-val { font-size: 14px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 1px; }
+        .kpi-lbl { font-size: 9px; font-weight: 700; color: #1e293b; }
+        .kpi-right { text-align: right; max-width: 90px; font-size: 7.5px; color: #475569; line-height: 1.1; font-style: italic; }
         
         .dashboard-row { 
             display: grid; 
@@ -133,15 +133,15 @@
             gap: 8px; 
             margin-bottom: 8px; 
         }
-        .dashboard-col { background: rgba(255, 255, 255, 0.65) !important; backdrop-filter: blur(10px); display: block; border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .dashboard-col { background: rgba(255, 255, 255, 0.72) !important; backdrop-filter: blur(10px); display: block; border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .dashboard-col h3 { font-size: 12px; color: #1f2937; margin-bottom: 6px; font-weight: 700; }
         
-        .chart-container { position: relative; height: 150px; width: 100%; }
-        .chart-container-large { position: relative; height: 200px; width: 100%; }
+        .chart-container { position: relative; height: 160px; width: 100%; }
+        .chart-container-large { position: relative; height: 210px; width: 100%; }
 
         /* 📋 STYLE DU RAPPORT ET BLOCS SEMI-TRANSPARENTS */
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
-            background: rgba(255, 255, 255, 0.72) !important;
+            background: rgba(255, 255, 255, 0.78) !important;
             backdrop-filter: blur(10px);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.5);
@@ -261,29 +261,37 @@
             <div id="view-dashboard" class="view-section active">
                 <div class="filter-period-bar">
                     <div class="filter-btn-group">
-                        <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout</button>
-                        <button type="button" class="btn-period" onclick="setQuickPeriod('3months', this)">3 mois</button>
-                        <button type="button" class="btn-period" onclick="setQuickPeriod('month', this)">Ce mois</button>
-                        <button type="button" class="btn-period" onclick="setQuickPeriod('7days', this)">7 jours</button>
+                        <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
+                        <button type="button" class="btn-period" onclick="setQuickPeriod('3months', this)">3 derniers mois</button>
+                        <button type="button" class="btn-period" onclick="setQuickPeriod('month', this)">Ce mois-ci</button>
+                        <button type="button" class="btn-period" onclick="setQuickPeriod('7days', this)">7 derniers jours</button>
                     </div>
                     <div class="custom-date-box">
-                        <span>Du:</span> <input type="date" id="filter-start-date" class="input-date">
-                        <span>Au:</span> <input type="date" id="filter-end-date" class="input-date">
+                        <span>Du :</span>
+                        <input type="date" id="filter-start-date" class="input-date">
+                        <span>Au :</span>
+                        <input type="date" id="filter-end-date" class="input-date">
                         <button type="button" class="btn-period" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 2px 6px;">Filtrer</button>
                     </div>
                 </div>
 
                 <div class="kpi-grid">
-                    <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes divisé par convives</div></div>
-                    <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs (plats, fruits, pain)</div></div>
-                    <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base estimée à 4,50 € le kg gaspillé</div></div>
-                    <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur d'impact GES (2 kg CO₂ / kg)</div></div>
+                    <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / nb convives</div></div>
+                    <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs</div></div>
+                    <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
+                    <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
                 </div>
                 
                 <div class="dashboard-row">
-                    <div class="dashboard-col">
-                        <h3>📈 Évolution historique du taux de gâchis (%)</h3>
-                        <div class="chart-container"><canvas id="chart-timeline"></canvas></div>
+                    <div class="dashboard-col" style="position: relative;">
+                        <h3>🎯 Historique journalier & Score de la veille</h3>
+                        <div class="chart-container" style="position: relative;">
+                            <canvas id="chart-timeline"></canvas>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                                <div style="font-size: 9.5px; font-weight: 800; color: #475569; text-transform: uppercase;">HIER</div>
+                                <div id="center-score-val" style="font-size: 16px; font-weight: 900; color: #1b4332;">-- g</div>
+                            </div>
+                        </div>
                     </div>
                     <div class="dashboard-col">
                         <h3>📊 Répartition des restes par composante (%)</h3>
@@ -308,7 +316,7 @@
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
                     <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
-                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
                         <div style="flex: 1.2; min-width: 280px; position: relative;">
                             <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 280px; object-fit: cover; border-radius: 10px; background: #1e293b; border: 2px solid #cbd5e1;"></video>
                             <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
@@ -325,9 +333,9 @@
 
             <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
-                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
+                <div style="background: rgba(255,255,255,0.88); padding: 16px; border-radius: 8px; max-width: 1150px; margin: 0 auto;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
-                    <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: rgba(248, 250, 252, 0.8); padding: 12px; border-radius: 6px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
                         <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
                         <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; justify-content: flex-end;">
@@ -431,7 +439,7 @@
 
             <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
             <div id="view-saisie-dechets" class="view-section">
-                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
+                <div style="background: rgba(255,255,255,0.88); padding: 16px; border-radius: 8px; max-width: 1200px; margin: 0 auto;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
@@ -519,7 +527,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 5 : BILAN INSTITUTIONNEL (RAPPORT D'ENQUÊTE DÉPARTEMENTAL) -->
+            <!-- PÔLE 5 : BILAN INSTITUTIONNEL -->
             <div id="view-rapport" class="view-section">
                 <div class="report-paper">
                     <div class="report-header">
@@ -530,7 +538,7 @@
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter PDF officiel</button>
                     </div>
 
-                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: rgba(248,250,252,0.9); padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
                         <p><strong>Cadre normatif :</strong> Référentiel CNRC et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
                         <p><strong>Objectif de l'enquête :</strong> Croiser la rigueur des obligations nutritionnelles avec la mesure physique du gaspillage et l'adhésion réelle des élèves par vision par ordinateur.</p>
@@ -659,15 +667,28 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
+            // 🎯 Remplacement du graphique linéaire par un Donut Chart pour l'historique journalier
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
-                type: 'line', 
-                data: { labels: [], datasets: [{ label: 'Taux global de gâchis (%)', data: [], borderColor: '#2d6a4f', tension: 0.2 }] }, 
-                options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } }, scales: { y: { beginAtZero: true, max: 100 } } } 
+                type: 'doughnut', 
+                data: { labels: [], datasets: [{ data: [], backgroundColor: ['#2d6a4f', '#52b788', '#74c69d', '#95d5b2', '#b7e4c7', '#40916c', '#1b4332', '#081c15'] }] }, 
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    cutout: '68%',
+                    plugins: { 
+                        legend: { display: false }, 
+                        datalabels: { 
+                            color: '#0f172a', 
+                            font: { weight: 'bold', size: 10 }, 
+                            formatter: (val, ctx) => `${ctx.chart.data.labels[ctx.dataIndex]}: ${val}g` 
+                        } 
+                    } 
+                } 
             });
 
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
-                data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 30 }] }, 
+                data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 28 }] }, 
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
             });
 
@@ -711,7 +732,8 @@
             let filteredLabels = [];
             let filteredAlim = [], filteredFruits = [], filteredPain = [], filteredEmb = [], filteredServ = [];
             let filteredDatesRaw = [];
-            let filteredTimelineScores = [];
+            let donutLabels = [];
+            let donutData = [];
 
             let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
             let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
@@ -729,8 +751,10 @@
                     lastAlimG = a * 1000; lastFruitsG = f * 1000; lastPainG = p * 1000;
 
                     let totalS = a + f + p;
-                    let score = effectif > 0 ? ((totalS * 1000) / effectif) : 0;
-                    filteredTimelineScores.push(Math.min(100, score).toFixed(0));
+                    let score = effectif > 0 ? Math.round((totalS * 1000) / effectif) : 0;
+                    
+                    donutLabels.push(sh.labels[i]);
+                    donutData.push(score);
                 }
             }
 
@@ -748,6 +772,13 @@
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
 
+            // Score de la veille au centre du donut
+            let yesterdayVal = "0 g";
+            if (donutData.length > 0) {
+                yesterdayVal = donutData[donutData.length - 1] + " g";
+            }
+            document.getElementById('center-score-val').innerText = yesterdayVal;
+
             // Mise à jour du rapport institutionnel
             document.getElementById('report-school-name').innerText = document.getElementById('select-etablissement').value;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
@@ -756,8 +787,9 @@
 
             runGranularExtraction(filteredScans);
 
-            chartTimeline.data.labels = filteredLabels.slice(-15);
-            chartTimeline.data.datasets[0].data = filteredTimelineScores.slice(-15);
+            // Mise à jour du donut chart
+            chartTimeline.data.labels = donutLabels.slice(-7);
+            chartTimeline.data.datasets[0].data = donutData.slice(-7);
             chartTimeline.update();
 
             let statPctEntree = totalLastNourritureG > 0 ? ((lastAlimG * 0.3) / totalLastNourritureG) * 100 : 0;
