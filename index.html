@@ -10,7 +10,6 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         
-        /* 1. Fond d'écran global avec la photo de la borne */
         body { 
             background-color: #1b4332;
             background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('image_1_borneABC.jpg');
@@ -24,7 +23,6 @@
             margin: 0;
         }
         
-        /* Barre latérale (Vert Collège semi-transparent) */
         .sidebar { 
             width: 240px; 
             background-color: rgba(27, 67, 50, 0.92) !important; 
@@ -45,7 +43,6 @@
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* Barre supérieure ultra-slim */
         .top-bar { 
             height: 42px; 
             background-color: rgba(255, 255, 255, 0.72) !important; 
@@ -59,12 +56,10 @@
             flex-shrink: 0;
         }
         
-        /* ↕️ Espace supérieur accru pour dégager la vue du haut */
         .content-area { padding: 30px 20px 20px 20px; overflow-y: auto; flex-grow: 1; background-color: rgba(0, 0, 0, 0.01); }
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        /* 🗓️ Conteneur global aligné à gauche pour le Dashboard */
         .dashboard-wrapper {
             max-width: 1050px;
             margin: 0;
@@ -73,7 +68,6 @@
             gap: 10px;
         }
 
-        /* 📸 Styles spécifiques restaurés pour la Borne */
         .borne-container {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(10px);
@@ -150,11 +144,8 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
             transition: background-color 0.2s;
         }
-        .btn-scan-trigger:hover {
-            background-color: #059669;
-        }
+        .btn-scan-trigger:hover { background-color: #059669; }
 
-        /* 🗓️ Barre de filtrage */
         .filter-period-bar {
             background: rgba(255, 255, 255, 0.78);
             backdrop-filter: blur(10px);
@@ -187,7 +178,6 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #475569; }
         .input-date { padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 10.5px; background: rgba(255,255,255,0.9); }
 
-        /* 📏 Micro-bandeaux KPI proportionnés */
         .kpi-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -233,7 +223,6 @@
         
         .chart-container { position: relative; height: 160px; width: 100%; }
 
-        /* 📋 Style du rapport et blocs alignés à gauche */
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
             background: rgba(255, 255, 255, 0.85) !important;
             backdrop-filter: blur(10px);
@@ -283,7 +272,6 @@
         }
         .report-table tr:nth-child(even) { background-color: rgba(248, 250, 252, 0.8); }
 
-        /* Palmarès & Historique */
         .history-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; padding: 4px 0; max-height: 180px; overflow-y: auto; }
         .history-day-card { background: rgba(248, 250, 252, 0.8); border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .history-day-date { font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; width: 100%; padding-bottom: 2px; }
@@ -331,15 +319,12 @@
         <div class="sidebar-brand">🌱 Projet A.B.C.</div>
         <div class="sidebar-subtitle">Assiette Bas Carbone</div>
         <ul class="sidebar-menu">
-            <!-- 🌍 1. Les 3 outils opérationnels pour tout le monde -->
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
             <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖️ Saisie des Déchets</li>
 
-            <!-- 👨‍🍳 Séparateur propre (intégré dans un li sémantique) -->
             <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default; background: transparent !important;">L'Espace des Chefs</li>
 
-            <!-- 📋 2. Conception et Contrôle de Conformité -->
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
         </ul>
@@ -428,7 +413,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER -->
+            <!-- PÔLE 3 : ESPACE CUISINIER (Dédié au paramétrage du service, catalogue et RAG quotidien) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -441,117 +426,96 @@
                         </div>
                     </div>
 
-                    <!-- 🧪 LABORATOIRE DE SIMULATION INDÉPENDANT (CYCLE 20 REPAS / CSV) -->
-                    <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
-                        <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Format .CSV)</h4>
-                        <p style="font-size: 11.5px; color: #334155; margin-bottom: 12px; line-height: 1.5;">
-                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille complète de 20 repas (5 semaines). L'IA croise votre proposition avec la « bible » GitHub (GRCN & Valérie Briançon) <strong>en toute indépendance du service en cours</strong>. 
-                            <br><em>Uploadez ➔ Lisez le rapport ➔ Modifiez votre CSV si besoin ➔ Ré-uploadez jusqu'à validation totale !</em>
-                        </p>
-                        
-                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                            <input type="file" id="csv-file-input" accept=".csv,.txt" style="font-size: 11px; flex: 1; min-width: 220px;" onchange="handleCSVUpload(event)">
-                            <button type="button" class="btn" onclick="runCSVAIAnalysis()" style="background-color: #047857; width: auto; padding: 10px 16px; font-size: 12px; font-weight: 800;">🤖 Lancer l'audit indépendant du cycle</button>
-                        </div>
-                        <div style="font-size: 10.5px; color: #64748b; margin-top: 6px; font-style: italic;">
-                            💡 Cet espace de test n'impacte pas la borne ni l'historique des services en cours.
-                        </div>
-                    </div>
-
                     <h3 style="margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">📋 Composition du menu du jour (Grand Catalogue)</h3>
                     <div class="table-responsive">
                         <table class="menu-table">
                             <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS & LAITAGES</th></tr></thead>
                             <tbody>
-                              <tr>
-                                  <td>
-                                      <div class="sub-theme">🍅 Crudités / Salades</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes râpées"> Carottes râpées</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
-                                      <div class="sub-theme">🐷 Charcuterie</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
-                                      <div class="sub-theme">🥧 Entrées Cuites</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="entree" value="Friand"> Friand 🥧</label>
-                                  </td>
-                                  <td>
-                                      <div class="sub-theme">🍲 Plats Uniques / Complets</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Gardianne"> Gardianne</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Couscous"> Couscous 🍢</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Paella"> Paella 🥘</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Bœuf bourguignon"> Bœuf bourguignon</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Blanquette de veau"> Blanquette de veau</label>
-                                      <div class="sub-theme">🐓 Volailles</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
-                                      <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
-                                      <div class="sub-theme">🐟 Poissons</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin</label>
-                                      <div class="sub-theme">🌱 Végétarien</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
-                                  </td>
-                                  <td>
-                                      <div class="sub-theme">🥔 Féculents</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes"> Pâtes</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
-                                      <div class="sub-theme">🌿 Légumes</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Brocolis"> Brocolis</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
-                                  </td>
-                                  <td>
-                                      <div class="sub-theme">🍏 Vergers & Fruits</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme"> Pomme / Banane</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote</label>
-                                      <div class="sub-theme">🥛 Laitages & Fromages</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage (Kiri/Cantal/Gouda)</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert</label>
-                                      <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
-                                      <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte aux fruits"> Tarte aux fruits</label>
-                                  </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                  </div>
-                  
-                  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                      <button type="button" class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; min-width: 220px; background-color: #047857;">🤖 1. Analyser le projet de menu avec l'IA Gemini (RAG Plan Alimentaire)</button>
-                      <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #1e3a8a;">💾 2. Valider & Lancer le service</button>
-                  </div>
+                                <tr>
+                                    <td>
+                                        <div class="sub-theme">🍅 Crudités / Salades</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes râpées"> Carottes râpées</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
+                                        <div class="sub-theme">🐷 Charcuterie</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
+                                        <div class="sub-theme">🥧 Entrées Cuites</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Friand"> Friand 🥧</label>
+                                    </td>
+                                    <td>
+                                        <div class="sub-theme">🍲 Plats Uniques / Complets</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Gardianne"> Gardianne</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Couscous"> Couscous 🍢</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Paella"> Paella 🥘</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Bœuf bourguignon"> Bœuf bourguignon</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Blanquette de veau"> Blanquette de veau</label>
+                                        <div class="sub-theme">🐓 Volailles</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
+                                        <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
+                                        <div class="sub-theme">🐟 Poissons</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin</label>
+                                        <div class="sub-theme">🌱 Végétarien</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
+                                    </td>
+                                    <td>
+                                        <div class="sub-theme">🥔 Féculents</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes"> Pâtes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
+                                        <div class="sub-theme">🌿 Légumes</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Brocolis"> Brocolis</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
+                                    </td>
+                                    <td>
+                                        <div class="sub-theme">🍏 Vergers & Fruits</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme"> Pomme / Banane</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote</label>
+                                        <div class="sub-theme">🥛 Laitages & Fromages</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage (Kiri/Cantal/Gouda)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert</label>
+                                        <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte aux fruits"> Tarte aux fruits</label>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+                        <button type="button" class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; min-width: 220px; background-color: #047857;">🤖 Analyser le menu du jour avec l'IA Gemini</button>
+                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #1e3a8a;">💾 Valider & Lancer le service pour la Borne</button>
+                    </div>
 
-                    <!-- BOUTON UNIQUE IMPRIMER / PDF INTÉGRÉ ICI -->
-                    <div id="gemini-ai-result" class="ai-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <div class="ai-title" style="margin: 0;">🌱 PLAN DE VOL ÉCO-RESPONSABLE DU CHEF (RAG VALIDATION)</div>
-                            <button type="button" class="btn" onclick="printOrPDF()" style="width: auto; padding: 4px 12px; font-size: 11px; background: #1b4332;">🖨️ Imprimer / PDF</button>
-                        </div>
-                        <div id="gemini-ai-text"></div>
-                  </div>
+                    <div id="gemini-ai-result-jour" class="ai-box" style="display: none;">
+                        <div class="ai-title">🌱 VALIDATION RAG DU MENU DU JOUR</div>
+                        <div id="gemini-ai-text-jour"></div>
+                    </div>
                 </div>
             </div>
 
@@ -645,21 +609,43 @@
                 </div>
             </div>
 
-            <!-- PÔLE 5 : CONFORMITÉ PLAN ALIMENTAIRE -->
+            <!-- PÔLE 5 : CONFORMITÉ PLAN ALIMENTAIRE & LABORATOIRE D'AUDIT -->
             <div id="view-rapport" class="view-section">
                 <div class="report-paper">
                     <div class="report-header">
                         <div>
                             <h2 style="color: #1b4332; font-size: 18px; font-weight: 900;">🥗 CONFORMITÉ PLAN ALIMENTAIRE — GRCN</h2>
-                            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Validation des cycles (Valérie Briançon) & Analyse des 6 composantes</p>
+                            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Validation des cycles (Valérie Briançon) & Laboratoire de Simulation d'Audit</p>
                         </div>
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter le rapport officiel</button>
+                    </div>
+
+                    <!-- 🧪 LABORATOIRE DE SIMULATION INDÉPENDANT (CYCLE 20 REPAS / CSV) -->
+                    <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
+                        <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Format .CSV)</h4>
+                        <p style="font-size: 11.5px; color: #334155; margin-bottom: 12px; line-height: 1.5;">
+                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille complète de 20 repas (5 semaines). L'IA croise votre proposition avec la « bible » GitHub (GRCN & Valérie Briançon) en toute indépendance. 
+                            <br><em>Uploadez ➔ Lisez le rapport ➔ Modifiez votre CSV si besoin ➔ Ré-uploadez jusqu'à validation totale !</em>
+                        </p>
+                        
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            <input type="file" id="csv-file-input" accept=".csv,.txt" style="font-size: 11px; flex: 1; min-width: 220px;" onchange="handleCSVUpload(event)">
+                            <button type="button" class="btn" onclick="runCSVAIAnalysis()" style="background-color: #047857; width: auto; padding: 10px 16px; font-size: 12px; font-weight: 800;">🤖 Lancer l'audit indépendant du cycle</button>
+                        </div>
+                    </div>
+
+                    <!-- Encadré de résultat du Laboratoire CSV avec bouton unique Imprimer / PDF -->
+                    <div id="gemini-ai-result-csv" class="ai-box" style="margin-bottom: 16px; display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div class="ai-title" style="margin: 0;">🌱 RAPPORT D'AUDIT DU CYCLE DE MENUS (RAG)</div>
+                            <button type="button" class="btn" onclick="printOrPDF()" style="width: auto; padding: 4px 12px; font-size: 11px; background: #1b4332;">🖨️ Imprimer / PDF</button>
+                        </div>
+                        <div id="gemini-ai-text-csv"></div>
                     </div>
 
                     <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
                         <p><strong>Cadre normatif :</strong> Référentiel GRCN (Guide des Recommandations en matière de Nutrition) et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
-                        <p><strong>Objectif de l'outil :</strong> Croiser la rigueur des fréquences obligatoires sur 20 repas avec la mesure physique du gaspillage et l'adhésion réelle des élèves.</p>
                     </div>
 
                     <div class="report-section-title">1. Synthèse globale des flux sur la période</div>
@@ -855,7 +841,7 @@
             if (btnElem) btnElem.classList.add('active');
 
             if (!globalRawData || !globalRawData.sacsHistory || globalRawData.sacsHistory.datesRaw.length === 0) return;
-             
+            
             const today = new Date();
             let startDate = "";
             let endDate = today.toISOString().split('T')[0];
@@ -883,7 +869,7 @@
 
             const sh = globalRawData.sacsHistory;
             const effectif = globalRawData.effectifCouverts || 450;
-             
+            
             let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
             let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
 
@@ -1076,7 +1062,7 @@
 
             let tauxCrudites = countCrudites > 0 ? Math.round(scoreCrudites / countCrudites) : 82;
             let tauxPoisson = countPoisson > 0 ? Math.round(scorePoisson / countPoisson) : 48;
-             
+            
             document.getElementById('rep-stat-crudites').innerText = `${tauxCrudites} %`;
             document.getElementById('rep-stat-poisson').innerText = `${tauxPoisson} %`;
             document.getElementById('rep-stat-frits').innerText = "88 %";
@@ -1131,14 +1117,17 @@
         function changeEtablissement() {
             const school = document.getElementById('select-etablissement').value; 
             localStorage.setItem('schoolActuelle', school);
-             
+            
             const reportSchoolElem = document.getElementById('report-school-name');
             if (reportSchoolElem) reportSchoolElem.innerText = school;
 
             loadExpectedMealsForSchool(school); 
             loadMenuForSchool(school); 
             loadLiveData();
-            document.getElementById('gemini-ai-result').style.display = "none";
+            const resBoxJour = document.getElementById('gemini-ai-result-jour');
+            if (resBoxJour) resBoxJour.style.display = "none";
+            const resBoxCsv = document.getElementById('gemini-ai-result-csv');
+            if (resBoxCsv) resBoxCsv.style.display = "none";
         }
 
         function loadExpectedMealsForSchool(school) {
@@ -1161,7 +1150,7 @@
             const header = document.getElementById('bilan-header-color');
             const pill = document.getElementById('bilan-score-pill');
             const val = document.getElementById('bilan-score-val');
-             
+            
             const totalKg = alimKg + fruitsKg + painKg;
             if (totalKg <= 0 || !effectif || effectif <= 0) { card.style.display = "none"; return; }
 
@@ -1229,13 +1218,13 @@
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = getCurrentCheckedMenu();
-            const resBox = document.getElementById('gemini-ai-result'); 
-            const resText = document.getElementById('gemini-ai-text');
+            const resBox = document.getElementById('gemini-ai-result-jour'); 
+            const resText = document.getElementById('gemini-ai-text-jour');
 
             if (!menuText) { alert("⚠️ Veuillez cocher au moins un aliment dans le tableau pour analyser votre projet de menu."); return; }
             resBox.style.display = "block"; 
             resText.innerHTML = "<em>🤖 Analyse RAG en cours (Croisement Plan Alimentaire Valérie Briançon & Gâchis A.B.C.)...</em>";
-             
+            
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, menu: menuText }) })
             .then(r => r.json())
             .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
@@ -1255,8 +1244,8 @@
 
         function runCSVAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
-            const resBox = document.getElementById('gemini-ai-result'); 
-            const resText = document.getElementById('gemini-ai-text');
+            const resBox = document.getElementById('gemini-ai-result-csv'); 
+            const resText = document.getElementById('gemini-ai-text-csv');
 
             if (!importedCSVText) {
                 alert("⚠️ Veuillez d'abord sélectionner un fichier CSV contenant le cycle de menus du chef.");
@@ -1265,7 +1254,7 @@
 
             resBox.style.display = "block"; 
             resText.innerHTML = "<em>🤖 Analyse RAG globale (Lecture de la bible GitHub & Audit du cycle CSV complet) en cours...</em>";
-             
+            
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain" }, 
@@ -1280,11 +1269,11 @@
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
-        /* FONCTION MISE À JOUR POUR LE BOUTON UNIQUE IMPRIMER / PDF */
+        /* FONCTION UNIQUE IMPRIMER / PDF POUR LE LABORATOIRE CSV */
         function printOrPDF() {
-            const content = document.getElementById('gemini-ai-text').innerHTML;
-            if (!content || content.includes("en cours")) {
-                alert("Veuillez attendre la fin de l'analyse.");
+            const content = document.getElementById('gemini-ai-text-csv').innerHTML;
+            if (!content || content.includes("en cours") || content.includes("attente")) {
+                alert("Veuillez d'abord lancer une analyse de cycle CSV.");
                 return;
             }
             const win = window.open('', '_blank');
@@ -1314,14 +1303,14 @@
             document.getElementById('kpi-total').innerText = "0.0 kg"; 
             document.getElementById('kpi-money').innerText = "0.00 €"; 
             document.getElementById('kpi-impact').innerText = "0.0 kg";
-             
+            
             document.getElementById('rep-kpi-avg').innerText = "0 g";
             document.getElementById('rep-kpi-total').innerText = "0.0 kg";
             document.getElementById('rep-kpi-money').innerText = "0.00 €";
 
             chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update();
             chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
-             
+            
             document.getElementById('rep-stat-crudites').innerText = "-- %";
             document.getElementById('rep-stat-poisson').innerText = "-- %";
             document.getElementById('rep-stat-frits').innerText = "-- %";
@@ -1341,10 +1330,10 @@
 
             const grid = document.getElementById('palmares-badges-grid'); 
             if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
-             
+            
             const historyGrid = document.getElementById('history-main-waste-grid'); 
             if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
-             
+            
             cacheSacsHistory = null; globalRawData = null;
             document.getElementById('bilan-eleves-container').style.display = "none";
         }
@@ -1378,7 +1367,7 @@
         }
 
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
-         
+        
         function resetBorneUI() { 
             isScanningProcess = false; 
             document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
@@ -1401,15 +1390,15 @@
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
-             
+            
             const banner = document.getElementById('instruction-text');
             banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE EN COURS..."; banner.className = "instruction-banner state-detected";
             const light = document.getElementById('student-light');
             light.className = "traffic-light light-detected"; light.innerHTML = '🛑<br><span style="font-size: 16px; font-weight: 900; display: block; margin-top: 4px;">STOP</span>';
-             
+            
             document.getElementById('bar-container').style.display = "block"; 
             document.getElementById('action-progress').style.width = '100%';
-             
+            
             const payload = { action: "logScanImage", etablissement: document.getElementById('select-etablissement').value, menu_jour: document.getElementById('borne-menu-active').innerText, image_base64: getBase64FromLiveVideo() };
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
 
@@ -1426,7 +1415,7 @@
             document.getElementById('menu-' + viewId).classList.add('active');
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
             document.getElementById(viewId).classList.add('active');
-             
+            
             if (viewId === 'view-borne') initCamera(); else stopCamera();
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport') loadLiveData(); 
         }
