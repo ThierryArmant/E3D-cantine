@@ -413,7 +413,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER (Dédié au paramétrage du service, catalogue et RAG quotidien) -->
+            <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -637,7 +637,7 @@
                     <!-- Encadré de résultat du Laboratoire CSV avec bouton unique Imprimer / PDF -->
                     <div id="gemini-ai-result-csv" class="ai-box" style="margin-bottom: 16px; display: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <div class="ai-title" style="margin: 0;">🌱 RAPPORT D'AUDIT DU CYCLE DE MENUS (RAG)</div>
+                            <div class="ai-title" style="margin: 0;">🌱 RAPPORT D'AUDIT DU CYCLE DE MENUS (RAG & SUBSTITUTIONS)</div>
                             <button type="button" class="btn" onclick="printOrPDF()" style="width: auto; padding: 4px 12px; font-size: 11px; background: #1b4332;">🖨️ Imprimer / PDF</button>
                         </div>
                         <div id="gemini-ai-text-csv"></div>
@@ -1253,7 +1253,7 @@
             }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG globale (Lecture de la bible GitHub & Audit du cycle CSV complet) en cours...</em>";
+            resText.innerHTML = "<em>🤖 Analyse RAG globale et génération du plan de substitution chiffré en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1261,7 +1261,7 @@
                 body: JSON.stringify({ 
                     action: "analyzeMenuWithStats", 
                     etablissement: school, 
-                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n" + importedCSVText 
+                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n[INSTRUCTION SPÉCIALE D'AUDIT & D'AIDE À LA CORRECTION] :\n1. Établis un tableau de contrôle chiffré des 20 repas par rapport aux seuils officiels (entrées grasses max 4, crudités min 10, fritures max 4, produits laitiers 18 obligatoires, etc.).\n2. Pour chaque non-conformité, propose des alternatives de remplacement concrètes issues du catalogue pour aider les agents.\n\n" + importedCSVText 
                 }) 
             })
             .then(r => r.json())
