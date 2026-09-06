@@ -664,8 +664,8 @@
             "Éclair": "🥖", "Tarte aux fruits": "🥧", "Pain": "🥖", "Entrée du jour": "🥗", "Plat du jour": "🍽️", "Dessert du jour": "🍰"
         };
 
-        window.addEventListener('DOMContentLoaded', () => { 
-            // 🎯 Graphique Donut "Répartition des biodéchets" (Évitables vs Inévitables avec tiret)
+       window.addEventListener('DOMContentLoaded', () => { 
+            // 🎯 Graphique Donut "Répartition des biodéchets" optimisé avec labels extérieurs et tirets
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 data: { 
@@ -673,17 +673,17 @@
                     datasets: [{ 
                         data: [0, 0], 
                         backgroundColor: ['#38bdf8', '#cbd5e1'],
-                        borderWidth: 0
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
                     }] 
                 }, 
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    cutout: '70%',
+                    cutout: '65%',
                     plugins: { 
                         legend: { 
-                            position: 'right', 
-                            labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } 
+                            display: false // Masqué pour laisser place aux labels directs sur les parts
                         }, 
                         datalabels: { 
                             formatter: (val, ctx) => {
@@ -694,7 +694,10 @@
                                 return `${percentage} - ${label}`;
                             },
                             color: '#0f172a', 
-                            font: { weight: 'bold', size: 10 } 
+                            font: { weight: '800', size: 11 },
+                            anchor: 'end',
+                            align: 'end',
+                            offset: 4
                         } 
                     } 
                 } 
