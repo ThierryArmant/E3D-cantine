@@ -282,20 +282,19 @@
                     <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
                 </div>
                 
-                <div class="dashboard-row">
-                    <!-- 🎯 NOUVEAU GRAPHIQUE : Répartition des biodéchets (Évitables vs Inévitables) -->
-                    <div class="dashboard-col">
-                        <h3>♻️ Répartition des biodéchets</h3>
-                        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;" id="biodiff-total">Total : 0 g</div>
-                        <div class="chart-container" style="height: 145px; display: flex; align-items: center; justify-content: center;">
-                            <canvas id="chart-timeline"></canvas>
-                        </div>
-                    </div>
-                    <div class="dashboard-col">
-                        <h3>📊 Répartition des restes par composante (%)</h3>
-                        <div class="chart-container"><canvas id="chart-categories"></canvas></div>
-                    </div>
-                </div>
+                <div class="dashboard-row" style="grid-template-columns: 1fr 1.8fr;">
+    <div class="dashboard-col">
+        <h3>♻️ Répartition des biodéchets</h3>
+        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;" id="biodiff-total">Total : 0 g</div>
+        <div class="chart-container" style="height: 145px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="chart-timeline"></canvas>
+        </div>
+    </div>
+    <div class="dashboard-col">
+        <h3>📊 Répartition des restes par composante (%)</h3>
+        <div class="chart-container"><canvas id="chart-categories"></canvas></div>
+    </div>
+</div>
                 
                 <div class="dashboard-row" style="grid-template-columns: 1fr;">
                     <div class="dashboard-col">
