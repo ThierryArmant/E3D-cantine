@@ -665,11 +665,11 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
-            // 🎯 Graphique Donut "Répartition des biodéchets" (Évitables vs Inévitables)
+            // 🎯 Graphique Donut "Répartition des biodéchets" avec scores et libellés reliés par un tiret
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 data: { 
-                    labels: ['Déchets évitables', 'Déchets inévitables'], 
+                    labels: ['Évitables', 'Inévitables'], 
                     datasets: [{ 
                         data: [0, 0], 
                         backgroundColor: ['#38bdf8', '#cbd5e1'],
@@ -679,22 +679,36 @@
                 options: { 
                     responsive: true, 
                     maintainAspectRatio: false, 
-                    cutout: '72%',
+                    cutout: '70%',
                     plugins: { 
-                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }, 
+                        legend: { 
+                            position: 'right', 
+                            labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } 
+                        }, 
                         datalabels: { 
                             formatter: (val, ctx) => {
                                 let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 if (sum === 0) return '0%';
                                 let percentage = (val * 100 / sum).toFixed(0) + "%";
-                                return percentage;
+                                let label = ctx.chart.data.labels[ctx.dataIndex];
+                                // Ajout du tiret reliant le score à la légende/partie
+                                return `${percentage} - ${label}`;
                             },
                             color: '#0f172a', 
-                            font: { weight: 'bold', size: 11 } 
+                            font: { weight: 'bold', size: 10 } 
                         } 
                     } 
                 } 
             });
+
+            chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
+                type: 'bar', plugins: [ChartDataLabels], 
+                data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 28 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
+            });
+
+            loadEtablissementsDropdown(); 
+        });
 
             chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
                 type: 'bar', plugins: [ChartDataLabels], 
