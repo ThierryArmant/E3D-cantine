@@ -1242,7 +1242,7 @@
             reader.readAsText(file, "UTF-8");
         }
 
-        function runCSVAIAnalysis() {
+       function runCSVAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const resBox = document.getElementById('gemini-ai-result-csv'); 
             const resText = document.getElementById('gemini-ai-text-csv');
@@ -1253,7 +1253,7 @@
             }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG globale et génération du plan de substitution chiffré en cours...</em>";
+            resText.innerHTML = "<em>🤖 Analyse RAG globale, calcul des fréquences et rédaction du plan d'aide aux agents en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1261,7 +1261,7 @@
                 body: JSON.stringify({ 
                     action: "analyzeMenuWithStats", 
                     etablissement: school, 
-                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n[INSTRUCTION SPÉCIALE D'AUDIT & D'AIDE À LA CORRECTION] :\n1. Établis un tableau de contrôle chiffré des 20 repas par rapport aux seuils officiels (entrées grasses max 4, crudités min 10, fritures max 4, produits laitiers 18 obligatoires, etc.).\n2. Pour chaque non-conformité, propose des alternatives de remplacement concrètes issues du catalogue pour aider les agents.\n\n" + importedCSVText 
+                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n[INSTRUCTION SPÉCIALE D'AUDIT & D'AIDE À LA CORRECTION] :\n1. Fournis le tableau de contrôle chiffré des fréquences sur 20 repas.\n2. AJOUTE OBLIGATOIREMENT une section intitulée '💡 PLAN DE CORRECTION & AIDE AUX AGENTS' dans laquelle tu cites précisément les jours posant problème et tu proposes des remplacements concrets et clairs (ex: 'Semaine 2, Jeudi : remplacer le beignet chocolat par un yaourt nature; Semaine 3, Lundi : remplacer le feuilleté par des carottes râpées').\n\n" + importedCSVText 
                 }) 
             })
             .then(r => r.json())
