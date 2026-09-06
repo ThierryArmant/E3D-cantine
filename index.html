@@ -10,70 +10,62 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
         
-        /* 1. Fond d'écran global avec ta photo de borne */
+        /* 1. Fond d'écran global avec la photo de la borne */
         body { 
             background-image: url('image_1_borneABC.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            color: #f8fafc; 
+            color: #1f2937; 
             display: flex; 
             height: 100vh; 
             overflow: hidden; 
             margin: 0;
         }
         
-        /* 2. Barre latérale en verre sombre givré */
+        /* Barre latérale d'origine (vert Collège Jean Giono) */
         .sidebar { 
             width: 240px; 
-            background-color: rgba(15, 23, 42, 0.85) !important; 
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            background-color: rgba(27, 67, 50, 0.95) !important; 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             color: white; 
             display: flex; 
             flex-direction: column; 
             padding: 15px 0; 
             flex-shrink: 0; 
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
-        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #4ade80; display: flex; align-items: center; gap: 8px; }
-        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #86efac; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
+        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
         .sidebar-menu { list-style: none; margin-top: 15px; flex-grow: 1; }
-        .menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; color: #cbd5e1; }
-        .menu-item:hover, .menu-item.active { background-color: rgba(45, 106, 79, 0.85); color: #fff; }
+        .menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; }
+        .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* 3. Barre supérieure en verre sombre */
         .top-bar { 
             height: 55px; 
-            background-color: rgba(15, 23, 42, 0.8) !important; 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+            background-color: rgba(255, 255, 255, 0.92) !important; 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid #e5e7eb; 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
             padding: 0 20px; 
             flex-shrink: 0;
-            color: #f8fafc;
         }
         
-        /* 4. Zone de contenu principale avec voile sombre tamisé */
-        .content-area { 
-            padding: 16px; 
-            overflow-y: auto; 
-            flex-grow: 1; 
-            background-color: rgba(0, 0, 0, 0.3) !important; 
-        }
+        .content-area { padding: 16px; overflow-y: auto; flex-grow: 1; background-color: rgba(243, 244, 246, 0.2); }
         .view-section { display: none; }
         .view-section.active { display: block; }
         
-        /* 5. Barre de filtrage des périodes (Effet Dark Glass) */
+        /* 🗓️ BARRE DE FILTRAGE DES PÉRIODES (Style d'origine + Glass) */
         .filter-period-bar {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             border-radius: 8px;
             padding: 10px 16px;
             margin-bottom: 14px;
@@ -82,48 +74,55 @@
             justify-content: space-between;
             flex-wrap: wrap;
             gap: 10px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-left: 4px solid #4ade80;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border-left: 4px solid #2d6a4f;
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
         .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
         .btn-period {
             padding: 6px 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(30, 41, 59, 0.8);
-            color: #cbd5e1;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #334155;
             font-size: 11.5px;
             font-weight: 700;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.15s;
         }
-        .btn-period:hover { background: rgba(51, 65, 85, 0.9); color: white; }
-        .btn-period.active { background: #2d6a4f; color: white; border-color: #4ade80; }
-        .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #94a3b8; }
-        .input-date { padding: 4px 8px; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; font-size: 11px; background: rgba(15, 23, 42, 0.6); color: white; }
+        .btn-period:hover { background: #e2e8f0; }
+        .btn-period.active { background: #2d6a4f; color: white; border-color: #2d6a4f; }
+        .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
+        .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 11px; background: white; }
 
-        /* 6. Effet Dark Glassmorphism universel pour tous les blocs, cartes et tableaux */
-        .kpi-card, .dashboard-col, .form-section, .report-paper, .bilan-eleves-wrapper, .ai-box, .food-badge-card, .history-day-card { 
-            background: rgba(20, 27, 45, 0.75) !important; 
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 12px; 
-            padding: 14px 16px; 
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); 
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #f8fafc !important;
+        /* Grilles KPI & Blocs (Présentation d'origine propre avec transparence glossy légère) */
+        .kpi-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); 
+            gap: 12px; 
+            margin-bottom: 16px; 
         }
-        
+        .kpi-card, .dashboard-col, .form-section, .report-paper, .bilan-eleves-wrapper, .ai-box { 
+            background: rgba(255, 255, 255, 0.92) !important; 
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 8px; 
+            padding: 14px 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
         .kpi-blue { border-top: 4px solid #3b82f6; }
         .kpi-green { border-top: 4px solid #10b981; }
         .kpi-yellow { border-top: 4px solid #eab308; }
         .kpi-red { border-top: 4px solid #ef4444; }
         
         .kpi-left { text-align: left; }
-        .kpi-val { font-size: 22px; font-weight: 900; color: #f8fafc !important; line-height: 1.1; margin-bottom: 2px; }
-        .kpi-lbl { font-size: 11.5px; font-weight: 700; color: #cbd5e1 !important; }
-        .kpi-right { text-align: right; max-width: 130px; font-size: 10px; color: #94a3b8 !important; line-height: 1.25; font-style: italic; }
+        .kpi-val { font-size: 22px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
+        .kpi-lbl { font-size: 11.5px; font-weight: 700; color: #1e293b; }
+        .kpi-right { text-align: right; max-width: 130px; font-size: 10px; color: #64748b; line-height: 1.25; font-style: italic; }
         
         .dashboard-row { 
             display: grid; 
@@ -131,45 +130,188 @@
             gap: 12px; 
             margin-bottom: 12px; 
         }
-        .dashboard-col h3 { font-size: 14px; color: #f8fafc !important; margin-bottom: 10px; font-weight: 700; }
+        .dashboard-col { background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(8px); display: block; }
+        .dashboard-col h3 { font-size: 14px; color: #1f2937; margin-bottom: 10px; font-weight: 700; }
         
         .chart-container { position: relative; height: 210px; width: 100%; }
         .chart-container-large { position: relative; height: 260px; width: 100%; }
 
-        /* Tableaux et listes en mode sombre transparent */
-        .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 16px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); }
-        .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
-        .menu-table th { background-color: rgba(27, 67, 50, 0.95); color: white; padding: 10px; text-align: left; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); }
-        .menu-table td { padding: 10px; vertical-align: top; border: 1px solid rgba(255,255,255,0.1); background-color: rgba(15, 23, 42, 0.6); color: #e2e8f0; }
-        .sub-theme { font-size: 10px; font-weight: 700; color: #34d399; text-transform: uppercase; margin: 8px 0 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.2); padding-bottom: 2px; }
-        .checkbox-label { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; cursor: pointer; color: #cbd5e1; }
-
+        /* 📋 STYLE DU RAPPORT INSTITUTIONNEL APPROFONDI */
         .report-paper {
-            background: rgba(15, 23, 42, 0.85) !important;
-            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(8px);
             border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            border: 1px solid #cbd5e1;
             padding: 28px;
-            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
             max-width: 1100px;
             margin: 0 auto;
+            display: block;
         }
-        .report-header { border-bottom: 3px solid #2d6a4f; padding-bottom: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .report-section-title { font-size: 14px; color: #4ade80; margin: 20px 0 10px 0; font-weight: 800; text-transform: uppercase; border-left: 4px solid #2d6a4f; padding-left: 8px; }
-        .report-table th, .report-table td { border: 1px solid rgba(255,255,255,0.15); padding: 10px 12px; text-align: left; }
-        .report-table th { background-color: rgba(27, 67, 50, 0.95); color: white; }
-        .report-table td { background-color: rgba(15, 23, 42, 0.6); color: #e2e8f0; }
+        .report-header {
+            border-bottom: 3px solid #1b4332;
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .report-section-title {
+            font-size: 14px;
+            color: #1b4332;
+            margin: 20px 0 10px 0;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 4px solid #2d6a4f;
+            padding-left: 8px;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+        .report-table th, .report-table td {
+            border: 1px solid #cbd5e1;
+            padding: 10px 12px;
+            text-align: left;
+        }
+        .report-table th {
+            background-color: #1b4332;
+            color: white;
+            font-weight: 700;
+        }
+        .report-table tr:nth-child(even) { background-color: #f8fafc; }
 
-        .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 14px; }
+        /* 🏆 HISTORIQUE DU PRINCIPAL DÉCHET PAR JOUR */
+        .history-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 8px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .history-day-card {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .history-day-date {
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 1px solid #cbd5e1;
+            width: 100%;
+            padding-bottom: 4px;
+        }
+        .history-day-icon { font-size: 36px; line-height: 1; margin: 4px 0; }
+        .history-day-name { font-size: 11.5px; font-weight: 800; color: #1e293b; }
+        .history-day-val { font-size: 13px; font-weight: 900; color: #ef4444; background: #fee2e2; padding: 2px 8px; border-radius: 10px; }
+
+        /* 🍽️ PALMARÈS VISUEL PONDÉRÉ */
+        .palmares-visual-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            padding: 8px 0;
+        }
+        .food-badge-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        .food-icon-box { font-size: 46px; line-height: 1; height: 50px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .food-percent-badge { color: #ffffff; font-size: 12.5px; font-weight: 900; padding: 3px 10px; border-radius: 12px; display: inline-block; }
+        .food-name-label { font-size: 12px; font-weight: 800; color: #1e293b; min-height: 28px; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .food-status-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+        
+        .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 14px;}
         .btn:hover { background-color: #1b4332; }
         
-        .form-section { background-color: rgba(15, 23, 42, 0.75); padding: 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 16px; }
-        .input-center { width: 70px; height: 48px; text-align: center; font-size: 16px; font-weight: 800; border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #f8fafc; background-color: rgba(15, 23, 42, 0.8); }
+        .form-section { background-color: rgba(248, 250, 252, 0.92); padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px; display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 10px; }
+        .waste-control-card { padding: 12px 8px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .waste-control-card label { font-size: 10px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 32px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
+        .spinner-container { display: flex; align-items: center; gap: 4px; }
+        .btn-spinner { width: 36px; height: 24px; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+        .btn-kg { background-color: #1e3a8a; } .btn-g { background-color: #0d9488; } .btn-down { background-color: #4b5563; } 
+        .input-center { width: 70px; height: 48px; text-align: center; font-size: 16px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 6px; color: #0f172a; background-color: #ffffff; }
+        
+        .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 16px; border-radius: 6px; border: 1px solid #e5e7eb; }
+        .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
+        .menu-table th { background-color: #2d6a4f; color: white; padding: 10px; text-align: left; font-size: 12px; font-weight: 600; border: 1px solid #e5e7eb; }
+        .menu-table td { padding: 10px; vertical-align: top; border: 1px solid #e5e7eb; background-color: rgba(249, 250, 251, 0.92); }
+        .sub-theme { font-size: 10px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 8px 0 4px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
+        .checkbox-label { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 12px; cursor: pointer; color: #374151; }
+        
+        .ai-box { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-top: 16px; display: none; box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .ai-title { color: #1b4332; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 14px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; text-transform: uppercase; }
+        .ai-card-block { padding: 14px; border-radius: 6px; margin-bottom: 12px; }
+        .ai-block-title { font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .ai-card-block p, .ai-bullet li { font-size: 12.5px; line-height: 1.5; color: #334155; }
+        .ai-bullet { list-style: none; padding-left: 0; }
+        .ai-bullet li { margin-bottom: 4px; padding-left: 14px; position: relative; }
+        .ai-bullet li::before { content: "•"; font-weight: bold; font-size: 14px; position: absolute; left: 2px; top: -1px; }
+        .ai-block-blue { background-color: #f0f9ff; border: 1px solid #bae6fd; border-left: 5px solid #0284c7; }
+        .ai-block-orange { background-color: #fffbeb; border: 1px solid #fef08a; border-left: 5px solid #d97706; }
+        .ai-block-purple { background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 5px solid #9333ea; }
+        .ai-block-green { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #16a34a; }
+        
+        /* 📸 BORNE & SMARTPHONE */
+        .borne-container { max-width: 800px; margin: 0 auto; text-align: center; }
+        .instruction-banner { background-color: #1e3a8a; color: white; padding: 12px; border-radius: 8px; font-size: 18px; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; transition: all 0.3s; }
+        .traffic-light { width: 140px; height: 140px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 22px; color: white; border: 6px solid #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .light-searching { background-color: #6b7280; } .light-detected { background-color: #ef4444; } .light-success { background-color: #10b981; } 
+        .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 20px; margin-top: 10px; height: 14px; overflow: hidden; display: none; }
+        .progress-bar { width: 0%; height: 100%; background-color: #f59e0b; transition: width 0.3s ease; }
+        .state-searching { background-color: #4b5563 !important; } .state-detected { background-color: #ef4444 !important; } .state-success { background-color: #047857 !important; }
+        .btn-scan-trigger { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; font-size: 20px; font-weight: 900; padding: 20px 32px; border: none; border-radius: 14px; cursor: pointer; width: 100%; max-width: 600px; margin: 18px auto 8px auto; box-shadow: 0 8px 20px rgba(4, 120, 87, 0.35); display: flex; align-items: center; justify-content: center; gap: 12px; text-transform: uppercase; transition: all 0.15s ease; }
+
+        /* 🏆 BILAN ÉLÈVES */
+        .bilan-eleves-wrapper { background: rgba(255, 255, 255, 0.95); border-radius: 12px; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(0,0,0,0.06); overflow: hidden; margin: 20px 0; display: none; }
+        .bilan-header-box { padding: 20px; text-align: center; color: #ffffff; background: linear-gradient(135deg, #10b981, #059669); }
+        .bilan-header-box.zone-jaune { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .bilan-header-box.zone-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .bilan-header-box.zone-rouge { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .score-pill { display: inline-block; padding: 5px 14px; background: rgba(255, 255, 255, 0.25); border-radius: 20px; font-weight: 800; font-size: 11.5px; text-transform: uppercase; margin-bottom: 6px; }
+        .score-title { font-size: 2.2rem; font-weight: 900; margin: 0; }
+        .score-sub { font-size: 11px; opacity: 0.9; margin-top: 4px; }
+        .eq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; padding: 16px; background: rgba(248, 250, 252, 0.92); border-bottom: 1px solid #e2e8f0; }
+        .eq-card { background: #ffffff; padding: 12px 8px; border-radius: 8px; text-align: center; border: 1px solid #e2e8f0; }
+        .eq-card-icon { font-size: 1.8rem; display: block; margin-bottom: 4px; }
+        .eq-card-val { font-size: 1.3rem; font-weight: 800; color: #0f172a; }
+        .eq-card-lbl { font-size: 10.5px; color: #64748b; font-weight: 600; margin-top: 2px; }
+        .ia-feedback-area { padding: 16px; }
+        .ia-feedback-area h4 { font-size: 12px; color: #1b4332; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; }
+        .ia-diag-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 12px 14px; border-radius: 6px; font-size: 12px; color: #334155; line-height: 1.5; margin-bottom: 10px; }
+        .ia-challenge-box { background: #fffbeb; border: 1px dashed #eab308; padding: 10px 14px; border-radius: 6px; color: #854d0e; font-size: 11.5px; line-height: 1.45; }
 
         @media print {
-            body { background: white; height: auto; overflow: visible; color: black; }
+            body { background: white; height: auto; overflow: visible; }
             .sidebar, .top-bar, .filter-period-bar, .btn { display: none !important; }
-            .kpi-card, .dashboard-col, .form-section, .report-paper { background: white !important; color: black !important; border: 1px solid #ccc; box-shadow: none; }
+            .main-container { overflow: visible; }
+            .content-area { padding: 0; overflow: visible; }
+            .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
         }
     </style>
 </head>
