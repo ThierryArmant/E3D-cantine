@@ -1339,7 +1339,6 @@
         }
 
         function formatAIResponseToUI(text) {
-            // Nettoyage complet des balises Markdown parasites (*, #)
             let cleanText = text
                 .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #0f172a;">$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>');
@@ -1347,12 +1346,29 @@
             const lines = cleanText.split('\n'); 
             let output = ""; 
             let listeOuverte = false;
+            let tableLines = [];
+
+            function flushTable() {
+                if (tableLines.length > 0) {
+                    output += renderMarkdownTable(tableLines);
+                    tableLines = [];
+                }
+            }
 
             for (let line of lines) {
                 let currentLine = line.trim(); 
                 if (currentLine === "") continue;
 
-                // Suppression complète des dièses et création d'un beau titre de section
+                // Capture des lignes d'un tableau Markdown (commençant et finissant par |)
+                if (currentLine.startsWith('|') && currentLine.endsWith('|')) {
+                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
+                    tableLines.push(currentLine);
+                    continue;
+                } else {
+                    flushTable();
+                }
+
+                // Conversion propre des en-têtes (#)
                 if (currentLine.startsWith('#')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
                     let headerText = currentLine.replace(/^#+\s*/, '').replace(/^[0-9]+\.\s*/, '');
@@ -1362,7 +1378,7 @@
 
                 if (currentLine.startsWith('---')) continue;
 
-                // Gestion propre des puces de liste (en nettoyant les astérisques et tirets résiduels)
+                // Gestion propre des puces de liste
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
                     if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
                     let bulletText = currentLine.replace(/^[\*\-\•]\s*/, '').replace(/^\*\s*/, '').replace(/\*$/, '');
@@ -1372,21 +1388,31 @@
                     output += `<p style="margin-bottom: 6px; font-size: 11px; line-height: 1.4;">${currentLine}</p>`;
                 }
             }
+            flushTable();
             if (listeOuverte) output += '</ul>'; 
             return output;
         }
 
         function renderMarkdownTable(rows) {
-            if (rows.length === 0) return '';
-            let html = '<div class="table-responsive"><table class="report-table">';
-            rows.forEach((row, index) => {
+            let html = '<div class="table-responsive" style="margin: 10px 0;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">';
+            let headerProcessed = false;
+            
+            rows.forEach((row) => {
+                if (row.includes('---')) return; // Ignore la ligne de séparation |:---|
                 let cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
-                let tag = (index === 0) ? 'th' : 'td';
+                if (cells.length === 0) return;
+
+                let tag = !headerProcessed ? 'th' : 'td';
+                let bgStyle = !headerProcessed ? 'background-color: #1b4332; color: white; font-weight: bold;' : 'background-color: #ffffff;';
+                let cellStyle = 'padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-align: left;';
+                
                 html += '<tr>';
                 cells.forEach(cell => {
-                    html += `<${tag}>${cell}</${tag}>`;
+                    html += `<${tag} style="${bgStyle} ${cellStyle}">${cell}</${tag}>`;
                 });
                 html += '</tr>';
+                
+                if (!headerProcessed) headerProcessed = true;
             });
             html += '</table></div>';
             return html;
