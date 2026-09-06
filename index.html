@@ -545,7 +545,13 @@
                     </div>
 
                     <div id="gemini-ai-result" class="ai-box">
-                        <div class="ai-title">🌱 PLAN DE VOL ÉCO-RESPONSABLE DU CHEF (RAG VALIDATION)</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div class="ai-title" style="margin: 0;">🌱 PLAN DE VOL ÉCO-RESPONSABLE DU CHEF (RAG VALIDATION)</div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="btn" onclick="printAIResult()" style="width: auto; padding: 4px 10px; font-size: 11px; background: #1b4332;">🖨️ Imprimer</button>
+                                <button type="button" class="btn" onclick="downloadAIResult()" style="width: auto; padding: 4px 10px; font-size: 11px; background: #047857;">📥 Télécharger</button>
+                            </div>
+                        </div>
                         <div id="gemini-ai-text"></div>
                     </div>
                 </div>
@@ -1274,6 +1280,39 @@
             .then(r => r.json())
             .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; });
+        }
+
+        function printAIResult() {
+            const content = document.getElementById('gemini-ai-text').innerHTML;
+            if (!content || content.includes("en cours")) {
+                alert("Veuillez attendre la fin de l'analyse pour l'imprimer.");
+                return;
+            }
+            const win = window.open('', '_blank');
+            win.document.write('<html><head><title>Audit du Cycle de Menus - A.B.C.</title><style>body{font-family:sans-serif;padding:20px;color:#1f2937;line-height:1.5;} h3{color:#1b4332;border-bottom:2px solid #1b4332;padding-bottom:4px;}</style></head><body>');
+            win.document.write('<h2>🌱 Audit du Cycle de Menus - Référentiel GRCN & Valérie Briançon</h2>');
+            win.document.write(content);
+            win.document.write('</body></html>');
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); win.close(); }, 250);
+        }
+
+        function downloadAIResult() {
+            const textContent = document.getElementById('gemini-ai-text').innerText;
+            if (!textContent || textContent.includes("en cours")) {
+                alert("Veuillez attendre la fin de l'analyse pour la télécharger.");
+                return;
+            }
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Audit_Cycle_Menus_ABC.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         function loadLiveData() {
