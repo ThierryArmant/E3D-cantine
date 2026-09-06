@@ -1339,46 +1339,38 @@
         }
 
         function formatAIResponseToUI(text) {
-            let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #0f172a;">$1</strong>');
+            // Nettoyage complet des balises Markdown parasites (*, #)
+            let cleanText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #0f172a;">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
             const lines = cleanText.split('\n'); 
             let output = ""; 
             let listeOuverte = false;
-            let inTable = false;
-            let tableRows = [];
 
             for (let line of lines) {
                 let currentLine = line.trim(); 
                 if (currentLine === "") continue;
 
-                // Détection des lignes de tableau Markdown (commençant et finissant par |)
-                if (currentLine.startsWith('|') && currentLine.endsWith('|')) {
+                // Suppression complète des dièses et création d'un beau titre de section
+                if (currentLine.startsWith('#')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    // Ignore la ligne de séparation |:---|
-                    if (currentLine.includes('---')) {
-                        continue;
-                    }
-                    inTable = true;
-                    tableRows.push(currentLine);
+                    let headerText = currentLine.replace(/^#+\s*/, '').replace(/^[0-9]+\.\s*/, '');
+                    output += `<div style="font-weight: 800; font-size: 12.5px; color: #1b4332; margin-top: 10px; margin-bottom: 6px; text-transform: uppercase; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 3px;">${headerText}</div>`;
                     continue;
-                } else if (inTable) {
-                    // Fin du tableau détectée, on le convertit en HTML
-                    output += renderMarkdownTable(tableRows);
-                    tableRows = [];
-                    inTable = false;
                 }
 
                 if (currentLine.startsWith('---')) continue;
 
+                // Gestion propre des puces de liste (en nettoyant les astérisques et tirets résiduels)
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
-                    if (!listeOuverte) { output += '<ul class="ai-bullet">'; listeOuverte = true; }
-                    output += `<li>${currentLine.replace(/^[\*\-\•]\s*/, '')}</li>`;
+                    if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
+                    let bulletText = currentLine.replace(/^[\*\-\•]\s*/, '').replace(/^\*\s*/, '').replace(/\*$/, '');
+                    output += `<li style="margin-bottom: 4px; font-size: 11px; line-height: 1.4;">${bulletText}</li>`;
                 } else {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    output += `<p>${currentLine}</p>`;
+                    output += `<p style="margin-bottom: 6px; font-size: 11px; line-height: 1.4;">${currentLine}</p>`;
                 }
-            }
-            if (inTable) {
-                output += renderMarkdownTable(tableRows);
             }
             if (listeOuverte) output += '</ul>'; 
             return output;
