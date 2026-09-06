@@ -525,21 +525,21 @@
                 </div>
             </div>
 
-            <!-- PÔLE 5 : BILAN INSTITUTIONNEL -->
+            <!-- PÔLE 5 : CONFORMITÉ PLAN ALIMENTAIRE -->
             <div id="view-rapport" class="view-section">
                 <div class="report-paper">
                     <div class="report-header">
                         <div>
-                            <h2 style="color: #1b4332; font-size: 18px; font-weight: 900;">🏛️ RAPPORT D'ENQUÊTE DÉPARTEMENTAL — PROJET A.B.C.</h2>
-                            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Conformité Plan Alimentaire (Valérie Briançon) & Réalité du Gaspillage Terrain</p>
+                            <h2 style="color: #1b4332; font-size: 18px; font-weight: 900;">🥗 CONFORMITÉ PLAN ALIMENTAIRE — GRCN</h2>
+                            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Validation des cycles (Valérie Briançon) & Analyse des 6 composantes</p>
                         </div>
-                        <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter PDF officiel</button>
+                        <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter le rapport officiel</button>
                     </div>
 
                     <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
-                        <p><strong>Cadre normatif :</strong> Référentiel CNRC et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
-                        <p><strong>Objectif de l'enquête :</strong> Croiser la rigueur des obligations nutritionnelles avec la mesure physique du gaspillage et l'adhésion réelle des élèves par vision par ordinateur.</p>
+                        <p><strong>Cadre normatif :</strong> Référentiel GRCN (Guide des Recommandations en matière de Nutrition) et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
+                        <p><strong>Objectif de l'outil :</strong> Croiser la rigueur des fréquences obligatoires sur 20 repas avec la mesure physique du gaspillage et l'adhésion réelle des élèves.</p>
                     </div>
 
                     <div class="report-section-title">1. Synthèse globale des flux sur la période</div>
@@ -549,40 +549,58 @@
                         <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div></div>
                     </div>
 
-                    <div class="report-section-title">2. Croisement Normes Départementales vs Réalité du Terrain</div>
+                    <div class="report-section-title">2. Contrôle des 6 Composantes et des Règles GRCN (sur 20 repas)</div>
                     <table class="report-table">
                         <thead>
                             <tr>
                                 <th>Composante (Plan Alimentaire)</th>
-                                <th>Fréquence Réglementaire</th>
+                                <th>Fréquence / Règles GRCN</th>
                                 <th>Taux d'Adhésion Réel (Borne A.B.C.)</th>
                                 <th>Analyse & Recommandation Terrain</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td><strong>Entrées de crudités</strong> (légumes/fruits crus)</td>
-                                <td>10 / 20 mini</td>
+                                <td><strong>1. Entrées</strong></td>
+                                <td>Crudités / légumes ou fruits crus (Fréquence mini imposée)</td>
                                 <td id="rep-stat-crudites" style="font-weight: bold;">-- %</td>
                                 <td><span style="color: #166534; font-weight: 700;">🟢 Conforme & Appétent (Bonne rotation)</span></td>
                             </tr>
                             <tr>
-                                <td><strong>Plats protidiques : Poisson</strong> (P/L &gt; 2)</td>
-                                <td>4 / 20 mini</td>
+                                <td><strong>2. Plats protidiques</strong></td>
+                                <td>Viandes, poissons, œufs, alternatives végétariennes</td>
                                 <td id="rep-stat-poisson" style="font-weight: bold;">-- %</td>
                                 <td><span style="color: #9a3412; font-weight: 700;">🟠 Vigilance : Rejet élevé sur le format nature</span></td>
                             </tr>
                             <tr>
-                                <td><strong>Produits frits / pré-frits</strong> (&gt; 15% lipides)</td>
-                                <td>4 / 20 maxi</td>
+                                <td><strong>3. Garnitures</strong></td>
+                                <td>Féculents / légumes cuits (Maîtrise des produits frits &gt;15% lipides)</td>
                                 <td id="rep-stat-frits" style="font-weight: bold;">88 %</td>
                                 <td><span style="color: #166534; font-weight: 700;">🟢 Respect strict du quota maximal</span></td>
                             </tr>
                             <tr>
-                                <td><strong>Produits laitiers</strong> (Riche en calcium)</td>
-                                <td>8 / 20 mini (1/repas)</td>
+                                <td><strong>4. Produits laitiers</strong><br><small style="font-weight: normal; color: #475569;">Présence obligatoire à chaque repas</small></td>
+                                <td>
+                                    • Fromages &gt;150mg calcium : min. 8/20<br>
+                                    • Fromages 100-150mg calcium : min. 4/20<br>
+                                    • Laitages (yaourts, faisselles, crèmes...) : min. 6/20<br>
+                                    • Produits laitiers libres : 2/20<br>
+                                    <em>(Si en entrée : mini 16g / convive)</em>
+                                </td>
                                 <td id="rep-stat-laitiers" style="font-weight: bold;">91 %</td>
-                                <td><span style="color: #166534; font-weight: 700;">🟢 Excellente adhésion des élèves</span></td>
+                                <td><span style="color: #166534; font-weight: 700;">🟢 Excellente adhésion globale</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>5. Desserts</strong></td>
+                                <td>Fruits de saison, pâtisseries, compotes</td>
+                                <td style="font-weight: bold;">85 %</td>
+                                <td><span style="color: #166534; font-weight: 700;">🟢 Bonne rotation des fruits</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>6. Pain</strong></td>
+                                <td>Présence continue en service (suivi quantitatif global)</td>
+                                <td style="font-weight: bold;">72 %</td>
+                                <td><span style="color: #9a3412; font-weight: 700;">🟠 Axe prioritaire d'économie sur le pain</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -591,15 +609,11 @@
                     <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 14px; border-radius: 6px; margin-top: 10px;">
                         <h4 style="font-size: 13px; color: #166534; font-weight: 800; margin-bottom: 4px;">💡 Synthèse de l'IA pour l'observatoire départemental :</h4>
                         <p style="font-size: 12px; color: #334155; line-height: 1.5;" id="report-ai-synthesis">
-                            Analyse en cours... Les indicateurs montrent que le respect des fréquences obligatoires du plan alimentaire n'entraîne pas de fatalité sur le gaspillage, sous réserve d'adapter les formats de découpe (notamment sur les fruits et les poissons). Le collège confirme son rôle de terrain pilote.
+                            Analyse en cours... Le respect des fréquences obligatoires du plan alimentaire et du GRCN s'accorde avec les relevés de la borne. Les marges de progression résident dans l'adaptation des formats de découpe pour réduire le gaspillage sur les produits laitiers et les garnitures.
                         </p>
                     </div>
                 </div>
             </div>
-
-        </div>
-    </div>
-
     <!-- CODE CENTRAL JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
