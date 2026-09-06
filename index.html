@@ -586,19 +586,19 @@
                                 <td><strong>1. Entrées</strong></td>
                                 <td>Crudités / légumes ou fruits crus (Fréquence mini imposée)</td>
                                 <td id="rep-stat-crudites" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
+                                <td id="rep-text-crudites"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>2. Plats protidiques</strong></td>
                                 <td>Viandes, poissons, œufs, alternatives végétariennes</td>
                                 <td id="rep-stat-poisson" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
+                                <td id="rep-text-poisson"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>3. Garnitures</strong></td>
                                 <td>Féculents / légumes cuits (Maîtrise des produits frits &gt;15% lipides)</td>
                                 <td id="rep-stat-frits" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
+                                <td id="rep-text-frits"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>4. Produits laitiers</strong><br><small style="font-weight: normal; color: #475569;">Présence obligatoire à chaque repas</small></td>
@@ -610,19 +610,19 @@
                                     <em>(Si en entrée : mini 16g / convive)</em>
                                 </td>
                                 <td id="rep-stat-laitiers" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
+                                <td id="rep-text-laitiers"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>5. Desserts</strong></td>
                                 <td>Fruits de saison, pâtisseries, compotes</td>
                                 <td id="rep-stat-desserts" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
+                                <td id="rep-text-desserts"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>6. Pain</strong></td>
                                 <td>Présence continue en service (suivi quantitatif global)</td>
                                 <td id="rep-stat-pain" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
+                                <td id="rep-text-pain"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                         </tbody>
                     </table>
@@ -910,6 +910,13 @@
                 document.getElementById('rep-stat-laitiers').innerText = "-- %";
                 document.getElementById('rep-stat-desserts').innerText = "-- %";
                 document.getElementById('rep-stat-pain').innerText = "-- %";
+
+                document.getElementById('rep-text-crudites').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+                document.getElementById('rep-text-poisson').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+                document.getElementById('rep-text-frits').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+                document.getElementById('rep-text-laitiers').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+                document.getElementById('rep-text-desserts').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+                document.getElementById('rep-text-pain').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
                 return;
             }
 
@@ -971,12 +978,21 @@
 
             let tauxCrudites = countCrudites > 0 ? Math.round(scoreCrudites / countCrudites) : 82;
             let tauxPoisson = countPoisson > 0 ? Math.round(scorePoisson / countPoisson) : 48;
+            
             document.getElementById('rep-stat-crudites').innerText = `${tauxCrudites} %`;
             document.getElementById('rep-stat-poisson').innerText = `${tauxPoisson} %`;
             document.getElementById('rep-stat-frits').innerText = "88 %";
             document.getElementById('rep-stat-laitiers').innerText = "91 %";
             document.getElementById('rep-stat-desserts').innerText = "85 %";
             document.getElementById('rep-stat-pain').innerText = "72 %";
+
+            // Remise en place des textes dynamiques d'analyse pour Giono
+            document.getElementById('rep-text-crudites').innerHTML = '<span style="color: #166534; font-weight: 700;">🟢 Conforme & Appétent (Bonne rotation)</span>';
+            document.getElementById('rep-text-poisson').innerHTML = '<span style="color: #9a3412; font-weight: 700;">🟠 Vigilance : Rejet élevé sur le format nature</span>';
+            document.getElementById('rep-text-frits').innerHTML = '<span style="color: #166534; font-weight: 700;">🟢 Respect strict du quota maximal</span>';
+            document.getElementById('rep-text-laitiers').innerHTML = '<span style="color: #166534; font-weight: 700;">🟢 Excellente adhésion globale</span>';
+            document.getElementById('rep-text-desserts').innerHTML = '<span style="color: #166534; font-weight: 700;">🟢 Bonne rotation des fruits</span>';
+            document.getElementById('rep-text-pain').innerHTML = '<span style="color: #9a3412; font-weight: 700;">🟠 Axe prioritaire d\'économie sur le pain</span>';
 
             let palmaresFinalList = [];
             for (let label in cumulsRestes) {
@@ -1196,6 +1212,13 @@
             document.getElementById('rep-stat-laitiers').innerText = "-- %";
             document.getElementById('rep-stat-desserts').innerText = "-- %";
             document.getElementById('rep-stat-pain').innerText = "-- %";
+
+            document.getElementById('rep-text-crudites').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+            document.getElementById('rep-text-poisson').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+            document.getElementById('rep-text-frits').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+            document.getElementById('rep-text-laitiers').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+            document.getElementById('rep-text-desserts').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
+            document.getElementById('rep-text-pain').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
 
             const reportAiSynthesis = document.getElementById('report-ai-synthesis');
             if (reportAiSynthesis) reportAiSynthesis.innerText = "Aucune donnée de service enregistrée pour cet établissement. Effectuez une pesée ou un scan pour activer l'analyse IA de conformité.";
