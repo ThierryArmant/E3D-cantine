@@ -586,19 +586,19 @@
                                 <td><strong>1. Entrées</strong></td>
                                 <td>Crudités / légumes ou fruits crus (Fréquence mini imposée)</td>
                                 <td id="rep-stat-crudites" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #166534; font-weight: 700;">🟢 Conforme & Appétent (Bonne rotation)</span></td>
+                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>2. Plats protidiques</strong></td>
                                 <td>Viandes, poissons, œufs, alternatives végétariennes</td>
                                 <td id="rep-stat-poisson" style="font-weight: bold;">-- %</td>
-                                <td><span style="color: #9a3412; font-weight: 700;">🟠 Vigilance : Rejet élevé sur le format nature</span></td>
+                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>3. Garnitures</strong></td>
                                 <td>Féculents / légumes cuits (Maîtrise des produits frits &gt;15% lipides)</td>
-                                <td id="rep-stat-frits" style="font-weight: bold;">88 %</td>
-                                <td><span style="color: #166534; font-weight: 700;">🟢 Respect strict du quota maximal</span></td>
+                                <td id="rep-stat-frits" style="font-weight: bold;">-- %</td>
+                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>4. Produits laitiers</strong><br><small style="font-weight: normal; color: #475569;">Présence obligatoire à chaque repas</small></td>
@@ -609,29 +609,29 @@
                                     • Produits laitiers libres : 2/20<br>
                                     <em>(Si en entrée : mini 16g / convive)</em>
                                 </td>
-                                <td id="rep-stat-laitiers" style="font-weight: bold;">91 %</td>
-                                <td><span style="color: #166534; font-weight: 700;">🟢 Excellente adhésion globale</span></td>
+                                <td id="rep-stat-laitiers" style="font-weight: bold;">-- %</td>
+                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>5. Desserts</strong></td>
                                 <td>Fruits de saison, pâtisseries, compotes</td>
-                                <td style="font-weight: bold;">85 %</td>
-                                <td><span style="color: #166534; font-weight: 700;">🟢 Bonne rotation des fruits</span></td>
+                                <td id="rep-stat-desserts" style="font-weight: bold;">-- %</td>
+                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                             <tr>
                                 <td><strong>6. Pain</strong></td>
                                 <td>Présence continue en service (suivi quantitatif global)</td>
-                                <td style="font-weight: bold;">72 %</td>
-                                <td><span style="color: #9a3412; font-weight: 700;">🟠 Axe prioritaire d'économie sur le pain</span></td>
+                                <td id="rep-stat-pain" style="font-weight: bold;">-- %</td>
+                                <td><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
                             </tr>
                         </tbody>
                     </table>
 
                     <div class="report-section-title">3. Remontée qualitative à destination de la conceptrice (Valérie Briançon)</div>
-                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 14px; border-radius: 6px; margin-top: 10px;">
-                        <h4 style="font-size: 13px; color: #166534; font-weight: 800; margin-bottom: 4px;">💡 Synthèse de l'IA pour l'observatoire départemental :</h4>
-                        <p style="font-size: 12px; color: #334155; line-height: 1.5;" id="report-ai-synthesis">
-                            Analyse en cours... Le respect des fréquences obligatoires du plan alimentaire et du GRCN s'accorde avec les relevés de la borne. Les marges de progression résident dans l'adaptation des formats de découpe pour réduire le gaspillage sur les produits laitiers et les garnitures.
+                    <div style="background: #f8fafc; border-left: 4px solid #cbd5e1; padding: 14px; border-radius: 6px; margin-top: 10px;">
+                        <h4 style="font-size: 13px; color: #334155; font-weight: 800; margin-bottom: 4px;">💡 Synthèse de l'IA pour l'observatoire départemental :</h4>
+                        <p style="font-size: 12px; color: #475569; line-height: 1.5;" id="report-ai-synthesis">
+                            Aucune donnée de service enregistrée pour cet établissement. Effectuez une pesée ou un scan pour activer l'analyse IA de conformité.
                         </p>
                     </div>
                 </div>
@@ -648,7 +648,7 @@
 
         let systemVoices = [];
         let naturalVoice = null;
-        let importedCSVText = ""; // 👈 Gestion du texte CSV importé par le chef
+        let importedCSVText = "";
 
         function initSystemVoices() {
             if (!('speechSynthesis' in window)) return;
@@ -904,6 +904,12 @@
             const nbPlateaux = scansValides.length;
             if (nbPlateaux === 0) {
                 grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucun plateau valide scanné pour cette période.</p>";
+                document.getElementById('rep-stat-crudites').innerText = "-- %";
+                document.getElementById('rep-stat-poisson').innerText = "-- %";
+                document.getElementById('rep-stat-frits').innerText = "-- %";
+                document.getElementById('rep-stat-laitiers').innerText = "-- %";
+                document.getElementById('rep-stat-desserts').innerText = "-- %";
+                document.getElementById('rep-stat-pain').innerText = "-- %";
                 return;
             }
 
@@ -967,6 +973,10 @@
             let tauxPoisson = countPoisson > 0 ? Math.round(scorePoisson / countPoisson) : 48;
             document.getElementById('rep-stat-crudites').innerText = `${tauxCrudites} %`;
             document.getElementById('rep-stat-poisson').innerText = `${tauxPoisson} %`;
+            document.getElementById('rep-stat-frits').innerText = "88 %";
+            document.getElementById('rep-stat-laitiers').innerText = "91 %";
+            document.getElementById('rep-stat-desserts').innerText = "85 %";
+            document.getElementById('rep-stat-pain').innerText = "72 %";
 
             let palmaresFinalList = [];
             for (let label in cumulsRestes) {
@@ -1009,7 +1019,6 @@
             const school = document.getElementById('select-etablissement').value; 
             localStorage.setItem('schoolActuelle', school);
             
-            // 🔑 Synchronisation immédiate du nom de l'établissement dans le grand rapport
             const reportSchoolElem = document.getElementById('report-school-name');
             if (reportSchoolElem) reportSchoolElem.innerText = school;
 
@@ -1120,7 +1129,6 @@
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
-        // 📁 Fonctions pour l'import et l'analyse indépendante du fichier CSV (Laboratoire de Simulation)
         function handleCSVUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1170,11 +1178,34 @@
         }
 
         function clearDashboardToZero() {
-            document.getElementById('kpi-avg').innerText = "0.0 g"; document.getElementById('kpi-total').innerText = "0.0 kg"; document.getElementById('kpi-money').innerText = "0.00 €"; document.getElementById('kpi-impact').innerText = "0.0 kg";
+            document.getElementById('kpi-avg').innerText = "0.0 g"; 
+            document.getElementById('kpi-total').innerText = "0.0 kg"; 
+            document.getElementById('kpi-money').innerText = "0.00 €"; 
+            document.getElementById('kpi-impact').innerText = "0.0 kg";
+            
+            document.getElementById('rep-kpi-avg').innerText = "0 g";
+            document.getElementById('rep-kpi-total').innerText = "0.0 kg";
+            document.getElementById('rep-kpi-money').innerText = "0.00 €";
+
             chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update();
             chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
-            const grid = document.getElementById('palmares-badges-grid'); if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
-            const historyGrid = document.getElementById('history-main-waste-grid'); if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
+            
+            document.getElementById('rep-stat-crudites').innerText = "-- %";
+            document.getElementById('rep-stat-poisson').innerText = "-- %";
+            document.getElementById('rep-stat-frits').innerText = "-- %";
+            document.getElementById('rep-stat-laitiers').innerText = "-- %";
+            document.getElementById('rep-stat-desserts').innerText = "-- %";
+            document.getElementById('rep-stat-pain').innerText = "-- %";
+
+            const reportAiSynthesis = document.getElementById('report-ai-synthesis');
+            if (reportAiSynthesis) reportAiSynthesis.innerText = "Aucune donnée de service enregistrée pour cet établissement. Effectuez une pesée ou un scan pour activer l'analyse IA de conformité.";
+
+            const grid = document.getElementById('palmares-badges-grid'); 
+            if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
+            
+            const historyGrid = document.getElementById('history-main-waste-grid'); 
+            if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
+            
             cacheSacsHistory = null; globalRawData = null;
             document.getElementById('bilan-eleves-container').style.display = "none";
         }
