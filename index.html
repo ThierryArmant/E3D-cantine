@@ -642,7 +642,7 @@
                     <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
                         <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Format .CSV)</h4>
                         <p style="font-size: 11.5px; color: #334155; margin-bottom: 12px; line-height: 1.5;">
-                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille complète de 20 repas (5 semaines). L'IA croise votre proposition avec le plan alimentaire départemental(Valérie Briançon) en toute indépendance. 
+                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille complète de 20 repas (5 semaines). L'IA croise votre proposition avec le plan alimentaire départemental (Valérie Briançon) en toute indépendance. 
                             <br><em>Uploadez ➔ Lisez le rapport ➔ Modifiez votre CSV si besoin ➔ Ré-uploadez à volonté !</em>
                         </p>
                         
@@ -1233,6 +1233,7 @@
             .then(() => { alert('✅ Menu validé et activé pour le service !'); loadLiveData(); });
         }
 
+        // 🥗 ANALYSE DU REPAS DU JOUR (Route dédiée : analyzeDailyMenu)
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = getCurrentCheckedMenu();
@@ -1241,9 +1242,13 @@
 
             if (!menuText) { alert("⚠️ Veuillez cocher au moins un aliment dans le tableau pour analyser votre projet de menu."); return; }
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG en cours (Croisement Plan Alimentaire Valérie Briançon & Gâchis A.B.C.)...</em>";
+            resText.innerHTML = "<em>🤖 Analyse RAG du repas du jour en cours (Méthode Valérie Briançon)...</em>";
             
-            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, menu: menuText }) })
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", 
+                headers: { "Content-Type": "text/plain" }, 
+                body: JSON.stringify({ action: "analyzeDailyMenu", etablissement: school, menu: menuText }) 
+            })
             .then(r => r.json())
             .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
@@ -1260,6 +1265,7 @@
             reader.readAsText(file, "UTF-8");
         }
 
+        // 📊 ANALYSE DU CYCLE DE 20 REPAS (Laboratoire CSV : analyzeMenuWithStats)
        function runCSVAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const resBox = document.getElementById('gemini-ai-result-csv'); 
@@ -1271,7 +1277,7 @@
             }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG sécurisée et enrichie avec les références réglementaires en cours...</em>";
+            resText.innerHTML = "<em>🤖 Analyse RAG sécurisée du cycle complet en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1279,7 +1285,7 @@
                 body: JSON.stringify({ 
                     action: "analyzeMenuWithStats", 
                     etablissement: school, 
-                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n[CONSIGNES STRICTES DE MISE EN FORME ET D'AUDIT SÉCURISÉ] :\n1. Utilise un tableau de synthèse épuré utilisant strictement la notation de fraction officielle 'X/20' (ex: 12/20 constatés vs max 4/20 ou min 10/20).\n2. Cite explicitement les textes officiels de référence (Décret n° 2011-1227, Lois EGALim / Climat-Résilience, Loi AGEC et avis ANSES janvier 2025) pour justifier rigoureusement chaque non-conformité relevée.\n3. Structure obligatoirement ta réponse en 4 sections distinctes utilisant des blocs HTML colorés (div style='background-color: [couleur]; padding: 12px; border-radius: 6px; margin-bottom: 12px;') :\n   - Partie 1 : Analyse des Fréquences Globales -> Fond saumon clair (#ffe5d9)\n   - Partie 2 : Conformité au Référentiel Officiel -> Fond bleu ciel (#e0f2fe)\n   - Partie 3 : Risques de Gaspillage Terrain -> Fond orange clair (#ffedd5)\n   - Partie 4 : Avis de Pré-Validation & Aides de Remplacement (avec propositions concrètes de substitution jour par jour) -> Fond vert clair (#f0fdf4).\n\n" + importedCSVText 
+                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n" + importedCSVText 
                 }) 
             })
             .then(r => r.json())
@@ -1377,7 +1383,6 @@
                 let currentLine = line.trim(); 
                 if (currentLine === "") continue;
 
-                // Capture des lignes d'un tableau Markdown (commençant et finissant par |)
                 if (currentLine.startsWith('|') && currentLine.endsWith('|')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
                     tableLines.push(currentLine);
@@ -1386,7 +1391,6 @@
                     flushTable();
                 }
 
-                // Conversion propre des en-têtes (#)
                 if (currentLine.startsWith('#')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
                     let headerText = currentLine.replace(/^#+\s*/, '').replace(/^[0-9]+\.\s*/, '');
@@ -1396,7 +1400,6 @@
 
                 if (currentLine.startsWith('---')) continue;
 
-                // Gestion propre des puces de liste
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
                     if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
                     let bulletText = currentLine.replace(/^[\*\-\•]\s*/, '').replace(/^\*\s*/, '').replace(/\*$/, '');
@@ -1416,7 +1419,7 @@
             let headerProcessed = false;
             
             rows.forEach((row) => {
-                if (row.includes('---')) return; // Ignore la ligne de séparation |:---|
+                if (row.includes('---')) return;
                 let cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
                 if (cells.length === 0) return;
 
