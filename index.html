@@ -305,12 +305,19 @@
         .checkbox-label { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; cursor: pointer; color: #374151; }
 
         @media print {
-            body { background: white; height: auto; overflow: visible; }
-            .sidebar, .top-bar, .btn { display: none !important; }
-            .main-container { overflow: visible; }
-            .content-area { padding: 0; overflow: visible; }
-            .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
-        }
+    body { background: white; height: auto; overflow: visible; }
+    .sidebar, .top-bar, .btn { display: none !important; }
+    .main-container { overflow: visible; }
+    .content-area { padding: 0; overflow: visible; }
+    .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+    
+    /* 🖨️ Forçage de l'impression des couleurs de fond et des blocs colorés */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
+}
     </style>
 </head>
 <body>
