@@ -36,25 +36,23 @@ OBJECTIF : Le plan alimentaire est un outil pour « fabriquer » des menus garan
   4. Positionner les crudités (entrées et fruits crus).
   5. Terminer par les ajustements.
 - CHOIX MULTIPLES ET DIRIGÉS : Ne pas proposer uniquement des plats limités (ex: pas de choix multiple 100% charcuterie en entrée ou 100% pâtisseries en dessert). Toujours équilibrer avec une option favorable obligatoire.
+- RÈGLE DE PROPORTIONALITÉ DES CHOIX MULTIPLES : Si le chef propose k choix par composante (ex: 3 entrées), les seuils et fréquences limites du GEM-RCN doivent être multipliés proportionnellement sur l'offre globale.
+- RÈGLE DU MULTI-ÉTIQUETAGE DES PLATS COMPLEXES : Un même plat appartient simultanément à plusieurs catégories cumulatives (ex: un Cordon Bleu compte comme plat P/L <= 1, produit pré-frit et plat < 70% de denrée protidique).
+- SUBTILITÉS DES ENTRÉES ET SALADES COMPOSÉES : Le taboulé doit contenir >50% de légumes crus pour compter en crudité (sinon féculent) ; le céleri rémoulade cumule crudité et entrée riche en lipides (>15%).
+- RÈGLE DES 70% POUR LES PLATS PRÉPARÉS : Pour les plats composés (hachis parmentier, lasagnes, gratins), le grammage de la denrée protidique noble doit représenter au moins 70% du poids recommandé de la portion de référence.
 
 --- 3. ALERTE SANITAIRE OFFICIELLE (ANSES - JANVIER 2025) ---
 - AVIS ANSES (Saisine n° 2022-SA-0221) : L'Anses ne recommande pas l'utilisation d'aliments à base de soja en restauration collective en raison d'un risque d'exposition collective aux isoflavones (phyto-estrogènes) faisant entrer les convives dans la catégorie « consommateur de soja ».
---- 4. RÉFÉRENCES LÉGISLATIVES ET RÉGLEMENTAIRES OFFICIELLES (À CITER DANS LES RAPPORTS) ---
-- QUALITÉ NUTRITIONNELLE : Décret n° 2011-1227 du 30 septembre 2011 relatif aux conditions de restauration scolaire et aux exigences nutritionnelles applicables aux repas (et Guide des Recommandations en matière de Nutrition - GRCN du CNRC).
-- OBJECTIFS D'APPROVISIONNEMENT (EGALIM) : Loi n° 2018-938 du 30 octobre 2018 (EGALim) et Loi n° 2021-1104 du 22 août 2021 (Climat et Résilience) imposant les seuils de qualité, de durabilité (50% dont 20% bio) et la mise en place du menu végétarien hebdomadaire.
-- LUTTE CONTRE LE GASPILLAGE : Loi n° 2020-105 du 10 février 2020 (Loi AGEC) relative à la lutte contre le gaspillage et à l'économie circulaire, et protocoles de caractérisation des biodéchets de l'ADEME.
-- VEILLE SANITAIRE : Avis de l'ANSES (Saisine n° 2022-SA-0221) portant sur l'évaluation des risques liés à l'exposition aux isoflavones (soja) en restauration collective.
 
---- 5. INSTRUCTION DE CITATION POUR L'IA ---
-- Dans ton rapport d'audit (notamment dans la partie sur la conformité et les risques), cite explicitement l'article, le décret ou l'avis officiel correspondant pour justifier chaque non-conformité relevée (ex: « Conformément au décret n° 2011-1227... » ou « Suivant les recommandations du GRCN et de l'avis ANSES de janvier 2025... »).
 --- 4. RÉFÉRENCES LÉGISLATIVES ET RÉGLEMENTAIRES OFFICIELLES (À CITER DANS LES RAPPORTS) ---
-- QUALITÉ NUTRITIONNELLE : Décret n° 2011-1227 du 30 septembre 2011 relatif aux conditions de restauration scolaire et aux exigences nutritionnelles applicables aux repas (et Guide des Recommandations en matière de Nutrition - GRCN du CNRC).
+- QUALITÉ NUTRITIONNELLE : Décret n° 2011-1227 du 30 septembre 2011 relatif aux conditions de restauration scolaire et aux exigences nutritionnelles applicables aux repas (et Guide des Recommandations en matière de Nutrition - GRCN / GEM-RCN v2.0 du CNRC).
 - OBJECTIFS D'APPROVISIONNEMENT (EGALim) : Loi n° 2018-938 du 30 octobre 2018 (EGALim) et Loi n° 2021-1104 du 22 août 2021 (Climat et Résilience) imposant les seuils de qualité, de durabilité (50% dont 20% bio) et la mise en place du menu végétarien hebdomadaire.
 - LUTTE CONTRE LE GASPILLAGE : Loi n° 2020-105 du 10 février 2020 (Loi AGEC) relative à la lutte contre le gaspillage et à l'économie circulaire, et protocoles de caractérisation des biodéchets de l'ADEME.
 - VEILLE SANITAIRE : Avis de l'ANSES (Saisine n° 2022-SA-0221) portant sur l'évaluation des risques liés à l'exposition aux isoflavones (soja) en restauration collective.
 
 --- 5. INSTRUCTION DE CITATION POUR L'IA ---
-- Dans ton rapport d'audit, cite explicitement l'article, le décret ou l'avis officiel correspondant pour justifier chaque non-conformité relevée (ex: « Conformément au décret n° 2011-1227... » ou « Suivant les recommandations du GRCN et de l'avis ANSES de janvier 2025... »).
+- Dans ton rapport d'audit (notamment dans la partie sur la conformité et les risques), cite explicitement l'article, le décret ou l'avis officiel correspondant pour justifier chaque non-conformité relevée (ex: « Conformément au décret n° 2011-1227... » ou « Suivant les recommandations du GRCN et de l'avis ANSES de janvier 2025... »).
+
 ====================================================================
 BASE DOCUMENTAIRE OFFICIELLE : GRCN (CNRC) & CADRE LÉGISLATIF
 ====================================================================
