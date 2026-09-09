@@ -645,16 +645,16 @@
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter le rapport officiel</button>
                     </div>
 
-                    <!-- 🧪 LABORATOIRE DE SIMULATION INDÉPENDANT (CYCLE 20 REPAS / CSV) -->
+                    <!-- 🧪 LABORATOIRE DE SIMULATION INDÉPENDANT (MULTIMODAL : CSV, TXT, PDF, JPG, PNG) -->
                     <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
-                        <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Format .CSV)</h4>
+                        <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Formats CSV, PDF, JPG)</h4>
                         <p style="font-size: 11.5px; color: #334155; margin-bottom: 12px; line-height: 1.5;">
-                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille complète de 20 repas (5 semaines). L'IA croise votre proposition avec le plan alimentaire départemental (Valérie Briançon) en toute indépendance. 
-                            <br><em>Uploadez ➔ Lisez le rapport ➔ Modifiez votre CSV si besoin ➔ Ré-uploadez à volonté !</em>
+                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille (CSV, PDF, ou photo de menu scanné). L'IA lit directement le document (OCR) et croise votre proposition avec le plan alimentaire départemental. 
+                            <br><em>Uploadez ➔ Lisez le rapport ➔ Modifiez votre document si besoin ➔ Ré-uploadez à volonté !</em>
                         </p>
                         
                         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                            <input type="file" id="csv-file-input" accept=".csv,.txt" style="font-size: 11px; flex: 1; min-width: 220px;" onchange="handleCSVUpload(event)">
+                            <input type="file" id="csv-file-input" accept=".csv,.txt,.pdf,image/jpeg,image/png" style="font-size: 11px; flex: 1; min-width: 220px;" onchange="handleMenuFileUpload(event)">
                             <button type="button" class="btn" onclick="runCSVAIAnalysis()" style="background-color: #047857; width: auto; padding: 10px 16px; font-size: 12px; font-weight: 800;">🤖 Lancer l'audit indépendant du cycle</button>
                         </div>
                     </div>
@@ -757,7 +757,7 @@
 
         let systemVoices = [];
         let naturalVoice = null;
-        let importedCSVText = "";
+        let filePayloadData = null; // Variable universelle pour stocker CSV ou Base64 (PDF/Image)
 
         function initSystemVoices() {
             if (!('speechSynthesis' in window)) return;
@@ -813,7 +813,7 @@
             "Éclair": "🥖", "Tarte aux fruits": "🥧", "Pain": "🥖", "Entrée du jour": "🥗", "Plat du jour": "🍽️", "Dessert du jour": "🍰"
         };
 
-      window.addEventListener('DOMContentLoaded', () => { 
+     window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 plugins: [ChartDataLabels], 
@@ -1240,7 +1240,6 @@
             .then(() => { alert('✅ Menu validé et activé pour le service !'); loadLiveData(); });
         }
 
-        // 🥗 ANALYSE DU REPAS DU JOUR (Route dédiée : analyzeDailyMenu)
         function runGeminiAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const menuText = getCurrentCheckedMenu();
@@ -1261,30 +1260,44 @@
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
-        function handleCSVUpload(event) {
+        // 🔄 CHARGEMENT UNIVERSEL MULTIMODAL (CSV, TXT, PDF, JPG, PNG)
+        function handleMenuFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
-                importedCSVText = e.target.result;
-                alert("✅ Fichier CSV du cycle chargé avec succès ! Vous pouvez lancer l'audit indépendant.");
-            };
-            reader.readAsText(file, "UTF-8");
+
+            if (file.type === "text/csv" || file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
+                reader.onload = function(e) {
+                    filePayloadData = { type: "text", content: e.target.result };
+                    alert("✅ Fichier texte/CSV chargé avec succès !");
+                };
+                reader.readAsText(file, "UTF-8");
+            } else {
+                reader.onload = function(e) {
+                    filePayloadData = { 
+                        type: "file", 
+                        mimeType: file.type || "application/pdf", 
+                        base64: e.target.result 
+                    };
+                    alert("✅ Document PDF ou Image chargé avec succès ! L'IA l'analysera en vision directe (OCR).");
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
-        // 📊 ANALYSE DU CYCLE DE 20 REPAS (Laboratoire CSV : analyzeMenuWithStats)
-       function runCSVAIAnalysis() {
+        // 📊 ANALYSE DU CYCLE DE 20 REPAS (Laboratoire Multimodal : analyzeMenuWithStats)
+        function runCSVAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const resBox = document.getElementById('gemini-ai-result-csv'); 
             const resText = document.getElementById('gemini-ai-text-csv');
 
-            if (!importedCSVText) {
-                alert("⚠️ Veuillez d'abord sélectionner un fichier CSV contenant le cycle de menus du chef.");
+            if (!filePayloadData) {
+                alert("⚠️ Veuillez d'abord sélectionner un fichier de menu (CSV, PDF ou Image).");
                 return;
             }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG sécurisée du cycle complet en cours...</em>";
+            resText.innerHTML = "<em>🤖 Lecture OCR et analyse RAG sécurisée du cycle complet en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1292,7 +1305,7 @@
                 body: JSON.stringify({ 
                     action: "analyzeMenuWithStats", 
                     etablissement: school, 
-                    menu: "--- CYCLE COMPLET DE MENUS (CSV) ---\n" + importedCSVText 
+                    payloadFile: filePayloadData 
                 }) 
             })
             .then(r => r.json())
@@ -1304,7 +1317,7 @@
         function printOrPDF() {
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
             if (!content || content.includes("en cours") || content.includes("attente")) {
-                alert("Veuillez d'abord lancer une analyse de cycle CSV.");
+                alert("Veuillez d'abord lancer une analyse de cycle.");
                 return;
             }
             const win = window.open('', '_blank');
@@ -1425,6 +1438,7 @@
             if (listeOuverte) output += '</ul>'; 
             return output;
         }
+
         function renderMarkdownTable(rows) {
             let html = '<div class="table-responsive" style="margin: 10px 0;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">';
             let headerProcessed = false;
