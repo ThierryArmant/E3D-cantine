@@ -305,19 +305,17 @@
         .checkbox-label { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; cursor: pointer; color: #374151; }
 
         @media print {
-    body { background: white; height: auto; overflow: visible; }
-    .sidebar, .top-bar, .btn { display: none !important; }
-    .main-container { overflow: visible; }
-    .content-area { padding: 0; overflow: visible; }
-    .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
-    
-    /* 🖨️ Forçage de l'impression des couleurs de fond et des blocs colorés */
-    * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-    }
-}
+            body { background: white; height: auto; overflow: visible; }
+            .sidebar, .top-bar, .btn { display: none !important; }
+            .main-container { overflow: visible; }
+            .content-area { padding: 0; overflow: visible; }
+            .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -420,7 +418,7 @@
                 </div>
             </div>
 
-           <!-- PÔLE 3 : ESPACE CUISINIER -->
+            <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
@@ -757,7 +755,7 @@
 
         let systemVoices = [];
         let naturalVoice = null;
-        let filePayloadData = null; // Variable universelle pour stocker CSV ou Base64 (PDF/Image)
+        let filePayloadData = null; 
 
         function initSystemVoices() {
             if (!('speechSynthesis' in window)) return;
@@ -813,7 +811,7 @@
             "Éclair": "🥖", "Tarte aux fruits": "🥧", "Pain": "🥖", "Entrée du jour": "🥗", "Plat du jour": "🍽️", "Dessert du jour": "🍰"
         };
 
-     window.addEventListener('DOMContentLoaded', () => { 
+        window.addEventListener('DOMContentLoaded', () => { 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 plugins: [ChartDataLabels], 
@@ -1057,6 +1055,7 @@
 
             scansValides.forEach(scan => {
                 let textRaw = (scan.commentaire || "").toLowerCase();
+                
                 let mE = false;
                 for (let item of keywordsEntree) {
                     if (textRaw.includes(item.key)) { 
@@ -1079,8 +1078,12 @@
 
                 let mD = false;
                 for (let item of keywordsDessert) {
-                    if (textRaw.includes(item.key)) { ajouterMesure(item.label, scan.dessert); }
+                    if (textRaw.includes(item.key)) { 
+                        ajouterMesure(item.label, scan.dessert); 
+                        mD = true; break; 
+                    }
                 }
+                if (!mD && scan.dessert > 0) ajouterMesure("Dessert du jour", scan.dessert);
 
                 if (textRaw.includes("pain") || scan.pain > 0) ajouterMesure("Pain", scan.pain);
             });
@@ -1260,7 +1263,6 @@
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
-        // 🔄 CHARGEMENT UNIVERSEL MULTIMODAL (CSV, TXT, PDF, JPG, PNG)
         function handleMenuFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1285,7 +1287,6 @@
             }
         }
 
-        // 📊 ANALYSE DU CYCLE DE 20 REPAS (Laboratoire Multimodal : analyzeMenuWithStats)
         function runCSVAIAnalysis() {
             const school = document.getElementById('select-etablissement').value;
             const resBox = document.getElementById('gemini-ai-result-csv'); 
@@ -1313,7 +1314,6 @@
                 if (res.error) {
                     resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
                 } else {
-                    // Utilisation de la fonction de formatage pour injecter les blocs HTML colorés et aérés
                     resText.innerHTML = formatAIResponseToUI(res.answer); 
                 }
             })
@@ -1322,7 +1322,6 @@
             });
         }
 
-        /* FONCTION UNIQUE IMPRIMER / PDF POUR LE LABORATOIRE CSV */
         function printOrPDF() {
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
             if (!content || content.includes("en cours") || content.includes("attente")) {
@@ -1392,7 +1391,6 @@
         }
 
         function formatAIResponseToUI(text) {
-            // 🛡️ SÉCURITÉ : Si l'IA renvoie directement du HTML structuré (blocs colorés ou tableau), on l'affiche tel quel !
             if (text.includes('<div') || text.includes('<table')) {
                 return text;
             }
