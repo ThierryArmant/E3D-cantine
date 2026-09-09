@@ -1370,10 +1370,14 @@
         }
 
         function formatAIResponseToUI(text) {
-            // Nettoyage et normalisation : on force un style de police et une couleur uniformes
+            // 🛡️ SÉCURITÉ : Si l'IA renvoie directement du HTML structuré (blocs colorés ou tableau), on l'affiche tel quel !
+            if (text.includes('<div') || text.includes('<table')) {
+                return text;
+            }
+
             let cleanText = text
                 .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1e293b;">$1</strong>')
-                .replace(/\*(.*?)\*/g, '<span style="font-style: normal; color: #1e293b;">$1</span>'); // Neutralise les italiques
+                .replace(/\*(.*?)\*/g, '<span style="font-style: normal; color: #1e293b;">$1</span>');
 
             const lines = cleanText.split('\n'); 
             let output = ""; 
@@ -1399,7 +1403,6 @@
                     flushTable();
                 }
 
-                // Titres et sections principales
                 if (currentLine.startsWith('#') || currentLine.includes('Partie')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
                     let headerText = currentLine.replace(/^#+\s*/, '').replace(/^[0-9]+\.\s*/, '');
@@ -1409,7 +1412,6 @@
 
                 if (currentLine.startsWith('---')) continue;
 
-                // Listes à puces uniformisées (sans italique)
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
                     if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
                     let bulletText = currentLine.replace(/^[\*\-\•]\s*/, '').replace(/^\*\s*/, '').replace(/\*$/, '');
