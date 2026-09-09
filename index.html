@@ -557,7 +557,7 @@
                     </div>
 
                     <div id="gemini-ai-result-jour" class="ai-box" style="display: none;">
-                        <div class="ai-title">🌱 VALIDATION RAG DU MENU DU JOUR</div>
+                        <div class="ai-title">🌱 ANALYSE EGAlim & PRÉVENTION DU GASPILLAGE</div>
                         <div id="gemini-ai-text-jour"></div>
                     </div>
                 </div>
@@ -1213,7 +1213,7 @@
 
             if (!menuText) { alert("⚠️ Veuillez cocher au moins un aliment dans le tableau pour analyser votre projet de menu."); return; }
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse RAG du repas du jour en cours (Méthode Valérie Briançon)...</em>";
+            resText.innerHTML = "<em>🤖 Analyse EGAlim & Prévention des biodéchets en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1221,7 +1221,15 @@
                 body: JSON.stringify({ action: "analyzeDailyMenu", etablissement: school, menu: menuText }) 
             })
             .then(r => r.json())
-            .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
+            .then(res => { 
+                if (res.error) {
+                    resText.innerHTML = res.error;
+                } else {
+                    // Nettoyage au cas où le serveur renverrait le nom de la conceptrice ici
+                    let cleanedAnswer = res.answer.replace(/Valérie Briançon/gi, 'l\'équipe pédagogique');
+                    resText.innerHTML = formatAIResponseToUI(cleanedAnswer); 
+                }
+            })
             .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
