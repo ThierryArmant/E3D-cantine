@@ -1297,7 +1297,7 @@
             }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Lecture OCR et analyse RAG sécurisée du cycle complet en cours...</em>";
+            resText.innerHTML = "<em>🤖 Analyse matricielle et croisement RAG du cycle en cours (Comptage éclaté des choix multiples)...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
@@ -1309,8 +1309,17 @@
                 }) 
             })
             .then(r => r.json())
-            .then(res => { resText.innerHTML = res.error ? res.error : formatAIResponseToUI(res.answer); })
-            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; });
+            .then(res => { 
+                if (res.error) {
+                    resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
+                } else {
+                    // Utilisation de la fonction de formatage pour injecter les blocs HTML colorés et aérés
+                    resText.innerHTML = formatAIResponseToUI(res.answer); 
+                }
+            })
+            .catch(() => { 
+                resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; 
+            });
         }
 
         /* FONCTION UNIQUE IMPRIMER / PDF POUR LE LABORATOIRE CSV */
