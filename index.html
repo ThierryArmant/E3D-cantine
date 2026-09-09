@@ -304,6 +304,27 @@
         .sub-theme { font-size: 9px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 4px 0 2px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
         .checkbox-label { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; cursor: pointer; color: #374151; }
 
+        /* Nouveaux styles compacts et propres pour le Bilan Élèves */
+        .bilan-eleves-wrapper { margin-top: 12px; border-radius: 8px; background: rgba(248, 250, 252, 0.95); border: 1px solid #cbd5e1; padding: 10px; }
+        .bilan-header-box { padding: 10px; border-radius: 6px; text-align: center; background: #dcfce7; color: #166534; margin-bottom: 8px; }
+        .bilan-header-box.zone-jaune { background: #fef9c3; color: #854d0e; }
+        .bilan-header-box.zone-orange { background: #ffedd5; color: #9a3412; }
+        .bilan-header-box.zone-rouge { background: #fee2e2; color: #991b1b; }
+        .score-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9.5px; font-weight: 800; margin-bottom: 2px; background: rgba(255,255,255,0.8); }
+        .score-title { font-size: 16px; font-weight: 900; line-height: 1.1; }
+        .score-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; margin-top: 1px; }
+        
+        .eq-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
+        .eq-card { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .eq-card-icon { font-size: 18px; line-height: 1; margin-bottom: 1px; }
+        .eq-card-val { font-size: 13px; font-weight: 900; color: #0f172a; line-height: 1.1; }
+        .eq-card-lbl { font-size: 8.5px; font-weight: 700; color: #64748b; text-align: center; line-height: 1.1; }
+        
+        .ia-feedback-area { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 10.5px; }
+        .ia-feedback-area h4 { font-size: 11px; color: #1b4332; font-weight: 800; margin-bottom: 3px; }
+        .ia-diag-box { color: #334155; margin-bottom: 3px; font-weight: 600; }
+        .ia-challenge-box { color: #b45309; font-weight: 700; background: #fffbeb; padding: 3px 6px; border-radius: 4px; border-left: 3px solid #f59e0b; }
+
         @media print {
             body { background: white; height: auto; overflow: visible; }
             .sidebar, .top-bar, .btn { display: none !important; }
@@ -583,7 +604,7 @@
                                 </div>
                             </div>
                             <div class="waste-control-card" style="background-color: #faf5ff; border: 1px solid #e9d5ff;">
-                                <label>🧻 Serviettes Papier [kg]</label>
+                                <label>📃 Serviettes Papier [kg]</label>
                                 <div class="spinner-container">
                                     <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-serviettes', 1.00)">▲ kg</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -1.00)">▼ kg</button></div>
                                     <input type="number" id="sac-serviettes" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
@@ -983,7 +1004,7 @@
                     { name: "Fruits", val: data.fruits, icon: "🍏" },
                     { name: "Pain", val: data.pain, icon: "🥖" },
                     { name: "Emballages", val: data.emb, icon: "📦" },
-                    { name: "Serviettes", val: data.serv, icon: "🧻" }
+                    { name: "Serviettes", val: data.serv, icon: "📃" }
                 ];
                 items.sort((a, b) => b.val - a.val);
                 let topItem = items[0];
@@ -1008,20 +1029,17 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre");
             });
 
-            // Catalogue de référence des aliments à suivre pour peupler la grille
             const referenceAliments = [
                 "Tomates", "Carottes râpées", "Salade verte", "Céleri rémoulade", 
                 "Poulet rôti", "Steak haché", "Poisson", "Frites", 
                 "Haricots verts", "Riz", "Pomme / Banane", "Yaourt", "Pain"
             ];
 
-            // Initialisation des stats par aliment
             let foodStats = {};
             referenceAliments.forEach(aliment => {
                 foodStats[aliment] = { totalRestes: 0, count: 0 };
             });
 
-            // Analyse de l'historique complet des scans sur la période
             scansValides.forEach(scan => {
                 let textRaw = (scan.commentaire || "").toLowerCase();
                 let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 15)));
@@ -1034,7 +1052,6 @@
                 });
             });
 
-            // Calcul du taux d'adhésion historique (100% - reste moyen)
             let palmaresFinalList = [];
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
@@ -1044,19 +1061,16 @@
                     let resteMoyen = stats.totalRestes / stats.count;
                     tauxMange = Math.max(15, Math.min(99, Math.round(100 - resteMoyen)));
                 } else {
-                    // Valeur de référence cohérente basée sur l'historique global si non mentionné explicitement sur la période
                     let hash = aliment.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                    tauxMange = 72 + (hash % 24); // Entre 72% et 95%
+                    tauxMange = 72 + (hash % 24);
                 }
 
                 let emoji = FOOD_ICONS_MAP[aliment] || "🍽️";
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            // Tri par ordre décroissant du taux d'adhésion (les plus aimés d'abord)
             palmaresFinalList.sort((a, b) => b.tauxMange - a.tauxMange);
 
-            // Rendu visuel sous forme de petits carrés bien visibles
             grid.innerHTML = "";
             palmaresFinalList.forEach(item => {
                 let badgeColor = "#10b981", tagColor = "#dcfce7", tagTextColor = "#166534", tagText = "🟢 Excellent";
