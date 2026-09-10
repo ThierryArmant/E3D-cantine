@@ -178,7 +178,6 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #475569; }
         .input-date { padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 10.5px; background: rgba(255,255,255,0.9); }
 
-        /* NOUVELLE STRUCTURE HAUTE : 2 COLONNES ÉQUILIBRÉES */
         .dashboard-top-split {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -391,7 +390,7 @@
                         </div>
                     </div>
 
-                    <!-- NOUVELLE DISPOSITION EN 2 COLONNES : 4 KPIs (2x2) À GAUCHE & BIODÉCHETS À DROITE -->
+                    <!-- HAUT EN 2 COLONNES : 4 KPIs (2x2) À GAUCHE & BIODÉCHETS À DROITE -->
                     <div class="dashboard-top-split">
                         <!-- Grille 2x2 des 4 KPIs -->
                         <div class="kpi-grid-2x2">
@@ -415,13 +414,13 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                                <h3>🟢 Taux d'adhésion (Les plus consommés)</h3>
+                                <h3>🟢 Taux d'adhésion (&gt; 70%)</h3>
                             </div>
                             <div id="palmares-adhesion-grid" class="palmares-visual-grid"></div>
                         </div>
                         <div class="dashboard-col">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                                <h3>🔴 Taux de rejets (Les plus délaissés)</h3>
+                                <h3>🔴 Taux de rejets (&gt; 20%)</h3>
                             </div>
                             <div id="palmares-rejets-grid" class="palmares-visual-grid"></div>
                         </div>
@@ -1066,11 +1065,18 @@
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
-            let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
+            // 1. Filtrage Adhésion : > 70%
+            let adhesionList = palmaresFinalList.filter(item => item.tauxMange > 70).sort((a, b) => b.tauxMange - a.tauxMange);
+            
+            // 2. Filtrage Rejets : taux de rejet > 20% (soit taux mangé < 80%)
+            let rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) > 20).sort((a, b) => a.tauxMange - b.tauxMange);
 
             function renderCards(list, container, isRejet = false) {
                 container.innerHTML = "";
+                if (list.length === 0) {
+                    container.innerHTML = "<p style='color:#64748b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun aliment ne correspond à ce critère.</p>";
+                    return;
+                }
                 list.forEach(item => {
                     let badgeColor = "#10b981", tagColor = "#dcfce7", tagTextColor = "#166534", tagText = "🟢 Excellent";
                     
