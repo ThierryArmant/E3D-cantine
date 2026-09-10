@@ -208,7 +208,7 @@
         
         .dashboard-row { 
             display: grid; 
-            grid-template-columns: 1fr 1.6fr; 
+            grid-template-columns: 1fr; 
             gap: 10px; 
         }
         .dashboard-col { 
@@ -402,20 +402,22 @@
                                 <canvas id="chart-timeline"></canvas>
                             </div>
                         </div>
-                        <div class="dashboard-col">
-                            <h3>📊 Répartition des restes par composante (%)</h3>
-                            <div class="chart-container"><canvas id="chart-categories"></canvas></div>
-                        </div>
                     </div>
                     
-                    <div class="dashboard-col">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                            <h3>🍽️ Taux d'adhésion réel aux composantes du menu</h3>
-                            <div style="font-size: 10px; font-weight: 700; color: #64748b; display: flex; gap: 6px;">
-                                <span>🟢 &gt;90%</span><span>🟡 75-90%</span><span>🟠 50-75%</span><span>🔴 &lt;50%</span>
+                    <!-- DEUX ZONES : TAUX D'ADHÉSION & TAUX DE REJETS -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="dashboard-col">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                                <h3>🟢 Taux d'adhésion (Les plus consommés)</h3>
                             </div>
+                            <div id="palmares-adhesion-grid" class="palmares-visual-grid"></div>
                         </div>
-                        <div id="palmares-badges-grid" class="palmares-visual-grid"></div>
+                        <div class="dashboard-col">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
+                                <h3>🔴 Taux de rejets (Les plus délaissés)</h3>
+                            </div>
+                            <div id="palmares-rejets-grid" class="palmares-visual-grid"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -770,7 +772,7 @@
     <!-- CODE CENTRAL JAVASCRIPT -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
-        let localStream = null, isScanningProcess = false, chartTimeline, chartCategories;
+        let localStream = null, isScanningProcess = false, chartTimeline;
         let cacheSacsHistory = null;
         let globalRawData = null; 
 
@@ -871,12 +873,6 @@
                 } 
             });
 
-            chartCategories = new Chart(document.getElementById('chart-categories').getContext('2d'), { 
-                type: 'bar', plugins: [ChartDataLabels], 
-                data: { labels: ['Entrées', 'Plats', 'Desserts', 'Pain'], datasets: [{ data: [0,0,0,0], backgroundColor: ['#3b82f6', '#ffb703', '#9b5de5', '#e63946'], barThickness: 28 }] }, 
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (val) => `${parseFloat(val).toFixed(0)} %`, font: { weight: 'bold' } } } } 
-            });
-
             loadEtablissementsDropdown(); 
         });
 
@@ -956,13 +952,6 @@
 
             runGranularExtraction(filteredScans);
 
-            let statPctEntree = totalLastNourritureG > 0 ? ((lastAlimG * 0.3) / totalLastNourritureG) * 100 : 0;
-            let statPctPlat = totalLastNourritureG > 0 ? ((lastAlimG * 0.7) / totalLastNourritureG) * 100 : 0;
-            let statPctFruits = totalLastNourritureG > 0 ? (lastFruitsG / totalLastNourritureG) * 100 : 0;
-            let statPctPain = totalLastNourritureG > 0 ? (lastPainG / totalLastNourritureG) * 100 : 0;
-            chartCategories.data.datasets[0].data = [statPctEntree.toFixed(1), statPctPlat.toFixed(1), statPctFruits.toFixed(1), statPctPain.toFixed(1)];
-            chartCategories.update();
-
             cacheSacsHistory = { labels: sh.labels, datesRaw: sh.datesRaw, alimentaire: sh.alimentaire, fruits: sh.fruits, pain: sh.pain, emballages: sh.emballages, serviettes: sh.serviettes };
             updateHistoryMode('day');
 
@@ -1021,8 +1010,9 @@
         }
 
         function runGranularExtraction(rawGaspillage) {
-            const grid = document.getElementById('palmares-badges-grid');
-            if (!grid) return;
+            const gridAdhesion = document.getElementById('palmares-adhesion-grid');
+            const gridRejets = document.getElementById('palmares-rejets-grid');
+            if (!gridAdhesion || !gridRejets) return;
 
             const scansValides = (rawGaspillage || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
@@ -1069,25 +1059,42 @@
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            palmaresFinalList.sort((a, b) => b.tauxMange - a.tauxMange);
+            // 1. Liste Adhésion (du plus haut au plus bas taux mangé)
+            let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
+            // 2. Liste Rejets (du plus bas au plus haut taux mangé = plus rejetés en premier)
+            let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
 
-            grid.innerHTML = "";
-            palmaresFinalList.forEach(item => {
-                let badgeColor = "#10b981", tagColor = "#dcfce7", tagTextColor = "#166534", tagText = "🟢 Excellent";
-                if (item.tauxMange >= 75 && item.tauxMange < 90) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
-                else if (item.tauxMange >= 50 && item.tauxMange < 75) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Fragile"; }
-                else if (item.tauxMange < 50) { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; }
+            function renderCards(list, container, isRejet = false) {
+                container.innerHTML = "";
+                list.forEach(item => {
+                    let badgeColor = "#10b981", tagColor = "#dcfce7", tagTextColor = "#166534", tagText = "🟢 Excellent";
+                    
+                    if (!isRejet) {
+                        if (item.tauxMange >= 75 && item.tauxMange < 90) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
+                        else if (item.tauxMange >= 50 && item.tauxMange < 75) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Fragile"; }
+                        else if (item.tauxMange < 50) { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; }
+                    } else {
+                        let rejetPct = 100 - item.tauxMange;
+                        if (rejetPct <= 10) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Faible rejet"; }
+                        else if (rejetPct <= 25) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
+                        else if (rejetPct <= 50) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; }
+                        else { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; }
+                    }
 
-                const card = document.createElement('div');
-                card.className = "food-badge-card";
-                card.innerHTML = `
-                    <div class="food-icon-box">${item.emoji}</div>
-                    <div class="food-percent-badge" style="background: ${badgeColor};">${item.tauxMange}%</div>
-                    <div class="food-name-label">${item.label}</div>
-                    <span class="food-status-tag" style="background: ${tagColor}; color: ${tagTextColor};">${tagText}</span>
-                `;
-                grid.appendChild(card);
-            });
+                    const card = document.createElement('div');
+                    card.className = "food-badge-card";
+                    card.innerHTML = `
+                        <div class="food-icon-box">${item.emoji}</div>
+                        <div class="food-percent-badge" style="background: ${badgeColor};">${isRejet ? (100 - item.tauxMange) + '%' : item.tauxMange + '%'}</div>
+                        <div class="food-name-label">${item.label}</div>
+                        <span class="food-status-tag" style="background: ${tagColor}; color: ${tagTextColor};">${tagText}</span>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            renderCards(adhesionList, gridAdhesion, false);
+            renderCards(rejetsList, gridRejets, true);
         }
 
         function adjustWeight(id, value) {
@@ -1330,7 +1337,6 @@
             document.getElementById('rep-kpi-money').innerText = "0.00 €";
 
             chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update();
-            chartCategories.data.datasets[0].data = [0,0,0,0]; chartCategories.update();
             
             document.getElementById('rep-stat-crudites').innerText = "-- %";
             document.getElementById('rep-stat-poisson').innerText = "-- %";
@@ -1349,8 +1355,11 @@
             const reportAiSynthesis = document.getElementById('report-ai-synthesis');
             if (reportAiSynthesis) reportAiSynthesis.innerText = "Aucune donnée de service enregistrée pour cet établissement. Effectuez une pesée ou un scan pour activer l'analyse IA de conformité.";
 
-            const grid = document.getElementById('palmares-badges-grid'); 
-            if (grid) grid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
+            const gridAdhesion = document.getElementById('palmares-adhesion-grid'); 
+            if (gridAdhesion) gridAdhesion.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
+
+            const gridRejets = document.getElementById('palmares-rejets-grid'); 
+            if (gridRejets) gridRejets.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
             
             const historyGrid = document.getElementById('history-main-waste-grid'); 
             if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
