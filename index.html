@@ -1097,11 +1097,24 @@
         }
 
         function loadEtablissementsDropdown() {
-            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getEtablissements`).then(res => res.json()).then(schools => {
-                const select = document.getElementById('select-etablissement'); select.innerHTML = ""; 
-                schools.forEach(school => { const opt = document.createElement('option'); opt.value = school; opt.innerText = school; select.appendChild(opt); });
-                select.value = localStorage.getItem('schoolActuelle') || schools[0]; changeEtablissement();
-            }).catch(() => clearDashboardToZero());
+            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getEtablissements`)
+                .then(res => res.json())
+                .then(schools => {
+                    const select = document.getElementById('select-etablissement'); 
+                    select.innerHTML = ""; 
+                    schools.forEach(school => { 
+                        const opt = document.createElement('option'); 
+                        opt.value = school; 
+                        opt.innerText = school; 
+                        select.appendChild(opt); 
+                    });
+                    select.value = localStorage.getItem('schoolActuelle') || schools[0]; 
+                    changeEtablissement();
+                })
+                .catch(err => {
+                    console.error("Erreur de chargement des établissements :", err);
+                    clearDashboardToZero();
+                });
         }
 
         function changeEtablissement() {
