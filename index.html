@@ -178,13 +178,22 @@
         .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #475569; }
         .input-date { padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 10.5px; background: rgba(255,255,255,0.9); }
 
-        .kpi-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
+        /* NOUVELLE STRUCTURE HAUTE : 2 COLONNES ÉQUILIBRÉES */
+        .dashboard-top-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: stretch;
         }
+        .kpi-grid-2x2 { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            grid-template-rows: repeat(2, 1fr); 
+            gap: 8px; 
+        }
+
         .kpi-card { 
-            background: rgba(255, 255, 255, 0.78) !important; 
+            background: rgba(255, 255, 255, 0.82) !important; 
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-radius: 8px; 
@@ -194,7 +203,7 @@
             justify-content: space-between; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
             border: 1px solid rgba(255, 255, 255, 0.6);
-            min-height: 52px;
+            height: 100%;
         }
         .kpi-blue { border-top: 4px solid #3b82f6; }
         .kpi-green { border-top: 4px solid #10b981; }
@@ -202,26 +211,21 @@
         .kpi-red { border-top: 4px solid #ef4444; }
         
         .kpi-left { text-align: left; display: flex; flex-direction: column; justify-content: center; }
-        .kpi-val { font-size: 16px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
-        .kpi-lbl { font-size: 10px; font-weight: 700; color: #1e293b; }
-        .kpi-right { text-align: right; max-width: 105px; font-size: 9px; color: #334155; line-height: 1.2; font-style: italic; font-weight: 700; }
+        .kpi-val { font-size: 15px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
+        .kpi-lbl { font-size: 9.5px; font-weight: 700; color: #1e293b; }
+        .kpi-right { text-align: right; max-width: 95px; font-size: 8.5px; color: #334155; line-height: 1.2; font-style: italic; font-weight: 700; }
         
-        .dashboard-row { 
-            display: grid; 
-            grid-template-columns: 1fr; 
-            gap: 10px; 
-        }
         .dashboard-col { 
-            background: rgba(255, 255, 255, 0.82) !important; 
+            background: rgba(255, 255, 255, 0.85) !important; 
             backdrop-filter: blur(10px); 
             border-radius: 8px; 
             padding: 12px; 
             border: 1px solid rgba(255,255,255,0.6); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
         }
-        .dashboard-col h3 { font-size: 12.5px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
+        .dashboard-col h3 { font-size: 12.5px; color: #1f2937; margin-bottom: 6px; font-weight: 800; }
         
-        .chart-container { position: relative; height: 160px; width: 100%; }
+        .chart-container { position: relative; height: 135px; width: 100%; }
 
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
             background: rgba(255, 255, 255, 0.85) !important;
@@ -387,18 +391,21 @@
                         </div>
                     </div>
 
-                    <div class="kpi-grid">
-                        <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / nb convives</div></div>
-                        <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs</div></div>
-                        <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
-                        <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
-                    </div>
-                    
-                    <div class="dashboard-row">
-                        <div class="dashboard-col">
+                    <!-- NOUVELLE DISPOSITION EN 2 COLONNES : 4 KPIs (2x2) À GAUCHE & BIODÉCHETS À DROITE -->
+                    <div class="dashboard-top-split">
+                        <!-- Grille 2x2 des 4 KPIs -->
+                        <div class="kpi-grid-2x2">
+                            <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / nb convives</div></div>
+                            <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs</div></div>
+                            <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
+                            <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
+                        </div>
+
+                        <!-- Bloc Répartition des biodéchets (même hauteur) -->
+                        <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
                             <h3>♻️ Répartition des biodéchets</h3>
-                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px;" id="biodiff-total">Total : 0 g</div>
-                            <div class="chart-container" style="height: 145px; display: flex; align-items: center; justify-content: center;">
+                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
+                            <div class="chart-container">
                                 <canvas id="chart-timeline"></canvas>
                             </div>
                         </div>
@@ -1059,9 +1066,7 @@
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            // 1. Liste Adhésion (du plus haut au plus bas taux mangé)
             let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
-            // 2. Liste Rejets (du plus bas au plus haut taux mangé = plus rejetés en premier)
             let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
 
             function renderCards(list, container, isRejet = false) {
