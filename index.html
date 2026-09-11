@@ -408,19 +408,19 @@
                         </div>
                     </div>
                     
-                    <!-- ZONE 1 : BILAN DU JOUR (Fonds distincts, seuils >80% & >20%) -->
+                    <!-- ZONE 1 : BILAN DU JOUR (Sans filtre strict de pourcentage, tous les plats du jour s'affichent) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 6px;">🟢 Adhésion du Jour (&gt; 80%)</h3>
+                            <h3 style="color: #065f46; margin-bottom: 6px;">🟢 Adhésion du Jour (Tous les plats scannés)</h3>
                             <div id="day-adhesion-grid" class="palmares-visual-grid"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 6px;">🔴 Rejets du Jour (&gt; 20%)</h3>
+                            <h3 style="color: #991b1b; margin-bottom: 6px;">🔴 Rejets du Jour (Tous les plats scannés)</h3>
                             <div id="day-rejets-grid" class="palmares-visual-grid"></div>
                         </div>
                     </div>
 
-                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE -->
+                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE (Filtré >80% adhésion et >20% rejets) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(240, 253, 244, 0.9) !important;">
                             <h3 style="color: #047857; margin-bottom: 6px;">📊 Adhésion Période (&gt; 80%)</h3>
@@ -1080,11 +1080,16 @@
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            // Adhésion : > 80%
-            let adhesionList = palmaresFinalList.filter(item => item.tauxMange > 80).sort((a, b) => b.tauxMange - a.tauxMange);
-            
-            // Rejets : taux de rejet > 20% (soit taux mangé < 80%)
-            let rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) > 20).sort((a, b) => a.tauxMange - b.tauxMange);
+            // Pour le jour : on affiche TOUS les aliments scannés sans filtre strict de pourcentage
+            // Pour la période globale : on applique les filtres (> 80% adhésion, > 20% rejets)
+            let adhesionList, rejetsList;
+            if (targetType === 'day') {
+                adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
+                rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
+            } else {
+                adhesionList = palmaresFinalList.filter(item => item.tauxMange > 80).sort((a, b) => b.tauxMange - a.tauxMange);
+                rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) > 20).sort((a, b) => a.tauxMange - b.tauxMange);
+            }
 
             function renderCards(list, container, isRejet = false) {
                 container.innerHTML = "";
@@ -1097,10 +1102,13 @@
                     
                     if (!isRejet) {
                         if (item.tauxMange >= 90) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Excellent"; }
-                        else { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
+                        else if (item.tauxMange >= 80) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Bon"; }
+                        else if (item.tauxMange >= 50) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
+                        else { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; }
                     } else {
                         let rejetPct = 100 - item.tauxMange;
-                        if (rejetPct <= 25) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
+                        if (rejetPct <= 10) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Faible"; }
+                        else if (rejetPct <= 25) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
                         else if (rejetPct <= 50) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; }
                         else { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; }
                     }
