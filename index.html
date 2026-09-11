@@ -376,7 +376,7 @@
                 <div class="dashboard-wrapper">
                     <div class="filter-period-bar">
                         <div class="filter-btn-group">
-                            <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
+                            <button type="button" class="btn-period" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
                             <button type="button" class="btn-period" onclick="setQuickPeriod('3months', this)">3 derniers mois</button>
                             <button type="button" class="btn-period" onclick="setQuickPeriod('month', this)">Ce mois-ci</button>
                             <button type="button" class="btn-period" onclick="setQuickPeriod('7days', this)">7 derniers jours</button>
@@ -386,7 +386,7 @@
                             <input type="date" id="filter-start-date" class="input-date">
                             <span>Au :</span>
                             <input type="date" id="filter-end-date" class="input-date">
-                            <button type="button" class="btn-period" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 3px 8px;">Filtrer</button>
+                            <button type="button" class="btn-period active" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 3px 8px;">Filtrer</button>
                         </div>
                     </div>
 
@@ -408,7 +408,7 @@
                         </div>
                     </div>
                     
-                    <!-- ZONE 1 : BILAN DU JOUR (Sans filtre strict de pourcentage, tous les plats du jour s'affichent) -->
+                    <!-- ZONE 1 : BILAN DU JOUR -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 6px;">🟢 Adhésion du Jour (Tous les plats scannés)</h3>
@@ -420,7 +420,7 @@
                         </div>
                     </div>
 
-                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE (Filtré >80% adhésion et >20% rejets) -->
+                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(240, 253, 244, 0.9) !important;">
                             <h3 style="color: #047857; margin-bottom: 6px;">📊 Adhésion Période (&gt; 80%)</h3>
@@ -781,7 +781,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT -->
+    <!-- CODE CENTRAL JAVASCRIPT AVEC DATE DU JOUR AUTOMATIQUE -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -840,6 +840,13 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
+            // Initialisation automatique des champs de date sur la date du jour (YYYY-MM-DD)
+            const todayIso = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('filter-start-date');
+            const endInput = document.getElementById('filter-end-date');
+            if (startInput) startInput.value = todayIso;
+            if (endInput) endInput.value = todayIso;
+
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 plugins: [ChartDataLabels], 
@@ -928,13 +935,22 @@
             }
 
             let filteredScans = [];
-            const todayStr = new Date().toISOString().split('T')[0];
             let todayScans = [];
+
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const todayFrenchStr = `${day}/${month}/${year}`;
+            const todayIsoStr = now.toISOString().split('T')[0];
 
             if (globalRawData.rawGaspillage) {
                 filteredScans = globalRawData.rawGaspillage.filter(s => !s.dateRaw || (s.dateRaw >= startDate && s.dateRaw <= endDate));
-                // Filtrage strict par la date de la colonne A (dateRaw) pour le jour actuel
-                todayScans = globalRawData.rawGaspillage.filter(s => s.dateRaw === todayStr);
+                
+                todayScans = globalRawData.rawGaspillage.filter(s => {
+                    if (!s.dateRaw) return false;
+                    return s.dateRaw.includes(todayFrenchStr) || s.dateRaw.includes(todayIsoStr);
+                });
             }
 
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
@@ -960,7 +976,6 @@
             document.getElementById('rep-kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('rep-kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
 
-            // Extraction pour la période globale et pour le jour (colonne A)
             runGranularExtraction(filteredScans, 'global');
             runGranularExtraction(todayScans, 'day');
 
@@ -1080,8 +1095,6 @@
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            // Pour le jour : on affiche TOUS les aliments scannés sans filtre strict de pourcentage
-            // Pour la période globale : on applique les filtres (> 80% adhésion, > 20% rejets)
             let adhesionList, rejetsList;
             if (targetType === 'day') {
                 adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
@@ -1354,7 +1367,7 @@
             .then(response => response.json()).then(data => {
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
-                setQuickPeriod('all', document.querySelector('.btn-period'));
+                applyCustomDateFilter(); // Applique le filtre sur la date du jour chargée automatiquement
             }).catch(() => clearDashboardToZero());
         }
 
