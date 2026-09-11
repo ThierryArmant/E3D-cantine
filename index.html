@@ -410,19 +410,33 @@
                         </div>
                     </div>
                     
-                    <!-- DEUX ZONES : TAUX D'ADHÉSION & TAUX DE REJETS -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="dashboard-col">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                                <h3>🟢 Taux d'adhésion (&gt; 70%)</h3>
+                    <!-- ZONE 1 : BILAN DU JOUR (Adhésion > 80% & Rejets > 20%) -->
+                    <div class="dashboard-col" style="border-left: 4px solid #10b981; background: rgba(240, 253, 244, 0.9) !important;">
+                        <h3 style="color: #065f46; margin-bottom: 8px;">📅 Bilan du Service du Jour (Adhésion &gt; 80% / Rejets &gt; 20%)</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <h4 style="font-size: 11px; color: #047857; margin-bottom: 4px; font-weight: 800; text-transform: uppercase;">🟢 Adhésion du jour (&gt; 80%)</h4>
+                                <div id="day-adhesion-grid" class="palmares-visual-grid"></div>
                             </div>
-                            <div id="palmares-adhesion-grid" class="palmares-visual-grid"></div>
+                            <div>
+                                <h4 style="font-size: 11px; color: #991b1b; margin-bottom: 4px; font-weight: 800; text-transform: uppercase;">🔴 Rejets du jour (&gt; 20%)</h4>
+                                <div id="day-rejets-grid" class="palmares-visual-grid"></div>
+                            </div>
                         </div>
-                        <div class="dashboard-col">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap;">
-                                <h3>🔴 Taux de rejets (&gt; 20%)</h3>
+                    </div>
+
+                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE (Adhésion > 80% & Rejets > 20%) -->
+                    <div class="dashboard-col">
+                        <h3 style="margin-bottom: 8px;">📊 Bilan Global / Période filtrée (Adhésion &gt; 80% / Rejets &gt; 20%)</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <h4 style="font-size: 11px; color: #047857; margin-bottom: 4px; font-weight: 800; text-transform: uppercase;">🟢 Adhésion Période (&gt; 80%)</h4>
+                                <div id="palmares-adhesion-grid" class="palmares-visual-grid"></div>
                             </div>
-                            <div id="palmares-rejets-grid" class="palmares-visual-grid"></div>
+                            <div>
+                                <h4 style="font-size: 11px; color: #991b1b; margin-bottom: 4px; font-weight: 800; text-transform: uppercase;">🔴 Rejets Période (&gt; 20%)</h4>
+                                <div id="palmares-rejets-grid" class="palmares-visual-grid"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -827,17 +841,10 @@
         }
 
         const FOOD_ICONS_MAP = {
-            "Tomates": "🍅", "Carottes râpées": "🥕", "Salade verte": "🥗", "Céleri rémoulade": "🥗", "Œuf mayonnaise": "🥚",
-            "Saucisson": "🥖", "Jambon": "🥓", "Jambon de pays": "🥓", "Jambon blanc": "🥓", "Pâté / Terrine": "🥩", "Quiche / Tarte": "🥧",
-            "Pizza": "🍕", "Friand": "🥟", "Gardianne": "🍲", "Couscous": "🍢", "Paella": "🥘",
-            "Bœuf bourguignon": "🍲", "Blanquette de veau": "🍲", "Poulet rôti": "🍗", "Nuggets": "🍗",
-            "Escalope de dinde": "🍗", "Steak haché": "🥩", "Rôti / Sauté": "🥩", "Rôti de porc/bœuf": "🥩", "Sauté de porc": "🥩",
-            "Boulettes de bœuf": "🧆", "Poisson": "🐟", "Poisson pané": "🐟", "Filet de colin": "🐟", "Galette de céréales": "🥞",
-            "Lasagnes végétariennes": "🍝", "Frites": "🍟", "Pâtes": "🍝", "Riz": "🍚", "Semoule": "🥣",
-            "Purée": "🥔", "Haricots verts": "🥦", "Ratatouille": "🍆", "Brocolis": "🥦", "Petits pois / Carottes": "🥕",
-            "Courgettes": "🥒", "Melon": "🍈", "Pastèque": "🍉", "Pomme / Banane": "🍎", "Fruit de saison": "🍓",
-            "Compote": "🍎", "Yaourt": "🥛", "Fromage": "🧀", "Dessert chocolat": "🍫", "Gâteau au chocolat": "🍫", "Dessert ramequin": "🍮",
-            "Éclair": "🥖", "Tarte aux fruits": "🥧", "Pain": "🥖", "Entrée du jour": "🥗", "Plat du jour": "🍽️", "Dessert du jour": "🍰"
+            "Salade verte": "🥗", "Œuf mayonnaise": "🥚", "Saucisson": "🥖", "Tomates": "🍅", "Carottes râpées": "🥕", "Céleri rémoulade": "🥗",
+            "Escalope de dinde": "🍗", "Steak haché": "🥩", "Poulet rôti": "🍗", "Poisson": "🐟", "Poisson pané": "🐟",
+            "Semoule": "🥣", "Courgettes": "🥒", "Frites": "🍟", "Riz": "🍚", "Pâtes": "🍝", "Haricots verts": "🥦",
+            "Pomme / Banane": "🍎", "Portion Fromage": "🧀", "Liégeois / Crème dessert": "🍮", "Yaourt": "🥛", "Compote": "🍎"
         };
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -929,8 +936,12 @@
             }
 
             let filteredScans = [];
+            let todayScans = [];
+            const todayStr = new Date().toISOString().split('T')[0];
+
             if (globalRawData.rawGaspillage) {
                 filteredScans = globalRawData.rawGaspillage.filter(s => !s.dateRaw || (s.dateRaw >= startDate && s.dateRaw <= endDate));
+                todayScans = globalRawData.rawGaspillage.filter(s => s.dateRaw === todayStr || (!s.dateRaw));
             }
 
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
@@ -956,7 +967,9 @@
             document.getElementById('rep-kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('rep-kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
 
-            runGranularExtraction(filteredScans);
+            // Extraction pour le Global/Période et pour le Jour
+            runGranularExtraction(filteredScans, 'global');
+            runGranularExtraction(todayScans.length > 0 ? todayScans : filteredScans, 'day');
 
             cacheSacsHistory = { labels: sh.labels, datesRaw: sh.datesRaw, alimentaire: sh.alimentaire, fruits: sh.fruits, pain: sh.pain, emballages: sh.emballages, serviettes: sh.serviettes };
             updateHistoryMode('day');
@@ -1015,20 +1028,21 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        function runGranularExtraction(rawGaspillage) {
-            const gridAdhesion = document.getElementById('palmares-adhesion-grid');
-            const gridRejets = document.getElementById('palmares-rejets-grid');
+        function runGranularExtraction(rawGaspillage, targetType) {
+            const gridAdhesion = document.getElementById(targetType === 'day' ? 'day-adhesion-grid' : 'palmares-adhesion-grid');
+            const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
             if (!gridAdhesion || !gridRejets) return;
 
             const scansValides = (rawGaspillage || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
-                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre");
+                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau");
             });
 
             const referenceAliments = [
-                "Tomates", "Carottes râpées", "Salade verte", "Céleri rémoulade", 
-                "Poulet rôti", "Steak haché", "Poisson", "Frites", 
-                "Haricots verts", "Riz", "Pomme / Banane", "Yaourt", "Pain"
+                "Salade verte", "Œuf mayonnaise", "Saucisson", "Tomates", "Carottes râpées", "Céleri rémoulade",
+                "Escalope de dinde", "Steak haché", "Poulet rôti", "Poisson", "Poisson pané",
+                "Semoule", "Courgettes", "Frites", "Riz", "Pâtes", "Haricots verts",
+                "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert", "Yaourt", "Compote", "Pain"
             ];
 
             let foodStats = {};
@@ -1065,10 +1079,10 @@
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            // 1. Filtrage Adhésion : > 70%
-            let adhesionList = palmaresFinalList.filter(item => item.tauxMange > 70).sort((a, b) => b.tauxMange - a.tauxMange);
+            // Adhésion : > 80%
+            let adhesionList = palmaresFinalList.filter(item => item.tauxMange > 80).sort((a, b) => b.tauxMange - a.tauxMange);
             
-            // 2. Filtrage Rejets : taux de rejet > 20% (soit taux mangé < 80%)
+            // Rejets : taux de rejet > 20% (soit taux mangé < 80%)
             let rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) > 20).sort((a, b) => a.tauxMange - b.tauxMange);
 
             function renderCards(list, container, isRejet = false) {
@@ -1081,13 +1095,11 @@
                     let badgeColor = "#10b981", tagColor = "#dcfce7", tagTextColor = "#166534", tagText = "🟢 Excellent";
                     
                     if (!isRejet) {
-                        if (item.tauxMange >= 75 && item.tauxMange < 90) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
-                        else if (item.tauxMange >= 50 && item.tauxMange < 75) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Fragile"; }
-                        else if (item.tauxMange < 50) { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; }
+                        if (item.tauxMange >= 90) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Excellent"; }
+                        else { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
                     } else {
                         let rejetPct = 100 - item.tauxMange;
-                        if (rejetPct <= 10) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Faible rejet"; }
-                        else if (rejetPct <= 25) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
+                        if (rejetPct <= 25) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
                         else if (rejetPct <= 50) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; }
                         else { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; }
                     }
@@ -1371,6 +1383,12 @@
 
             const gridRejets = document.getElementById('palmares-rejets-grid'); 
             if (gridRejets) gridRejets.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
+
+            const gridDayAdhesion = document.getElementById('day-adhesion-grid');
+            if (gridDayAdhesion) gridDayAdhesion.innerHTML = "<p style='color:#64748b; font-size:11px; text-align:center; padding:10px;'>Aucune donnée pour ce jour.</p>";
+
+            const gridDayRejets = document.getElementById('day-rejets-grid');
+            if (gridDayRejets) gridDayRejets.innerHTML = "<p style='color:#64748b; font-size:11px; text-align:center; padding:10px;'>Aucune donnée pour ce jour.</p>";
             
             const historyGrid = document.getElementById('history-main-waste-grid'); 
             if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
