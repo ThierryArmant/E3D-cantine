@@ -781,7 +781,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT AVEC DATE DU JOUR AUTOMATIQUE -->
+    <!-- CODE CENTRAL JAVASCRIPT AVEC NORMALISATION ROBUSTE DES DATES -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -839,8 +839,23 @@
             "Pomme / Banane": "🍎", "Portion Fromage": "🧀", "Liégeois / Crème dessert": "🍮", "Yaourt": "🥛", "Compote": "🍎", "Pain": "🥖"
         };
 
+        // Fonction robuste pour convertir n'importe quel format de date (DD/MM/YYYY ou YYYY-MM-DD) en YYYY-MM-DD
+        function normalizeDate(raw) {
+            if (!raw) return "";
+            let str = String(raw).trim();
+            let matchFR = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+            if (matchFR) {
+                return `${matchFR[3]}-${matchFR[2]}-${matchFR[1]}`;
+            }
+            let matchISO = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (matchISO) {
+                return `${matchISO[1]}-${matchISO[2]}-${matchISO[3]}`;
+            }
+            return str.substring(0, 10);
+        }
+
         window.addEventListener('DOMContentLoaded', () => { 
-            // Initialisation automatique des champs de date sur la date du jour (YYYY-MM-DD)
+            // Initialisation automatique de la date du jour (YYYY-MM-DD) sur les deux filtres
             const todayIso = new Date().toISOString().split('T')[0];
             const startInput = document.getElementById('filter-start-date');
             const endInput = document.getElementById('filter-end-date');
@@ -926,7 +941,7 @@
             let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
-                let d = sh.datesRaw[i];
+                let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
                     let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i];
                     totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
@@ -936,20 +951,18 @@
 
             let filteredScans = [];
             let todayScans = [];
-
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const todayFrenchStr = `${day}/${month}/${year}`;
-            const todayIsoStr = now.toISOString().split('T')[0];
+            const todayIsoStr = new Date().toISOString().split('T')[0];
 
             if (globalRawData.rawGaspillage) {
-                filteredScans = globalRawData.rawGaspillage.filter(s => !s.dateRaw || (s.dateRaw >= startDate && s.dateRaw <= endDate));
+                filteredScans = globalRawData.rawGaspillage.filter(s => {
+                    let iso = normalizeDate(s.dateRaw);
+                    if (!iso) return true;
+                    return iso >= startDate && iso <= endDate;
+                });
                 
                 todayScans = globalRawData.rawGaspillage.filter(s => {
-                    if (!s.dateRaw) return false;
-                    return s.dateRaw.includes(todayFrenchStr) || s.dateRaw.includes(todayIsoStr);
+                    let iso = normalizeDate(s.dateRaw);
+                    return iso === todayIsoStr;
                 });
             }
 
@@ -995,7 +1008,7 @@
             let mapAccumulator = {};
 
             for (let i = 0; i < cacheSacsHistory.labels.length; i++) {
-                let isoDate = cacheSacsHistory.datesRaw[i]; 
+                let isoDate = normalizeDate(cacheSacsHistory.datesRaw[i]); 
                 let labelDate = cacheSacsHistory.labels[i];
                 if (!isoDate) continue;
                 let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
@@ -1367,7 +1380,7 @@
             .then(response => response.json()).then(data => {
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
-                applyCustomDateFilter(); // Applique le filtre sur la date du jour chargée automatiquement
+                applyCustomDateFilter(); 
             }).catch(() => clearDashboardToZero());
         }
 
