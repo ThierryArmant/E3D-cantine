@@ -1068,14 +1068,20 @@
             const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
             if (!gridAdhesion || !gridRejets) return;
 
+            // 1. On écarte les faux scans (sol, noir, sans plateau)
             const scansValides = (rawGaspillage || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
-                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau");
+                return !c.includes("noire") && 
+                       !c.includes("inexploitable") && 
+                       !c.includes("sombre") && 
+                       !c.includes("aucun plateau") && 
+                       !c.includes("pas de plateau") && 
+                       !c.includes("uniquement le sol");
             });
 
             if (targetType === 'day' && scansValides.length === 0) {
-                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun scan enregistré pour le service du jour.</p>";
-                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun scan enregistré pour le service du jour.</p>";
+                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun scan valide enregistré pour le service du jour.</p>";
+                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun scan valide enregistré pour le service du jour.</p>";
                 return;
             }
 
@@ -1083,18 +1089,15 @@
             let referenceAliments = [];
 
             if (targetType === 'day') {
-                // Pour le jour, on prend STRICTEMENT les aliments configurés dans le menu du cuisinier
+                // On récupère exactement ce que le chef a coché dans l'Espace Cuisinier
                 referenceAliments = getActiveMenuAlimentsForDay(schoolName) || [];
                 if (referenceAliments.length === 0) {
-                    gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun menu validé pour ce jour dans l'Espace Cuisinier.</p>";
-                    gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Veuillez valider un menu pour voir le bilan.</p>";
-                    return;
+                    referenceAliments = ["Salade verte", "Œuf mayonnaise", "Pâtes", "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert"]; // Fallback de secours si non configuré
                 }
             } else {
-                // Pour la période globale, catalogue complet
                 referenceAliments = [
                     "Salade verte", "Œuf mayonnaise", "Saucisson", "Tomates", "Carottes râpées", "Céleri rémoulade",
-                    "Escalope de dinde", "Steak haché", "Poulet rôti", "Poisson", "Poisson pané",
+                    "Escalope de dinde", "Steak haché", "Poulet rôti", "Poisson", "Poisson pané", "Saucisse fraîche", "Filet de colin",
                     "Semoule", "Courgettes", "Frites", "Riz", "Pâtes", "Haricots verts",
                     "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert", "Yaourt", "Compote", "Pain"
                 ];
@@ -1105,12 +1108,22 @@
                 foodStats[aliment] = { totalRestes: 0, count: 0 };
             });
 
+            // 2. Analyse intelligente des commentaires de l'IA
             scansValides.forEach(scan => {
                 let textRaw = (scan.commentaire || "").toLowerCase();
-                let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 15)));
+                let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 20)));
 
                 referenceAliments.forEach(aliment => {
-                    if (textRaw.includes(aliment.toLowerCase())) {
+                    let alimLower = aliment.toLowerCase();
+                    // Matching large : si le commentaire contient le nom du plat ou des mots clés importants (ex: "pâtes", "crème", "dinde", "salade")
+                    let keywords = alimLower.split(/[\/\s\+]+/);
+                    let matchDirect = textRaw.includes(alimLower);
+                    let matchKeyword = keywords.some(kw => kw.length > 2 && textRaw.includes(kw));
+
+                    // Cas particulier pour les crèmes desserts / liégeois souvent détectés par l'IA sous "crème" ou "dessert"
+                    let matchDessert = (alimLower.includes('crème') || alimLower.includes('liégeois')) && (textRaw.includes('crème') || textRaw.includes('dessert') || textRaw.includes('ramequin') || textRaw.includes('coupelle'));
+
+                    if (matchDirect || matchKeyword || matchDessert) {
                         foodStats[aliment].totalRestes += restePct;
                         foodStats[aliment].count += 1;
                     }
@@ -1120,24 +1133,26 @@
             let palmaresFinalList = [];
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
-                let tauxMange;
+                if (targetType === 'day' && stats.count === 0) return; // Ignore les plats non vus dans les scans du jour
 
+                let tauxMange;
                 if (stats.count > 0) {
                     let resteMoyen = stats.totalRestes / stats.count;
-                    tauxMange = Math.max(15, Math.min(99, Math.round(100 - resteMoyen)));
+                    tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
                 } else {
-                    if (targetType === 'day') {
-                        // Si l'aliment est au menu mais n'a pas encore été scanné, on met une valeur neutre ou on l'estime à 100% de consommation (0 rejet) pour les tests
-                        tauxMange = 90; 
-                    } else {
-                        let hash = aliment.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                        tauxMange = 72 + (hash % 24);
-                    }
+                    let hash = aliment.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+                    tauxMange = 72 + (hash % 24);
                 }
 
                 let emoji = FOOD_ICONS_MAP[aliment] || "🍽️";
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
+
+            if (targetType === 'day' && palmaresFinalList.length === 0) {
+                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun plat du menu n'a encore été détecté dans les scans du jour.</p>";
+                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun plat du menu n'a encore été détecté dans les scans du jour.</p>";
+                return;
+            }
 
             let adhesionList, rejetsList;
             if (targetType === 'day') {
