@@ -420,14 +420,14 @@
                         </div>
                     </div>
 
-                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE -->
+                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE (Filtres stricts : Top Adhésion > 85% & Top Rejets > 20%) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(240, 253, 244, 0.9) !important;">
-                            <h3 style="color: #047857; margin-bottom: 6px;">📊 Adhésion Période (&gt; 80%)</h3>
+                            <h3 style="color: #047857; margin-bottom: 6px;">📊 Top Adhésion Période (&gt; 85%)</h3>
                             <div id="palmares-adhesion-grid" class="palmares-visual-grid"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(255, 245, 245, 0.9) !important;">
-                            <h3 style="color: #b91c1c; margin-bottom: 6px;">📊 Rejets Période (&gt; 20%)</h3>
+                            <h3 style="color: #b91c1c; margin-bottom: 6px;">📊 Top Rejets Période (&gt; 20%)</h3>
                             <div id="palmares-rejets-grid" class="palmares-visual-grid"></div>
                         </div>
                     </div>
@@ -781,7 +781,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT AVEC SÉCURITÉ CATALOGUE COMPLET SI AUCUN MENU N'EST VALIDÉ -->
+    <!-- CODE CENTRAL JAVASCRIPT AVEC FILTRES DE TOP / FLOP STRICTS -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -1076,7 +1076,6 @@
 
             if (targetType === 'day') {
                 referenceAliments = getActiveMenuAlimentsForDay(schoolName) || [];
-                // SÉCURITÉ DE SECOURS : Si aucun menu n'est enregistré, on prend tout le catalogue pour afficher les scans immédiatement
                 if (referenceAliments.length === 0) {
                     referenceAliments = [
                         "Salade verte", "Œuf mayonnaise", "Saucisson", "Tomates", "Carottes râpées", "Céleri rémoulade",
@@ -1120,11 +1119,7 @@
             let palmaresFinalList = [];
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
-                
-                // Pour le jour : on n'affiche que les plats qui ont au moins 1 scan réel dans la journée
-                if (targetType === 'day' && stats.count === 0) {
-                    return; 
-                }
+                if (targetType === 'day' && stats.count === 0) return; 
 
                 let tauxMange;
                 if (stats.count > 0) {
@@ -1140,18 +1135,26 @@
             });
 
             if (targetType === 'day' && palmaresFinalList.length === 0) {
-                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
-                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
+                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>En attente de scans pour ce menu...</p>";
+                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>En attente de scans pour ce menu...</p>";
                 return;
             }
 
-            let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
-            let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
+            // FILTRES STRICTS DE MISE EN LUMIÈRE ("Ce qui sort du lot")
+            let adhesionList, rejetsList;
+            if (targetType === 'day') {
+                adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
+                rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
+            } else {
+                // Pour la période : TOP adhésion (> 85%) et TOP rejets (> 20% de rejet, triés du plus fort au plus faible)
+                adhesionList = palmaresFinalList.filter(item => item.tauxMange >= 85).sort((a, b) => b.tauxMange - a.tauxMange);
+                rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) >= 20).sort((a, b) => (100 - b.tauxMange) - (100 - a.tauxMange));
+            }
 
             function renderCards(list, container, isRejet = false) {
                 container.innerHTML = "";
                 if (list.length === 0) {
-                    container.innerHTML = "<p style='color:#64748b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun aliment ne correspond à ce critère.</p>";
+                    container.innerHTML = "<p style='color:#64748b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun élément marquant pour ce critère.</p>";
                     return;
                 }
                 list.forEach(item => {
@@ -1159,15 +1162,12 @@
                     
                     if (!isRejet) {
                         if (item.tauxMange >= 90) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Excellent"; }
-                        else if (item.tauxMange >= 80) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Bon"; }
-                        else if (item.tauxMange >= 50) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Satisfaisant"; }
-                        else { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; }
+                        else if (item.tauxMange >= 85) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Bon"; }
                     } else {
                         let rejetPct = 100 - item.tauxMange;
-                        if (rejetPct <= 10) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Faible"; }
-                        else if (rejetPct <= 25) { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
-                        else if (rejetPct <= 50) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; }
-                        else { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; }
+                        if (rejetPct >= 40) { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; }
+                        else if (rejetPct >= 25) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; }
+                        else { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
                     }
 
                     const card = document.createElement('div');
@@ -1451,10 +1451,10 @@
             if (gridRejets) gridRejets.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
 
             const gridDayAdhesion = document.getElementById('day-adhesion-grid');
-            if (gridDayAdhesion) gridDayAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
+            if (gridDayAdhesion) gridDayAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>Aucun scan enregistré pour le service du jour.</p>";
 
             const gridDayRejets = document.getElementById('day-rejets-grid');
-            if (gridDayRejets) gridDayRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
+            if (gridDayRejets) gridDayRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>Aucun scan enregistré pour le service du jour.</p>";
             
             const historyGrid = document.getElementById('history-main-waste-grid'); 
             if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
