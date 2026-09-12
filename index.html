@@ -421,7 +421,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE (OPTIMISÉ PLEIN ÉCRAN & GROS BOUTON) -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
@@ -903,6 +903,14 @@
             });
 
             loadEtablissementsDropdown(); 
+
+            // 🔄 ACTUALISATION AUTOMATIQUE EN ARRIÈRE-PLAN TOUTES LES 30 SECONDES
+            setInterval(() => {
+                const schoolSelect = document.getElementById('select-etablissement');
+                if (schoolSelect && schoolSelect.value && schoolSelect.value !== "Chargement...") {
+                    loadLiveData();
+                }
+            }, 30000);
         });
 
         function setQuickPeriod(type, btnElem) {
@@ -1301,21 +1309,20 @@
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport') loadLiveData(); 
         }
 
+        // 🔄 FONCTION DE SYNCHRONISATION DU MENU ACTIF DEPUIS GOOGLE SHEETS
         function loadLiveData() {
             const school = document.getElementById('select-etablissement').value;
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
-                // MISE À JOUR FORCÉE DU MENU ACTIF DEPUIS LE GOOGLE SHEET
                 if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
                     localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
+                    loadMenuForSchool(school);
                 }
-                loadMenuForSchool(school); // Rafraîchit l'affichage visuel sur la page
-
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
                 applyCustomDateFilter(); 
             }).catch(() => clearDashboardToZero());
-        } 
+        }
 
         function adjustWeight(id, value) {
             const input = document.getElementById(id);
