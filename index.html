@@ -1305,10 +1305,12 @@
             const school = document.getElementById('select-etablissement').value;
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
+                // MISE À JOUR FORCÉE DU MENU ACTIF DEPUIS LE GOOGLE SHEET
                 if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
                     localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
-                    loadMenuForSchool(school);
                 }
+                loadMenuForSchool(school); // Rafraîchit l'affichage visuel sur la page
+
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
                 applyCustomDateFilter(); 
