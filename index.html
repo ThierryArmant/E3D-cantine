@@ -408,14 +408,14 @@
                         </div>
                     </div>
                     
-                    <!-- ZONE 1 : BILAN DU JOUR (Basé sur le menu validé du jour) -->
+                    <!-- ZONE 1 : BILAN DU JOUR -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 6px;">🟢 Adhésion du Menu du Jour</h3>
+                            <h3 style="color: #065f46; margin-bottom: 6px;">🟢 Adhésion du Menu du Jour (Scans réels)</h3>
                             <div id="day-adhesion-grid" class="palmares-visual-grid"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 6px;">🔴 Rejets du Menu du Jour</h3>
+                            <h3 style="color: #991b1b; margin-bottom: 6px;">🔴 Rejets du Menu du Jour (Scans réels)</h3>
                             <div id="day-rejets-grid" class="palmares-visual-grid"></div>
                         </div>
                     </div>
@@ -781,7 +781,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT AVEC SYNCHRONISATION DU MENU ACTIF DU JOUR -->
+    <!-- CODE CENTRAL JAVASCRIPT AVEC SÉCURITÉ CATALOGUE COMPLET SI AUCUN MENU N'EST VALIDÉ -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -849,7 +849,6 @@
             return str.substring(0, 10);
         }
 
-        // Récupère les aliments du menu validé du jour pour l'établissement actif
         function getActiveMenuAlimentsForDay(school) {
             let menuStr = localStorage.getItem(`menuActive-${school}`);
             if (!menuStr || menuStr === "Non configuré") return null;
@@ -962,11 +961,10 @@
 
             let filteredScans = [];
             let todayScans = [];
-            const todayIsoStr = new Date().toISOString().split('T')[0];
 
             if (globalRawData.rawGaspillage) {
                 let allDates = globalRawData.rawGaspillage.map(s => normalizeDate(s.dateRaw)).filter(d => d);
-                let latestDate = allDates.length > 0 ? allDates.sort().pop() : todayIsoStr;
+                let latestDate = allDates.length > 0 ? allDates.sort().pop() : new Date().toISOString().split('T')[0];
 
                 filteredScans = globalRawData.rawGaspillage.filter(s => {
                     let iso = normalizeDate(s.dateRaw);
@@ -1068,31 +1066,24 @@
             const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
             if (!gridAdhesion || !gridRejets) return;
 
-            // 1. On écarte les faux scans (sol, noir, sans plateau)
             const scansValides = (rawGaspillage || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
-                return !c.includes("noire") && 
-                       !c.includes("inexploitable") && 
-                       !c.includes("sombre") && 
-                       !c.includes("aucun plateau") && 
-                       !c.includes("pas de plateau") && 
-                       !c.includes("uniquement le sol");
+                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau") && !c.includes("uniquement le sol");
             });
-
-            if (targetType === 'day' && scansValides.length === 0) {
-                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun scan valide enregistré pour le service du jour.</p>";
-                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun scan valide enregistré pour le service du jour.</p>";
-                return;
-            }
 
             const schoolName = document.getElementById('select-etablissement').value;
             let referenceAliments = [];
 
             if (targetType === 'day') {
-                // On récupère exactement ce que le chef a coché dans l'Espace Cuisinier
                 referenceAliments = getActiveMenuAlimentsForDay(schoolName) || [];
+                // SÉCURITÉ DE SECOURS : Si aucun menu n'est enregistré, on prend tout le catalogue pour afficher les scans immédiatement
                 if (referenceAliments.length === 0) {
-                    referenceAliments = ["Salade verte", "Œuf mayonnaise", "Pâtes", "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert"]; // Fallback de secours si non configuré
+                    referenceAliments = [
+                        "Salade verte", "Œuf mayonnaise", "Saucisson", "Tomates", "Carottes râpées", "Céleri rémoulade",
+                        "Escalope de dinde", "Steak haché", "Poulet rôti", "Poisson", "Poisson pané", "Saucisse fraîche", "Filet de colin",
+                        "Semoule", "Courgettes", "Frites", "Riz", "Pâtes", "Haricots verts",
+                        "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert", "Yaourt", "Compote", "Pain"
+                    ];
                 }
             } else {
                 referenceAliments = [
@@ -1108,19 +1099,15 @@
                 foodStats[aliment] = { totalRestes: 0, count: 0 };
             });
 
-            // 2. Analyse intelligente des commentaires de l'IA
             scansValides.forEach(scan => {
                 let textRaw = (scan.commentaire || "").toLowerCase();
                 let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 20)));
 
                 referenceAliments.forEach(aliment => {
                     let alimLower = aliment.toLowerCase();
-                    // Matching large : si le commentaire contient le nom du plat ou des mots clés importants (ex: "pâtes", "crème", "dinde", "salade")
                     let keywords = alimLower.split(/[\/\s\+]+/);
                     let matchDirect = textRaw.includes(alimLower);
                     let matchKeyword = keywords.some(kw => kw.length > 2 && textRaw.includes(kw));
-
-                    // Cas particulier pour les crèmes desserts / liégeois souvent détectés par l'IA sous "crème" ou "dessert"
                     let matchDessert = (alimLower.includes('crème') || alimLower.includes('liégeois')) && (textRaw.includes('crème') || textRaw.includes('dessert') || textRaw.includes('ramequin') || textRaw.includes('coupelle'));
 
                     if (matchDirect || matchKeyword || matchDessert) {
@@ -1133,7 +1120,11 @@
             let palmaresFinalList = [];
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
-                if (targetType === 'day' && stats.count === 0) return; // Ignore les plats non vus dans les scans du jour
+                
+                // Pour le jour : on n'affiche que les plats qui ont au moins 1 scan réel dans la journée
+                if (targetType === 'day' && stats.count === 0) {
+                    return; 
+                }
 
                 let tauxMange;
                 if (stats.count > 0) {
@@ -1149,19 +1140,13 @@
             });
 
             if (targetType === 'day' && palmaresFinalList.length === 0) {
-                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun plat du menu n'a encore été détecté dans les scans du jour.</p>";
-                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun plat du menu n'a encore été détecté dans les scans du jour.</p>";
+                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
+                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
                 return;
             }
 
-            let adhesionList, rejetsList;
-            if (targetType === 'day') {
-                adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
-                rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
-            } else {
-                adhesionList = palmaresFinalList.filter(item => item.tauxMange > 80).sort((a, b) => b.tauxMange - a.tauxMange);
-                rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) > 20).sort((a, b) => a.tauxMange - b.tauxMange);
-            }
+            let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
+            let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
 
             function renderCards(list, container, isRejet = false) {
                 container.innerHTML = "";
@@ -1466,10 +1451,10 @@
             if (gridRejets) gridRejets.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
 
             const gridDayAdhesion = document.getElementById('day-adhesion-grid');
-            if (gridDayAdhesion) gridDayAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>Aucun menu validé pour ce jour.</p>";
+            if (gridDayAdhesion) gridDayAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
 
             const gridDayRejets = document.getElementById('day-rejets-grid');
-            if (gridDayRejets) gridDayRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>Aucun menu validé pour ce jour.</p>";
+            if (gridDayRejets) gridDayRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>Aucun aliment détecté dans les scans du jour pour le moment.</p>";
             
             const historyGrid = document.getElementById('history-main-waste-grid'); 
             if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
