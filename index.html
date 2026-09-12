@@ -56,8 +56,8 @@
             flex-shrink: 0;
         }
         
-        .content-area { padding: 30px 20px 20px 20px; overflow-y: auto; flex-grow: 1; background-color: rgba(0, 0, 0, 0.01); }
-        .view-section { display: none; }
+        .content-area { padding: 20px; overflow-y: auto; flex-grow: 1; background-color: rgba(0, 0, 0, 0.01); }
+        .view-section { display: none; height: 100%; }
         .view-section.active { display: block; }
         
         .dashboard-wrapper {
@@ -69,45 +69,31 @@
         }
 
         .borne-container {
-            background: rgba(255, 255, 255, 0.85);
+            background: rgba(255, 255, 255, 0.92);
             backdrop-filter: blur(10px);
             border-radius: 12px;
-            padding: 20px;
+            padding: 15px;
             border: 1px solid rgba(255, 255, 255, 0.6);
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            max-width: 1050px;
-            margin: 0;
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         .instruction-banner {
-            font-size: 15px;
-            font-weight: 800;
+            font-size: 16px;
+            font-weight: 900;
             text-align: center;
             padding: 12px;
             border-radius: 8px;
-            margin-bottom: 16px;
             color: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         .state-searching { background-color: #2563eb; }
         .state-detected { background-color: #d97706; }
         .state-success { background-color: #059669; }
-
-        .traffic-light {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            font-size: 12px;
-        }
-        .light-searching { background-color: #3b82f6; }
-        .light-detected { background-color: #f59e0b; }
-        .light-success { background-color: #10b981; }
 
         .progress-container {
             position: absolute;
@@ -128,23 +114,24 @@
         }
 
         .btn-scan-trigger {
-            background-color: #10b981;
+            background-color: #059669;
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 14px 24px;
-            font-size: 15px;
-            font-weight: 800;
+            border-radius: 10px;
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 900;
             width: 100%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-            transition: background-color 0.2s;
+            gap: 12px;
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+            transition: background-color 0.2s, transform 0.1s;
         }
-        .btn-scan-trigger:hover { background-color: #059669; }
+        .btn-scan-trigger:hover { background-color: #047857; }
+        .btn-scan-trigger:active { transform: scale(0.98); }
 
         .filter-period-bar {
             background: rgba(255, 255, 255, 0.78);
@@ -420,7 +407,7 @@
                         </div>
                     </div>
 
-                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE (Filtré : Top Adhésion > 85% & Top Rejets > 20%) -->
+                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <div class="dashboard-col" style="background: rgba(240, 253, 244, 0.9) !important;">
                             <h3 style="color: #047857; margin-bottom: 6px;">📊 Top Adhésion Période (&gt; 85%)</h3>
@@ -434,26 +421,27 @@
                 </div>
             </div>
 
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE (AVEC SÉLECTEUR DE CAMÉRA USB) -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE (OPTIMISÉ PLEIN ÉCRAN & GROS BOUTON) -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container">
-                    <div id="instruction-text" class="instruction-banner state-searching">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
-                    <div style="display: flex; gap: 16px; align-items: center; justify-content: center; background: white; padding: 18px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.04); margin-bottom: 16px; flex-wrap: wrap;">
-                        <div style="flex: 1.2; min-width: 280px; position: relative;">
-                            <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source vidéo :</label>
-                                <select id="camera-select" onchange="switchCameraSource()" style="padding: 3px 6px; border-radius: 5px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; background: #fff;"></select>
-                            </div>
-                            <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 260px; object-fit: cover; border-radius: 10px; background: #1e293b; border: 2px solid #cbd5e1;"></video>
-                            <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
-                        </div>
-                        <div style="flex: 0.8; display: flex; flex-direction: column; justify-content: center; align-items: center; min-width: 160px; gap: 10px;">
-                            <div id="student-light" class="traffic-light light-searching">🍏<br><span style="font-size: 13px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span></div>
-                            <span style="font-size: 11px; color: #64748b; font-weight: 600;">Statut de la borne</span>
-                        </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
+                        <div id="instruction-text" class="instruction-banner state-searching" style="flex-grow: 1; margin-bottom: 0;">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
+                        <button type="button" class="btn-period" onclick="toggleBorneFullscreen()" style="background: #1b4332; color: white; padding: 8px 12px; font-size: 11px; font-weight: bold; border-radius: 6px;">⛶ Plein écran</button>
                     </div>
-                    <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()"><span>📸</span><span>Appuyer pour scanner mon plateau</span></button>
-                    <div style="margin-top: 14px; font-size: 12px; color: #475569;">Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span></div>
+
+                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; margin-bottom: 8px;">
+                        <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source vidéo :</label>
+                        <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; background: #fff;"></select>
+                    </div>
+
+                    <div style="position: relative; flex-grow: 1; min-height: 300px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 12px;">
+                        <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                        <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
+                    </div>
+
+                    <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()"><span>📸</span><span>APPUYEZ POUR SCANNER LE PLATEAU</span></button>
+                    
+                    <div style="margin-top: 8px; font-size: 11px; color: #475569; text-align: center;">Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span></div>
                 </div>
             </div>
 
@@ -785,7 +773,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT COMPLET AVEC GESTION USB CAMÉRA & TOP/FLOP STRICTS -->
+    <!-- CODE CENTRAL JAVASCRIPT COMPLET -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -1144,7 +1132,6 @@
                 return;
             }
 
-            // FILTRES STRICTS DE MISE EN LUMIÈRE ("Ce qui sort du lot")
             let adhesionList, rejetsList;
             if (targetType === 'day') {
                 adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
@@ -1251,14 +1238,24 @@
             }
         }
 
+        function toggleBorneFullscreen() {
+            const elem = document.getElementById('view-borne');
+            if (!document.fullscreenElement) {
+                elem.requestFullscreen().catch(err => {
+                    console.warn(`Erreur plein écran: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
         
         function resetBorneUI() { 
             isScanningProcess = false; 
-            document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
-            document.getElementById('instruction-text').className = "instruction-banner state-searching"; 
-            document.getElementById('student-light').className = "traffic-light light-searching"; 
-            document.getElementById('student-light').innerHTML = '🍏<br><span style="font-size: 13px; font-weight: 800; display: block; margin-top: 4px;">ATTENTE</span>'; 
+            const banner = document.getElementById('instruction-text');
+            banner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
+            banner.className = "instruction-banner state-searching"; 
             document.getElementById('bar-container').style.display = "none"; 
             document.getElementById('action-progress').style.width = "0%"; 
         }
@@ -1277,9 +1274,8 @@
             isScanningProcess = true;
             
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE EN COURS..."; banner.className = "instruction-banner state-detected";
-            const light = document.getElementById('student-light');
-            light.className = "traffic-light light-detected"; light.innerHTML = '🛑<br><span style="font-size: 16px; font-weight: 900; display: block; margin-top: 4px;">STOP</span>';
+            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE EN COURS..."; 
+            banner.className = "instruction-banner state-detected";
             
             document.getElementById('bar-container').style.display = "block"; 
             document.getElementById('action-progress').style.width = '100%';
@@ -1288,8 +1284,8 @@
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) });
 
             setTimeout(() => {
-                banner.innerText = "🟢 SUIVANT !"; banner.className = "instruction-banner state-success";
-                light.className = "traffic-light light-success"; light.innerHTML = '🟢<br><span style="font-size: 14px; font-weight: 800; display: block; margin-top: 4px;">SUIVANT</span>';
+                banner.innerText = "🟢 SUIVANT !"; 
+                banner.className = "instruction-banner state-success";
                 prononcerMessage("Suivant !");
                 setTimeout(() => resetBorneUI(), 800);
             }, 400);
@@ -1303,6 +1299,20 @@
             
             if (viewId === 'view-borne') initCamera(); else stopCamera();
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport') loadLiveData(); 
+        }
+
+        function loadLiveData() {
+            const school = document.getElementById('select-etablissement').value;
+            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
+            .then(response => response.json()).then(data => {
+                if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
+                    localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
+                    loadMenuForSchool(school);
+                }
+                if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
+                globalRawData = data; 
+                applyCustomDateFilter(); 
+            }).catch(() => clearDashboardToZero());
         }
 
         function adjustWeight(id, value) {
@@ -1522,64 +1532,6 @@
             setTimeout(() => { 
                 win.print(); 
             }, 300);
-        }
-
-        function loadLiveData() {
-            const school = document.getElementById('select-etablissement').value;
-            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
-            .then(response => response.json()).then(data => {
-                if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
-                globalRawData = data; 
-                applyCustomDateFilter(); 
-            }).catch(() => clearDashboardToZero());
-        }
-
-        function clearDashboardToZero() {
-            document.getElementById('kpi-avg').innerText = "0.0 g"; 
-            document.getElementById('kpi-total').innerText = "0.0 kg"; 
-            document.getElementById('kpi-money').innerText = "0.00 €"; 
-            document.getElementById('kpi-impact').innerText = "0.0 kg";
-            
-            document.getElementById('rep-kpi-avg').innerText = "0 g";
-            document.getElementById('rep-kpi-total').innerText = "0.0 kg";
-            document.getElementById('rep-kpi-money').innerText = "0.00 €";
-
-            chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update();
-            
-            document.getElementById('rep-stat-crudites').innerText = "-- %";
-            document.getElementById('rep-stat-poisson').innerText = "-- %";
-            document.getElementById('rep-stat-frits').innerText = "-- %";
-            document.getElementById('rep-stat-laitiers').innerText = "-- %";
-            document.getElementById('rep-stat-desserts').innerText = "-- %";
-            document.getElementById('rep-stat-pain').innerText = "-- %";
-
-            document.getElementById('rep-text-crudites').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
-            document.getElementById('rep-text-poisson').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
-            document.getElementById('rep-text-frits').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
-            document.getElementById('rep-text-laitiers').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
-            document.getElementById('rep-text-desserts').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
-            document.getElementById('rep-text-pain').innerHTML = '<span style="color: #475569; font-weight: 600;">En attente de données terrain</span>';
-
-            const reportAiSynthesis = document.getElementById('report-ai-synthesis');
-            if (reportAiSynthesis) reportAiSynthesis.innerText = "Aucune donnée de service enregistrée pour cet établissement. Effectuez une pesée ou un scan pour activer l'analyse IA de conformité.";
-
-            const gridAdhesion = document.getElementById('palmares-adhesion-grid'); 
-            if (gridAdhesion) gridAdhesion.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
-
-            const gridRejets = document.getElementById('palmares-rejets-grid'); 
-            if (gridRejets) gridRejets.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:20px;'>Aucune donnée disponible.</p>";
-
-            const gridDayAdhesion = document.getElementById('day-adhesion-grid');
-            if (gridDayAdhesion) gridDayAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>Aucun scan enregistré pour le service du jour.</p>";
-
-            const gridDayRejets = document.getElementById('day-rejets-grid');
-            if (gridDayRejets) gridDayRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>Aucun scan enregistré pour le service du jour.</p>";
-            
-            const historyGrid = document.getElementById('history-main-waste-grid'); 
-            if (historyGrid) historyGrid.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée disponible.</p>";
-            
-            cacheSacsHistory = null; globalRawData = null;
-            document.getElementById('bilan-eleves-container').style.display = "none";
         }
 
         function formatAIResponseToUI(text) {
