@@ -36,8 +36,8 @@
             transition: all 0.3s ease;
         }
         .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
-        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
-        .sidebar-menu { list-style: none; margin-top: 15px; flex-grow: 1; }
+        .sidebar-subtitle { padding: 0 15px 12px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
+        .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; }
         .menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         
@@ -334,6 +334,14 @@
     <div class="sidebar">
         <div class="sidebar-brand">🌱 Projet A.B.C.</div>
         <div class="sidebar-subtitle">Assiette Bas Carbone</div>
+
+        <!-- Carte Développeur Pro & Futuriste (Remontée & Agrandie) -->
+        <div style="margin: 10px 12px; padding: 12px 10px; background: rgba(255, 255, 255, 0.12); border: 1.5px solid rgba(82, 183, 136, 0.6); border-radius: 10px; backdrop-filter: blur(6px); text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
+            <div style="font-size: 10px; color: #52b788; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">⚡ Architecture & Conception</div>
+            <div style="font-size: 13px; color: #ffffff; font-weight: 900; margin-bottom: 4px;">Thierry Armant</div>
+            <a href="mailto:thierry.armant@ac-aix-marseille.fr" style="font-size: 9.5px; color: #b7e4c7; text-decoration: underline; font-weight: 700; display: block; word-break: break-all;" title="Envoyer un mail">thierry.armant@ac-aix-marseille.fr</a>
+        </div>
+
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
@@ -344,13 +352,6 @@
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
         </ul>
-
-        <!-- Carte Développeur Pro & Futuriste -->
-        <div style="margin: 12px; padding: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(82, 183, 136, 0.4); border-radius: 8px; backdrop-filter: blur(5px); text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-            <div style="font-size: 8.5px; color: #52b788; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px;">⚡ Architecte & Dev</div>
-            <div style="font-size: 11.5px; color: #ffffff; font-weight: 900; margin-bottom: 3px;">Thierry Armant</div>
-            <a href="mailto:thierry.armant@ac-aix-marseille.fr" style="font-size: 8px; color: #b7e4c7; text-decoration: none; word-break: break-all; display: block; opacity: 0.9;" title="Contact mail">thierry.armant@ac-aix-marseille.fr</a>
-        </div>
     </div>
 
     <div class="main-container">
