@@ -35,11 +35,55 @@
             flex-shrink: 0; 
             transition: all 0.3s ease;
         }
-        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
-        .sidebar-subtitle { padding: 0 15px 12px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
-        .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; }
+        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; flex-shrink: 0; }
+        .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; overflow-y: auto; }
         .menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
+        
+        /* Plaque style Hub IA EPS adaptée en Vert & Veine Dorée */
+        .dev-badge-card {
+            margin: 12px;
+            padding: 12px 10px;
+            background: linear-gradient(145deg, #123524 0%, #1b4332 50%, #0d281c 100%);
+            border: 1.5px solid rgba(212, 175, 55, 0.45);
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        .dev-badge-title {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            background: linear-gradient(135deg, #e6c665 0%, #f9f295 50%, #c5a059 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        .dev-badge-name {
+            font-size: 13px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #f7efb2 0%, #dfb15b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .dev-badge-email {
+            font-size: 9px;
+            font-weight: 700;
+            color: #d8f3dc;
+            text-decoration: underline;
+            word-break: break-all;
+            opacity: 0.9;
+            transition: opacity 0.2s;
+        }
+        .dev-badge-email:hover {
+            opacity: 1.0;
+            color: #f7efb2;
+        }
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
@@ -335,13 +379,6 @@
         <div class="sidebar-brand">🌱 Projet A.B.C.</div>
         <div class="sidebar-subtitle">Assiette Bas Carbone</div>
 
-        <!-- Carte Développeur Pro & Futuriste (Remontée & Agrandie) -->
-        <div style="margin: 10px 12px; padding: 12px 10px; background: rgba(255, 255, 255, 0.12); border: 1.5px solid rgba(82, 183, 136, 0.6); border-radius: 10px; backdrop-filter: blur(6px); text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.25);">
-            <div style="font-size: 10px; color: #52b788; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;">⚡ Architecture & Conception</div>
-            <div style="font-size: 13px; color: #ffffff; font-weight: 900; margin-bottom: 4px;">Thierry Armant</div>
-            <a href="mailto:thierry.armant@ac-aix-marseille.fr" style="font-size: 9.5px; color: #b7e4c7; text-decoration: underline; font-weight: 700; display: block; word-break: break-all;" title="Envoyer un mail">thierry.armant@ac-aix-marseille.fr</a>
-        </div>
-
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
@@ -352,6 +389,13 @@
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
         </ul>
+
+        <!-- Plaque Plaque Style Hub IA EPS (Vert & Veine Dorée) en bas de menu -->
+        <div class="dev-badge-card">
+            <div class="dev-badge-title">Architecture & Conception</div>
+            <div class="dev-badge-name">Thierry Armant</div>
+            <a href="mailto:thierry.armant@ac-aix-marseille.fr" class="dev-badge-email" title="Envoyer un e-mail">thierry.armant@ac-aix-marseille.fr</a>
+        </div>
     </div>
 
     <div class="main-container">
@@ -592,13 +636,20 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS (AVEC DATE RÉTROACTIVE) -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
                         
+                        <!-- 📅 SÉLECTEUR DE DATE RÉTROACTIVE -->
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1;">
+                            <label style="font-size: 11.5px; font-weight: bold; color: #1b4332;">📅 Date de la pesée :</label>
+                            <input type="date" id="input-pesee-date" class="input-date" style="padding: 5px 8px; font-size: 12px; font-weight: bold; background: white;">
+                            <span style="font-size: 10.5px; color: #64748b; font-style: italic;">(Modifiable pour enregistrer ou corriger une pesée passée)</span>
+                        </div>
+
                         <div class="form-grid">
                             <div class="waste-control-card" style="background-color: #ffe5d9; border: 1px solid #ffcad4;">
                                 <label>🍖 Déchets Alimentaires (Plats) [kg]</label>
@@ -888,8 +939,10 @@
             const todayIso = new Date().toISOString().split('T')[0];
             const startInput = document.getElementById('filter-start-date');
             const endInput = document.getElementById('filter-end-date');
+            const peseeDateInput = document.getElementById('input-pesee-date');
             if (startInput) startInput.value = todayIso;
             if (endInput) endInput.value = todayIso;
+            if (peseeDateInput) peseeDateInput.value = todayIso;
 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
@@ -1088,6 +1141,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
+        // 🛑 ISOLATION STRICTE : FILTRAGE EXCLUSIF DES ALIMENTS RÉELLEMENT SCANNÉS DANS L'ÉTABLISSEMENT
         function runGranularExtraction(rawGaspillage, targetType) {
             const gridAdhesion = document.getElementById(targetType === 'day' ? 'day-adhesion-grid' : 'palmares-adhesion-grid');
             const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
@@ -1103,21 +1157,8 @@
 
             if (targetType === 'day') {
                 referenceAliments = getActiveMenuAlimentsForDay(schoolName) || [];
-                if (referenceAliments.length === 0) {
-                    referenceAliments = [
-                        "Salade verte", "Œuf mayonnaise", "Saucisson", "Tomates", "Carottes râpées", "Céleri rémoulade",
-                        "Escalope de dinde", "Steak haché", "Poulet rôti", "Poisson", "Poisson pané", "Saucisse fraîche", "Filet de colin",
-                        "Semoule", "Courgettes", "Frites", "Riz", "Pâtes", "Haricots verts",
-                        "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert", "Yaourt", "Compote", "Pain"
-                    ];
-                }
             } else {
-                referenceAliments = [
-                    "Salade verte", "Œuf mayonnaise", "Saucisson", "Tomates", "Carottes râpées", "Céleri rémoulade",
-                    "Escalope de dinde", "Steak haché", "Poulet rôti", "Poisson", "Poisson pané", "Saucisse fraîche", "Filet de colin",
-                    "Semoule", "Courgettes", "Frites", "Riz", "Pâtes", "Haricots verts",
-                    "Pomme / Banane", "Portion Fromage", "Liégeois / Crème dessert", "Yaourt", "Compote", "Pain"
-                ];
+                referenceAliments = Object.keys(FOOD_ICONS_MAP);
             }
 
             let foodStats = {};
@@ -1146,24 +1187,21 @@
             let palmaresFinalList = [];
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
-                if (targetType === 'day' && stats.count === 0) return; 
+                
+                // Si l'aliment n'a reçu aucun scan réel, on l'exclut totalement (Zéro données fictives !)
+                if (stats.count === 0) return; 
 
-                let tauxMange;
-                if (stats.count > 0) {
-                    let resteMoyen = stats.totalRestes / stats.count;
-                    tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
-                } else {
-                    let hash = aliment.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-                    tauxMange = 72 + (hash % 24);
-                }
+                let resteMoyen = stats.totalRestes / stats.count;
+                let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
 
                 let emoji = FOOD_ICONS_MAP[aliment] || "🍽️";
                 palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
             });
 
-            if (targetType === 'day' && palmaresFinalList.length === 0) {
-                gridAdhesion.innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>En attente de scans pour ce menu...</p>";
-                gridRejets.innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>En attente de scans pour ce menu...</p>";
+            if (palmaresFinalList.length === 0) {
+                const messageVide = targetType === 'day' ? "En attente de scans pour ce menu..." : "Aucune donnée de scan enregistrée pour cette période.";
+                gridAdhesion.innerHTML = `<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>${messageVide}</p>`;
+                gridRejets.innerHTML = `<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>${messageVide}</p>`;
                 return;
             }
 
@@ -1426,8 +1464,10 @@
             card.style.display = "block";
         }
 
+        // ENREGISTREMENT DES PESÉES AVEC SUPPORT DE LA DATE RÉTROACTIVE
         function saveBagWeights() {
             const school = document.getElementById('select-etablissement').value;
+            const peseeDate = document.getElementById('input-pesee-date').value || new Date().toISOString().split('T')[0];
             const alim = parseFloat(document.getElementById('sac-alimentaire').value) || 0;
             const fruits = parseFloat(document.getElementById('sac-fruits').value) || 0;
             const pain = parseFloat(document.getElementById('sac-pain').value) || 0;
@@ -1435,11 +1475,21 @@
             const serv = parseFloat(document.getElementById('sac-serviettes').value) || 0;
             const effectif = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
 
-            const payload = { action: "logBagWeights", etablissement: school, sac_alimentaire: alim.toFixed(2), sac_fruits: fruits.toFixed(2), sac_pain: pain.toFixed(2), sac_emballages: emb.toFixed(2), sac_serviettes: serv.toFixed(2) };
+            const payload = { 
+                action: "logBagWeights", 
+                etablissement: school, 
+                date_pesee: peseeDate, 
+                sac_alimentaire: alim.toFixed(2), 
+                sac_fruits: fruits.toFixed(2), 
+                sac_pain: pain.toFixed(2), 
+                sac_emballages: emb.toFixed(2), 
+                sac_serviettes: serv.toFixed(2) 
+            };
+            
             renderBilanEleves(alim, fruits, pain, effectif);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", mode: "no-cors", body: JSON.stringify(payload) }).then(() => {
-                alert("✅ Pesées enregistrées et bilan élèves mis à jour !");
+                alert("✅ Pesées enregistrées pour la date du " + peseeDate + " !");
                 document.getElementById('sac-alimentaire').value = "0.00"; document.getElementById('sac-fruits').value = "0.00";
                 document.getElementById('sac-pain').value = "0.00"; document.getElementById('sac-emballages').value = "0.00";
                 document.getElementById('sac-serviettes').value = "0.00"; loadLiveData(); 
