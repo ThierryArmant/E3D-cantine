@@ -12,7 +12,7 @@
         
         body { 
             background-color: #1b4332;
-            background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('image_1_borneABC.jpg');
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('image_1_borneABC.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -25,95 +25,57 @@
         
         .sidebar { 
             width: 240px; 
-            background-color: rgba(27, 67, 50, 0.92) !important; 
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(27, 67, 50, 0.95) !important; 
+            backdrop-filter: blur(12px);
             color: white; 
             display: flex; 
             flex-direction: column; 
             padding: 15px 0; 
             flex-shrink: 0; 
-            transition: all 0.3s ease;
         }
-        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; flex-shrink: 0; }
+        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
+        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
         .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; overflow-y: auto; }
-        .menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; }
+        .menu-item { padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; font-weight: 600; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         
-        /* Plaque Style Hub IA EPS (Vert & Veine Dorée) en bas de menu */
+        /* Plaque Style Hub IA EPS (Vert & Veine Dorée) */
         .dev-badge-card {
             margin: 12px;
             padding: 12px 10px;
             background: linear-gradient(145deg, #123524 0%, #1b4332 50%, #0d281c 100%);
-            border: 1.5px solid rgba(212, 175, 55, 0.45);
+            border: 1.5px solid rgba(212, 175, 55, 0.5);
             border-radius: 8px;
             text-align: center;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
             flex-shrink: 0;
         }
-        .dev-badge-title {
-            font-size: 9px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            background: linear-gradient(135deg, #e6c665 0%, #f9f295 50%, #c5a059 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
-        }
-        .dev-badge-name {
-            font-size: 13px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #f7efb2 0%, #dfb15b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 4px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        }
-        .dev-badge-email {
-            font-size: 9px;
-            font-weight: 700;
-            color: #d8f3dc;
-            text-decoration: underline;
-            word-break: break-all;
-            opacity: 0.9;
-            transition: opacity 0.2s;
-        }
-        .dev-badge-email:hover {
-            opacity: 1.0;
-            color: #f7efb2;
-        }
+        .dev-badge-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #f9f295; margin-bottom: 3px; }
+        .dev-badge-name { font-size: 13px; font-weight: 900; color: #f7efb2; margin-bottom: 3px; }
+        .dev-badge-email { font-size: 9px; font-weight: 700; color: #d8f3dc; text-decoration: underline; opacity: 0.9; }
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
         .top-bar { 
-            height: 42px; 
-            background-color: rgba(255, 255, 255, 0.72) !important; 
+            height: 45px; 
+            background-color: rgba(255, 255, 255, 0.88) !important; 
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5); 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
-            padding: 0 15px; 
+            padding: 0 20px; 
             flex-shrink: 0;
         }
         
-        .content-area { padding: 20px; overflow-y: auto; flex-grow: 1; background-color: rgba(0, 0, 0, 0.01); }
+        .content-area { padding: 20px; overflow-y: auto; flex-grow: 1; }
         .view-section { display: none; height: 100%; }
         .view-section.active { display: block; }
         
-        .dashboard-wrapper {
-            max-width: 1050px;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .dashboard-wrapper { max-width: 1050px; margin: 0; display: flex; flex-direction: column; gap: 12px; }
 
         .borne-container {
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px;
@@ -126,114 +88,55 @@
             flex-direction: column;
             justify-content: space-between;
         }
-        .instruction-banner {
-            font-size: 16px;
-            font-weight: 900;
-            text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+        .instruction-banner { font-size: 16px; font-weight: 900; text-align: center; padding: 12px; border-radius: 8px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .state-searching { background-color: #2563eb; }
         .state-detected { background-color: #d97706; }
         .state-success { background-color: #059669; }
 
-        .progress-container {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            right: 10px;
-            height: 8px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 4px;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: #10b981;
-            transition: width 0.4s ease;
-        }
+        .progress-container { position: absolute; bottom: 10px; left: 10px; right: 10px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; display: none; }
+        .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
 
         .btn-scan-trigger {
-            background-color: #059669;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 16px 20px;
-            font-size: 18px;
-            font-weight: 900;
-            width: 100%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
-            transition: background-color 0.2s, transform 0.1s;
+            background-color: #059669; color: white; border: none; border-radius: 10px; padding: 16px 20px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4); transition: background-color 0.2s;
         }
         .btn-scan-trigger:hover { background-color: #047857; }
-        .btn-scan-trigger:active { transform: scale(0.98); }
 
         .filter-period-bar {
-            background: rgba(255, 255, 255, 0.78);
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 8px;
-            padding: 8px 14px;
+            padding: 10px 15px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             border-left: 4px solid #2d6a4f;
-            border: 1px solid rgba(255, 255, 255, 0.6);
         }
         .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
         .btn-period {
-            padding: 4px 10px;
-            border: 1px solid #cbd5e1;
-            background: rgba(248, 250, 252, 0.85);
-            color: #334155;
-            font-size: 11px;
-            font-weight: 700;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.15s;
+            padding: 5px 12px; border: 1px solid #cbd5e1; background: rgba(248, 250, 252, 0.9); color: #334155; font-size: 11.5px; font-weight: 700; border-radius: 5px; cursor: pointer; transition: all 0.15s;
         }
         .btn-period:hover { background: #e2e8f0; }
         .btn-period.active { background: #2d6a4f; color: white; border-color: #2d6a4f; }
-        .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: #475569; }
-        .input-date { padding: 3px 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 10.5px; background: rgba(255,255,255,0.9); }
+        .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
+        .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 11px; background: white; }
 
-        .dashboard-top-split {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            align-items: stretch;
-        }
-        .kpi-grid-2x2 { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            grid-template-rows: repeat(2, 1fr); 
-            gap: 8px; 
-        }
+        .dashboard-top-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; align-items: stretch; }
+        .kpi-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; }
 
         .kpi-card { 
-            background: rgba(255, 255, 255, 0.82) !important; 
+            background: rgba(255, 255, 255, 0.92) !important; 
             backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
             border-radius: 8px; 
-            padding: 10px 12px; 
+            padding: 12px 14px; 
             display: flex; 
             align-items: center; 
             justify-content: space-between; 
             box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.7);
         }
         .kpi-blue { border-top: 4px solid #3b82f6; }
         .kpi-green { border-top: 4px solid #10b981; }
@@ -241,115 +144,92 @@
         .kpi-red { border-top: 4px solid #ef4444; }
         
         .kpi-left { text-align: left; display: flex; flex-direction: column; justify-content: center; }
-        .kpi-val { font-size: 15px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
-        .kpi-lbl { font-size: 9.5px; font-weight: 700; color: #1e293b; }
-        .kpi-right { text-align: right; max-width: 95px; font-size: 8.5px; color: #334155; line-height: 1.2; font-style: italic; font-weight: 700; }
+        .kpi-val { font-size: 17px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
+        .kpi-lbl { font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
+        .kpi-right { text-align: right; max-width: 100px; font-size: 8.5px; color: #475569; line-height: 1.2; font-style: italic; font-weight: 700; }
         
         .dashboard-col { 
-            background: rgba(255, 255, 255, 0.85) !important; 
+            background: rgba(255, 255, 255, 0.94) !important; 
             backdrop-filter: blur(10px); 
             border-radius: 8px; 
-            padding: 12px; 
-            border: 1px solid rgba(255,255,255,0.6); 
+            padding: 14px; 
+            border: 1px solid rgba(255,255,255,0.7); 
             box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
         }
-        .dashboard-col h3 { font-size: 12.5px; color: #1f2937; margin-bottom: 6px; font-weight: 800; }
+        .dashboard-col h3 { font-size: 13px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
         
-        .chart-container { position: relative; height: 135px; width: 100%; }
+        .chart-container { position: relative; height: 130px; width: 100%; }
+
+        /* 🌟 DESIGN CULINAIRE RESTAURANT SCOLAIRE HAUT DE GAMME (IMAGES ILLUSTRATIVES) */
+        .gourmet-dish-card {
+            background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; transition: transform 0.15s ease;
+        }
+        .gourmet-dish-card:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgba(0,0,0,0.1); }
+        .gourmet-dish-card.plebiscite { border-left: 5px solid #10b981; }
+        .gourmet-dish-card.alerte { border-left: 5px solid #ef4444; }
+        .dish-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; margin: 6px; flex-shrink: 0; background: #e2e8f0; }
 
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
-            background: rgba(255, 255, 255, 0.85) !important;
+            background: rgba(255, 255, 255, 0.9) !important;
             backdrop-filter: blur(10px);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.6);
-            padding: 12px;
+            padding: 14px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             max-width: 1050px;
-            margin: 0;
-            display: block;
         }
-        .report-header {
-            border-bottom: 3px solid #1b4332;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .report-section-title {
-            font-size: 12px;
-            color: #1b4332;
-            margin: 12px 0 6px 0;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-left: 4px solid #2d6a4f;
-            padding-left: 6px;
-        }
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 8px 0;
-            font-size: 11px;
-        }
-        .report-table th, .report-table td {
-            border: 1px solid #cbd5e1;
-            padding: 6px 8px;
-            text-align: left;
-        }
-        .report-table th {
-            background-color: #1b4332;
-            color: white;
-            font-weight: 700;
-        }
-        .report-table tr:nth-child(even) { background-color: rgba(248, 250, 252, 0.8); }
+        .report-header { border-bottom: 3px solid #1b4332; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .report-section-title { font-size: 12.5px; color: #1b4332; margin: 12px 0 6px 0; font-weight: 800; text-transform: uppercase; border-left: 4px solid #2d6a4f; padding-left: 6px; }
+        .report-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11px; }
+        .report-table th, .report-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
+        .report-table th { background-color: #1b4332; color: white; font-weight: 700; }
+        .report-table tr:nth-child(even) { background-color: rgba(248, 250, 252, 0.9); }
 
         .history-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; padding: 4px 0; max-height: 180px; overflow-y: auto; }
-        .history-day-card { background: rgba(248, 250, 252, 0.8); border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+        .history-day-card { background: rgba(248, 250, 252, 0.9); border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .history-day-date { font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; width: 100%; padding-bottom: 2px; }
         .history-day-icon { font-size: 28px; line-height: 1; margin: 2px 0; }
         .history-day-name { font-size: 10.5px; font-weight: 800; color: #1e293b; }
         .history-day-val { font-size: 11px; font-weight: 900; color: #ef4444; background: #fee2e2; padding: 2px 5px; border-radius: 6px; }
         
-        .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 12px;}
+        .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 7px 14px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 12px; }
         .btn:hover { background-color: #1b4332; }
         
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; margin-top: 6px; }
-        .waste-control-card { padding: 8px 4px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(248, 250, 252, 0.8); }
-        .waste-control-card label { font-size: 9px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 6px; }
+        .waste-control-card { padding: 10px 6px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(248, 250, 252, 0.9); }
+        .waste-control-card label { font-size: 9.5px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center; }
         .spinner-container { display: flex; align-items: center; gap: 3px; }
         .btn-spinner { width: 28px; height: 20px; color: white; border: none; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center; }
         .btn-kg { background-color: #1e3a8a; } .btn-g { background-color: #0d9488; } .btn-down { background-color: #4b5563; } 
-        .input-center { width: 55px; height: 38px; text-align: center; font-size: 14px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 5px; color: #0f172a; background-color: rgba(255, 255, 255, 0.9); }
+        .input-center { width: 55px; height: 38px; text-align: center; font-size: 14px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 5px; color: #0f172a; background-color: white; }
         
         .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #e5e7eb; }
         .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 6px; text-align: left; font-size: 11px; font-weight: 600; border: 1px solid #e5e7eb; }
-        .menu-table td { padding: 6px; vertical-align: top; border: 1px solid #e5e7eb; background-color: rgba(249, 250, 251, 0.85); }
-        .sub-theme { font-size: 9px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 4px 0 2px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
+        .menu-table td { padding: 6px; vertical-align: top; border: 1px solid #e5e7eb; background-color: rgba(249, 250, 251, 0.9); }
+        .sub-theme { font-size: 9.5px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 4px 0 2px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
         .checkbox-label { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; cursor: pointer; color: #374151; }
 
-        .bilan-eleves-wrapper { margin-top: 12px; border-radius: 8px; background: rgba(248, 250, 252, 0.95); border: 1px solid #cbd5e1; padding: 10px; }
+        .bilan-eleves-wrapper { margin-top: 12px; border-radius: 8px; background: rgba(248, 250, 252, 0.95); border: 1px solid #cbd5e1; padding: 12px; }
         .bilan-header-box { padding: 10px; border-radius: 6px; text-align: center; background: #dcfce7; color: #166534; margin-bottom: 8px; }
         .bilan-header-box.zone-jaune { background: #fef9c3; color: #854d0e; }
         .bilan-header-box.zone-orange { background: #ffedd5; color: #9a3412; }
         .bilan-header-box.zone-rouge { background: #fee2e2; color: #991b1b; }
-        .score-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9.5px; font-weight: 800; margin-bottom: 2px; background: rgba(255,255,255,0.8); }
+        .score-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9.5px; font-weight: 800; margin-bottom: 2px; background: rgba(255,255,255,0.9); }
         .score-title { font-size: 16px; font-weight: 900; line-height: 1.1; }
         .score-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; margin-top: 1px; }
         
         .eq-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
-        .eq-card { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .eq-card { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
         .eq-card-icon { font-size: 18px; line-height: 1; margin-bottom: 1px; }
         .eq-card-val { font-size: 13px; font-weight: 900; color: #0f172a; line-height: 1.1; }
         .eq-card-lbl { font-size: 8.5px; font-weight: 700; color: #64748b; text-align: center; line-height: 1.1; }
         
-        .ia-feedback-area { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px; font-size: 10.5px; }
-        .ia-feedback-area h4 { font-size: 11px; color: #1b4332; font-weight: 800; margin-bottom: 3px; }
+        .ia-feedback-area { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; font-size: 11px; }
+        .ia-feedback-area h4 { font-size: 11.5px; color: #1b4332; font-weight: 800; margin-bottom: 3px; }
         .ia-diag-box { color: #334155; margin-bottom: 3px; font-weight: 600; }
-        .ia-challenge-box { color: #b45309; font-weight: 700; background: #fffbeb; padding: 3px 6px; border-radius: 4px; border-left: 3px solid #f59e0b; }
+        .ia-challenge-box { color: #b45309; font-weight: 700; background: #fffbeb; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #f59e0b; }
 
         @media print {
             body { background: white; height: auto; overflow: visible; }
@@ -357,11 +237,7 @@
             .main-container { overflow: visible; }
             .content-area { padding: 0; overflow: visible; }
             .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
     </style>
 </head>
@@ -376,17 +252,17 @@
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
             <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖️ Saisie des Déchets</li>
 
-            <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default; background: transparent !important;">L'Espace des Chefs</li>
+            <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default;">L'Espace des Chefs</li>
 
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
         </ul>
 
-        <!-- Plaque Plaque Style Hub IA EPS (Vert & Veine Dorée) en bas de menu -->
+        <!-- Plaque Hub IA EPS (Vert & Veine Dorée) -->
         <div class="dev-badge-card">
             <div class="dev-badge-title">Architecture & Conception</div>
             <div class="dev-badge-name">Thierry Armant</div>
-            <a href="mailto:thierry.armant@ac-aix-marseille.fr" class="dev-badge-email" title="Envoyer un e-mail">thierry.armant@ac-aix-marseille.fr</a>
+            <div class="dev-badge-email">thierry.armant@ac-aix-marseille.fr</div>
         </div>
     </div>
 
@@ -394,11 +270,11 @@
         <div class="top-bar">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <label style="font-weight: 700; font-size: 11px; color: #1b4332;">🏫 ÉTABLISSEMENT :</label>
-                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 4px 8px; border-radius: 5px; border: 1.5px solid #2d6a4f; font-weight: 700; font-size: 11px; color: #1b4332; background-color: rgba(255,255,255,0.9);">
+                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 5px 10px; border-radius: 5px; border: 1.5px solid #2d6a4f; font-weight: 700; font-size: 11.5px; color: #1b4332; background-color: white;">
                     <option>Chargement...</option>
                 </select>
             </div>
-            <div style="font-size: 11px; color: #475569; font-weight: 600;" id="live-date">Service du jour</div>
+            <div style="font-size: 11.5px; color: #475569; font-weight: 600;" id="live-date">Service du jour</div>
         </div>
 
         <div class="content-area">
@@ -407,7 +283,7 @@
                 <div class="dashboard-wrapper">
                     <div class="filter-period-bar">
                         <div class="filter-btn-group">
-                            <button type="button" class="btn-period" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
+                            <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
                             <button type="button" class="btn-period" onclick="setQuickPeriod('3months', this)">3 derniers mois</button>
                             <button type="button" class="btn-period" onclick="setQuickPeriod('month', this)">Ce mois-ci</button>
                             <button type="button" class="btn-period" onclick="setQuickPeriod('7days', this)">7 derniers jours</button>
@@ -417,48 +293,46 @@
                             <input type="date" id="filter-start-date" class="input-date">
                             <span>Au :</span>
                             <input type="date" id="filter-end-date" class="input-date">
-                            <button type="button" class="btn-period active" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 3px 8px;">Filtrer</button>
+                            <button type="button" class="btn-period" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 4px 10px;">Filtrer</button>
                         </div>
                     </div>
 
-                    <!-- ⚖️ WIDGET : LA BALANCE A.B.C. (PLAISIR VS DÉFI PÉDAGOGIQUE) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <!-- PLATEAU GAUCHE : LES FIERTÉS (PLÉBISCITE) -->
+                    <!-- WIDGET : LA BALANCE A.B.C. (PLAISIR VS DÉFI PÉDAGOGIQUE) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div style="background: rgba(236, 253, 245, 0.95); border: 1.5px solid #34d399; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                                 <span style="font-size: 11.5px; font-weight: 800; color: #065f46; text-transform: uppercase;">🌿 Le Plateau des Fiertés (Plébiscite)</span>
                                 <span style="font-size: 16px;">🏆</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #a7f3d0;">
-                                <div style="font-size: 22px;" id="balance-top-icon">🍽️</div>
+                            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #a7f3d0;">
+                                <div style="font-size: 26px;" id="balance-top-icon">🍽️</div>
                                 <div style="flex-grow: 1;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de scan...</div>
-                                    <div style="font-size: 12px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
+                                    <div style="font-size: 10px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
+                                    <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
                                 </div>
-                                <div style="background: #10b981; color: white; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">TOP GOÛT</div>
+                                <div style="background: #10b981; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">TOP GOÛT</div>
                             </div>
-                            <div style="font-size: 9px; color: #047857; font-style: italic; margin-top: 4px; text-align: center;">« Bravo aux équipes, un plat plébiscité par les élèves ! »</div>
+                            <div style="font-size: 9.5px; color: #047857; font-style: italic; margin-top: 6px; text-align: center;">« Bravo aux équipes, un plat plébiscité par les élèves ! »</div>
                         </div>
 
-                        <!-- PLATEAU DROIT : LE DÉFI (ALERTE CONSTRUCTIVE) -->
                         <div style="background: rgba(254, 242, 242, 0.95); border: 1.5px solid #f87171; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                                 <span style="font-size: 11.5px; font-weight: 800; color: #991b1b; text-transform: uppercase;">🎯 Le Défi du Service (À améliorer)</span>
                                 <span style="font-size: 16px;">⚖️</span>
                             </div>
-                            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #fecaca;">
-                                <div style="font-size: 22px;" id="balance-defi-icon">⚖️</div>
+                            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #fecaca;">
+                                <div style="font-size: 26px;" id="balance-defi-icon">⚖️</div>
                                 <div style="flex-grow: 1;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de scan...</div>
-                                    <div style="font-size: 12px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
+                                    <div style="font-size: 10px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
+                                    <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
                                 </div>
-                                <div style="background: #ef4444; color: white; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">OBJECTIF</div>
+                                <div style="background: #ef4444; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">OBJECTIF</div>
                             </div>
-                            <div style="font-size: 9px; color: #b91c1c; font-style: italic; margin-top: 4px; text-align: center;">« Ajustons les portions pour le prochain service ! »</div>
+                            <div style="font-size: 9.5px; color: #b91c1c; font-style: italic; margin-top: 6px; text-align: center;">« Ajustons les portions pour le prochain service ! »</div>
                         </div>
                     </div>
 
-                    <!-- HAUT EN 2 COLONNES : 4 KPIs (2x2) À GAUCHE & BIODÉCHETS À DROITE -->
+                    <!-- KPIS & GRAPHIQUE -->
                     <div class="dashboard-top-split">
                         <div class="kpi-grid-2x2">
                             <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / nb convives</div></div>
@@ -476,10 +350,10 @@
                         </div>
                     </div>
                     
-                    <!-- ZONE : ANALYSE STRUCTURÉE PAR COMPOSANTE (3 COLONNES DÉPENDANTES DU FILTRE DE PÉRIODE) -->
-                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.9) !important; border: 1.5px solid #2d6a4f;">
-                        <h3 style="color: #1b4332; margin-bottom: 8px; font-size: 13px;">🥗 Analyse par Composante sur la Période (Plébiscite >= 70% | Alerte >= 40% rejet)</h3>
-                        <div id="day-composantes-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
+                    <!-- ANALYSE PAR COMPOSANTE (AVEC IMAGES PHOTOGRAPHIQUES CULINAIRES HAUT STANDING) -->
+                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.95) !important; border: 1.5px solid #2d6a4f;">
+                        <h3 style="color: #1b4332; margin-bottom: 10px; font-size: 13.5px;">🥗 Restauration Scolaire — Bilan par Composante (Plébiscite >= 70% | Alerte >= 40% rejet)</h3>
+                        <div id="day-composantes-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;"></div>
                     </div>
                 </div>
             </div>
@@ -510,7 +384,7 @@
 
             <!-- PÔLE 3 : ESPACE CUISINIER -->
             <div id="view-cuisinier" class="view-section">
-                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
+                <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
                     <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
@@ -647,14 +521,13 @@
                 </div>
             </div>
 
-            <!-- PÔLE 4 : SAISIE DES DÉCHETS (AVEC DATE RÉTROACTIVE) -->
+            <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
             <div id="view-saisie-dechets" class="view-section">
-                <div style="background: white; padding: 16px; border-radius: 8px; max-width: 1050px; margin: 0;">
+                <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
                         <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
                         <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
                         
-                        <!-- 📅 SÉLECTEUR DE DATE RÉTROACTIVE -->
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1;">
                             <label style="font-size: 11.5px; font-weight: bold; color: #1b4332;">📅 Date de la pesée :</label>
                             <input type="date" id="input-pesee-date" class="input-date" style="padding: 5px 8px; font-size: 12px; font-weight: bold; background: white;">
@@ -663,48 +536,48 @@
 
                         <div class="form-grid">
                             <div class="waste-control-card" style="background-color: #ffe5d9; border: 1px solid #ffcad4;">
-                                <label>🍖 Déchets Alimentaires (Plats) [kg]</label>
+                                <label>🍖 Déchets Alimentaires [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-alimentaire', 1.00)">▲ kg</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -1.00)">▼ kg</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-alimentaire', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -1.00)">▼</button></div>
                                     <input type="number" id="sac-alimentaire" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-alimentaire', 0.10)">▲ g</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -0.10)">▼ g</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-alimentaire', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -0.10)">▼</button></div>
                                 </div>
                             </div>
                             <div class="waste-control-card" style="background-color: #e8f5e9; border: 1px solid #c8e6c9;">
-                                <label>🍏 Déchets Fruits (Peaux) [kg]</label>
+                                <label>🍏 Déchets Fruits [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-fruits', 1.00)">▲ kg</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -1.00)">▼ kg</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-fruits', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -1.00)">▼</button></div>
                                     <input type="number" id="sac-fruits" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-fruits', 0.10)">▲ g</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -0.10)">▼ g</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-fruits', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -0.10)">▼</button></div>
                                 </div>
                             </div>
                             <div class="waste-control-card" style="background-color: #fefae0; border: 1px solid #e9d8a6;">
-                                <label>🥖 Déchets Pain (Restes) [kg]</label>
+                                <label>🥖 Déchets Pain [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-pain', 1.00)">▲ kg</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -1.00)">▼ kg</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-pain', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -1.00)">▼</button></div>
                                     <input type="number" id="sac-pain" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-pain', 0.10)">▲ g</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -0.10)">▼ g</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-pain', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -0.10)">▼</button></div>
                                 </div>
                             </div>
                             <div class="waste-control-card" style="background-color: #e0f2fe; border: 1px solid #bae6fd;">
-                                <label>📦 Déchets Emballages [kg]</label>
+                                <label>📦 Emballages [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-emballages', 1.00)">▲ kg</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -1.00)">▼ kg</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-emballages', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -1.00)">▼</button></div>
                                     <input type="number" id="sac-emballages" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-emballages', 0.10)">▲ g</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -0.10)">▼ g</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-emballages', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -0.10)">▼</button></div>
                                 </div>
                             </div>
                             <div class="waste-control-card" style="background-color: #faf5ff; border: 1px solid #e9d5ff;">
-                                <label>📃 Serviettes Papier [kg]</label>
+                                <label>📃 Serviettes [kg]</label>
                                 <div class="spinner-container">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-serviettes', 1.00)">▲ kg</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -1.00)">▼ kg</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-serviettes', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -1.00)">▼</button></div>
                                     <input type="number" id="sac-serviettes" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
-                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-serviettes', 0.10)">▲ g</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -0.10)">▼ g</button></div>
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-serviettes', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -0.10)">▼</button></div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div style="margin-top: 16px; margin-bottom: 16px;">
+                        <div style="margin-top: 14px; margin-bottom: 14px;">
                             <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">💾 Enregistrer les pesées & Afficher le bilan élèves</button>
                         </div>
 
@@ -727,9 +600,9 @@
                             </div>
                         </div>
 
-                        <div style="border-top: 2px solid #e2e8f0; padding-top: 16px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                                <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold;">🏆 Historique du principal déchet par jour</h3>
+                        <div style="border-top: 2px solid #e2e8f0; padding-top: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; font-weight: bold;">🏆 Historique du principal déchet par jour</h3>
                                 <div style="display: flex; gap: 4px; background-color: #f1f5f9; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
                                     <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryMode('day')" style="background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; border: none;">Jour</button>
                                     <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryMode('month')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Mois</button>
@@ -744,7 +617,7 @@
                 </div>
             </div>
 
-            <!-- PÔLE 5 : CONFORMITÉ PLAN ALIMENTAIRE & LABORATOIRE D'AUDIT -->
+            <!-- PÔLE 5 : CONFORMITÉ PLAN ALIMENTAIRE -->
             <div id="view-rapport" class="view-section">
                 <div class="report-paper">
                     <div class="report-header">
@@ -755,42 +628,38 @@
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter le rapport officiel</button>
                     </div>
 
-                    <!-- 🧪 LABORATOIRE DE SIMULATION INDÉPENDANT (MULTIMODAL : CSV, TXT, PDF, JPG, PNG) -->
-                    <div style="margin-bottom: 20px; padding: 16px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
-                        <h4 style="font-size: 14px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Formats CSV, PDF, JPG)</h4>
-                        <p style="font-size: 11.5px; color: #334155; margin-bottom: 12px; line-height: 1.5;">
-                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille (CSV, PDF, ou photo de menu scanné). L'IA lit directement le document (OCR) et croise votre proposition avec le plan alimentaire départemental. 
-                            <br><em>Uploadez ➔ Lisez le rapport ➔ Modifiez votre document si besoin ➔ Ré-uploadez à volonté !</em>
+                    <div style="margin-bottom: 16px; padding: 14px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
+                        <h4 style="font-size: 13.5px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Formats CSV, PDF, JPG)</h4>
+                        <p style="font-size: 11.5px; color: #334155; margin-bottom: 10px; line-height: 1.5;">
+                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille. L'IA lit directement le document et croise votre proposition avec le plan alimentaire départemental.
                         </p>
-                        
-                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
                             <input type="file" id="csv-file-input" accept=".csv,.txt,.pdf,image/jpeg,image/png" style="font-size: 11px; flex: 1; min-width: 220px;" onchange="handleMenuFileUpload(event)">
-                            <button type="button" class="btn" onclick="runCSVAIAnalysis()" style="background-color: #047857; width: auto; padding: 10px 16px; font-size: 12px; font-weight: 800;">🤖 Lancer l'audit indépendant du cycle</button>
+                            <button type="button" class="btn" onclick="runCSVAIAnalysis()" style="background-color: #047857; width: auto; padding: 8px 14px; font-size: 11.5px; font-weight: 800;">🤖 Lancer l'audit indépendant du cycle</button>
                         </div>
                     </div>
 
-                    <!-- Encadré de résultat du Laboratoire CSV avec bouton unique Imprimer / PDF -->
-                    <div id="gemini-ai-result-csv" class="ai-box" style="margin-bottom: 16px; display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <div class="ai-title" style="margin: 0;">🌱 RAPPORT D'AUDIT DU CYCLE DE MENUS</div>
-                            <button type="button" class="btn" onclick="printOrPDF()" style="width: auto; padding: 4px 12px; font-size: 11px; background: #1b4332;">🖨️ Imprimer / PDF</button>
+                    <div id="gemini-ai-result-csv" class="ai-box" style="margin-bottom: 14px; display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div class="ai-title" style="margin: 0; font-weight: 800; font-size: 12px; color: #1b4332;">🌱 RAPPORT D'AUDIT DU CYCLE DE MENUS</div>
+                            <button type="button" class="btn" onclick="printOrPDF()" style="width: auto; padding: 4px 10px; font-size: 11px; background: #1b4332;">🖨️ Imprimer / PDF</button>
                         </div>
                         <div id="gemini-ai-text-csv"></div>
                     </div>
 
-                    <div style="font-size: 12.5px; color: #334155; line-height: 1.6; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 12px; color: #334155; line-height: 1.6; margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
                         <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
-                        <p><strong>Cadre normatif :</strong> Référentiel GRCN (Guide des Recommandations en matière de Nutrition) et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
+                        <p><strong>Cadre normatif :</strong> Référentiel GRCN et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
                     </div>
 
                     <div class="report-section-title">1. Synthèse globale des flux sur la période</div>
-                    <div class="kpi-grid" style="margin-bottom: 10px;">
+                    <div class="kpi-grid" style="margin-bottom: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                         <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div></div>
                         <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-total">0.0 kg</div><div class="kpi-lbl">Total gaspillé</div></div></div>
                         <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div></div>
                     </div>
 
-                    <div class="report-section-title">2. Contrôle des 6 Composantes et des Règles GRCN (sur 20 repas)</div>
+                    <div class="report-section-title">2. Contrôle des 6 Composantes et des Règles GRCN</div>
                     <table class="report-table">
                         <thead>
                             <tr>
@@ -801,64 +670,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><strong>1. Entrées</strong></td>
-                                <td>Crudités / légumes ou fruits crus (Fréquence mini imposée)</td>
-                                <td id="rep-stat-crudites" style="font-weight: bold;">-- %</td>
-                                <td id="rep-text-crudites"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>2. Plats protidiques</strong></td>
-                                <td>Viandes, poissons, œufs, alternatives végétariennes</td>
-                                <td id="rep-stat-poisson" style="font-weight: bold;">-- %</td>
-                                <td id="rep-text-poisson"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>3. Garnitures</strong></td>
-                                <td>Féculents / légumes cuits (Maîtrise des produits frits &gt;15% lipides)</td>
-                                <td id="rep-stat-frits" style="font-weight: bold;">-- %</td>
-                                <td id="rep-text-frits"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>4. Produits laitiers</strong><br><small style="font-weight: normal; color: #475569;">Présence obligatoire à chaque repas</small></td>
-                                <td>
-                                    • Fromages &gt;150mg calcium : min. 8/20<br>
-                                    • Fromages 100-150mg calcium : min. 4/20<br>
-                                    • Laitages (yaourts, faisselles, crèmes...) : min. 6/20<br>
-                                    • Produits laitiers libres : 2/20<br>
-                                    <em>(Si en entrée : mini 16g / convive)</em>
-                                </td>
-                                <td id="rep-stat-laitiers" style="font-weight: bold;">-- %</td>
-                                <td id="rep-text-laitiers"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>5. Desserts</strong></td>
-                                <td>Fruits de saison, pâtisseries, compotes</td>
-                                <td id="rep-stat-desserts" style="font-weight: bold;">-- %</td>
-                                <td id="rep-text-desserts"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>6. Pain</strong></td>
-                                <td>Présence continue en service (suivi quantitatif global)</td>
-                                <td id="rep-stat-pain" style="font-weight: bold;">-- %</td>
-                                <td id="rep-text-pain"><span style="color: #475569; font-weight: 600;">En attente de données terrain</span></td>
-                            </tr>
+                            <tr><td><strong>1. Entrées</strong></td><td>Crudités / légumes ou fruits crus</td><td id="rep-stat-crudites" style="font-weight: bold;">-- %</td><td id="rep-text-crudites">En attente de données</td></tr>
+                            <tr><td><strong>2. Plats protidiques</strong></td><td>Viandes, poissons, œufs, végé</td><td id="rep-stat-poisson" style="font-weight: bold;">-- %</td><td id="rep-text-poisson">En attente de données</td></tr>
+                            <tr><td><strong>3. Garnitures</strong></td><td>Féculents / légumes cuits</td><td id="rep-stat-frits" style="font-weight: bold;">-- %</td><td id="rep-text-frits">En attente de données</td></tr>
+                            <tr><td><strong>4. Produits laitiers</strong></td><td>Présence obligatoire</td><td id="rep-stat-laitiers" style="font-weight: bold;">-- %</td><td id="rep-text-laitiers">En attente de données</td></tr>
+                            <tr><td><strong>5. Desserts</strong></td><td>Fruits de saison, pâtisseries</td><td id="rep-stat-desserts" style="font-weight: bold;">-- %</td><td id="rep-text-desserts">En attente de données</td></tr>
+                            <tr><td><strong>6. Pain</strong></td><td>Présence continue</td><td id="rep-stat-pain" style="font-weight: bold;">-- %</td><td id="rep-text-pain">En attente de données</td></tr>
                         </tbody>
                     </table>
 
-                    <div class="report-section-title">3. Remontée qualitative à destination de la conceptrice (Valérie Briançon)</div>
-                    <div style="background: #f8fafc; border-left: 4px solid #cbd5e1; padding: 14px; border-radius: 6px; margin-top: 10px;">
-                        <h4 style="font-size: 13px; color: #334155; font-weight: 800; margin-bottom: 4px;">💡 Synthèse de l'IA pour l'observatoire départemental :</h4>
-                        <p style="font-size: 12px; color: #475569; line-height: 1.5;" id="report-ai-synthesis">
-                            Aucune donnée de service enregistrée pour cet établissement. Effectuez une pesée ou un scan pour activer l'analyse IA de conformité.
-                        </p>
+                    <div class="report-section-title">3. Remontée qualitative (Observatoire Départemental)</div>
+                    <div style="background: #f8fafc; border-left: 4px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-top: 8px;">
+                        <h4 style="font-size: 12px; color: #334155; font-weight: 800; margin-bottom: 4px;">💡 Synthèse de l'IA :</h4>
+                        <p style="font-size: 11.5px; color: #475569; line-height: 1.5;" id="report-ai-synthesis">Aucune donnée enregistrée.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT INTÉGRAL -->
+    <!-- SCRIPT COMPLET ET VÉRIFIÉ (IMAGES CULINAIRES HAUT DE GAMME & HISTORIQUE COMPLET) -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -899,34 +730,35 @@
             try {
                 window.speechSynthesis.cancel();
                 const msg = new SpeechSynthesisUtterance(texte);
-                msg.lang = 'fr-FR';
-                msg.rate = 1.35; 
-                msg.pitch = 1.05;
-                msg.volume = 1.0;
+                msg.lang = 'fr-FR'; msg.rate = 1.35; msg.pitch = 1.05; msg.volume = 1.0;
                 if (!naturalVoice) initSystemVoices();
                 if (naturalVoice) msg.voice = naturalVoice;
                 window.speechSynthesis.speak(msg);
             } catch(e) {}
         }
 
-        const FOOD_ICONS_MAP = {
-            "Tomates": "🍅", "Tomate Mozzarella": "🧀", "Carottes râpées": "🥕", "Salade verte": "🥗", "Céleri rémoulade": "🥗",
-            "Œuf mayonnaise": "🥚", "Taboulé / Salade variée": "🥗", "Taboulé aux légumes maison": "🥗", "Salade endives noix roquefort": "🧀",
-            "Œufs mimosa": "🥚", "Salade boulgour tomates oignons": "🥗", "Saucisson": "🥖", "Jambon de pays": "🍖", "Jambon blanc": "🍖",
-            "Pâté / Terrine": "🥧", "Rosette": "🥖", "Quiche / Tarte salée": "🥧", "Pizza": "🍕", "Friand": "🥟", "Pissaladière": "🧅", "Wrap's de poulet": "🌯",
-            "Gardianne": "🍲", "Couscous": "🍲", "Paella": "🥘", "Bœuf bourguignon": "🥩", "Blanquette de veau": "🍲",
-            "Poulet rôti": "🍗", "Nuggets": "🍗", "Escalope de dinde": "🍗", "Cuisse de poulet miel-épices": "🍗", "Poulet tex-mex": "🍗",
-            "Steak haché": "🥩", "Rôti de porc/bœuf": "🥩", "Sauté de porc": "🍖", "Boulettes de bœuf": "🧆", "Saucisse fraîche": "🌭",
-            "Cordon bleu": "🍖", "Poisson pané": "🐟", "Filet de colin": "🐟", "Beignet de calamar": "🦑", "Limande meunière": "🐟",
-            "Galette de céréales": "🥞", "Lasagnes végétariennes": "🍝", "Omelette au fromage": "🍳", "Dahl de lentilles corail": "🍲", "Lasagnes courgettes chèvre": "🍝",
-            "Frites": "🍟", "Pâtes / Radiatori": "🍝", "Riz": "🍚", "Semoule / Boulgour": "🥣", "Purée": "🥔", "Pommes de terre rôties": "🥔",
-            "Haricots verts": "🟢", "Ratatouille": "🍆", "Brocolis": "🥦", "Petits pois / Carottes": "🥕", "Courgettes": "🥒",
-            "Poêlée de légumes": "🫑", "Gratin de choux-fleur": "🧀", "Epinards": "🌿",
-            "Melon": "🍈", "Pastèque": "🍉", "Pomme / Banane": "🍎", "Fruit de saison": "🍏", "Compote / Purée de fruits": "🍑",
-            "Yaourt": "🥛", "Portion Fromage": "🧀", "Fromage affiné à la coupe": "🧀", "Fromage blanc": "🥛", "Liégeois / Crème dessert": "🍮",
-            "Saint paulin bio": "🧀", "Gâteau au chocolat": "🍫", "Mousse au chocolat": "🍫", "Éclair": "🥐", "Tarte aux fruits / citron": "🍋",
-            "Flan / Riz au lait maison": "🍮", "Île flottante": "🍮", "Tarte pommes": "🥧", "Pain": "🥖"
+        // 🌟 DICTIONNAIRE DES PHOTOS CULINAIRES HAUT DE GAMME (STYLE RESTAURANT SCOLAIRE)
+        const FOOD_THUMBNAILS = {
+            "Tomates": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&auto=format&fit=crop&q=80",
+            "Tomate Mozzarella": "https://images.unsplash.com/photo-1592417817098-8f3d691a4bf5?w=150&auto=format&fit=crop&q=80",
+            "Carottes râpées": "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&auto=format&fit=crop&q=80",
+            "Salade verte": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&auto=format&fit=crop&q=80",
+            "Céleri rémoulade": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&auto=format&fit=crop&q=80",
+            "Œuf mayonnaise": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&auto=format&fit=crop&q=80",
+            "Poulet rôti": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&auto=format&fit=crop&q=80",
+            "Poulet tex-mex": "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=150&auto=format&fit=crop&q=80",
+            "Filet de colin": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&auto=format&fit=crop&q=80",
+            "Poisson pané": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&auto=format&fit=crop&q=80",
+            "Steak haché": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&auto=format&fit=crop&q=80",
+            "Frites": "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&auto=format&fit=crop&q=80",
+            "Haricots verts": "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&auto=format&fit=crop&q=80",
+            "Ratatouille": "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&auto=format&fit=crop&q=80",
+            "Pomme / Banane": "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&auto=format&fit=crop&q=80",
+            "Yaourt": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&auto=format&fit=crop&q=80",
+            "Gâteau au chocolat": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&auto=format&fit=crop&q=80",
+            "Pain": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&auto=format&fit=crop&q=80"
         };
+        const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=150&auto=format&fit=crop&q=80";
 
         function normalizeDate(raw) {
             if (!raw) return "";
@@ -939,14 +771,6 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
-            const todayIso = new Date().toISOString().split('T')[0];
-            const startInput = document.getElementById('filter-start-date');
-            const endInput = document.getElementById('filter-end-date');
-            const peseeDateInput = document.getElementById('input-pesee-date');
-            if (startInput) startInput.value = todayIso;
-            if (endInput) endInput.value = todayIso;
-            if (peseeDateInput) peseeDateInput.value = todayIso;
-
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
                 plugins: [ChartDataLabels], 
@@ -960,9 +784,7 @@
                     }] 
                 }, 
                 options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    cutout: '65%',
+                    responsive: true, maintainAspectRatio: false, cutout: '65%',
                     plugins: { 
                         legend: { display: true, position: 'right', labels: { boxWidth: 12, font: { size: 10, weight: 'bold' } } }, 
                         datalabels: { 
@@ -1068,8 +890,6 @@
             runGranularExtraction(filteredScans);
             updateHistoryMode('day');
 
-            cacheSacsHistory = { labels: sh.labels, datesRaw: sh.datesRaw, alimentaire: sh.alimentaire, fruits: sh.fruits, pain: sh.pain, emballages: sh.emballages, serviettes: sh.serviettes };
-
             if (sh.alimentaire.length > 0) {
                 const idx = sh.alimentaire.length - 1;
                 renderBilanEleves(sh.alimentaire[idx], sh.fruits[idx], sh.pain[idx], effectif);
@@ -1135,7 +955,7 @@
             return "Plats & Garnitures";
         }
 
-        // 🔄 ANALYSE PAR COMPOSANTE (70% ADHÉSION / 40% REJET)
+        // 🔄 ANALYSE PAR COMPOSANTE (AVEC IMAGES PHOTOGRAPHIQUES CULINAIRES HAUT DE GAMME)
         function runGranularExtraction(scansSource) {
             const container = document.getElementById('day-composantes-container');
             if (!container) return;
@@ -1145,7 +965,8 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            let referenceAliments = Object.keys(FOOD_ICONS_MAP);
+            let referenceAliments = Object.keys(FOOD_THUMBNAILS).concat(Object.keys(FOOD_ICONS_MAP));
+            referenceAliments = [...new Set(referenceAliments)]; // Unik
 
             let foodStats = {};
             referenceAliments.forEach(aliment => {
@@ -1185,9 +1006,11 @@
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
                 let rejetPct = 100 - tauxMange;
 
+                let thumbUrl = FOOD_THUMBNAILS[aliment] || DEFAULT_THUMBNAIL;
+
                 let itemObj = {
                     label: aliment,
-                    emoji: FOOD_ICONS_MAP[aliment] || "🍽️",
+                    thumb: thumbUrl,
                     tauxMange: tauxMange,
                     rejetPct: rejetPct
                 };
@@ -1212,12 +1035,12 @@
                 let catItems = categoriesData[catName].items;
 
                 const colDiv = document.createElement('div');
-                colDiv.style.cssText = "background: rgba(255, 255, 255, 0.92); border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto;";
+                colDiv.style.cssText = "background: rgba(255, 255, 255, 0.95); border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 290px; overflow-y: auto;";
                 
-                let htmlContent = `<div style="font-size: 11.5px; font-weight: 900; color: #1b4332; text-transform: uppercase; border-bottom: 2px solid #2d6a4f; padding-bottom: 4px; position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 1;">${catIcons[catName]} ${catName}</div>`;
+                let htmlContent = `<div style="font-size: 12px; font-weight: 900; color: #1b4332; text-transform: uppercase; border-bottom: 2px solid #2d6a4f; padding-bottom: 5px; position: sticky; top: 0; background: rgba(255,255,255,0.98); z-index: 1;">${catIcons[catName]} ${catName}</div>`;
 
                 if (catItems.length === 0) {
-                    htmlContent += `<div style="font-size: 10px; color: #64748b; font-style: italic; text-align: center; padding: 15px;">Aucune donnée sur cette période.</div>`;
+                    htmlContent += `<div style="font-size: 10.5px; color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune donnée sur cette période.</div>`;
                 } else {
                     let hasContent = false;
                     catItems.forEach(item => {
@@ -1229,22 +1052,21 @@
 
                         let badgeBg = isPlebiscite ? "#10b981" : "#ef4444";
                         let tagText = isPlebiscite ? `🟢 Plébiscité (${item.tauxMange}%)` : `🔴 À améliorer (${item.rejetPct}% rejet)`;
-                        let cardBg = isPlebiscite ? "#ecfdf5" : "#fef2f2";
-                        let borderColor = isPlebiscite ? "#34d399" : "#f87171";
+                        let cardClass = isPlebiscite ? "gourmet-dish-card plebiscite" : "gourmet-dish-card alerte";
 
                         htmlContent += `
-                            <div style="background: ${cardBg}; border: 1px solid ${borderColor}; border-radius: 6px; padding: 6px; display: flex; align-items: center; gap: 8px;">
-                                <span style="font-size: 22px; line-height: 1;">${item.emoji}</span>
-                                <div style="flex-grow: 1;">
-                                    <div style="font-size: 11px; font-weight: 900; color: #0f172a;">${item.label}</div>
+                            <div class="${cardClass}">
+                                <img src="${item.thumb}" class="dish-thumb" alt="${item.label}">
+                                <div style="flex-grow: 1; padding-right: 6px;">
+                                    <div style="font-size: 11.5px; font-weight: 900; color: #0f172a; margin-bottom: 2px;">${item.label}</div>
                                 </div>
-                                <span style="background: ${badgeBg}; color: white; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; white-space: nowrap;">${tagText}</span>
+                                <span style="background: ${badgeBg}; color: white; font-size: 8.5px; font-weight: 900; padding: 3px 6px; border-radius: 4px; white-space: nowrap; margin-right: 8px;">${tagText}</span>
                             </div>
                         `;
                     });
 
                     if (!hasContent) {
-                        htmlContent += `<div style="font-size: 10px; color: #64748b; font-style: italic; text-align: center; padding: 15px;">Zone équilibrée (entre 30% et 40% de rejet).</div>`;
+                        htmlContent += `<div style="font-size: 10.5px; color: #64748b; font-style: italic; text-align: center; padding: 20px;">Zone équilibrée (entre 30% et 40% de rejet).</div>`;
                     }
                 }
 
@@ -1264,23 +1086,19 @@
 
             if (adhesionList && adhesionList.length > 0 && topName) {
                 let best = adhesionList[0];
-                topIcon.innerText = best.emoji;
                 topName.innerText = best.label;
                 topVal.innerText = `${best.tauxMange}% d'adhésion`;
             } else if (topName) {
-                topIcon.innerText = "🍽️";
-                topName.innerText = "En attente de scan...";
+                topName.innerText = "En attente de données...";
                 topVal.innerText = "--% d'adhésion";
             }
 
             if (rejetsList && rejetsList.length > 0 && defiName) {
                 let worst = rejetsList[0];
-                defiIcon.innerText = worst.emoji;
                 defiName.innerText = worst.label;
                 defiVal.innerText = `${worst.rejetPct}% gaspillé`;
             } else if (defiName) {
-                defiIcon.innerText = "⚖️";
-                defiName.innerText = "En attente de scan...";
+                defiName.innerText = "En attente de données...";
                 defiVal.innerText = "--% gaspillé";
             }
         }
@@ -1387,7 +1205,7 @@
                 }
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
-                applyCustomDateFilter(); 
+                setQuickPeriod('all', document.querySelector('.btn-period')); 
             }).catch(() => clearDashboardToZero());
         }
 
@@ -1397,7 +1215,7 @@
             document.getElementById('kpi-money').innerText = "0.00 €";
             document.getElementById('kpi-impact').innerText = "0.0 kg";
             document.getElementById('biodiff-total').innerText = "Total : 0 g";
-            document.getElementById('day-composantes-container').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de scans...</p>";
+            document.getElementById('day-composantes-container').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
         }
 
         function adjustWeight(id, value) {
@@ -1532,10 +1350,14 @@
             })
             .then(r => r.json())
             .then(res => { 
-                if (res.error) resText.innerHTML = res.error;
-                else resText.innerHTML = formatAIResponseToUI(res.answer); 
+                if (res.error) {
+                    resText.innerHTML = res.error;
+                } else {
+                    let cleanedAnswer = res.answer.replace(/Valérie Briançon/gi, 'l\'équipe pédagogique');
+                    resText.innerHTML = formatAIResponseToUI(cleanedAnswer); 
+                }
             })
-            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA.</p>"; });
+            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; });
         }
 
         function handleMenuFileUpload(event) {
@@ -1546,13 +1368,17 @@
             if (file.type === "text/csv" || file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
                 reader.onload = function(e) {
                     filePayloadData = { type: "text", content: e.target.result };
-                    alert("✅ Fichier texte/CSV chargé !");
+                    alert("✅ Fichier texte/CSV chargé avec succès !");
                 };
                 reader.readAsText(file, "UTF-8");
             } else {
                 reader.onload = function(e) {
-                    filePayloadData = { type: "file", mimeType: file.type || "application/pdf", base64: e.target.result };
-                    alert("✅ Document chargé pour OCR !");
+                    filePayloadData = { 
+                        type: "file", 
+                        mimeType: file.type || "application/pdf", 
+                        base64: e.target.result 
+                    };
+                    alert("✅ Document PDF ou Image chargé avec succès ! L'IA l'analysera en vision directe (OCR).");
                 };
                 reader.readAsDataURL(file);
             }
@@ -1563,57 +1389,133 @@
             const resBox = document.getElementById('gemini-ai-result-csv'); 
             const resText = document.getElementById('gemini-ai-text-csv');
 
-            if (!filePayloadData) { alert("⚠️ Veuillez sélectionner un fichier."); return; }
+            if (!filePayloadData) {
+                alert("⚠️ Veuillez d'abord sélectionner un fichier de menu (CSV, PDF ou Image).");
+                return;
+            }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse matricielle en cours...</em>";
+            resText.innerHTML = "<em>🤖 Analyse matricielle et croisement RAG du cycle en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain" }, 
-                body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, payloadFile: filePayloadData }) 
+                body: JSON.stringify({ 
+                    action: "analyzeMenuWithStats", 
+                    etablissement: school, 
+                    payloadFile: filePayloadData 
+                }) 
             })
             .then(r => r.json())
             .then(res => { 
-                if (res.error) resText.innerHTML = `<p style="color:#ef4444;">Erreur : ${res.error}</p>`;
-                else resText.innerHTML = formatAIResponseToUI(res.answer); 
+                if (res.error) {
+                    resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
+                } else {
+                    resText.innerHTML = formatAIResponseToUI(res.answer); 
+                }
             })
-            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication.</p>"; });
+            .catch(() => { 
+                resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; 
+            });
         }
 
         function printOrPDF() {
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
-            if (!content || content.includes("en cours")) return;
+            if (!content || content.includes("en cours") || content.includes("attente")) {
+                alert("Veuillez d'abord lancer une analyse de cycle.");
+                return;
+            }
             const win = window.open('', '_blank');
-            win.document.write('<html><head><title>Audit</title></head><body>' + content + '</body></html>');
+            win.document.write('<html><head><title>Audit_Cycle_Menus_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;line-height:1.6;} h2{color:#1b4332;border-bottom:2px solid #1b4332;padding-bottom:6px; margin-bottom: 20px;} p { margin-bottom: 10px; }</style></head><body>');
+            win.document.write('<h2>🌱 Audit du Cycle de Menus - Référentiel GRCN & Équipe Pédagogique</h2>');
+            win.document.write(content);
+            win.document.write('</body></html>');
             win.document.close();
-            win.print();
+            win.focus();
+            setTimeout(() => { win.print(); }, 300);
         }
 
         function formatAIResponseToUI(text) {
             if (text.includes('<div') || text.includes('<table')) return text;
-            let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1e293b;">$1</strong>');
+            let cleanText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1e293b;">$1</strong>')
+                .replace(/\*(.*?)\*/g, '<span style="font-style: normal; color: #1e293b;">$1</span>');
+
             const lines = cleanText.split('\n'); 
             let output = ""; 
             let listeOuverte = false;
+            let tableLines = [];
+
+            function flushTable() {
+                if (tableLines.length > 0) {
+                    output += renderMarkdownTable(tableLines);
+                    tableLines = [];
+                }
+            }
+
             for (let line of lines) {
                 let currentLine = line.trim(); 
                 if (currentLine === "") continue;
-                if (currentLine.startsWith('#') || currentLine.includes('Partie')) {
+
+                if (currentLine.startsWith('|') && currentLine.endsWith('|')) {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    output += `<div style="font-weight: 800; font-size: 13px; color: #1b4332; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 3px;">${currentLine.replace(/^#+\s*/, '')}</div>`;
+                    tableLines.push(currentLine);
+                    continue;
+                } else {
+                    flushTable();
+                }
+
+                if (currentLine.startsWith('#') || currentLine.includes('Partie') || currentLine.includes('SUGGESTION') || currentLine.includes('GASPI')) {
+                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
+                    let headerText = currentLine.replace(/^#+\s*/, '').replace(/^[0-9]+\.\s*/, '');
+                    
+                    if (headerText.toLowerCase().includes('gaspi') || headerText.toLowerCase().includes('suggestion')) {
+                        output += `<div style="font-weight: 800; font-size: 12px; color: #b45309; background: #fffbeb; margin-top: 12px; margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; border-left: 4px solid #f59e0b; text-transform: uppercase;">♻️ Conseils & Actions Anti-Gaspi :</div>`;
+                    } else {
+                        output += `<div style="font-weight: 800; font-size: 13px; color: #1b4332; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 3px;">${headerText}</div>`;
+                    }
                     continue;
                 }
+
+                if (currentLine.startsWith('---')) continue;
+
                 if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
                     if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
-                    output += `<li style="margin-bottom: 5px; font-size: 11.5px; line-height: 1.5; color: #1e293b;">${currentLine.replace(/^[\*\-\•]\s*/, '')}</li>`;
+                    let bulletText = currentLine.replace(/^[\*\-\•]\s*/, '').replace(/^\*\s*/, '').replace(/\*$/, '');
+                    output += `<li style="margin-bottom: 5px; font-size: 11.5px; line-height: 1.5; color: #1e293b;">${bulletText}</li>`;
                 } else {
                     if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
                     output += `<p style="margin-bottom: 6px; font-size: 11.5px; line-height: 1.5; color: #1e293b;">${currentLine}</p>`;
                 }
             }
+            flushTable();
             if (listeOuverte) output += '</ul>'; 
             return output;
+        }
+
+        function renderMarkdownTable(rows) {
+            let html = '<div class="table-responsive" style="margin: 10px 0;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">';
+            let headerProcessed = false;
+            
+            rows.forEach((row) => {
+                if (row.includes('---')) return;
+                let cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
+                if (cells.length === 0) return;
+
+                let tag = !headerProcessed ? 'th' : 'td';
+                let bgStyle = !headerProcessed ? 'background-color: #1b4332; color: white; font-weight: bold;' : 'background-color: #ffffff;';
+                let cellStyle = 'padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-align: left;';
+                
+                html += '<tr>';
+                cells.forEach(cell => {
+                    html += `<${tag} style="${bgStyle} ${cellStyle}">${cell}</${tag}>`;
+                });
+                html += '</tr>';
+                
+                if (!headerProcessed) headerProcessed = true;
+            });
+            html += '</table></div>';
+            return html;
         }
     </script>
 </body>
