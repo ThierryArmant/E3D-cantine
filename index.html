@@ -1178,7 +1178,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🛑 ISOLATION STRICTE ET MISE À JOUR DYNAMIQUE DE LA BALANCE PÉDAGOGIQUE
+        // 🛑 ISOLATION STRICTE & MISE À JOUR DE LA BALANCE PÉDAGOGIQUE
         function runGranularExtraction(rawGaspillage, targetType) {
             const gridAdhesion = document.getElementById(targetType === 'day' ? 'day-adhesion-grid' : 'palmares-adhesion-grid');
             const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
@@ -1243,7 +1243,6 @@
             let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
             let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
 
-            // Mise à jour automatique de la Balance Pédagogique (Fierté vs Défi) pour le jour
             if (targetType === 'day') {
                 updateBalanceWidget(adhesionList, rejetsList);
             }
