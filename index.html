@@ -257,14 +257,6 @@
         
         .chart-container { position: relative; height: 135px; width: 100%; }
 
-        /* CARTES COMPACTES */
-        .palmares-visual-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 6px; padding: 4px 0; }
-        .food-badge-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 3px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-        .food-icon-box { font-size: 26px; line-height: 1; height: 30px; display: flex; align-items: center; justify-content: center; user-select: none; }
-        .food-percent-badge { color: #ffffff; font-size: 10px; font-weight: 900; padding: 1px 5px; border-radius: 6px; display: inline-block; }
-        .food-name-label { font-size: 9px; font-weight: 800; color: #1e293b; min-height: 18px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.1; }
-        .food-status-tag { font-size: 8px; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
-
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box {
             background: rgba(255, 255, 255, 0.85) !important;
             backdrop-filter: blur(10px);
@@ -484,28 +476,10 @@
                         </div>
                     </div>
                     
-                    <!-- ZONE 1 : BILAN DU JOUR -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 6px;">🟢 Adhésion du Menu du Jour (Scans réels)</h3>
-                            <div id="day-adhesion-grid" class="palmares-visual-grid"></div>
-                        </div>
-                        <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 6px;">🔴 Rejets du Menu du Jour (Scans réels)</h3>
-                            <div id="day-rejets-grid" class="palmares-visual-grid"></div>
-                        </div>
-                    </div>
-
-                    <!-- ZONE 2 : BILAN GLOBAL / PÉRIODE -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                        <div class="dashboard-col" style="background: rgba(240, 253, 244, 0.9) !important;">
-                            <h3 style="color: #047857; margin-bottom: 6px;">📊 Top Adhésion Période (&gt; 85%)</h3>
-                            <div id="palmares-adhesion-grid" class="palmares-visual-grid"></div>
-                        </div>
-                        <div class="dashboard-col" style="background: rgba(255, 245, 245, 0.9) !important;">
-                            <h3 style="color: #b91c1c; margin-bottom: 6px;">📊 Top Rejets Période (&gt; 20%)</h3>
-                            <div id="palmares-rejets-grid" class="palmares-visual-grid"></div>
-                        </div>
+                    <!-- ZONE : ANALYSE DU MENU DU JOUR STRUCTURÉE PAR COMPOSANTE (3 COLONNES AVEC SEUILS 70% / 40%) -->
+                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.9) !important; border: 1.5px solid #2d6a4f;">
+                        <h3 style="color: #1b4332; margin-bottom: 8px; font-size: 13px;">🥗 Analyse du Menu du Jour par Composante (Plébiscite $\ge$ 70% | Alerte $\ge$ 40% rejet)</h3>
+                        <div id="day-composantes-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;"></div>
                     </div>
                 </div>
             </div>
@@ -884,7 +858,7 @@
         </div>
     </div>
 
-    <!-- CODE CENTRAL JAVASCRIPT COMPLET -->
+    <!-- CODE CENTRAL JAVASCRIPT COMPLET AVEC CATALOGUE EXHAUSTIF ET SVG MODERNES -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -935,15 +909,96 @@
             } catch(e) {}
         }
 
+        // 🌟 DICTIONNAIRE EXHAUSTIF DE TOUS LES ALIMENTS DU CATALOGUE AVEC SVG MODERNES
+        const DEFAULT_SVG_ICON = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>`;
+
         const FOOD_ICONS_MAP = {
-            "Salade verte": "🥗", "Œuf mayonnaise": "🥚", "Saucisson": "🥖", "Tomates": "🍅", "Carottes râpées": "🥕", "Céleri rémoulade": "🥗",
-            "Escalope de dinde": "🍗", "Steak haché": "🥩", "Poulet rôti": "🍗", "Poisson": "🐟", "Poisson pané": "🐟",
-            "Semoule": "🥣", "Courgettes": "🥒", "Frites": "🍟", "Riz": "🍚", "Pâtes": "🍝", "Haricots verts": "🥦",
-            "Pomme / Banane": "🍎", "Portion Fromage": "🧀", "Liégeois / Crème dessert": "🍮", "Yaourt": "🥛", "Compote": "🍎", "Pain": "🥖",
-            "Taboulé aux légumes maison": "🥗", "Salade endives noix roquefort": "🥗", "Œufs mimosa": "🥚", "Salade boulgour tomates oignons": "🥗",
-            "Limande meunière": "🐟", "Poulet tex-mex": "🍗", "Lasagnes courgettes chèvre": "🍝", "Cordon bleu": "🍖",
-            "Saint paulin bio": "🧀", "Yaourt aux fruits mixés": "🥛", "Yaourt à la grecque": "🥛",
-            "Flan patissier": "🍮", "Île flottante": "🍮", "Tarte pommes": "🥧", "Crème dessert vanille / chocolat": "🍮"
+            // Entrées & Salades
+            "Tomates": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 5V3"/></svg>`,
+            "Tomate Mozzarella": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M8 11h8"/></svg>`,
+            "Carottes râpées": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="m10.85 12.15 8.15-8.15"/></svg>`,
+            "Salade verte": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.4 19 2c1 2 2 4.5 2 8a9 9 0 0 1-10 10Z"/></svg>`,
+            "Céleri rémoulade": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#84cc16" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="6"/></svg>`,
+            "Œuf mayonnaise": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><ellipse cx="12" cy="13" rx="7" ry="8"/></svg>`,
+            "Taboulé / Salade variée": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M2 12h20M12 2v20"/></svg>`,
+            "Taboulé aux légumes maison": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10"/></svg>`,
+            "Salade endives noix roquefort": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#65a30d" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>`,
+            "Œufs mimosa": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>`,
+            "Salade boulgour tomates oignons": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M4 12h16"/></svg>`,
+            "Saucisson": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9a3412" stroke-width="2"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>`,
+            "Jambon de pays": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#be123c" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-2 4-2"/></svg>`,
+            "Jambon blanc": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><path d="M5 12h14"/></svg>`,
+            "Pâté / Terrine": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/></svg>`,
+            "Rosette": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9f1239" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`,
+            "Quiche / Tarte salée": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>`,
+            "Pizza": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M12 2l10 18H2L12 2z"/></svg>`,
+            "Friand": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>`,
+            "Pissaladière": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M3 7h18v10H3z"/></svg>`,
+            "Wrap's de poulet": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><path d="M4 6l16 12M4 18L20 6"/></svg>`,
+
+            // Plats
+            "Gardianne": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c2d12" stroke-width="2"><path d="M6 15h12v4H6z"/></svg>`,
+            "Couscous": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><circle cx="12" cy="14" r="7"/></svg>`,
+            "Paella": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M3 12a9 9 0 1 0 18 0H3z"/></svg>`,
+            "Bœuf bourguignon": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#451a03" stroke-width="2"><ellipse cx="12" cy="13" rx="8" ry="6"/></svg>`,
+            "Blanquette de veau": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#78716c" stroke-width="2"><path d="M5 12h14v7H5z"/></svg>`,
+            "Poulet rôti": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.5 8.5L5 14l3 3 5.5-5.5"/></svg>`,
+            "Nuggets": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="5" y="7" width="6" height="6" rx="2"/></svg>`,
+            "Escalope de dinde": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M4 12c2-3 8-3 16 0-8 3-14 3-16 0z"/></svg>`,
+            "Cuisse de poulet miel-épices": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M15 4l5 5-9 9H6v-5z"/></svg>`,
+            "Poulet tex-mex": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M14.5 4.5L19 9M10 14l-4 4"/></svg>`,
+            "Steak haché": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7f1d1d" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="5"/></svg>`,
+            "Rôti de porc/bœuf": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#991b1b" stroke-width="2"><rect x="4" y="8" width="16" height="8" rx="2"/></svg>`,
+            "Sauté de porc": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2"><path d="M3 12h18M12 3v18"/></svg>`,
+            "Boulettes de bœuf": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#581c87" stroke-width="2"><circle cx="8" cy="12" r="3"/><circle cx="16" cy="12" r="3"/></svg>`,
+            "Saucisse fraîche": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9a3412" stroke-width="2"><path d="M3 12c3-3 6 3 9 0s6 3 9 0"/></svg>`,
+            "Cordon bleu": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="3"/></svg>`,
+            "Poisson pané": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M2 12c4-4 16-4 20 0-4 4-16 4-20 0z"/></svg>`,
+            "Filet de colin": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2"><path d="M2 12h20M12 6v12"/></svg>`,
+            "Beignet de calamar": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>`,
+            "Limande meunière": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M4 12h16M12 4l-4 8 4 8"/></svg>`,
+            "Galette de céréales": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>`,
+            "Lasagnes végétariennes": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><rect x="3" y="6" width="18" height="12" rx="2"/></svg>`,
+            "Omelette au fromage": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2"><path d="M3 12c2-4 16-4 18 0-2 4-16 4-18 0z"/></svg>`,
+            "Dahl de lentilles corail": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2"><path d="M4 14c2 4 14 4 16 0z"/></svg>`,
+            "Lasagnes courgettes chèvre": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/></svg>`,
+
+            // Accompagnements
+            "Frites": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M6 10h12l-1 10H7L6 10Z"/><path d="M10 10V4M14 10V6"/></svg>`,
+            "Pâtes / Radiatori": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M4 8h16M4 16h16"/></svg>`,
+            "Riz": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2"><circle cx="8" cy="8" r="1"/><circle cx="16" cy="8" r="1"/><circle cx="12" cy="16" r="1"/></svg>`,
+            "Semoule / Boulgour": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a16207" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`,
+            "Purée": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><ellipse cx="12" cy="14" rx="8" ry="4"/></svg>`,
+            "Pommes de terre rôties": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>`,
+            "Haricots verts": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M5 19L19 5M9 5l10 10"/></svg>`,
+            "Ratatouille": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`,
+            "Brocolis": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2"><circle cx="12" cy="10" r="5"/><path d="M12 15v6"/></svg>`,
+            "Petits pois / Carottes": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/></svg>`,
+            "Courgettes": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="4"/></svg>`,
+            "Poêlée de légumes": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M3 12h18M12 3l9 9-9 9-9-9z"/></svg>`,
+            "Gratin de choux-fleur": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ca8a04" stroke-width="2"><path d="M12 4a8 8 0 0 1 8 8H4a8 8 0 0 1 8-8z"/></svg>`,
+            "Epinards": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14532d" stroke-width="2"><path d="M12 21V7M5 12l7-5 7 5"/></svg>`,
+
+            // Desserts & Pâtisseries
+            "Melon": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M4 12a8 8 0 0 1 16 0H4z"/></svg>`,
+            "Pastèque": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M3 12a9 9 0 0 1 18 0H3z"/></svg>`,
+            "Pomme / Banane": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.5"/></svg>`,
+            "Fruit de saison": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>`,
+            "Compote / Purée de fruits": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ea580c" stroke-width="2"><path d="M8 10h8v10H8z"/></svg>`,
+            "Yaourt": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M7 10h10l-1 10H8L7 10Z"/></svg>`,
+            "Portion Fromage": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><path d="M3 20h18L12 4z"/></svg>`,
+            "Fromage affiné à la coupe": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><rect x="3" y="10" width="18" height="10" rx="2"/></svg>`,
+            "Fromage blanc": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M5 10h14l-2 10H7L5 10Z"/></svg>`,
+            "Liégeois / Crème dessert": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2"><path d="M8 8h8v12H8z"/></svg>`,
+            "Saint paulin bio": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="8"/></svg>`,
+            "Gâteau au chocolat": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#78350f" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/></svg>`,
+            "Mousse au chocolat": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#451a03" stroke-width="2"><path d="M6 12h12v8H6z"/></svg>`,
+            "Éclair": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><rect x="3" y="9" width="18" height="6" rx="3"/></svg>`,
+            "Tarte aux fruits / citron": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><path d="M3 14l9-10 9 10H3z"/></svg>`,
+            "Flan / Riz au lait maison": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fde047" stroke-width="2"><path d="M5 12h14v8H5z"/></svg>`,
+            "Île flottante": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><ellipse cx="12" cy="14" rx="8" ry="5"/></svg>`,
+            "Tarte pommes": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M4 14l8-8 8 8H4z"/></svg>`,
+            "Pain": `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2"><path d="M3 18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v3Z"/></svg>`
         };
 
         function normalizeDate(raw) {
@@ -1021,7 +1076,6 @@
 
             loadEtablissementsDropdown(); 
 
-            // 🔄 ACTUALISATION AUTOMATIQUE EN ARRIÈRE-PLAN TOUTES LES 30 SECONDES
             setInterval(() => {
                 const schoolSelect = document.getElementById('select-etablissement');
                 if (schoolSelect && schoolSelect.value && schoolSelect.value !== "Chargement...") {
@@ -1076,19 +1130,11 @@
                 }
             }
 
-            let filteredScans = [];
             let todayScans = [];
-
             if (globalRawData.rawGaspillage) {
                 let allDates = globalRawData.rawGaspillage.map(s => normalizeDate(s.dateRaw)).filter(d => d);
                 let latestDate = allDates.length > 0 ? allDates.sort().pop() : new Date().toISOString().split('T')[0];
 
-                filteredScans = globalRawData.rawGaspillage.filter(s => {
-                    let iso = normalizeDate(s.dateRaw);
-                    if (!iso) return true;
-                    return iso >= startDate && iso <= endDate;
-                });
-                
                 todayScans = globalRawData.rawGaspillage.filter(s => {
                     let iso = normalizeDate(s.dateRaw);
                     return iso === latestDate;
@@ -1118,11 +1164,9 @@
             document.getElementById('rep-kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('rep-kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
 
-            runGranularExtraction(filteredScans, 'global');
             runGranularExtraction(todayScans, 'day');
 
             cacheSacsHistory = { labels: sh.labels, datesRaw: sh.datesRaw, alimentaire: sh.alimentaire, fruits: sh.fruits, pain: sh.pain, emballages: sh.emballages, serviettes: sh.serviettes };
-            updateHistoryMode('day');
 
             if (sh.alimentaire.length > 0) {
                 const idx = sh.alimentaire.length - 1;
@@ -1130,77 +1174,33 @@
             }
         }
 
-        function updateHistoryMode(mode) {
-            if (!cacheSacsHistory || !cacheSacsHistory.labels || cacheSacsHistory.labels.length === 0) return;
-            const gridContainer = document.getElementById('history-main-waste-grid');
-            gridContainer.innerHTML = "";
-            let mapAccumulator = {};
+        // 🥗 CLASSIFICATION AUTOMATIQUE PAR COMPOSANTE DU REPAS
+        function getCategoryForFood(label) {
+            let l = (label || "").toLowerCase();
+            const entreesKeys = ["salade", "tomate", "carotte", "céleri", "oeuf", "oeufs", "taboulé", "saucisson", "jambon", "pâté", "terrine", "rosette", "quiche", "pizza", "friand", "pissaladière", "wrap"];
+            const dessertsKeys = ["pomme", "banane", "fruit", "melon", "pastèque", "compote", "yaourt", "fromage", "cantal", "tome", "blanc", "liégeois", "crème", "saint paulin", "gâteau", "mousse", "éclair", "tarte", "flan", "riz au lait", "île flottante", "pain"];
 
-            for (let i = 0; i < cacheSacsHistory.labels.length; i++) {
-                let isoDate = normalizeDate(cacheSacsHistory.datesRaw[i]); 
-                let labelDate = cacheSacsHistory.labels[i];
-                if (!isoDate) continue;
-                let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
-                if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
-                mapAccumulator[timeKey].alim += parseFloat(cacheSacsHistory.alimentaire[i]) || 0;
-                mapAccumulator[timeKey].fruits += parseFloat(cacheSacsHistory.fruits[i]) || 0;
-                mapAccumulator[timeKey].pain += parseFloat(cacheSacsHistory.pain[i]) || 0;
-                mapAccumulator[timeKey].emb += parseFloat(cacheSacsHistory.emballages[i]) || 0;
-                mapAccumulator[timeKey].serv += parseFloat(cacheSacsHistory.serviettes[i]) || 0;
-            }
-
-            const keys = Object.keys(mapAccumulator);
-            if (keys.length === 0) {
-                gridContainer.innerHTML = "<p style='color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;'>Aucune donnée sur cette période.</p>";
-                return;
-            }
-
-            keys.forEach(dateKey => {
-                let data = mapAccumulator[dateKey];
-                let items = [
-                    { name: "Plats alim.", val: data.alim, icon: "🍖" },
-                    { name: "Fruits", val: data.fruits, icon: "🍏" },
-                    { name: "Pain", val: data.pain, icon: "🥖" },
-                    { name: "Emballages", val: data.emb, icon: "📦" },
-                    { name: "Serviettes", val: data.serv, icon: "📃" }
-                ];
-                items.sort((a, b) => b.val - a.val);
-                let topItem = items[0];
-
-                const card = document.createElement('div');
-                card.className = "history-day-card";
-                card.innerHTML = `<div class="history-day-date">${dateKey}</div><div class="history-day-icon">${topItem.icon}</div><div class="history-day-name">${topItem.name}</div><div class="history-day-val">${topItem.val.toFixed(1)} kg</div>`;
-                gridContainer.appendChild(card);
-            });
-
-            document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
-            let targetBtn = document.getElementById('btn-hist-' + mode);
-            if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
+            if (entreesKeys.some(k => l.includes(k))) return "Entrées";
+            if (dessertsKeys.some(k => l.includes(k))) return "Desserts & Pain";
+            return "Plats & Garnitures";
         }
 
-        // 🛑 ISOLATION STRICTE & MISE À JOUR DE LA BALANCE PÉDAGOGIQUE
+        // 🔄 ANALYSE PAR COMPOSANTE AVEC SEUILS 70% (PLÉBISCITE) ET 40% (REJET)
         function runGranularExtraction(rawGaspillage, targetType) {
-            const gridAdhesion = document.getElementById(targetType === 'day' ? 'day-adhesion-grid' : 'palmares-adhesion-grid');
-            const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
-            if (!gridAdhesion || !gridRejets) return;
+            const container = document.getElementById('day-composantes-container');
+            if (!container) return;
 
             const scansValides = (rawGaspillage || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
-                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau") && !c.includes("uniquement le sol");
+                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
             const schoolName = document.getElementById('select-etablissement').value;
-            let referenceAliments = [];
-
-            if (targetType === 'day') {
-                referenceAliments = getActiveMenuAlimentsForDay(schoolName) || [];
-            } else {
-                referenceAliments = Object.keys(FOOD_ICONS_MAP);
-            }
+            let referenceAliments = getActiveMenuAlimentsForDay(schoolName) || Object.keys(FOOD_ICONS_MAP);
 
             let foodStats = {};
             referenceAliments.forEach(aliment => {
-                foodStats[aliment] = { totalRestes: 0, count: 0 };
+                foodStats[aliment] = { totalRestes: 0, count: 0, cat: getCategoryForFood(aliment) };
             });
 
             scansValides.forEach(scan => {
@@ -1212,125 +1212,87 @@
                     let keywords = alimLower.split(/[\/\s\+]+/);
                     let matchDirect = textRaw.includes(alimLower);
                     let matchKeyword = keywords.some(kw => kw.length > 2 && textRaw.includes(kw));
-                    let matchDessert = (alimLower.includes('crème') || alimLower.includes('liégeois')) && (textRaw.includes('crème') || textRaw.includes('dessert') || textRaw.includes('ramequin') || textRaw.includes('coupelle'));
 
-                    if (matchDirect || matchKeyword || matchDessert) {
+                    if (matchDirect || matchKeyword) {
                         foodStats[aliment].totalRestes += restePct;
                         foodStats[aliment].count += 1;
                     }
                 });
             });
 
-            let palmaresFinalList = [];
+            let categoriesData = {
+                "Entrées": { items: [] },
+                "Plats & Garnitures": { items: [] },
+                "Desserts & Pain": { items: [] }
+            };
+
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
                 if (stats.count === 0) return; 
 
                 let resteMoyen = stats.totalRestes / stats.count;
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
+                let rejetPct = 100 - tauxMange;
 
-                let emoji = FOOD_ICONS_MAP[aliment] || "🍽️";
-                palmaresFinalList.push({ label: aliment, emoji: emoji, tauxMange: tauxMange });
+                categoriesData[stats.cat].items.push({
+                    label: aliment,
+                    svg: FOOD_ICONS_MAP[aliment] || DEFAULT_SVG_ICON,
+                    tauxMange: tauxMange,
+                    rejetPct: rejetPct
+                });
             });
 
-            if (palmaresFinalList.length === 0) {
-                const messageVide = targetType === 'day' ? "En attente de scans pour ce menu..." : "Aucune donnée de scan enregistrée pour cette période.";
-                gridAdhesion.innerHTML = `<p style='color:#065f46; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>${messageVide}</p>`;
-                gridRejets.innerHTML = `<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>${messageVide}</p>`;
-                return;
-            }
+            container.innerHTML = "";
+            let cats = ["Entrées", "Plats & Garnitures", "Desserts & Pain"];
+            let catIcons = { "Entrées": "🥗", "Plats & Garnitures": "🍖", "Desserts & Pain": "🍰" };
 
-            let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
-            let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
+            cats.forEach(catName => {
+                let catItems = categoriesData[catName].items;
 
-            if (targetType === 'day') {
-                updateBalanceWidget(adhesionList, rejetsList);
-            }
+                const colDiv = document.createElement('div');
+                colDiv.style.cssText = "background: rgba(255, 255, 255, 0.92); border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto;";
+                
+                let htmlContent = `<div style="font-size: 11.5px; font-weight: 900; color: #1b4332; text-transform: uppercase; border-bottom: 2px solid #2d6a4f; padding-bottom: 4px; position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 1;">${catIcons[catName]} ${catName}</div>`;
 
-            let filteredAdhesion = targetType === 'day' ? adhesionList : adhesionList.filter(item => item.tauxMange >= 85);
-            let filteredRejets = targetType === 'day' ? rejetsList : rejetsList.filter(item => (100 - item.tauxMange) >= 20);
+                if (catItems.length === 0) {
+                    htmlContent += `<div style="font-size: 10px; color: #64748b; font-style: italic; text-align: center; padding: 15px;">Aucun scan pour cette catégorie.</div>`;
+                } else {
+                    let hasContent = false;
+                    catItems.forEach(item => {
+                        let isPlebiscite = item.tauxMange >= 70;
+                        let isRejetCritique = item.rejetPct >= 40;
 
-            function renderCards(list, container, isRejet = false) {
-                container.innerHTML = "";
-                if (list.length === 0) {
-                    container.innerHTML = "<p style='color:#64748b; font-size:11px; text-align:center; padding:10px; grid-column:1/-1;'>Aucun élément marquant pour ce critère.</p>";
-                    return;
-                }
-                list.forEach(item => {
-                    let badgeColor, tagColor, tagTextColor, tagText;
-                    
-                    if (!isRejet) {
-                        if (item.tauxMange >= 85) { 
-                            badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Excellent"; 
-                        } else if (item.tauxMange >= 75) { 
-                            badgeColor = "#3b82f6"; tagColor = "#e0f2fe"; tagTextColor = "#0369a1"; tagText = "🔵 Bon"; 
-                        } else if (item.tauxMange >= 60) { 
-                            badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Moyen"; 
-                        } else { 
-                            badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; 
-                        }
-                    } else {
-                        let rejetPct = 100 - item.tauxMange;
-                        if (rejetPct >= 40) { 
-                            badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; 
-                        } else if (rejetPct >= 25) { 
-                            badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; 
-                        } else { 
-                            badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; 
-                        }
+                        if (!isPlebiscite && !isRejetCritique) return; 
+                        hasContent = true;
+
+                        let badgeBg = isPlebiscite ? "#10b981" : "#ef4444";
+                        let tagText = isPlebiscite ? `🟢 Plébiscité (${item.tauxMange}%)` : `🔴 À améliorer (${item.rejetPct}% rejet)`;
+                        let cardBg = isPlebiscite ? "#ecfdf5" : "#fef2f2";
+                        let borderColor = isPlebiscite ? "#34d399" : "#f87171";
+
+                        htmlContent += `
+                            <div style="background: ${cardBg}; border: 1px solid ${borderColor}; border-radius: 6px; padding: 6px; display: flex; align-items: center; gap: 8px;">
+                                <div style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px;">${item.svg}</div>
+                                <div style="flex-grow: 1;">
+                                    <div style="font-size: 11px; font-weight: 900; color: #0f172a;">${item.label}</div>
+                                </div>
+                                <span style="background: ${badgeBg}; color: white; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 4px; white-space: nowrap;">${tagText}</span>
+                            </div>
+                        `;
+                    });
+
+                    if (!hasContent) {
+                        htmlContent += `<div style="font-size: 10px; color: #64748b; font-style: italic; text-align: center; padding: 15px;">Zone équilibrée (entre 30% et 40% de rejet).</div>`;
                     }
+                }
 
-                    const card = document.createElement('div');
-                    card.className = "food-badge-card";
-                    card.innerHTML = `
-                        <div class="food-icon-box">${item.emoji}</div>
-                        <div class="food-percent-badge" style="background: ${badgeColor};">${isRejet ? (100 - item.tauxMange) + '%' : item.tauxMange + '%'}</div>
-                        <div class="food-name-label">${item.label}</div>
-                        <span class="food-status-tag" style="background: ${tagColor}; color: ${tagTextColor};">${tagText}</span>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-
-            renderCards(filteredAdhesion, gridAdhesion, false);
-            renderCards(filteredRejets, gridRejets, true);
-        }
-
-        function updateBalanceWidget(adhesionList, rejetsList) {
-            const topIcon = document.getElementById('balance-top-icon');
-            const topName = document.getElementById('balance-top-name');
-            const topVal = document.getElementById('balance-top-val');
-            
-            const defiIcon = document.getElementById('balance-defi-icon');
-            const defiName = document.getElementById('balance-defi-name');
-            const defiVal = document.getElementById('balance-defi-val');
-
-            if (adhesionList && adhesionList.length > 0 && topName) {
-                let best = adhesionList[0];
-                topIcon.innerText = best.emoji;
-                topName.innerText = best.label;
-                topVal.innerText = `${best.tauxMange}% d'adhésion`;
-            } else if (topName) {
-                topIcon.innerText = "🍽️";
-                topName.innerText = "En attente de scan...";
-                topVal.innerText = "--% d'adhésion";
-            }
-
-            if (rejetsList && rejetsList.length > 0 && defiName) {
-                let worst = rejetsList[0];
-                let rejetPct = 100 - worst.tauxMange;
-                defiIcon.innerText = worst.emoji;
-                defiName.innerText = worst.label;
-                defiVal.innerText = `${rejetPct}% gaspillé`;
-            } else if (defiName) {
-                defiIcon.innerText = "⚖️";
-                defiName.innerText = "En attente de scan...";
-                defiVal.innerText = "--% gaspillé";
-            }
+                colDiv.innerHTML = htmlContent;
+                container.appendChild(colDiv);
+            });
         }
 
         // ==========================
-        // GESTION DES CAMÉRAS USB & TABLETTES
+        // GESTION CAMÉRAS & API
         // ==========================
         async function getAvailableCameras() {
             const select = document.getElementById('camera-select');
@@ -1349,35 +1311,16 @@
                     option.text = device.label || `Caméra USB / Externe ${index + 1}`;
                     select.appendChild(option);
                 });
-            } catch (err) {
-                console.warn("Impossible de lister les caméras :", err);
-            }
+            } catch (err) {}
         }
 
         async function initCamera(selectedDeviceId = null) {
             const video = document.getElementById('camera-feed');
             try {
                 if (localStream) stopCamera();
-                
-                let constraints = { 
-                    video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { width: { ideal: 640 }, height: { ideal: 480 } }, 
-                    audio: false 
-                };
-
+                let constraints = { video: selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : { width: { ideal: 640 }, height: { ideal: 480 } }, audio: false };
                 localStream = await navigator.mediaDevices.getUserMedia(constraints);
                 video.srcObject = localStream;
-                
-                const select = document.getElementById('camera-select');
-                if (select && select.options.length === 0) {
-                    await getAvailableCameras();
-                    const track = localStream.getVideoTracks()[0];
-                    if (track) {
-                        const settings = track.getSettings();
-                        if (settings.deviceId) {
-                            select.value = settings.deviceId;
-                        }
-                    }
-                }
                 resetBorneUI();
             } catch (err) { 
                 document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
@@ -1386,20 +1329,13 @@
 
         function switchCameraSource() {
             const select = document.getElementById('camera-select');
-            if (select && select.value) {
-                initCamera(select.value);
-            }
+            if (select && select.value) initCamera(select.value);
         }
 
         function toggleBorneFullscreen() {
             const elem = document.getElementById('view-borne');
-            if (!document.fullscreenElement) {
-                elem.requestFullscreen().catch(err => {
-                    console.warn(`Erreur plein écran: ${err.message}`);
-                });
-            } else {
-                document.exitFullscreen();
-            }
+            if (!document.fullscreenElement) elem.requestFullscreen().catch(() => {});
+            else document.exitFullscreen();
         }
 
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
@@ -1425,11 +1361,9 @@
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
-            
             const banner = document.getElementById('instruction-text');
             banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE EN COURS..."; 
             banner.className = "instruction-banner state-detected";
-            
             document.getElementById('bar-container').style.display = "block"; 
             document.getElementById('action-progress').style.width = '100%';
             
@@ -1454,7 +1388,6 @@
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport') loadLiveData(); 
         }
 
-        // 🔄 FONCTION DE SYNCHRONISATION DU MENU ACTIF DEPUIS GOOGLE SHEETS
         function loadLiveData() {
             const school = document.getElementById('select-etablissement').value;
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
@@ -1475,10 +1408,7 @@
             document.getElementById('kpi-money').innerText = "0.00 €";
             document.getElementById('kpi-impact').innerText = "0.0 kg";
             document.getElementById('biodiff-total').innerText = "Total : 0 g";
-            document.getElementById('day-adhesion-grid').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>En attente de scans...</p>";
-            document.getElementById('day-rejets-grid').innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>En attente de scans...</p>";
-            document.getElementById('palmares-adhesion-grid').innerHTML = "<p style='color:#047857; font-size:11px; text-align:center; padding:10px;'>Aucune donnée période.</p>";
-            document.getElementById('palmares-rejets-grid').innerHTML = "<p style='color:#b91c1c; font-size:11px; text-align:center; padding:10px;'>Aucune donnée période.</p>";
+            document.getElementById('day-composantes-container').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de scans...</p>";
         }
 
         function adjustWeight(id, value) {
@@ -1498,17 +1428,11 @@
         function changeEtablissement() {
             const school = document.getElementById('select-etablissement').value; 
             localStorage.setItem('schoolActuelle', school);
-            
             const reportSchoolElem = document.getElementById('report-school-name');
             if (reportSchoolElem) reportSchoolElem.innerText = school;
-
             loadExpectedMealsForSchool(school); 
             loadMenuForSchool(school); 
             loadLiveData();
-            const resBoxJour = document.getElementById('gemini-ai-result-jour');
-            if (resBoxJour) resBoxJour.style.display = "none";
-            const resBoxCsv = document.getElementById('gemini-ai-result-csv');
-            if (resBoxCsv) resBoxCsv.style.display = "none";
         }
 
         function loadExpectedMealsForSchool(school) {
@@ -1544,19 +1468,13 @@
             else if (gramsPerPupil <= 100) { header.classList.add("zone-orange"); pill.innerText = "🟠 NIVEAU 2 — FRAGILE"; }
             else { header.classList.add("zone-rouge"); pill.innerText = "🔴 NIVEAU 1 — INSUFFISANT"; }
 
-            const baguettes = Math.round((painKg * 1000) / 200);
-            const repasGaspilles = Math.round((totalKg * 1000) / 450);
-            const eurosGaspilles = (totalKg * 2.30).toFixed(2);
-            const enfantsNourris = Math.round((totalKg * 1000) / 200); 
-
-            document.getElementById('bilan-eq-pain').innerText = `${baguettes}`;
-            document.getElementById('bilan-eq-repas').innerText = `${repasGaspilles}`;
-            document.getElementById('bilan-eq-euros').innerText = `${eurosGaspilles} €`;
-            document.getElementById('bilan-eq-monde').innerText = `${enfantsNourris}`;
+            document.getElementById('bilan-eq-pain').innerText = `${Math.round((painKg * 1000) / 200)}`;
+            document.getElementById('bilan-eq-repas').innerText = `${Math.round((totalKg * 1000) / 450)}`;
+            document.getElementById('bilan-eq-euros').innerText = `${(totalKg * 2.30).toFixed(2)} €`;
+            document.getElementById('bilan-eq-monde').innerText = `${Math.round((totalKg * 1000) / 200)}`;
             card.style.display = "block";
         }
 
-        // ENREGISTREMENT DES PESÉES AVEC SUPPORT DE LA DATE RÉTROACTIVE
         function saveBagWeights() {
             const school = document.getElementById('select-etablissement').value;
             const peseeDate = document.getElementById('input-pesee-date').value || new Date().toISOString().split('T')[0];
@@ -1625,14 +1543,10 @@
             })
             .then(r => r.json())
             .then(res => { 
-                if (res.error) {
-                    resText.innerHTML = res.error;
-                } else {
-                    let cleanedAnswer = res.answer.replace(/Valérie Briançon/gi, 'l\'équipe pédagogique');
-                    resText.innerHTML = formatAIResponseToUI(cleanedAnswer); 
-                }
+                if (res.error) resText.innerHTML = res.error;
+                else resText.innerHTML = formatAIResponseToUI(res.answer); 
             })
-            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur lors de la communication avec l'IA. Vérifiez votre connexion.</p>"; });
+            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA.</p>"; });
         }
 
         function handleMenuFileUpload(event) {
@@ -1643,17 +1557,13 @@
             if (file.type === "text/csv" || file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
                 reader.onload = function(e) {
                     filePayloadData = { type: "text", content: e.target.result };
-                    alert("✅ Fichier texte/CSV chargé avec succès !");
+                    alert("✅ Fichier texte/CSV chargé !");
                 };
                 reader.readAsText(file, "UTF-8");
             } else {
                 reader.onload = function(e) {
-                    filePayloadData = { 
-                        type: "file", 
-                        mimeType: file.type || "application/pdf", 
-                        base64: e.target.result 
-                    };
-                    alert("✅ Document PDF ou Image chargé avec succès ! L'IA l'analysera en vision directe (OCR).");
+                    filePayloadData = { type: "file", mimeType: file.type || "application/pdf", base64: e.target.result };
+                    alert("✅ Document chargé pour OCR !");
                 };
                 reader.readAsDataURL(file);
             }
@@ -1664,138 +1574,35 @@
             const resBox = document.getElementById('gemini-ai-result-csv'); 
             const resText = document.getElementById('gemini-ai-text-csv');
 
-            if (!filePayloadData) {
-                alert("⚠️ Veuillez d'abord sélectionner un fichier de menu (CSV, PDF ou Image).");
-                return;
-            }
+            if (!filePayloadData) { alert("⚠️ Veuillez sélectionner un fichier."); return; }
 
             resBox.style.display = "block"; 
-            resText.innerHTML = "<em>🤖 Analyse matricielle et croisement RAG du cycle en cours (Comptage éclaté des choix multiples)...</em>";
+            resText.innerHTML = "<em>🤖 Analyse matricielle en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", 
                 headers: { "Content-Type": "text/plain" }, 
-                body: JSON.stringify({ 
-                    action: "analyzeMenuWithStats", 
-                    etablissement: school, 
-                    payloadFile: filePayloadData 
-                }) 
+                body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, payloadFile: filePayloadData }) 
             })
             .then(r => r.json())
             .then(res => { 
-                if (res.error) {
-                    resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
-                } else {
-                    resText.innerHTML = formatAIResponseToUI(res.answer); 
-                }
+                if (res.error) resText.innerHTML = `<p style="color:#ef4444;">Erreur : ${res.error}</p>`;
+                else resText.innerHTML = formatAIResponseToUI(res.answer); 
             })
-            .catch(() => { 
-                resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA. Vérifiez votre connexion.</p>"; 
-            });
+            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication.</p>"; });
         }
 
         function printOrPDF() {
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
-            if (!content || content.includes("en cours") || content.includes("attente")) {
-                alert("Veuillez d'abord lancer une analyse de cycle.");
-                return;
-            }
+            if (!content || content.includes("en cours")) return;
             const win = window.open('', '_blank');
-            win.document.write('<html><head><title>Audit_Cycle_Menus_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;line-height:1.6;} h2{color:#1b4332;border-bottom:2px solid #1b4332;padding-bottom:6px; margin-bottom: 20px;} p { margin-bottom: 10px; }</style></head><body>');
-            win.document.write('<h2>🌱 Audit du Cycle de Menus - Référentiel GRCN & Équipe Pédagogique</h2>');
-            win.document.write(content);
-            win.document.write('</body></html>');
+            win.document.write('<html><head><title>Audit</title></head><body>' + content + '</body></html>');
             win.document.close();
-            win.focus();
-            setTimeout(() => { 
-                win.print(); 
-            }, 300);
+            win.print();
         }
 
         function formatAIResponseToUI(text) {
-            if (text.includes('<div') || text.includes('<table')) {
-                return text;
-            }
-
-            let cleanText = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1e293b;">$1</strong>')
-                .replace(/\*(.*?)\*/g, '<span style="font-style: normal; color: #1e293b;">$1</span>');
-
-            const lines = cleanText.split('\n'); 
-            let output = ""; 
-            let listeOuverte = false;
-            let tableLines = [];
-
-            function flushTable() {
-                if (tableLines.length > 0) {
-                    output += renderMarkdownTable(tableLines);
-                    tableLines = [];
-                }
-            }
-
-            for (let line of lines) {
-                let currentLine = line.trim(); 
-                if (currentLine === "") continue;
-
-                if (currentLine.startsWith('|') && currentLine.endsWith('|')) {
-                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    tableLines.push(currentLine);
-                    continue;
-                } else {
-                    flushTable();
-                }
-
-                if (currentLine.startsWith('#') || currentLine.includes('Partie') || currentLine.includes('SUGGESTION') || currentLine.includes('GASPI')) {
-                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    let headerText = currentLine.replace(/^#+\s*/, '').replace(/^[0-9]+\.\s*/, '');
-                    
-                    if (headerText.toLowerCase().includes('gaspi') || headerText.toLowerCase().includes('suggestion')) {
-                        output += `<div style="font-weight: 800; font-size: 12px; color: #b45309; background: #fffbeb; margin-top: 12px; margin-bottom: 6px; padding: 6px 10px; border-radius: 6px; border-left: 4px solid #f59e0b; text-transform: uppercase;">♻️ Conseils & Actions Anti-Gaspi :</div>`;
-                    } else {
-                        output += `<div style="font-weight: 800; font-size: 13px; color: #1b4332; margin-top: 12px; margin-bottom: 6px; text-transform: uppercase; border-bottom: 1.5px solid #2d6a4f; padding-bottom: 3px;">${headerText}</div>`;
-                    }
-                    continue;
-                }
-
-                if (currentLine.startsWith('---')) continue;
-
-                if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
-                    if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
-                    let bulletText = currentLine.replace(/^[\*\-\•]\s*/, '').replace(/^\*\s*/, '').replace(/\*$/, '');
-                    output += `<li style="margin-bottom: 5px; font-size: 11.5px; line-height: 1.5; color: #1e293b; font-style: normal;">${bulletText}</li>`;
-                } else {
-                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    output += `<p style="margin-bottom: 6px; font-size: 11.5px; line-height: 1.5; color: #1e293b; font-style: normal;">${currentLine}</p>`;
-                }
-            }
-            flushTable();
-            if (listeOuverte) output += '</ul>'; 
-            return output;
-        }
-
-        function renderMarkdownTable(rows) {
-            let html = '<div class="table-responsive" style="margin: 10px 0;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">';
-            let headerProcessed = false;
-            
-            rows.forEach((row) => {
-                if (row.includes('---')) return;
-                let cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
-                if (cells.length === 0) return;
-
-                let tag = !headerProcessed ? 'th' : 'td';
-                let bgStyle = !headerProcessed ? 'background-color: #1b4332; color: white; font-weight: bold;' : 'background-color: #ffffff;';
-                let cellStyle = 'padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-align: left;';
-                
-                html += '<tr>';
-                cells.forEach(cell => {
-                    html += `<${tag} style="${bgStyle} ${cellStyle}">${cell}</${tag}>`;
-                });
-                html += '</tr>';
-                
-                if (!headerProcessed) headerProcessed = true;
-            });
-            html += '</table></div>';
-            return html;
+            return text.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700; color: #1e293b;">$1</strong>');
         }
     </script>
 </body>
