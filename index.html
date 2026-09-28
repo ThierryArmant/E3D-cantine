@@ -41,7 +41,7 @@
         .menu-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         
-        /* Plaque style Hub IA EPS adaptée en Vert & Veine Dorée */
+        /* Plaque Style Hub IA EPS (Vert & Veine Dorée) en bas de menu */
         .dev-badge-card {
             margin: 12px;
             padding: 12px 10px;
@@ -426,6 +426,43 @@
                             <span>Au :</span>
                             <input type="date" id="filter-end-date" class="input-date">
                             <button type="button" class="btn-period active" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 3px 8px;">Filtrer</button>
+                        </div>
+                    </div>
+
+                    <!-- ⚖️ WIDGET : LA BALANCE A.B.C. (PLAISIR VS DÉFI PÉDAGOGIQUE) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <!-- PLATEAU GAUCHE : LES FIERTÉS (PLÉBISCITE) -->
+                        <div style="background: rgba(236, 253, 245, 0.95); border: 1.5px solid #34d399; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="font-size: 11.5px; font-weight: 800; color: #065f46; text-transform: uppercase;">🌿 Le Plateau des Fiertés (Plébiscite)</span>
+                                <span style="font-size: 16px;">🏆</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #a7f3d0;">
+                                <div style="font-size: 22px;" id="balance-top-icon">🍽️</div>
+                                <div style="flex-grow: 1;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de scan...</div>
+                                    <div style="font-size: 12px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
+                                </div>
+                                <div style="background: #10b981; color: white; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">TOP GOÛT</div>
+                            </div>
+                            <div style="font-size: 9px; color: #047857; font-style: italic; margin-top: 4px; text-align: center;">« Bravo aux équipes, un plat plébiscité par les élèves ! »</div>
+                        </div>
+
+                        <!-- PLATEAU DROIT : LE DÉFI (ALERTE CONSTRUCTIVE) -->
+                        <div style="background: rgba(254, 242, 242, 0.95); border: 1.5px solid #f87171; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="font-size: 11.5px; font-weight: 800; color: #991b1b; text-transform: uppercase;">🎯 Le Défi du Service (À améliorer)</span>
+                                <span style="font-size: 16px;">⚖️</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; background: white; padding: 6px 10px; border-radius: 6px; border: 1px solid #fecaca;">
+                                <div style="font-size: 22px;" id="balance-defi-icon">⚖️</div>
+                                <div style="flex-grow: 1;">
+                                    <div style="font-size: 10px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de scan...</div>
+                                    <div style="font-size: 12px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
+                                </div>
+                                <div style="background: #ef4444; color: white; font-size: 9px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">OBJECTIF</div>
+                            </div>
+                            <div style="font-size: 9px; color: #b91c1c; font-style: italic; margin-top: 4px; text-align: center;">« Ajustons les portions pour le prochain service ! »</div>
                         </div>
                     </div>
 
@@ -1141,7 +1178,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🛑 ISOLATION STRICTE : FILTRAGE EXCLUSIF DES ALIMENTS RÉELLEMENT SCANNÉS DANS L'ÉTABLISSEMENT
+        // 🛑 ISOLATION STRICTE ET MISE À JOUR DYNAMIQUE DE LA BALANCE PÉDAGOGIQUE
         function runGranularExtraction(rawGaspillage, targetType) {
             const gridAdhesion = document.getElementById(targetType === 'day' ? 'day-adhesion-grid' : 'palmares-adhesion-grid');
             const gridRejets = document.getElementById(targetType === 'day' ? 'day-rejets-grid' : 'palmares-rejets-grid');
@@ -1187,8 +1224,6 @@
             let palmaresFinalList = [];
             referenceAliments.forEach(aliment => {
                 let stats = foodStats[aliment];
-                
-                // Si l'aliment n'a reçu aucun scan réel, on l'exclut totalement (Zéro données fictives !)
                 if (stats.count === 0) return; 
 
                 let resteMoyen = stats.totalRestes / stats.count;
@@ -1205,14 +1240,16 @@
                 return;
             }
 
-            let adhesionList, rejetsList;
+            let adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
+            let rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
+
+            // Mise à jour automatique de la Balance Pédagogique (Fierté vs Défi) pour le jour
             if (targetType === 'day') {
-                adhesionList = [...palmaresFinalList].sort((a, b) => b.tauxMange - a.tauxMange);
-                rejetsList = [...palmaresFinalList].sort((a, b) => a.tauxMange - b.tauxMange);
-            } else {
-                adhesionList = palmaresFinalList.filter(item => item.tauxMange >= 85).sort((a, b) => b.tauxMange - a.tauxMange);
-                rejetsList = palmaresFinalList.filter(item => (100 - item.tauxMange) >= 20).sort((a, b) => (100 - b.tauxMange) - (100 - a.tauxMange));
+                updateBalanceWidget(adhesionList, rejetsList);
             }
+
+            let filteredAdhesion = targetType === 'day' ? adhesionList : adhesionList.filter(item => item.tauxMange >= 85);
+            let filteredRejets = targetType === 'day' ? rejetsList : rejetsList.filter(item => (100 - item.tauxMange) >= 20);
 
             function renderCards(list, container, isRejet = false) {
                 container.innerHTML = "";
@@ -1221,16 +1258,27 @@
                     return;
                 }
                 list.forEach(item => {
-                    let badgeColor = "#10b981", tagColor = "#dcfce7", tagTextColor = "#166534", tagText = "🟢 Excellent";
+                    let badgeColor, tagColor, tagTextColor, tagText;
                     
                     if (!isRejet) {
-                        if (item.tauxMange >= 90) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Excellent"; }
-                        else if (item.tauxMange >= 85) { badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Bon"; }
+                        if (item.tauxMange >= 85) { 
+                            badgeColor = "#10b981"; tagColor = "#dcfce7"; tagTextColor = "#166534"; tagText = "🟢 Excellent"; 
+                        } else if (item.tauxMange >= 75) { 
+                            badgeColor = "#3b82f6"; tagColor = "#e0f2fe"; tagTextColor = "#0369a1"; tagText = "🔵 Bon"; 
+                        } else if (item.tauxMange >= 60) { 
+                            badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Moyen"; 
+                        } else { 
+                            badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Insuffisant"; 
+                        }
                     } else {
                         let rejetPct = 100 - item.tauxMange;
-                        if (rejetPct >= 40) { badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; }
-                        else if (rejetPct >= 25) { badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; }
-                        else { badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; }
+                        if (rejetPct >= 40) { 
+                            badgeColor = "#ef4444"; tagColor = "#fee2e2"; tagTextColor = "#991b1b"; tagText = "🔴 Critique"; 
+                        } else if (rejetPct >= 25) { 
+                            badgeColor = "#f97316"; tagColor = "#ffedd5"; tagTextColor = "#9a3412"; tagText = "🟠 Élevé"; 
+                        } else { 
+                            badgeColor = "#eab308"; tagColor = "#fef9c3"; tagTextColor = "#854d0e"; tagText = "🟡 Modéré"; 
+                        }
                     }
 
                     const card = document.createElement('div');
@@ -1245,8 +1293,41 @@
                 });
             }
 
-            renderCards(adhesionList, gridAdhesion, false);
-            renderCards(rejetsList, gridRejets, true);
+            renderCards(filteredAdhesion, gridAdhesion, false);
+            renderCards(filteredRejets, gridRejets, true);
+        }
+
+        function updateBalanceWidget(adhesionList, rejetsList) {
+            const topIcon = document.getElementById('balance-top-icon');
+            const topName = document.getElementById('balance-top-name');
+            const topVal = document.getElementById('balance-top-val');
+            
+            const defiIcon = document.getElementById('balance-defi-icon');
+            const defiName = document.getElementById('balance-defi-name');
+            const defiVal = document.getElementById('balance-defi-val');
+
+            if (adhesionList && adhesionList.length > 0 && topName) {
+                let best = adhesionList[0];
+                topIcon.innerText = best.emoji;
+                topName.innerText = best.label;
+                topVal.innerText = `${best.tauxMange}% d'adhésion`;
+            } else if (topName) {
+                topIcon.innerText = "🍽️";
+                topName.innerText = "En attente de scan...";
+                topVal.innerText = "--% d'adhésion";
+            }
+
+            if (rejetsList && rejetsList.length > 0 && defiName) {
+                let worst = rejetsList[0];
+                let rejetPct = 100 - worst.tauxMange;
+                defiIcon.innerText = worst.emoji;
+                defiName.innerText = worst.label;
+                defiVal.innerText = `${rejetPct}% gaspillé`;
+            } else if (defiName) {
+                defiIcon.innerText = "⚖️";
+                defiName.innerText = "En attente de scan...";
+                defiVal.innerText = "--% gaspillé";
+            }
         }
 
         // ==========================
@@ -1387,6 +1468,18 @@
                 globalRawData = data; 
                 applyCustomDateFilter(); 
             }).catch(() => clearDashboardToZero());
+        }
+
+        function clearDashboardToZero() {
+            document.getElementById('kpi-avg').innerText = "0 g";
+            document.getElementById('kpi-total').innerText = "0.0 kg";
+            document.getElementById('kpi-money').innerText = "0.00 €";
+            document.getElementById('kpi-impact').innerText = "0.0 kg";
+            document.getElementById('biodiff-total').innerText = "Total : 0 g";
+            document.getElementById('day-adhesion-grid').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:10px;'>En attente de scans...</p>";
+            document.getElementById('day-rejets-grid').innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:10px;'>En attente de scans...</p>";
+            document.getElementById('palmares-adhesion-grid').innerHTML = "<p style='color:#047857; font-size:11px; text-align:center; padding:10px;'>Aucune donnée période.</p>";
+            document.getElementById('palmares-rejets-grid').innerHTML = "<p style='color:#b91c1c; font-size:11px; text-align:center; padding:10px;'>Aucune donnée période.</p>";
         }
 
         function adjustWeight(id, value) {
