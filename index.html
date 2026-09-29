@@ -1071,7 +1071,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
+        // 🌟 EXTRACTION 100% AUTOMATIQUE & AUTO-APPRENANTE (Plus besoin d'ajouter les items à la main)
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1083,16 +1083,33 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            const alimentsReferencePermis = [
-                "Couscous", "Paella", "Tajine", "Gardiane de Taureau", "Chili", "Lasagnes", 
-                "Poulet rôti", "Poulet tex-mex", "Sauté de viande", "Bœuf Bourguignon", "Steak haché", 
-                "Poisson", "Filet de colin", "Omelette", "Cordon Bleu", "Saucisse", "Merguez",
-                "Frites", "Pâtes", "Riz", "Semoule", "Purée", "Lentilles", "Haricots verts", 
-                "Petits pois", "Brocolis", "Ratatouille", "Épinards", "Endives cuites",
+            // 🤖 AUTO-DÉTECTION : On collecte dynamiquement tous les items depuis l'historique des menus et des scans
+            let alimentsDynaSet = new Set([
+                "Couscous", "Paella", "Lasagnes", "Poulet rôti", "Poulet tex-mex", "Poisson", "Filet de colin", 
+                "Frites", "Pâtes", "Riz", "Semoule", "Purée", "Haricots verts", "Ratatouille", 
                 "Salade verte", "Salade d'endives", "Tomates", "Carottes râpées", "Taboulé", 
-                "Œuf dur", "Quiche", "Tarte", "Charcuterie",
-                "Yaourt", "Fromage", "Fruit de saison", "Compote", "Crème dessert", "Île flottante", "Pâtisserie", "Flan", "Glace", "Pain"
-            ];
+                "Yaourt", "Fromage", "Fruit de saison", "Compote", "Crème dessert", "Île flottante", "Pain"
+            ]);
+
+            // Analyse de l'historique global pour enrichir la liste en autonomie
+            if (globalRawData && globalRawData.rawGaspillage) {
+                globalRawData.rawGaspillage.forEach(s => {
+                    if (s.type === "CONFIGURATION_MENU" && s.commentaire) {
+                        let parts = s.commentaire.split('|');
+                        parts.forEach(part => {
+                            let items = part.split(/[\+\/]/);
+                            items.forEach(it => {
+                                let cleanIt = it.trim().replace(' 🧑‍🍳', '').replace('(Fait Maison)', '').trim();
+                                if (cleanIt && cleanIt.length > 2 && !cleanIt.toLowerCase().includes('sans')) {
+                                    alimentsDynaSet.add(cleanIt);
+                                }
+                            });
+                        });
+                    }
+                });
+            }
+
+            const alimentsReferencePermis = Array.from(alimentsDynaSet);
 
             let foodStats = {};
             globalItemsDetailedStats = {};
@@ -1115,11 +1132,11 @@
 
                     if (textRaw.includes(alimLower)) {
                         isMatch = true;
-                    } else if (alimLower === "poulet" && (textRaw.includes("poulet") || textRaw.includes("tex-mex"))) {
+                    } else if (alimLower.includes("poulet") && (textRaw.includes("poulet") || textRaw.includes("tex-mex"))) {
                         isMatch = true;
-                    } else if (alimLower === "poisson" && (textRaw.includes("poisson") || textRaw.includes("colin"))) {
+                    } else if (alimLower.includes("poisson") && (textRaw.includes("poisson") || textRaw.includes("colin"))) {
                         isMatch = true;
-                    } else if (alimLower === "viande" && (textRaw.includes("viande") || textRaw.includes("bœuf") || textRaw.includes("veau"))) {
+                    } else if (alimLower.includes("flottante") && (textRaw.includes("île flottante") || textRaw.includes("crème anglaise"))) {
                         isMatch = true;
                     }
 
@@ -1147,7 +1164,7 @@
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
                 let rejetPct = 100 - tauxMange;
                 
-                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
+                let mediaObj = FOOD_THUMBNAILS[aliment] || FOOD_THUMBNAILS[getCleanLabel(aliment)] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
 
                 let itemObj = {
                     label: aliment,
