@@ -1649,8 +1649,24 @@
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
             document.getElementById(viewId).classList.add('active');
             
-            if (viewId === 'view-borne') initCamera(); else stopCamera();
-            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport') loadLiveData(); 
+            if (viewId === 'view-borne') {
+                initCamera(); 
+                
+                // 🌟 NOUVEAU : Affiche instantanément le dernier menu connu en mémoire
+                const school = document.getElementById('select-etablissement').value;
+                const menuLocal = localStorage.getItem(`menuActive-${school}`);
+                if (menuLocal) {
+                    const displayMenu = document.getElementById('borne-menu-active');
+                    if (displayMenu) displayMenu.innerText = menuLocal.substring(0, 50) + (menuLocal.length > 50 ? "..." : "");
+                }
+            } else {
+                stopCamera();
+            }
+
+            // 🌟 CORRECTION : J'ai ajouté 'view-borne' ici pour forcer la synchronisation avec le serveur !
+            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport' || viewId === 'view-borne') {
+                loadLiveData(); 
+            }
             if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
 
