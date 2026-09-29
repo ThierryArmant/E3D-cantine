@@ -241,42 +241,43 @@
                     </div>
 
                     <!-- KPIs & GRAPHIQUE -->
-                    <div class="dashboard-top-split">
-                        <div class="kpi-grid-2x2">
-                            <div class="kpi-card kpi-blue">
-                                <div class="kpi-left">
-                                    <div class="kpi-val" id="kpi-avg">0 g</div>
-                                    <div class="kpi-lbl">Moyenne / convive</div>
-                                </div>
-                                <div class="kpi-right">Total restes / Effectif total</div>
-                            </div>
-                            
-                            <!-- 🗑️ La carte verte "Quantité évitable" a été retirée pour supprimer le doublon -->
+<div class="dashboard-top-split">
+    <div class="kpi-grid-2x2">
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-left">
+                <div class="kpi-val" id="kpi-avg">0 g</div>
+                <div class="kpi-lbl">Moyenne / convive</div>
+            </div>
+            <div class="kpi-right">Total restes / Effectif total</div>
+        </div>
+        
+        <!-- Élément masqué pour que le JavaScript trouve son ID et ne plante pas -->
+        <div id="kpi-total" style="display: none;">0.0 kg</div>
 
-                            <div class="kpi-card kpi-yellow">
-                                <div class="kpi-left">
-                                    <div class="kpi-val" id="kpi-money">0.00 €</div>
-                                    <div class="kpi-lbl">Pertes financières</div>
-                                </div>
-                                <div class="kpi-right">Base 4,50 € / kg</div>
-                            </div>
-                            <div class="kpi-card kpi-red" style="grid-column: span 2;">
-                                <div class="kpi-left">
-                                    <div class="kpi-val" id="kpi-impact">0.0 kg</div>
-                                    <div class="kpi-lbl">Émissions CO₂</div>
-                                </div>
-                                <div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div>
-                            </div>
-                        </div>
+        <div class="kpi-card kpi-yellow">
+            <div class="kpi-left">
+                <div class="kpi-val" id="kpi-money">0.00 €</div>
+                <div class="kpi-lbl">Pertes financières</div>
+            </div>
+            <div class="kpi-right">Base 4,50 € / kg</div>
+        </div>
+        <div class="kpi-card kpi-red" style="grid-column: span 2;">
+            <div class="kpi-left">
+                <div class="kpi-val" id="kpi-impact">0.0 kg</div>
+                <div class="kpi-lbl">Émissions CO₂</div>
+            </div>
+            <div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div>
+        </div>
+    </div>
 
-                        <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
-                            <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
-                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
-                            <div class="chart-container">
-                                <canvas id="chart-timeline"></canvas>
-                            </div>
-                        </div>
-                    </div>
+    <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
+        <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
+        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
+        <div class="chart-container">
+            <canvas id="chart-timeline"></canvas>
+        </div>
+    </div>
+</div>
                     
                     <!-- 🟢🔴 ANALYSE DES PLATS SUR LA PÉRIODE (CLICABLES) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
