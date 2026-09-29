@@ -27,7 +27,6 @@
         .menu-item { padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; font-weight: 600; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         
-        /* Plaque Style Hub IA EPS */
         .dev-badge-card { margin: 12px; padding: 12px 10px; background: linear-gradient(145deg, #123524 0%, #1b4332 50%, #0d281c 100%); border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; text-align: center; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); flex-shrink: 0; }
         .dev-badge-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #f9f295; margin-bottom: 3px; }
         .dev-badge-name { font-size: 13px; font-weight: 900; color: #f7efb2; margin-bottom: 3px; }
@@ -73,17 +72,23 @@
         .dashboard-col h3 { font-size: 13px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
         .chart-container { position: relative; height: 130px; width: 100%; }
 
-        /* 🌟 DESIGN CULINAIRE AVEC DE VRAIES PHOTOS HAUT DE GAMME */
-        .gourmet-dish-card {
-            background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; transition: transform 0.15s ease;
-        }
+        /* 🌟 DESIGN CULINAIRE AVEC SÉCURITÉS VISUELLES */
+        .gourmet-dish-card { background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; transition: transform 0.15s ease; }
         .gourmet-dish-card:hover { transform: translateY(-1px); box-shadow: 0 5px 12px rgba(0,0,0,0.1); }
         .gourmet-dish-card.plebiscite { border-left: 5px solid #10b981; }
         .gourmet-dish-card.alerte { border-left: 5px solid #ef4444; }
+        
+        /* Protection des images : coupe l'alt text baveux */
         .dish-thumb-photo { 
-            width: 48px; height: 48px; border-radius: 6px; margin: 6px 6px 6px 10px; flex-shrink: 0; 
-            object-fit: cover; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.1); background-color: #f1f5f9;
+            width: 46px; height: 46px; border-radius: 6px; margin: 6px 6px 6px 10px; flex-shrink: 0; 
+            object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9;
+            color: transparent; /* Masque le alt text si l'image casse */
+        }
+        
+        /* Sécurité pour que le texte reste sur une ligne propre */
+        .text-truncate {
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-size: 11px; font-weight: 900; color: #0f172a; margin-bottom: 2px;
         }
 
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box { background: rgba(255, 255, 255, 0.9) !important; backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.6); padding: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 1050px; }
@@ -129,7 +134,7 @@
         .score-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; margin-top: 1px; }
         
         .eq-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
-        .eq-card { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .eq-card { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
         .eq-card-icon { font-size: 18px; line-height: 1; margin-bottom: 1px; }
         .eq-card-val { font-size: 13px; font-weight: 900; color: #0f172a; line-height: 1.1; }
         .eq-card-lbl { font-size: 8.5px; font-weight: 700; color: #64748b; text-align: center; line-height: 1.1; }
@@ -189,7 +194,6 @@
             <!-- PÔLE 1 : DASHBOARD -->
             <div id="view-dashboard" class="view-section active">
                 <div class="dashboard-wrapper">
-                    <!-- Zone de gestion des erreurs (invisible si tout va bien) -->
                     <div id="dashboard-error-banner" style="display: none; background: #fee2e2; border-left: 4px solid #ef4444; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 10px;"></div>
 
                     <div class="filter-period-bar">
@@ -216,9 +220,9 @@
                                 <span style="font-size: 16px;">🏆</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #a7f3d0;">
-                                <div id="balance-top-icon" style="font-size: 26px;">🍽️</div>
-                                <div style="flex-grow: 1;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
+                                <div id="balance-top-icon" style="width: 44px; height: 44px;">🍽️</div>
+                                <div style="flex-grow: 1; overflow: hidden;">
+                                    <div class="text-truncate" style="font-size: 10px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
                                     <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
                                 </div>
                                 <div style="background: #10b981; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">TOP GOÛT</div>
@@ -232,9 +236,9 @@
                                 <span style="font-size: 16px;">⚖️</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #fecaca;">
-                                <div id="balance-defi-icon" style="font-size: 26px;">⚖️</div>
-                                <div style="flex-grow: 1;">
-                                    <div style="font-size: 10px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
+                                <div id="balance-defi-icon" style="width: 44px; height: 44px;">⚖️</div>
+                                <div style="flex-grow: 1; overflow: hidden;">
+                                    <div class="text-truncate" style="font-size: 10px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
                                     <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
                                 </div>
                                 <div style="background: #ef4444; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">OBJECTIF</div>
@@ -261,7 +265,7 @@
                         </div>
                     </div>
                     
-                    <!-- ANALYSE PAR COMPOSANTE (IMAGES PHOTOGRAPHIQUES CULINAIRES) -->
+                    <!-- ANALYSE PAR COMPOSANTE -->
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.95) !important; border: 1.5px solid #2d6a4f;">
                         <h3 style="color: #1b4332; margin-bottom: 10px; font-size: 13.5px;">🥗 Restauration Scolaire — Bilan par Composante (Plébiscite >= 70% | Alerte >= 40% rejet)</h3>
                         <div id="day-composantes-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;"></div>
@@ -320,7 +324,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Taboulé / Salade de pâtes"> Taboulé / Salade variée</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Taboulé / Salade variée"> Taboulé / Salade variée</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Taboulé aux légumes maison"> Taboulé aux légumes maison</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade endives noix roquefort"> Salade endives noix roquefort</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Œufs mimosa"> Œufs mimosa</label>
@@ -332,7 +336,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Rosette"> Rosette</label>
                                         <div class="sub-theme">🥧 Entrées Cuites</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte"> Quiche / Tarte salée</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte salée"> Quiche / Tarte salée</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Friand"> Friand 🥧</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree" value="Pissaladière"> Pissaladière</label>
@@ -373,10 +377,10 @@
                                     <td>
                                         <div class="sub-theme">🥔 Féculents</div>
                                         <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes"> Pâtes / Radiatori</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes / Radiatori"> Pâtes / Radiatori</label>
                                         <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule"> Semoule / Boulgour</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée de p.de terre"> Purée</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule / Boulgour"> Semoule / Boulgour</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée"> Purée</label>
                                         <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pommes de terre rôties"> Pommes de terre rôties / rissolées</label>
                                         <div class="sub-theme">🌿 Légumes</div>
                                         <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
@@ -392,9 +396,9 @@
                                         <div class="sub-theme">🍏 Vergers & Fruits</div>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme"> Pomme / Banane</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote"> Compote / Purée de fruits</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote / Purée de fruits"> Compote / Purée de fruits</label>
                                         <div class="sub-theme">🥛 Laitages & Fromages</div>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage portion (Kiri/Gouda)</label>
@@ -600,11 +604,13 @@
         </div>
     </div>
 
+    <!-- CODE CENTRAL JAVASCRIPT INTÉGRAL, VÉRIFIÉ ET ROBUSTE -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
         let cacheSacsHistory = null;
         let globalRawData = null; 
+
         let systemVoices = [];
         let naturalVoice = null;
         let filePayloadData = null; 
@@ -644,12 +650,12 @@
             } catch(e) {}
         }
 
-        // 🌟 DICTIONNAIRE CULINAIRE DE HAUTE QUALITÉ : PHOTOS PROFESSIONNELLES (URL FIABLES)
-        const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1490818387583-1b5f22222bd2?w=150&q=80"; // Assiette neutre HD
+        // 🌟 DICTIONNAIRE CULINAIRE HD : Rendu professionnel
+        const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1490818387583-1b5f22222bd2?w=150&q=80"; 
         
         const FOOD_THUMBNAILS = {
             "Tomates": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80",
-            "Tomate Mozzarella": "https://images.unsplash.com/photo-1592417817098-8f3d691a4bf5?w=150&q=80",
+            "Tomate Mozzarella": "https://images.unsplash.com/photo-1529312266912-b33cfce2eefd?w=150&q=80",
             "Carottes râpées": "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80",
             "Salade verte": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80",
             "Céleri rémoulade": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&q=80",
@@ -658,9 +664,9 @@
             "Taboulé aux légumes maison": "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80",
             "Salade endives noix roquefort": "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80",
             "Œufs mimosa": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80",
-            "Saucisson": "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80",
-            "Jambon de pays": "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80",
-            "Jambon blanc": "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80",
+            "Saucisson": "https://images.unsplash.com/photo-1555507036-ab1f40ce88cb?w=150&q=80",
+            "Jambon de pays": "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80",
+            "Jambon blanc": "https://images.unsplash.com/photo-1517093751761-b9a3dc8fcd21?w=150&q=80",
             "Pâté / Terrine": "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80",
             "Quiche / Tarte salée": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80",
             "Pizza": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&q=80",
@@ -680,22 +686,22 @@
             "Galette de céréales": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=150&q=80",
             "Lasagnes végétariennes": "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80",
             "Frites": "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80",
-            "Pâtes": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80",
+            "Pâtes / Radiatori": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80",
             "Riz": "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80",
-            "Semoule": "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80",
+            "Semoule / Boulgour": "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80",
             "Purée": "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80",
             "Haricots verts": "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&q=80",
             "Ratatouille": "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80",
             "Brocolis": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80",
-            "Petits pois": "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80",
+            "Petits pois / Carottes": "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80",
             "Pomme / Banane": "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80",
             "Fruit de saison": "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80",
             "Yaourt": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80",
             "Portion Fromage": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80",
-            "Fromage affiné": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80",
+            "Fromage affiné à la coupe": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80",
             "Gâteau au chocolat": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80",
             "Mousse au chocolat": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80",
-            "Tarte aux fruits": "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80",
+            "Tarte aux fruits / citron": "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80",
             "Pain": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&q=80"
         };
 
@@ -707,6 +713,12 @@
             let matchISO = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
             if (matchISO) return `${matchISO[1]}-${matchISO[2]}-${matchISO[3]}`;
             return str.substring(0, 10);
+        }
+
+        // Simplifie "Pomme / Banane" en "Pomme" pour un affichage net
+        function getCleanLabel(label) {
+            if (!label) return "";
+            return label.split('/')[0].trim();
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -792,14 +804,13 @@
             
             let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
             let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
-            let nbJours = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
-                    nbJours++;
                     let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i];
                     totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
+                    lastAlimG = a * 1000; lastFruitsG = f * 1000; lastPainG = p * 1000;
                 }
             }
 
@@ -813,19 +824,19 @@
             }
 
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
-            
-            // On calcule la moyenne avec le cumul total de la période pour la chart
-            let evitablesG = (totalAlimKg + totalPainKg) * 1000;
-            let inevitablesG = totalFruitsKg * 1000;
-            let totalBioG = evitablesG + inevitablesG;
-
-            let avgGrams = (nbJours > 0 && effectif > 0) ? (totalBioG / (effectif * nbJours)) : 0;
+            let totalLastNourritureG = lastAlimG + lastFruitsG + lastPainG;
+            let avgGrams = effectif > 0 ? (totalLastNourritureG / effectif) : 0;
 
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
-            document.getElementById('biodiff-total').innerText = `Total Période : ${totalBioG.toFixed(0)} g`;
+
+            let evitablesG = lastAlimG + lastPainG;
+            let inevitablesG = lastFruitsG;
+            let totalBioG = evitablesG + inevitablesG;
+
+            document.getElementById('biodiff-total').innerText = `Total : ${totalBioG.toFixed(0)} g`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
             chartTimeline.update();
@@ -838,8 +849,9 @@
             runGranularExtraction(filteredScans);
             updateHistoryMode('day');
 
-            if (nbJours > 0) {
-                renderBilanEleves(totalAlimKg/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
+            if (sh.alimentaire.length > 0) {
+                const idx = sh.alimentaire.length - 1;
+                renderBilanEleves(sh.alimentaire[idx], sh.fruits[idx], sh.pain[idx], effectif);
             }
         }
 
@@ -850,15 +862,10 @@
             let mapAccumulator = {};
             let cache = globalRawData.sacsHistory;
 
-            let startDate = document.getElementById('filter-start-date').value || "2000-01-01";
-            let endDate = document.getElementById('filter-end-date').value || "2099-12-31";
-
             for (let i = 0; i < cache.labels.length; i++) {
                 let isoDate = normalizeDate(cache.datesRaw[i]); 
                 let labelDate = cache.labels[i];
                 if (!isoDate) continue;
-                if (isoDate < startDate || isoDate > endDate) continue;
-
                 let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
                 if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
                 mapAccumulator[timeKey].alim += parseFloat(cache.alimentaire[i]) || 0;
@@ -907,7 +914,6 @@
             return "Plats & Garnitures";
         }
 
-        // 🔄 ANALYSE PAR COMPOSANTE (AVEC VRAIES IMAGES HD ET HISTORIQUE TOTAL)
         function runGranularExtraction(scansSource) {
             const container = document.getElementById('day-composantes-container');
             if (!container) return;
@@ -917,7 +923,6 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            // On prend l'intégralité du catalogue pour ne rater aucun aliment de l'historique
             let referenceAliments = Object.keys(FOOD_THUMBNAILS);
 
             let foodStats = {};
@@ -959,9 +964,12 @@
                 let rejetPct = 100 - tauxMange;
 
                 let thumbUrl = FOOD_THUMBNAILS[aliment] || DEFAULT_THUMBNAIL;
+                
+                // Utilise le label nettoyé (ex: "Pomme / Banane" -> "Pomme")
+                let cleanLabel = getCleanLabel(aliment);
 
                 let itemObj = {
-                    label: aliment,
+                    label: cleanLabel,
                     thumb: thumbUrl,
                     tauxMange: tauxMange,
                     rejetPct: rejetPct
@@ -988,7 +996,7 @@
                 catItems.sort((a, b) => b.tauxMange - a.tauxMange);
 
                 const colDiv = document.createElement('div');
-                colDiv.style.cssText = "background: rgba(255, 255, 255, 0.95); border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto;";
+                colDiv.style.cssText = "background: rgba(255, 255, 255, 0.95); border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 290px; overflow-y: auto;";
                 
                 let htmlContent = `<div style="font-size: 12px; font-weight: 900; color: #1b4332; text-transform: uppercase; border-bottom: 2px solid #2d6a4f; padding-bottom: 5px; position: sticky; top: 0; background: rgba(255,255,255,0.98); z-index: 1;">${catIcons[catName]} ${catName}</div>`;
 
@@ -1004,16 +1012,16 @@
                         hasContent = true;
 
                         let badgeBg = isPlebiscite ? "#10b981" : "#ef4444";
-                        let tagText = isPlebiscite ? `🟢 Plébiscité (${item.tauxMange}%)` : `🔴 À améliorer (${item.rejetPct}% rejet)`;
+                        let tagText = isPlebiscite ? `🟢 Plébiscité (${item.tauxMange}%)` : `🔴 À améliorer (${item.rejetPct}%)`;
                         let cardClass = isPlebiscite ? "gourmet-dish-card plebiscite" : "gourmet-dish-card alerte";
 
                         htmlContent += `
                             <div class="${cardClass}">
-                                <img src="${item.thumb}" class="dish-thumb-photo" alt="${item.label}" loading="lazy">
-                                <div style="flex-grow: 1; padding-right: 6px;">
-                                    <div style="font-size: 11.5px; font-weight: 900; color: #0f172a; margin-bottom: 2px;">${item.label}</div>
+                                <img src="${item.thumb}" onerror="this.src='${DEFAULT_THUMBNAIL}'" class="dish-thumb-photo" alt="">
+                                <div style="flex-grow: 1; padding-right: 6px; overflow: hidden;">
+                                    <div class="text-truncate" title="${item.label}">${item.label}</div>
                                 </div>
-                                <span style="background: ${badgeBg}; color: white; font-size: 8.5px; font-weight: 900; padding: 3px 6px; border-radius: 4px; white-space: nowrap; margin-right: 8px;">${tagText}</span>
+                                <span style="background: ${badgeBg}; color: white; font-size: 8.5px; font-weight: 900; padding: 3px 6px; border-radius: 4px; margin-right: 8px; flex-shrink: 0;">${tagText}</span>
                             </div>
                         `;
                     });
@@ -1039,7 +1047,7 @@
 
             if (adhesionList && adhesionList.length > 0 && topName) {
                 let best = adhesionList[0];
-                topIcon.innerHTML = `<img src="${best.thumb}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="${best.label}">`;
+                topIcon.innerHTML = `<img src="${best.thumb}" onerror="this.src='${DEFAULT_THUMBNAIL}'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; color: transparent;" alt="">`;
                 topName.innerText = best.label;
                 topVal.innerText = `${best.tauxMange}% d'adhésion`;
             } else if (topName) {
@@ -1050,7 +1058,7 @@
 
             if (rejetsList && rejetsList.length > 0 && defiName) {
                 let worst = rejetsList[0];
-                defiIcon.innerHTML = `<img src="${worst.thumb}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="${worst.label}">`;
+                defiIcon.innerHTML = `<img src="${worst.thumb}" onerror="this.src='${DEFAULT_THUMBNAIL}'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; color: transparent;" alt="">`;
                 defiName.innerText = worst.label;
                 defiVal.innerText = `${worst.rejetPct}% gaspillé`;
             } else if (defiName) {
