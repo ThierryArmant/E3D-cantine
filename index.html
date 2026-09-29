@@ -71,25 +71,13 @@
         .dashboard-col h3 { font-size: 13px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
         .chart-container { position: relative; height: 130px; width: 100%; }
 
-        /* 🌟 NOUVEAU DESIGN 2 ZONES AVEC PHOTOS */
-        .gourmet-dish-card {
-            background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.1s ease;
-        }
+        .gourmet-dish-card { background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.1s ease; }
         .gourmet-dish-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
         .gourmet-dish-card.plebiscite { border-left: 5px solid #10b981; }
         .gourmet-dish-card.alerte { border-left: 5px solid #ef4444; }
+        .dish-thumb-photo { width: 40px; height: 40px; border-radius: 4px; margin: 4px 4px 4px 6px; flex-shrink: 0; object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: transparent; }
         
-        .dish-thumb-photo { 
-            width: 40px; height: 40px; border-radius: 4px; margin: 4px 4px 4px 6px; flex-shrink: 0; 
-            object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: transparent;
-        }
-        
-        .text-truncate {
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            font-size: 11px; font-weight: 900; color: #0f172a; margin-bottom: 2px;
-            width: 100%; display: block;
-        }
+        .text-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; font-weight: 900; color: #0f172a; margin-bottom: 2px; width: 100%; display: block; }
 
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box { background: rgba(255, 255, 255, 0.9) !important; backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.6); padding: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 1050px; }
         .report-header { border-bottom: 3px solid #1b4332; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
@@ -108,6 +96,8 @@
         
         .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 7px 14px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 12px; }
         .btn:hover { background-color: #1b4332; }
+        .btn-outline { background-color: transparent; border: 1.5px solid #2d6a4f; color: #2d6a4f; }
+        .btn-outline:hover { background-color: #f0fdf4; }
         
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 6px; }
         .waste-control-card { padding: 10px 6px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(248, 250, 252, 0.9); }
@@ -118,11 +108,13 @@
         .input-center { width: 55px; height: 38px; text-align: center; font-size: 14px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 5px; color: #0f172a; background-color: white; }
         
         .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #e5e7eb; }
-        .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
+        .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 900px; }
         .menu-table th { background-color: #2d6a4f; color: white; padding: 6px; text-align: left; font-size: 11px; font-weight: 600; border: 1px solid #e5e7eb; }
         .menu-table td { padding: 6px; vertical-align: top; border: 1px solid #e5e7eb; background-color: rgba(249, 250, 251, 0.9); }
         .sub-theme { font-size: 9.5px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 4px 0 2px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
         .checkbox-label { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; cursor: pointer; color: #374151; }
+        
+        .local-favs-box { background: #f0fdf4; border: 1px dashed #10b981; padding: 6px; border-radius: 4px; margin-top: 6px; }
 
         .bilan-eleves-wrapper { margin-top: 12px; border-radius: 8px; background: rgba(248, 250, 252, 0.95); border: 1px solid #cbd5e1; padding: 12px; }
         .bilan-header-box { padding: 10px; border-radius: 6px; text-align: center; background: #dcfce7; color: #166534; margin-bottom: 8px; }
@@ -222,7 +214,7 @@
                             <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #a7f3d0;">
                                 <div id="balance-top-icon" style="width: 44px; height: 44px;">🍽️</div>
                                 <div style="flex-grow: 1; overflow: hidden;">
-                                    <div class="text-truncate" style="font-size: 11px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
+                                    <div class="text-truncate" style="font-size: 11.5px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
                                     <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
                                 </div>
                                 <div style="background: #10b981; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">TOP GOÛT</div>
@@ -238,7 +230,7 @@
                             <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #fecaca;">
                                 <div id="balance-defi-icon" style="width: 44px; height: 44px;">⚖️</div>
                                 <div style="flex-grow: 1; overflow: hidden;">
-                                    <div class="text-truncate" style="font-size: 11px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
+                                    <div class="text-truncate" style="font-size: 11.5px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
                                     <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
                                 </div>
                                 <div style="background: #ef4444; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">OBJECTIF</div>
@@ -250,7 +242,7 @@
                     <!-- KPIs & GRAPHIQUE -->
                     <div class="dashboard-top-split">
                         <div class="kpi-grid-2x2">
-                            <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / nb convives</div></div>
+                            <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
                             <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs</div></div>
                             <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
                             <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
@@ -265,15 +257,15 @@
                         </div>
                     </div>
                     
-                    <!-- 🟢🔴 NOUVELLE ZONE : ANALYSE DES PLATS SUR LA PÉRIODE (2 ZONES SEULEMENT) -->
+                    <!-- 🟢🔴 ANALYSE DES PLATS SUR LA PÉRIODE -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (Adhésion >= 70%)</h3>
-                            <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
+                            <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
                             <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (Rejets >= 40%)</h3>
-                            <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
+                            <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
                 </div>
@@ -303,340 +295,23 @@
                 </div>
             </div>
 
-            <!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A.B.C. - Assiette Bas Carbone</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; }
-        
-        body { 
-            background: linear-gradient(135deg, #1b4332 0%, #064e3b 100%);
-            background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('image_1_borneABC.jpg');
-            background-size: cover; background-position: center; background-attachment: fixed;
-            color: #1f2937; display: flex; height: 100vh; overflow: hidden; margin: 0;
-        }
-        
-        .sidebar { 
-            width: 240px; background-color: rgba(27, 67, 50, 0.95) !important; backdrop-filter: blur(12px);
-            color: white; display: flex; flex-direction: column; padding: 15px 0; flex-shrink: 0; 
-        }
-        .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
-        .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
-        .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; overflow-y: auto; }
-        .menu-item { padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; font-weight: 600; }
-        .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
-        
-        .dev-badge-card { margin: 12px; padding: 12px 10px; background: linear-gradient(145deg, #123524 0%, #1b4332 50%, #0d281c 100%); border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; text-align: center; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); flex-shrink: 0; }
-        .dev-badge-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #f9f295; margin-bottom: 3px; }
-        .dev-badge-name { font-size: 13px; font-weight: 900; color: #f7efb2; margin-bottom: 3px; }
-        .dev-badge-email { font-size: 9px; font-weight: 700; color: #d8f3dc; text-decoration: underline; opacity: 0.9; }
-        
-        .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
-        
-        .top-bar { height: 45px; background-color: rgba(255, 255, 255, 0.88) !important; backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.5); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
-        .content-area { padding: 20px; overflow-y: auto; flex-grow: 1; }
-        .view-section { display: none; height: 100%; }
-        .view-section.active { display: block; }
-        .dashboard-wrapper { max-width: 1050px; margin: 0; display: flex; flex-direction: column; gap: 12px; }
-
-        .borne-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
-        .instruction-banner { font-size: 16px; font-weight: 900; text-align: center; padding: 12px; border-radius: 8px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; }
-
-        .progress-container { position: absolute; bottom: 10px; left: 10px; right: 10px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
-
-        .btn-scan-trigger { background-color: #059669; color: white; border: none; border-radius: 10px; padding: 16px 20px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4); transition: background-color 0.2s; }
-        .btn-scan-trigger:hover { background-color: #047857; }
-
-        .filter-period-bar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 8px; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #2d6a4f; }
-        .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
-        .btn-period { padding: 5px 12px; border: 1px solid #cbd5e1; background: rgba(248, 250, 252, 0.9); color: #334155; font-size: 11.5px; font-weight: 700; border-radius: 5px; cursor: pointer; transition: all 0.15s; }
-        .btn-period:hover { background: #e2e8f0; }
-        .btn-period.active { background: #2d6a4f; color: white; border-color: #2d6a4f; }
-        .custom-date-box { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; color: #475569; }
-        .input-date { padding: 4px 8px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 11px; background: white; }
-
-        .dashboard-top-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 12px; align-items: stretch; }
-        .kpi-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, 1fr); gap: 10px; }
-
-        .kpi-card { background: rgba(255, 255, 255, 0.92) !important; backdrop-filter: blur(10px); border-radius: 8px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(255, 255, 255, 0.7); }
-        .kpi-blue { border-top: 4px solid #3b82f6; } .kpi-green { border-top: 4px solid #10b981; } .kpi-yellow { border-top: 4px solid #eab308; } .kpi-red { border-top: 4px solid #ef4444; }
-        .kpi-left { text-align: left; display: flex; flex-direction: column; justify-content: center; }
-        .kpi-val { font-size: 17px; font-weight: 900; color: #0f172a; line-height: 1.1; margin-bottom: 2px; }
-        .kpi-lbl { font-size: 10px; font-weight: 700; color: #1e293b; text-transform: uppercase; }
-        .kpi-right { text-align: right; max-width: 100px; font-size: 8.5px; color: #475569; line-height: 1.2; font-style: italic; font-weight: 700; }
-        
-        .dashboard-col { background: rgba(255, 255, 255, 0.94) !important; backdrop-filter: blur(10px); border-radius: 8px; padding: 14px; border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .dashboard-col h3 { font-size: 13px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
-        .chart-container { position: relative; height: 130px; width: 100%; }
-
-        /* 🌟 NOUVEAU DESIGN 2 ZONES AVEC PHOTOS */
-        .gourmet-dish-card {
-            background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.1s ease;
-        }
-        .gourmet-dish-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
-        .gourmet-dish-card.plebiscite { border-left: 5px solid #10b981; }
-        .gourmet-dish-card.alerte { border-left: 5px solid #ef4444; }
-        
-        .dish-thumb-photo { 
-            width: 40px; height: 40px; border-radius: 4px; margin: 4px 4px 4px 6px; flex-shrink: 0; 
-            object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: transparent;
-        }
-        
-        .text-truncate {
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            font-size: 11px; font-weight: 900; color: #0f172a; margin-bottom: 2px;
-            width: 100%; display: block;
-        }
-
-        .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box { background: rgba(255, 255, 255, 0.9) !important; backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.6); padding: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 1050px; }
-        .report-header { border-bottom: 3px solid #1b4332; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-        .report-section-title { font-size: 12.5px; color: #1b4332; margin: 12px 0 6px 0; font-weight: 800; text-transform: uppercase; border-left: 4px solid #2d6a4f; padding-left: 6px; }
-        .report-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 11px; }
-        .report-table th, .report-table td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; }
-        .report-table th { background-color: #1b4332; color: white; font-weight: 700; }
-        .report-table tr:nth-child(even) { background-color: rgba(248, 250, 252, 0.9); }
-
-        .history-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; padding: 4px 0; max-height: 180px; overflow-y: auto; }
-        .history-day-card { background: rgba(248, 250, 252, 0.9); border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .history-day-date { font-size: 9.5px; font-weight: 700; color: #64748b; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; width: 100%; padding-bottom: 2px; }
-        .history-day-icon { font-size: 28px; line-height: 1; margin: 2px 0; }
-        .history-day-name { font-size: 10.5px; font-weight: 800; color: #1e293b; }
-        .history-day-val { font-size: 11px; font-weight: 900; color: #ef4444; background: #fee2e2; padding: 2px 5px; border-radius: 6px; }
-        
-        .btn { display: inline-block; background-color: #2d6a4f; color: white; padding: 7px 14px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; width: 100%; text-align: center; font-size: 12px; }
-        .btn:hover { background-color: #1b4332; }
-        
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 6px; }
-        .waste-control-card { padding: 10px 6px; border-radius: 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(248, 250, 252, 0.9); }
-        .waste-control-card label { font-size: 9.5px; font-weight: 700; color: #334155; text-transform: uppercase; text-align: center; min-height: 24px; display: flex; align-items: center; justify-content: center; }
-        .spinner-container { display: flex; align-items: center; gap: 3px; }
-        .btn-spinner { width: 28px; height: 20px; color: white; border: none; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 9px; display: flex; align-items: center; justify-content: center; }
-        .btn-kg { background-color: #1e3a8a; } .btn-g { background-color: #0d9488; } .btn-down { background-color: #4b5563; } 
-        .input-center { width: 55px; height: 38px; text-align: center; font-size: 14px; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 5px; color: #0f172a; background-color: white; }
-        
-        .table-responsive { overflow-x: auto; width: 100%; margin-bottom: 10px; border-radius: 5px; border: 1px solid #e5e7eb; }
-        .menu-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
-        .menu-table th { background-color: #2d6a4f; color: white; padding: 6px; text-align: left; font-size: 11px; font-weight: 600; border: 1px solid #e5e7eb; }
-        .menu-table td { padding: 6px; vertical-align: top; border: 1px solid #e5e7eb; background-color: rgba(249, 250, 251, 0.9); }
-        .sub-theme { font-size: 9.5px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 4px 0 2px 0; border-bottom: 1px dashed #cbd5e1; padding-bottom: 2px; }
-        .checkbox-label { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; font-size: 11px; cursor: pointer; color: #374151; }
-
-        .bilan-eleves-wrapper { margin-top: 12px; border-radius: 8px; background: rgba(248, 250, 252, 0.95); border: 1px solid #cbd5e1; padding: 12px; }
-        .bilan-header-box { padding: 10px; border-radius: 6px; text-align: center; background: #dcfce7; color: #166534; margin-bottom: 8px; }
-        .bilan-header-box.zone-jaune { background: #fef9c3; color: #854d0e; }
-        .bilan-header-box.zone-orange { background: #ffedd5; color: #9a3412; }
-        .bilan-header-box.zone-rouge { background: #fee2e2; color: #991b1b; }
-        .score-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9.5px; font-weight: 800; margin-bottom: 2px; background: rgba(255,255,255,0.9); }
-        .score-title { font-size: 16px; font-weight: 900; line-height: 1.1; }
-        .score-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; margin-top: 1px; }
-        
-        .eq-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; }
-        .eq-card { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 4px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
-        .eq-card-icon { font-size: 18px; line-height: 1; margin-bottom: 1px; }
-        .eq-card-val { font-size: 13px; font-weight: 900; color: #0f172a; line-height: 1.1; }
-        .eq-card-lbl { font-size: 8.5px; font-weight: 700; color: #64748b; text-align: center; line-height: 1.1; }
-        
-        .ia-feedback-area { background: white; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; font-size: 11px; }
-        .ia-feedback-area h4 { font-size: 11.5px; color: #1b4332; font-weight: 800; margin-bottom: 3px; }
-        .ia-diag-box { color: #334155; margin-bottom: 3px; font-weight: 600; }
-        .ia-challenge-box { color: #b45309; font-weight: 700; background: #fffbeb; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #f59e0b; }
-
-        @media print {
-            body { background: white; height: auto; overflow: visible; }
-            .sidebar, .top-bar, .btn { display: none !important; }
-            .main-container { overflow: visible; }
-            .content-area { padding: 0; overflow: visible; }
-            .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar">
-        <div class="sidebar-brand">🌱 Projet A.B.C.</div>
-        <div class="sidebar-subtitle">Assiette Bas Carbone</div>
-
-        <ul class="sidebar-menu">
-            <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
-            <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
-            <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖️ Saisie des Déchets</li>
-
-            <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default;">L'Espace des Éco-Délégués</li>
-
-            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Éco-Délégués (Menu)</li>
-            <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
-        </ul>
-
-        <!-- Plaque Hub IA EPS -->
-        <div class="dev-badge-card">
-            <div class="dev-badge-title">Architecture & Conception</div>
-            <div class="dev-badge-name">Thierry Armant</div>
-            <div class="dev-badge-email">thierry.armant@ac-aix-marseille.fr</div>
-        </div>
-    </div>
-
-    <div class="main-container">
-        <div class="top-bar">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <label style="font-weight: 700; font-size: 11px; color: #1b4332;">🏫 ÉTABLISSEMENT :</label>
-                <select id="select-etablissement" onchange="changeEtablissement()" style="padding: 5px 10px; border-radius: 5px; border: 1.5px solid #2d6a4f; font-weight: 700; font-size: 11.5px; color: #1b4332; background-color: white;">
-                    <option>Chargement...</option>
-                </select>
-            </div>
-            <div style="font-size: 11.5px; color: #475569; font-weight: 600;" id="live-date">Service du jour</div>
-        </div>
-
-        <div class="content-area">
-            <!-- PÔLE 1 : DASHBOARD -->
-            <div id="view-dashboard" class="view-section active">
-                <div class="dashboard-wrapper">
-                    <div id="dashboard-error-banner" style="display: none; background: #fee2e2; border-left: 4px solid #ef4444; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 10px;"></div>
-
-                    <div class="filter-period-bar">
-                        <div class="filter-btn-group">
-                            <button type="button" class="btn-period active" onclick="setQuickPeriod('all', this)">Tout l'historique</button>
-                            <button type="button" class="btn-period" onclick="setQuickPeriod('3months', this)">3 derniers mois</button>
-                            <button type="button" class="btn-period" onclick="setQuickPeriod('month', this)">Ce mois-ci</button>
-                            <button type="button" class="btn-period" onclick="setQuickPeriod('7days', this)">7 derniers jours</button>
-                        </div>
-                        <div class="custom-date-box">
-                            <span>Du :</span>
-                            <input type="date" id="filter-start-date" class="input-date">
-                            <span>Au :</span>
-                            <input type="date" id="filter-end-date" class="input-date">
-                            <button type="button" class="btn-period" onclick="applyCustomDateFilter()" style="background:#1b4332; color:white; border-color:#1b4332; padding: 4px 10px;">Filtrer</button>
-                        </div>
-                    </div>
-
-                    <!-- WIDGET : LA BALANCE A.B.C. -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div style="background: rgba(236, 253, 245, 0.95); border: 1.5px solid #34d399; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <span style="font-size: 11.5px; font-weight: 800; color: #065f46; text-transform: uppercase;">🌿 Le Plateau des Fiertés (Plébiscite)</span>
-                                <span style="font-size: 16px;">🏆</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #a7f3d0;">
-                                <div id="balance-top-icon" style="width: 44px; height: 44px;">🍽️</div>
-                                <div style="flex-grow: 1; overflow: hidden;">
-                                    <div class="text-truncate" style="font-size: 11px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
-                                    <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
-                                </div>
-                                <div style="background: #10b981; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">TOP GOÛT</div>
-                            </div>
-                            <div style="font-size: 9.5px; color: #047857; font-style: italic; margin-top: 6px; text-align: center;">« Bravo aux équipes, un plat plébiscité par les élèves ! »</div>
-                        </div>
-
-                        <div style="background: rgba(254, 242, 242, 0.95); border: 1.5px solid #f87171; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <span style="font-size: 11.5px; font-weight: 800; color: #991b1b; text-transform: uppercase;">🎯 Le Défi du Service (À améliorer)</span>
-                                <span style="font-size: 16px;">⚖️</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #fecaca;">
-                                <div id="balance-defi-icon" style="width: 44px; height: 44px;">⚖️</div>
-                                <div style="flex-grow: 1; overflow: hidden;">
-                                    <div class="text-truncate" style="font-size: 11px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
-                                    <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
-                                </div>
-                                <div style="background: #ef4444; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">OBJECTIF</div>
-                            </div>
-                            <div style="font-size: 9.5px; color: #b91c1c; font-style: italic; margin-top: 6px; text-align: center;">« Ajustons les portions pour le prochain service ! »</div>
-                        </div>
-                    </div>
-
-                    <!-- KPIs & GRAPHIQUE -->
-                    <div class="dashboard-top-split">
-                        <div class="kpi-grid-2x2">
-                            <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / nb convives</div></div>
-                            <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs</div></div>
-                            <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
-                            <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
-                        </div>
-
-                        <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
-                            <h3>♻️ Répartition des biodéchets</h3>
-                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
-                            <div class="chart-container">
-                                <canvas id="chart-timeline"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 🟢🔴 NOUVELLE ZONE : ANALYSE DES PLATS SUR LA PÉRIODE (2 ZONES SEULEMENT) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (Adhésion >= 70%)</h3>
-                            <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
-                        </div>
-                        <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (Rejets >= 40%)</h3>
-                            <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
-            <div id="view-borne" class="view-section">
-                <div class="borne-container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <div id="instruction-text" class="instruction-banner state-searching" style="flex-grow: 1; margin-bottom: 0;">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
-                        <button type="button" class="btn-period" onclick="toggleBorneFullscreen()" style="background: #1b4332; color: white; padding: 8px 12px; font-size: 11px; font-weight: bold; border-radius: 6px;">⛶ Plein écran</button>
-                    </div>
-
-                    <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; margin-bottom: 8px;">
-                        <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source vidéo :</label>
-                        <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; background: #fff;"></select>
-                    </div>
-
-                    <div style="position: relative; flex-grow: 1; min-height: 300px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 12px;">
-                        <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
-                        <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
-                    </div>
-
-                    <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()"><span>📸</span><span>APPUYEZ POUR SCANNER LE PLATEAU</span></button>
-                    
-                    <div style="margin-top: 8px; font-size: 11px; color: #475569; text-align: center;">Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span></div>
-                </div>
-            </div>
-
-            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Anciennement Cuisinier) -->
+            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
-                    </div>
-
-                    <!-- GESTION DES EFFECTIFS -->
-                    <div style="display: flex; gap: 12px; margin-bottom: 20px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1px solid #cbd5e1;">
-                        <div style="flex: 1; min-width: 140px;">
-                            <label style="font-size: 12px; font-weight: bold; color: #334155; display: block; margin-bottom: 4px;">Midi - Service 1 (Effectif attendu) :</label>
-                            <input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 13px; font-weight: bold;">
-                        </div>
-                        <div style="flex: 1; min-width: 140px;">
-                            <label style="font-size: 12px; font-weight: bold; color: #334155; display: block; margin-bottom: 4px;">Midi - Service 2 (Effectif attendu) :</label>
-                            <input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 13px; font-weight: bold;">
-                        </div>
-                        <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div style="margin-bottom: 6px; font-size: 13px; color: #475569;">Total convives : <span id="lbl-total-attendus" style="font-weight: 900; color: #16a34a; font-size: 16px;">450</span></div>
-                            <button class="btn" onclick="saveExpectedMeals()" style="background-color: #1e293b; padding: 10px; font-size: 12px;">💾 Valider les effectifs</button>
+                        <!-- Remplacement des services manuels par le compteur automatique de scans -->
+                        <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 12px; border-radius: 6px; color: #0369a1; font-weight: 800; font-size: 13px;">
+                            🤖 Plateaux analysés aujourd'hui : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
                         </div>
                     </div>
 
                     <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour (Briques modulaires)</h3>
-                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Sélectionnez la base et l'ajout, ou utilisez le champ "Autre" si le plat n'est pas dans la liste.</p>
+                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Sélectionnez la base et l'ajout. N'oubliez pas de cocher <strong>"Fait Maison"</strong> pour valoriser le travail de la cuisine !</p>
                     
                     <div class="table-responsive">
-                        <table class="menu-table" style="min-width: 850px;">
+                        <table class="menu-table" style="min-width: 900px;">
                             <thead>
                                 <tr>
                                     <th style="width: 25%;">🥗 ENTRÉES</th>
@@ -650,12 +325,13 @@
                                     <!-- COLONNE ENTRÉES -->
                                     <td>
                                         <div class="sub-theme">Bases (Choisir)</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur"> Œuf dur</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie (Saucisson/Jambon)</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte / Friand</label>
 
@@ -664,77 +340,127 @@
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Roquefort/Bleu"> + Roquefort / Bleu</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Vinaigrette"> + Vinaigrette</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mayonnaise"> + Mayonnaise</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
+                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="entree_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
+
+                                        <div id="favs_container_entree" class="local-favs-box" style="display: none;"></div>
 
                                         <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Entrée (Saisie libre)</div>
-                                        <input type="text" id="entree_libre" placeholder="Ex: Soupe de potiron..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="entree_libre" placeholder="Ex: Soupe..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('entree')" title="Mémoriser pour ce collège">🌟</button>
+                                        </div>
                                     </td>
                                     
                                     <!-- COLONNE PLATS -->
                                     <td>
-                                        <div class="sub-theme">Bases (Choisir)</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet rôti / Cuisse"> Poulet rôti / Cuisse</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet tex-mex"> Poulet tex-mex</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson blanc (Colin/Lieu)"> Poisson blanc (Colin/Lieu)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané"> Poisson pané</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Sauté de porc/veau"> Sauté de viande</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Galette végétale"> Galette végétale</label>
+                                        <div class="sub-theme">Plats Complets</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Paella"> Paella</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Gardiane de Taureau"> Gardiane de Taureau</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Chili (Con Carné/Végé)"> Chili (Con Carné/Végé)</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes</label>
 
-                                        <div class="sub-theme" style="margin-top: 8px;">Options / Sauces</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Crème/Fromage"> + Sauce Crème/Fromage</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Curry/Épices"> + Sauce Curry/Épices</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Au jus / Nature"> + Au jus / Nature</label>
+                                        <div class="sub-theme" style="margin-top: 8px;">Viandes & Poissons</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet rôti / Cuisse"> Poulet rôti / Cuisse</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet tex-mex"> Poulet tex-mex</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Sauté de viande (Veau/Porc)"> Sauté de viande (Veau/Porc)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Bœuf Bourguignon"> Bœuf Bourguignon</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson (Blanc/Saumon)"> Poisson (Blanc/Saumon)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané / Kebab Fish"> Poisson pané / Kebab Fish</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette / Cordons Bleus"> Omelette / Cordons Bleus</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px;">Options / Sauces / Garnitures</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Merguez"> + Merguez</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate / Bolognaise</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Champignons"> + Sauce Champignons</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Poivre"> + Sauce au Poivre</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Aux Olives"> + Aux Olives</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
+                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="plat_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
+
+                                        <div id="favs_container_plat" class="local-favs-box" style="display: none;"></div>
 
                                         <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Plat (Saisie libre)</div>
-                                        <input type="text" id="plat_libre" placeholder="Ex: Couscous merguez..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="plat_libre" placeholder="Ex: Kebab viande..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('plat')" title="Mémoriser pour ce collège">🌟</button>
+                                        </div>
                                     </td>
 
                                     <!-- COLONNE ACCOMPAGNEMENTS -->
                                     <td>
                                         <div class="sub-theme">Féculents</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites"> Frites</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes</label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes / Coquillettes</label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour"> Semoule / Boulgour</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée / Pommes rissolées"> Pommes de terre (Purée/Rissolées)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour / Épeautre</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles</label>
                                         
                                         <div class="sub-theme" style="margin-top: 8px;">Légumes</div>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux-fleurs</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Poêlée"> Ratatouille / Poêlée légumes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes Vichy"> Petits pois / Carottes Vichy</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines</label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Endives cuites"> Endives cuites</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Gratin courgettes"> Gratin courgettes</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
+                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="accomp_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
+
+                                        <div id="favs_container_accomp" class="local-favs-box" style="display: none;"></div>
 
                                         <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Accomp. (Saisie libre)</div>
-                                        <input type="text" id="accomp_libre" placeholder="Ex: Lentilles..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="accomp_libre" placeholder="Ex: Haricots blancs..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('accomp')" title="Mémoriser pour ce collège">🌟</button>
+                                        </div>
                                     </td>
 
                                     <!-- COLONNE DESSERTS & LAITAGES -->
                                     <td>
                                         <div class="sub-theme">Laitages</div>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt nature/aromatisé"> Yaourt nature/aromatisé</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt aux fruits mixés"> Yaourt aux fruits mixés</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage portion (Kiri/Babybel)"> Fromage portion (Kiri/Gouda)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage portion"> Fromage portion</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage à la coupe"> Fromage à la coupe</label>
 
                                         <div class="sub-theme" style="margin-top: 8px;">Fruits & Douceurs</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Fruit de saison (Pomme/Banane)"> Fruit de saison (Pomme/Banane)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Fruit de saison"> Fruit de saison</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Compote"> Compote</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Crème dessert / Liégeois"> Crème dessert / Liégeois</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Île flottante"> Île flottante</label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie (Tarte/Gâteau/Flan)"> Pâtisserie (Tarte/Gâteau/Flan)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Glace / Glace à l'eau"> Glace / Glace à l'eau</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
+                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="dessert_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
+
+                                        <div id="favs_container_dessert" class="local-favs-box" style="display: none;"></div>
 
                                         <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Dessert (Saisie libre)</div>
-                                        <input type="text" id="dessert_libre" placeholder="Ex: Mousse au chocolat..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="dessert_libre" placeholder="Ex: Mousse..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('dessert')" title="Mémoriser pour ce collège">🌟</button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     
+                    <!-- GESTION DES EFFECTIFS DECLARATIFS -->
+                    <div style="display: flex; gap: 12px; margin-top: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1px solid #cbd5e1; align-items: center;">
+                        <div style="font-size: 13px; font-weight: 800; color: #1b4332;">👥 Effectif global attendu (pour le calcul EGAlim) :</div>
+                        <input type="number" id="convives-total" value="450" onchange="saveExpectedMeals()" style="width: 100px; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 14px; font-weight: bold; text-align: center;">
+                    </div>
+
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
                         <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #047857; font-size: 14px; padding: 12px;">✅ VALIDER LE MENU POUR LA BORNE</button>
                     </div>
@@ -968,55 +694,35 @@
             "Salade verte": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
             "Céleri rémoulade": { url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&q=80", emoji: "🥗" },
             "Œuf mayonnaise": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
-            "Taboulé / Salade variée": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
-            "Taboulé aux légumes maison": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
-            "Salade endives noix roquefort": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
-            "Œufs mimosa": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
-            "Salade boulgour tomates oignons": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
-            "Saucisson": { url: "https://images.unsplash.com/photo-1555507036-ab1f40ce88cb?w=150&q=80", emoji: "🥖" },
-            "Jambon de pays": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🍖" },
-            "Jambon blanc": { url: "https://images.unsplash.com/photo-1517093751761-b9a3dc8fcd21?w=150&q=80", emoji: "🍖" },
-            "Pâté / Terrine": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🥧" },
-            "Quiche / Tarte salée": { url: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80", emoji: "🥧" },
-            "Pizza": { url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&q=80", emoji: "🍕" },
-            "Poulet rôti": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
+            "Taboulé": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
+            "Salade d'endives": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
+            "Charcuterie": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🍖" },
+            "Quiche / Tarte": { url: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80", emoji: "🥧" },
+            "Poulet rôti / Cuisse": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
             "Poulet tex-mex": { url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=150&q=80", emoji: "🍗" },
-            "Nuggets": { url: "https://images.unsplash.com/photo-1562967914-608f82629710?w=150&q=80", emoji: "🍗" },
-            "Escalope de dinde": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍗" },
-            "Cuisse de poulet miel-épices": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
-            "Steak haché": { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80", emoji: "🥩" },
-            "Rôti de porc/bœuf": { url: "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80", emoji: "🥩" },
-            "Boulettes de bœuf": { url: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=150&q=80", emoji: "🧆" },
-            "Saucisse fraîche": { url: "https://images.unsplash.com/photo-1528607929212-2636ec44253e?w=150&q=80", emoji: "🌭" },
-            "Cordon bleu": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍖" },
+            "Poisson blanc (Colin/Lieu)": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
             "Poisson pané": { url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&q=80", emoji: "🐟" },
-            "Filet de colin": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
-            "Beignet de calamar": { url: "https://images.unsplash.com/photo-1605333396914-2314dce27636?w=150&q=80", emoji: "🦑" },
-            "Galette de céréales": { url: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=150&q=80", emoji: "🥞" },
-            "Lasagnes végétariennes": { url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80", emoji: "🍝" },
+            "Steak haché / Boulettes": { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80", emoji: "🥩" },
+            "Sauté de porc/veau": { url: "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80", emoji: "🥩" },
+            "Galette végétale": { url: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=150&q=80", emoji: "🥞" },
+            "Lasagnes": { url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80", emoji: "🍝" },
             "Frites": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
-            "Pâtes / Radiatori": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
+            "Pâtes": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
             "Riz": { url: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80", emoji: "🍚" },
             "Semoule / Boulgour": { url: "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80", emoji: "🥣" },
-            "Purée": { url: "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80", emoji: "🥔" },
+            "Purée / Pommes rissolées": { url: "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80", emoji: "🥔" },
             "Haricots verts": { url: "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&q=80", emoji: "🟢" },
-            "Ratatouille": { url: "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80", emoji: "🍆" },
-            "Brocolis": { url: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80", emoji: "🥦" },
+            "Ratatouille / Poêlée": { url: "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80", emoji: "🍆" },
+            "Brocolis / Choux": { url: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80", emoji: "🥦" },
             "Petits pois / Carottes": { url: "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80", emoji: "🥕" },
-            "Pomme / Banane": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍎" },
-            "Fruit de saison": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍏" },
-            "Yaourt": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
-            "Portion Fromage": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
-            "Fromage affiné à la coupe": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
-            "Gâteau au chocolat": { url: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80", emoji: "🍫" },
-            "Mousse au chocolat": { url: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80", emoji: "🍫" },
-            "Tarte aux fruits / citron": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🍋" },
-            "Flan / Riz au lait maison": { url: "https://images.unsplash.com/photo-1598215439218-f79b40db21ac?w=150&q=80", emoji: "🍮" },
-            "Flan patissier": { url: "https://images.unsplash.com/photo-1598215439218-f79b40db21ac?w=150&q=80", emoji: "🍮" },
+            "Fruit de saison": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍎" },
+            "Yaourt nature/aromatisé": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
+            "Yaourt aux fruits mixés": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
+            "Fromage portion": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
+            "Fromage à la coupe": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
+            "Crème dessert / Liégeois": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
             "Île flottante": { url: "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80", emoji: "🍮" },
-            "Tarte pommes": { url: "https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=150&q=80", emoji: "🥧" },
-            "Crème dessert vanille / chocolat": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
-            "Pain": { url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&q=80", emoji: "🥖" }
+            "Pâtisserie": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" }
         };
 
         function normalizeDate(raw) {
@@ -1081,6 +787,51 @@
             }, 30000);
         });
 
+        // 🌟 NOUVEAU : SYSTÈME DE FAVORIS LOCAUX
+        function addLocalFavorite(type) {
+            let inputField = document.getElementById(type + '_libre');
+            let val = inputField.value.trim();
+            if(!val) return;
+
+            let school = document.getElementById('select-etablissement').value;
+            let key = `favs_${school}_${type}`;
+            let favs = JSON.parse(localStorage.getItem(key) || '[]');
+            if(!favs.includes(val)) {
+                favs.push(val);
+                localStorage.setItem(key, JSON.stringify(favs));
+            }
+            inputField.value = "";
+            renderLocalFavorites();
+        }
+
+        function removeLocalFavorite(type, val) {
+            let school = document.getElementById('select-etablissement').value;
+            let key = `favs_${school}_${type}`;
+            let favs = JSON.parse(localStorage.getItem(key) || '[]');
+            favs = favs.filter(f => f !== val);
+            localStorage.setItem(key, JSON.stringify(favs));
+            renderLocalFavorites();
+        }
+
+        function renderLocalFavorites() {
+            let school = document.getElementById('select-etablissement').value;
+            ['entree', 'plat', 'accomp', 'dessert'].forEach(type => {
+                let container = document.getElementById(`favs_container_${type}`);
+                if(!container) return;
+                let favs = JSON.parse(localStorage.getItem(`favs_${school}_${type}`) || '[]');
+                container.innerHTML = "";
+                if(favs.length > 0) {
+                    container.style.display = "block";
+                    favs.forEach(f => {
+                        let fieldName = type === "accomp" ? "accomp_leg" : (type === "entree" ? "entree_base" : (type === "plat" ? "plat_base" : "dessert_douceur"));
+                        container.innerHTML += `<label class="checkbox-label" style="display:inline-flex; align-items:center; background:white; padding:2px 6px; border-radius:4px; margin-right:4px; border:1px solid #10b981;"><input type="checkbox" name="${fieldName}" value="${f}"> 🌟 ${f} <span style="color:#ef4444; margin-left:8px; cursor:pointer; font-weight:bold;" onclick="removeLocalFavorite('${type}', '${f}')" title="Supprimer ce favori">✖</span></label>`;
+                    });
+                } else {
+                    container.style.display = "none";
+                }
+            });
+        }
+
         function setQuickPeriod(type, btnElem) {
             document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
             if (btnElem) btnElem.classList.add('active');
@@ -1113,17 +864,18 @@
             if (!globalRawData || !globalRawData.sacsHistory) return;
 
             const sh = globalRawData.sacsHistory;
-            const effectif = globalRawData.effectifCouverts || 450;
+            const school = document.getElementById('select-etablissement').value;
+            const effectif = parseInt(document.getElementById('convives-total').value) || parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
             
             let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
-            let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
+            let nbJours = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
+                    nbJours++;
                     let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i];
                     totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
-                    lastAlimG = a * 1000; lastFruitsG = f * 1000; lastPainG = p * 1000;
                 }
             }
 
@@ -1136,35 +888,99 @@
                 });
             }
 
+            // 🌟 Mise à jour du compteur automatique de scans
+            let totalScansToday = 0;
+            const todayIsoStr = new Date().toISOString().split('T')[0];
+            if (globalRawData.rawGaspillage) {
+                totalScansToday = globalRawData.rawGaspillage.filter(s => normalizeDate(s.dateRaw) === todayIsoStr).length;
+            }
+            let compteurScanElem = document.getElementById('compteur-scans-jour');
+            if (compteurScanElem) compteurScanElem.innerText = totalScansToday;
+
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
-            let totalLastNourritureG = lastAlimG + lastFruitsG + lastPainG;
-            let avgGrams = effectif > 0 ? (totalLastNourritureG / effectif) : 0;
+            
+            let evitablesG = (totalAlimKg + totalPainKg) * 1000;
+            let inevitablesG = totalFruitsKg * 1000;
+            let totalBioG = evitablesG + inevitablesG;
+
+            let avgGrams = (nbJours > 0 && effectif > 0) ? (totalBioG / (effectif * nbJours)) : 0;
 
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
-
-            let evitablesG = lastAlimG + lastPainG;
-            let inevitablesG = lastFruitsG;
-            let totalBioG = evitablesG + inevitablesG;
-
-            document.getElementById('biodiff-total').innerText = `Total : ${totalBioG.toFixed(0)} g`;
+            document.getElementById('biodiff-total').innerText = `Total Période : ${totalBioG.toFixed(0)} g`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
             chartTimeline.update();
 
-            document.getElementById('report-school-name').innerText = document.getElementById('select-etablissement').value;
+            document.getElementById('report-school-name').innerText = school;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('rep-kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('rep-kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
 
             runGranularExtraction(filteredScans);
+            updateHistoryMode('day');
 
-            if (sh.alimentaire.length > 0) {
-                const idx = sh.alimentaire.length - 1;
-                renderBilanEleves(sh.alimentaire[idx], sh.fruits[idx], sh.pain[idx], effectif);
+            if (nbJours > 0) {
+                renderBilanEleves(totalAlimKg/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
+            } else {
+                document.getElementById('bilan-eleves-container').style.display = "none";
             }
+        }
+
+        function updateHistoryMode(mode) {
+            if (!globalRawData || !globalRawData.sacsHistory || globalRawData.sacsHistory.labels.length === 0) return;
+            const gridContainer = document.getElementById('history-main-waste-grid');
+            gridContainer.innerHTML = "";
+            let mapAccumulator = {};
+            let cache = globalRawData.sacsHistory;
+
+            let startDate = document.getElementById('filter-start-date').value || "2000-01-01";
+            let endDate = document.getElementById('filter-end-date').value || "2099-12-31";
+
+            for (let i = 0; i < cache.labels.length; i++) {
+                let isoDate = normalizeDate(cache.datesRaw[i]); 
+                let labelDate = cache.labels[i];
+                if (!isoDate) continue;
+                if (isoDate < startDate || isoDate > endDate) continue;
+
+                let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
+                if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
+                mapAccumulator[timeKey].alim += parseFloat(cache.alimentaire[i]) || 0;
+                mapAccumulator[timeKey].fruits += parseFloat(cache.fruits[i]) || 0;
+                mapAccumulator[timeKey].pain += parseFloat(cache.pain[i]) || 0;
+                mapAccumulator[timeKey].emb += parseFloat(cache.emballages[i]) || 0;
+                mapAccumulator[timeKey].serv += parseFloat(cache.serviettes[i]) || 0;
+            }
+
+            const keys = Object.keys(mapAccumulator);
+            if (keys.length === 0) {
+                gridContainer.innerHTML = "<p style='color:#64748b; font-size:12px; text-align:center; padding:15px; grid-column:1/-1;'>Aucune donnée sur cette période.</p>";
+                return;
+            }
+
+            keys.forEach(dateKey => {
+                let data = mapAccumulator[dateKey];
+                let items = [
+                    { name: "Plats alim.", val: data.alim, icon: "🍖" },
+                    { name: "Fruits", val: data.fruits, icon: "🍏" },
+                    { name: "Pain", val: data.pain, icon: "🥖" },
+                    { name: "Emballages", val: data.emb, icon: "📦" },
+                    { name: "Serviettes", val: data.serv, icon: "📃" }
+                ];
+                items.sort((a, b) => b.val - a.val);
+                let topItem = items[0];
+
+                const card = document.createElement('div');
+                card.className = "history-day-card";
+                card.innerHTML = `<div class="history-day-date">${dateKey}</div><div class="history-day-icon">${topItem.icon}</div><div class="history-day-name">${topItem.name}</div><div class="history-day-val">${topItem.val.toFixed(1)} kg</div>`;
+                gridContainer.appendChild(card);
+            });
+
+            document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
+            let targetBtn = document.getElementById('btn-hist-' + mode);
+            if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
         // 🔄 ANALYSE PAR COMPOSANTE : ALGORITHME CORRIGÉ ET STRICT
@@ -1178,7 +994,14 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            let referenceAliments = Object.keys(FOOD_THUMBNAILS);
+            // Fusion du catalogue dur ET des favoris locaux
+            let school = document.getElementById('select-etablissement').value;
+            let localItems = [];
+            ['entree', 'plat', 'accomp', 'dessert'].forEach(type => {
+                let favs = JSON.parse(localStorage.getItem(`favs_${school}_${type}`) || '[]');
+                localItems = localItems.concat(favs);
+            });
+            let referenceAliments = Array.from(new Set(Object.keys(FOOD_THUMBNAILS).concat(localItems)));
 
             let foodStats = {};
             referenceAliments.forEach(aliment => {
@@ -1218,7 +1041,7 @@
                 let rejetPct = 100 - tauxMange;
                 
                 let cleanLabel = getCleanLabel(aliment);
-                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
+                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🌟" };
 
                 let itemObj = {
                     label: cleanLabel,
@@ -1412,6 +1235,7 @@
             
             if (viewId === 'view-borne') initCamera(); else stopCamera();
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport') loadLiveData(); 
+            if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
 
         function loadLiveData() {
@@ -1428,6 +1252,8 @@
 
                 if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
                     localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
+                    let displayMenu = document.getElementById('borne-menu-active');
+                    if(displayMenu) displayMenu.innerText = data.dernierMenu.substring(0, 50) + "...";
                 }
 
                 if (data.effectifCouverts) {
@@ -1435,10 +1261,9 @@
                     let s1 = parts[0] ? parseInt(parts[0]) : 0;
                     let s2 = parts[1] ? parseInt(parts[1]) : 0;
                     if(s1 > 0 || s2 > 0) {
-                        localStorage.setItem(`convives-s1-${school}`, s1); 
-                        localStorage.setItem(`convives-s2-${school}`, s2); 
                         localStorage.setItem(`totalConvives-${school}`, s1 + s2);
-                        loadExpectedMealsForSchool(school);
+                        let totalInput = document.getElementById('convives-total');
+                        if(totalInput) totalInput.value = s1 + s2;
                     }
                 }
 
@@ -1469,6 +1294,7 @@
             document.getElementById('biodiff-total').innerText = "Total : 0 g";
             document.getElementById('period-adhesion-grid').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
             document.getElementById('period-rejets-grid').innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
+            if(document.getElementById('compteur-scans-jour')) document.getElementById('compteur-scans-jour').innerText = "0";
         }
 
         function adjustWeight(id, value) {
@@ -1493,6 +1319,7 @@
             const reportSchoolElem = document.getElementById('report-school-name');
             if (reportSchoolElem) reportSchoolElem.innerText = school;
             loadExpectedMealsForSchool(school); 
+            renderLocalFavorites();
             loadLiveData();
         }
 
@@ -1502,10 +1329,15 @@
             document.getElementById('convives-s1').value = s1; 
             document.getElementById('convives-s2').value = s2; 
             document.getElementById('lbl-total-attendus').innerText = s1 + s2;
+            let totalInput = document.getElementById('convives-total');
+            if(totalInput) totalInput.value = s1 + s2;
         }
 
         function updateExpectedMeals() { 
-            document.getElementById('lbl-total-attendus').innerText = (parseInt(document.getElementById('convives-s1').value)||0) + (parseInt(document.getElementById('convives-s2').value)||0); 
+            let total = (parseInt(document.getElementById('convives-s1').value)||0) + (parseInt(document.getElementById('convives-s2').value)||0);
+            document.getElementById('lbl-total-attendus').innerText = total; 
+            let totalInput = document.getElementById('convives-total');
+            if(totalInput) totalInput.value = total;
         }
 
         function saveExpectedMeals() {
@@ -1580,48 +1412,52 @@
         }
 
         function getCurrentCheckedMenu() {
-            // Assemblage dynamique des entrées
             let entrees = Array.from(document.querySelectorAll('input[name="entree_base"]:checked')).map(el => el.value);
             let entreesOpt = Array.from(document.querySelectorAll('input[name="entree_opt"]:checked')).map(el => el.value);
+            let entreeMaison = document.querySelector('input[name="entree_maison"]:checked') ? " 🧑‍🍳" : "";
             let entreeLibre = document.getElementById('entree_libre').value.trim();
+            
             let entreeFinal = entrees.length > 0 ? entrees.join(' + ') : "";
             if (entreesOpt.length > 0 && entreeFinal) entreeFinal += " (" + entreesOpt.join(', ') + ")";
             if (entreeLibre) entreeFinal = entreeFinal ? entreeFinal + " / " + entreeLibre : entreeLibre;
+            if (entreeFinal && entreeMaison) entreeFinal += entreeMaison;
             if (!entreeFinal) entreeFinal = "Sans entrée";
 
-            // Assemblage dynamique des plats
             let plats = Array.from(document.querySelectorAll('input[name="plat_base"]:checked')).map(el => el.value);
             let platsOpt = Array.from(document.querySelectorAll('input[name="plat_opt"]:checked')).map(el => el.value);
+            let platMaison = document.querySelector('input[name="plat_maison"]:checked') ? " 🧑‍🍳" : "";
             let platLibre = document.getElementById('plat_libre').value.trim();
+            
             let platFinal = plats.length > 0 ? plats.join(' + ') : "";
             if (platsOpt.length > 0 && platFinal) platFinal += " (" + platsOpt.join(', ') + ")";
             if (platLibre) platFinal = platFinal ? platFinal + " / " + platLibre : platLibre;
+            if (platFinal && platMaison) platFinal += platMaison;
             if (!platFinal) platFinal = "Sans plat";
 
-            // Assemblage dynamique des accompagnements
             let accompsBase = Array.from(document.querySelectorAll('input[name="accomp_base"]:checked')).map(el => el.value);
             let accompsLeg = Array.from(document.querySelectorAll('input[name="accomp_leg"]:checked')).map(el => el.value);
+            let accompMaison = document.querySelector('input[name="accomp_maison"]:checked') ? " 🧑‍🍳" : "";
             let accompLibre = document.getElementById('accomp_libre').value.trim();
+            
             let accompFinalList = accompsBase.concat(accompsLeg);
             let accompFinal = accompFinalList.length > 0 ? accompFinalList.join(' + ') : "";
             if (accompLibre) accompFinal = accompFinal ? accompFinal + " / " + accompLibre : accompLibre;
+            if (accompFinal && accompMaison) accompFinal += accompMaison;
             if (!accompFinal) accompFinal = "Sans accomp.";
 
-            // Assemblage dynamique des desserts
             let dessertsLait = Array.from(document.querySelectorAll('input[name="dessert_lait"]:checked')).map(el => el.value);
             let dessertsDouceur = Array.from(document.querySelectorAll('input[name="dessert_douceur"]:checked')).map(el => el.value);
+            let dessertMaison = document.querySelector('input[name="dessert_maison"]:checked') ? " 🧑‍🍳" : "";
             let dessertLibre = document.getElementById('dessert_libre').value.trim();
+            
             let dessertFinalList = dessertsLait.concat(dessertsDouceur);
             let dessertFinal = dessertFinalList.length > 0 ? dessertFinalList.join(' + ') : "";
             if (dessertLibre) dessertFinal = dessertFinal ? dessertFinal + " / " + dessertLibre : dessertLibre;
+            if (dessertFinal && dessertMaison) dessertFinal += dessertMaison;
             if (!dessertFinal) dessertFinal = "Sans dessert";
 
-            // Si absolument rien n'a été coché ni écrit
-            if (entreeFinal === "Sans entrée" && platFinal === "Sans plat" && accompFinal === "Sans accomp." && dessertFinal === "Sans dessert") {
-                return null;
-            }
+            if (entreeFinal === "Sans entrée" && platFinal === "Sans plat" && accompFinal === "Sans accomp." && dessertFinal === "Sans dessert") return null;
 
-            // Concaténation finale pour l'envoi au serveur
             return `${entreeFinal} | ${platFinal} | ${accompFinal} | ${dessertFinal}`;
         }
 
@@ -1630,19 +1466,22 @@
             const menuFinal = getCurrentCheckedMenu();
             if (!menuFinal) { alert("Veuillez cocher au moins un élément ou remplir un champ libre pour activer le menu du jour."); return; }
             
-            // Met à jour l'affichage de la Borne avec le menu simplifié pour la lisibilité
-            document.getElementById('borne-menu-active').innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
+            let displayMenu = document.getElementById('borne-menu-active');
+            if(displayMenu) displayMenu.innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
             localStorage.setItem(`menuActive-${school}`, menuFinal);
+
+            // Enregistrer l'effectif déclaré
+            let effectifSaisi = parseInt(document.getElementById('convives-total').value) || 450;
+            localStorage.setItem(`totalConvives-${school}`, effectifSaisi);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "logMenu", ecole: school, effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450, menu_complet: menuFinal }) 
+                body: JSON.stringify({ action: "logMenu", ecole: school, effectif: effectifSaisi, menu_complet: menuFinal }) 
             })
             .then(r => r.json())
             .then(res => {
                 if(res.success) { 
                     alert('✅ Menu validé et activé pour le service ! Les éco-délégués peuvent démarrer la borne.'); 
-                    // Vide les champs libres après validation
                     document.getElementById('entree_libre').value = "";
                     document.getElementById('plat_libre').value = "";
                     document.getElementById('accomp_libre').value = "";
@@ -1705,137 +1544,7 @@
 
         function printOrPDF() {
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
-            if (!content || content.includes("en cours")) { alert("Veuillez d'abord lancer une analyse."); return; }
-            const win = window.open('', '_blank');
-            win.document.write('<html><head><title>Audit_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;} h2{color:#1b4332;border-bottom:2px solid #1b4332;} p{margin-bottom:10px;}</style></head><body><h2>🌱 Audit - Plan Alimentaire</h2>' + content + '</body></html>');
-            win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 300);
-        }
-
-        function formatAIResponseToUI(text) {
-            if (text.includes('<div') || text.includes('<table')) return text;
-            let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 700;">$1</strong>').replace(/\*(.*?)\*/g, '<span style="font-style: normal;">$1</span>');
-            const lines = cleanText.split('\n'); let output = ""; let listeOuverte = false; let tableLines = [];
-            function flushTable() { if (tableLines.length > 0) { output += renderMarkdownTable(tableLines); tableLines = []; } }
-
-            for (let line of lines) {
-                let currentLine = line.trim(); 
-                if (currentLine === "") continue;
-                if (currentLine.startsWith('|') && currentLine.endsWith('|')) { if (listeOuverte) { output += '</ul>'; listeOuverte = false; } tableLines.push(currentLine); continue; } else { flushTable(); }
-
-                if (currentLine.startsWith('#') || currentLine.includes('Partie')) {
-                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    output += `<div style="font-weight: 800; font-size: 13px; color: #1b4332; margin: 12px 0 6px 0; text-transform: uppercase; border-bottom: 1.5px solid #2d6a4f;">${currentLine.replace(/^#+\s*/, '')}</div>`;
-                } else if (currentLine.startsWith('*') || currentLine.startsWith('-') || currentLine.startsWith('•')) {
-                    if (!listeOuverte) { output += '<ul style="margin-left: 18px; margin-bottom: 6px;">'; listeOuverte = true; }
-                    output += `<li style="margin-bottom: 5px; font-size: 11.5px; line-height: 1.5;">${currentLine.replace(/^[\*\-\•]\s*/, '')}</li>`;
-                } else {
-                    if (listeOuverte) { output += '</ul>'; listeOuverte = false; }
-                    output += `<p style="margin-bottom: 6px; font-size: 11.5px; line-height: 1.5;">${currentLine}</p>`;
-                }
-            }
-            flushTable(); if (listeOuverte) output += '</ul>'; return output;
-        }
-
-        function renderMarkdownTable(rows) {
-            let html = '<div class="table-responsive" style="margin: 10px 0;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">';
-            let headerProcessed = false;
-            rows.forEach((row) => {
-                if (row.includes('---')) return;
-                let cells = row.split('|').map(c => c.trim()).filter(c => c !== '');
-                if (cells.length === 0) return;
-                let tag = !headerProcessed ? 'th' : 'td';
-                let bgStyle = !headerProcessed ? 'background-color: #1b4332; color: white; font-weight: bold;' : 'background-color: #ffffff;';
-                let cellStyle = 'padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-align: left;';
-                html += '<tr>'; cells.forEach(cell => { html += `<${tag} style="${bgStyle} ${cellStyle}">${cell}</${tag}>`; }); html += '</tr>';
-                if (!headerProcessed) headerProcessed = true;
-            });
-            html += '</table></div>'; return html;
-        }
-    </script>
-</body>
-</html>
-
-        function saveMenu() {
-            const school = document.getElementById('select-etablissement').value;
-            const menuFinal = getCurrentCheckedMenu();
-            if (!menuFinal) { alert("Veuillez cocher au moins un élément ou remplir un champ libre pour activer le menu du jour."); return; }
-            
-            // Met à jour l'affichage de la Borne avec le menu simplifié pour la lisibilité
-            document.getElementById('borne-menu-active').innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
-            localStorage.setItem(`menuActive-${school}`, menuFinal);
-
-            fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "logMenu", ecole: school, effectif: parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450, menu_complet: menuFinal }) 
-            })
-            .then(r => r.json())
-            .then(res => {
-                if(res.success) { 
-                    alert('✅ Menu validé et activé pour le service ! Les éco-délégués peuvent démarrer la borne.'); 
-                    // Vide les champs libres après validation
-                    document.getElementById('entree_libre').value = "";
-                    document.getElementById('plat_libre').value = "";
-                    document.getElementById('accomp_libre').value = "";
-                    document.getElementById('dessert_libre').value = "";
-                    loadLiveData(); 
-                }
-                else { alert('❌ Erreur serveur : ' + res.error); }
-            }).catch(() => alert('❌ Erreur réseau lors de la validation du menu.'));
-        }
-
-        function runGeminiAIAnalysis() {
-            const school = document.getElementById('select-etablissement').value;
-            const menuText = getCurrentCheckedMenu();
-            const resBox = document.getElementById('gemini-ai-result-jour'); 
-            const resText = document.getElementById('gemini-ai-text-jour');
-
-            if (!menuText) { alert("⚠️ Veuillez sélectionner des éléments du menu pour lancer l'analyse."); return; }
-            resBox.style.display = "block"; resText.innerHTML = "<em>🤖 Analyse EGAlim en cours...</em>";
-            
-            fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeDailyMenu", etablissement: school, menu: menuText }) 
-            })
-            .then(r => r.json())
-            .then(res => { 
-                if (res.error) resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
-                else { let cleanedAnswer = res.answer.replace(/Valérie Briançon/gi, 'l\'équipe pédagogique'); resText.innerHTML = formatAIResponseToUI(cleanedAnswer); }
-            })
-            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA.</p>"; });
-        }
-
-        function handleMenuFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-
-            if (file.type === "text/csv" || file.name.endsWith('.csv') || file.name.endsWith('.txt')) {
-                reader.onload = function(e) { filePayloadData = { type: "text", content: e.target.result }; alert("✅ Fichier texte/CSV chargé !"); };
-                reader.readAsText(file, "UTF-8");
-            } else {
-                reader.onload = function(e) { filePayloadData = { type: "file", mimeType: file.type || "application/pdf", base64: e.target.result }; alert("✅ Document chargé pour OCR !"); };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function runCSVAIAnalysis() {
-            const school = document.getElementById('select-etablissement').value;
-            const resBox = document.getElementById('gemini-ai-result-csv'); 
-            const resText = document.getElementById('gemini-ai-text-csv');
-
-            if (!filePayloadData) { alert("⚠️ Veuillez sélectionner un fichier."); return; }
-            resBox.style.display = "block"; resText.innerHTML = "<em>🤖 Analyse matricielle en cours...</em>";
-            
-            fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeMenuWithStats", etablissement: school, payloadFile: filePayloadData }) 
-            }).then(r => r.json()).then(res => { 
-                if (res.error) resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
-                else resText.innerHTML = formatAIResponseToUI(res.answer); 
-            }).catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication.</p>"; });
-        }
-
-        function printOrPDF() {
-            const content = document.getElementById('gemini-ai-text-csv').innerHTML;
-            if (!content || content.includes("en cours")) { alert("Veuillez d'abord lancer une analyse."); return; }
+            if (!content || content.includes("en cours") || content.includes("attente")) { alert("Veuillez d'abord lancer une analyse."); return; }
             const win = window.open('', '_blank');
             win.document.write('<html><head><title>Audit_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;} h2{color:#1b4332;border-bottom:2px solid #1b4332;} p{margin-bottom:10px;}</style></head><body><h2>🌱 Audit - Plan Alimentaire</h2>' + content + '</body></html>');
             win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 300);
