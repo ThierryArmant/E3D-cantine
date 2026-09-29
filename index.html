@@ -1528,42 +1528,32 @@
             }
         }
 
-        async function initCamera(selectedDeviceId = null) {
+       async function initCamera(selectedDeviceId = null) {
             const video = document.getElementById('camera-feed');
             try {
                 if (localStream) stopCamera();
                 
-                let videoConstraints = {};
+                let videoConstraints = { width: { ideal: 640 }, height: { ideal: 480 } };
+                
                 if (selectedDeviceId) {
-                    videoConstraints = { deviceId: { exact: selectedDeviceId } };
+                    // Si tu as sélectionné une caméra précise dans la liste
+                    videoConstraints.deviceId = { exact: selectedDeviceId };
                 } else {
-                    // Force la caméra arrière par défaut sur smartphone
-                    videoConstraints = { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } };
+                    // 🌟 LA MAGIE EST ICI : "ideal" au lieu d'une contrainte stricte
+                    // Sur smartphone -> Caméra Dos. Sur PC -> Webcam normale. (0 bug !)
+                    videoConstraints.facingMode = { ideal: "environment" };
                 }
                 
                 localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
                 video.srcObject = localStream;
-                
-                video.play().catch(e => console.log("Attente d'interaction utilisateur", e));
                 resetBorneUI();
                 
-                // On peuple la liste des caméras APRES avoir eu l'autorisation
+                // On met à jour la liste des caméras une fois que le flux vidéo est autorisé
                 if (!selectedDeviceId) getAvailableCameras();
                 
             } catch (err) { 
-                if (!selectedDeviceId) {
-                    try {
-                        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                        video.srcObject = localStream;
-                        video.play().catch(e => {});
-                        resetBorneUI();
-                        getAvailableCameras();
-                    } catch(e) {
-                        document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
-                    }
-                } else {
-                    document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
-                }
+                console.error("Erreur de caméra :", err);
+                document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
             }
         }
 
