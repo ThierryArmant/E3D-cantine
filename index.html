@@ -625,30 +625,71 @@
         let naturalVoice = null;
         let filePayloadData = null; 
 
-        // 🌿 BASE DE DONNÉES DES COEFFICIENTS D'INÉVITABILITÉ (Réf ADEME / Restauration collective)
+        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES (Réf ADEME & Restauration Collective)
         const COEFFICIENTS_INEVITABLES = {
-            "poulet tex-mex": 0.30,
-            "poulet rôti / cuisse": 0.30,
-            "filet de colin": 0.10,
-            "poisson": 0.10,
-            "frites / potatoes": 0.00,
-            "tomates": 0.10,
+            // Viandes & Volailles avec os / cartilages
+            "poulet": 0.30,
+            "cuisse": 0.30,
+            "tex-mex": 0.30,
+            "rôti": 0.25,
+            "cote": 0.25,
+            "blanquette": 0.20,
+            "sauté": 0.20,
+            "bourguignon": 0.20,
+            "steak": 0.00,
+            "haché": 0.00,
+            "boulettes": 0.00,
+            "merguez": 0.10,
+            
+            // Poissons (arêtes et parures)
+            "colin": 0.10,
+            "poisson": 0.15,
+            "saumon": 0.10,
+            "cabillaud": 0.10,
+            
+            // Féculents & Garnitures
+            "frites": 0.00,
+            "potatoes": 0.00,
+            "pâtes": 0.00,
+            "riz": 0.00,
+            "semoule": 0.00,
+            "purée": 0.00,
+            "lentilles": 0.05,
+            
+            // Entrées & Légumes crus
             "salade verte": 0.10,
-            "salade d'endives": 0.15,
-            "carottes râpées": 0.05,
-            "fruit de saison": 0.20,
+            "endive": 0.15,
+            "tomate": 0.10,
+            "carotte": 0.10,
+            "concombre": 0.15,
+            "betterave": 0.10,
+            "radis": 0.20,
+            "taboulé": 0.05,
+            
+            // Fruits & Desserts
+            "fruit": 0.20,
             "pomme": 0.15,
+            "poire": 0.15,
+            "banane": 0.35,
+            "orange": 0.30,
+            "clémentine": 0.25,
+            "melon": 0.35,
+            "pastèque": 0.30,
             "yaourt": 0.00,
-            "île flottante": 0.00
+            "île flottante": 0.00,
+            "compote": 0.00
         };
 
-        function getTauxInevitablesPourPlat(nomPlat) {
-            if (!nomPlat) return 0.0;
-            let clean = nomPlat.toLowerCase().trim();
+        function getTauxInevitablesPourTexte(texte) {
+            if (!texte) return 0.0;
+            let clean = texte.toLowerCase().trim();
+            // Recherche intelligente par mots-clés dans la bibliothèque
             for (let key in COEFFICIENTS_INEVITABLES) {
-                if (clean.includes(key)) return COEFFICIENTS_INEVITABLES[key];
+                if (clean.includes(key)) {
+                    return COEFFICIENTS_INEVITABLES[key];
+                }
             }
-            return 0.0; 
+            return 0.0; // Par défaut si non trouvé
         }
 
         function initSystemVoices() {
@@ -893,9 +934,11 @@
                 }
             }
 
-            // Correction des déchets inévitables (30% d'os sur le sac alimentaire)
-            let tauxInevitableGlobal = 0.30; 
-            let poidsInevitablesAlim = totalAlimBrutKg * tauxInevitableGlobal;
+            // Application dynamique du dictionnaire d'inévitabilité basé sur le menu actif
+            let menuActif = localStorage.getItem(`menuActive-${school}`) || "poulet tex-mex";
+            let tauxInévitablePlat = getTauxInevitablesPourTexte(menuActif);
+            
+            let poidsInevitablesAlim = totalAlimBrutKg * tauxInévitablePlat;
             let poidsEvitableAlim = totalAlimBrutKg - poidsInevitablesAlim;
 
             let poidsTotalEvitable = poidsEvitableAlim + totalPainKg;
@@ -939,7 +982,7 @@
             document.getElementById('rep-kpi-money').innerText = `${(poidsTotalEvitable * 4.50).toFixed(2)} €`;
 
             runGranularExtraction(filteredScans);
-            updateHistoryMode('day');
+            updateHistoryMode('day', tauxInévitablePlat);
 
             if (nbJours > 0) {
                 renderBilanEleves(poidsTotalEvitable/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
@@ -948,7 +991,7 @@
             }
         }
 
-        function updateHistoryMode(mode) {
+        function updateHistoryMode(mode, tauxInévitableOverride = 0.30) {
             if (!globalRawData || !globalRawData.sacsHistory || globalRawData.sacsHistory.labels.length === 0) return;
             const gridContainer = document.getElementById('history-main-waste-grid');
             gridContainer.innerHTML = "";
@@ -967,9 +1010,8 @@
                 let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
                 if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
                 
-                // Correction appliquée directement dans l'historique (70% évitable, 30% inévitable)
                 let alimBrute = parseFloat(cache.alimentaire[i]) || 0;
-                mapAccumulator[timeKey].alim += alimBrute * 0.70; 
+                mapAccumulator[timeKey].alim += alimBrute * (1 - tauxInévitableOverride); 
                 mapAccumulator[timeKey].fruits += parseFloat(cache.fruits[i]) || 0;
                 mapAccumulator[timeKey].pain += parseFloat(cache.pain[i]) || 0;
                 mapAccumulator[timeKey].emb += parseFloat(cache.emballages[i]) || 0;
@@ -1037,9 +1079,16 @@
                     let keywords = alimLower.split(/[\/\+]/).map(kw => kw.trim());
                     
                     let isMatch = keywords.some(kw => {
-                        if(kw.length < 4) return false; 
+                        if(kw.length < 3) return false; 
                         return textRaw.includes(kw);
                     });
+
+                    // 🌟 Correspondance élargie pour le poulet et les viandes (si les textes parlent d'os ou de poulet)
+                    if (!isMatch && (alimLower.includes("poulet") || alimLower.includes("tex-mex"))) {
+                        if (textRaw.includes("poulet") || textRaw.includes("os") || textRaw.includes("viande")) {
+                            isMatch = true;
+                        }
+                    }
 
                     if (isMatch) {
                         foodStats[aliment].totalRestes += restePct;
