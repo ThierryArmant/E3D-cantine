@@ -269,6 +269,37 @@
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
+
+                    <!-- 🔬 SECTION : ANALYSE FINE DU MENU & FILTRAGE PAR ITEM -->
+                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">Filtrer un item :</label>
+                                <select id="select-filter-item" onchange="filtrerAnalyseFineItem()" style="padding: 5px 8px; border-radius: 5px; border: 1px solid #cbd5e1; font-size: 11px; background: white; font-weight: bold;">
+                                    <option value="all">-- Tous les items de la période --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Synthèse visuelle Vert / Rouge -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px;">
+                                <div style="font-size: 11px; font-weight: 800; color: #166534; margin-bottom: 6px; text-transform: uppercase;">🟢 Ce qui a fonctionné (Succès de service)</div>
+                                <div id="analyse-fine-vert" style="font-size: 11.5px; color: #14532d; line-height: 1.4;">Sélectionnez une période ou un item...</div>
+                            </div>
+                            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px;">
+                                <div style="font-size: 11px; font-weight: 800; color: #991b1b; margin-bottom: 6px; text-transform: uppercase;">🔴 Ce qui n'a pas marché (À ajuster / Recette)</div>
+                                <div id="analyse-fine-rouge" style="font-size: 11.5px; color: #7f1d1d; line-height: 1.4;">Sélectionnez une période ou un item...</div>
+                            </div>
+                        </div>
+
+                        <!-- Zone de détail de l'item filtré -->
+                        <div id="box-detail-item-filtré" style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 6px; padding: 10px; font-size: 11.5px; color: #334155; display: none;">
+                            <strong>📊 Bilan ciblé pour l'item :</strong> <span id="label-item-filtre-titre" style="color: #1b4332; font-weight: bold;">--</span>
+                            <div id="content-item-filtre-stats" style="margin-top: 4px; font-weight: 600;"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -296,19 +327,26 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu avec Fait Maison par ligne) -->
+            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu avec Fait Maison, Options et Date) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
+                        
+                        <!-- 📅 SÉLECTEUR DE DATE DU MENU -->
+                        <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #2d6a4f;">
+                            <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📅 Date du menu :</label>
+                            <input type="date" id="input-menu-date" class="input-date" style="padding: 4px 8px; font-weight: bold; background: white;">
+                        </div>
+
                         <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 12px; border-radius: 6px; color: #0369a1; font-weight: 800; font-size: 13px;">
                             🤖 Plateaux analysés aujourd'hui : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
                         </div>
                     </div>
 
-                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour (Briques modulaires & Fait Maison)</h3>
-                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les ingrédients du jour. Cochez la toque <strong>🧑‍🍳</strong> en face de l'élément s'il est fait maison !</p>
+                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour</h3>
+                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les éléments principaux. Les options (sauces, fromages, suppléments) sont regroupées dans la zone dédiée en bas de chaque colonne pour éviter toute confusion.</p>
                     
                     <div class="table-responsive">
                         <table class="menu-table" style="min-width: 900px;">
@@ -324,7 +362,7 @@
                                 <tr>
                                     <!-- COLONNE ENTRÉES -->
                                     <td>
-                                        <div class="sub-theme">Bases & Options</div>
+                                        <div class="sub-theme">Bases & Entrées</div>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade d'endives (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -334,6 +372,9 @@
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Œuf dur / Mayonnaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Quiche / Tarte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+
+                                        <!-- ZONE OPTIONS DÉDIÉE -->
+                                        <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Suppléments</div>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mozzarella"> + Mozzarella</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Roquefort/Bleu"> + Roquefort / Bleu</label>
@@ -364,7 +405,11 @@
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Steak haché (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson"> Poisson <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette / Cordons Bleus"> Omelette / Cordon Bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette / Cordon Bleu (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Merguez"> + Merguez</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Saucisse"> Saucisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Saucisse (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Merguez"> Merguez <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Merguez (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+
+                                        <!-- ZONE OPTIONS DÉDIÉE -->
+                                        <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Accompagnements Plats</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate / Bolognaise</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Champignons"> + Sauce Champignons</label>
@@ -625,71 +670,24 @@
         let naturalVoice = null;
         let filePayloadData = null; 
 
-        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES (Réf ADEME & Restauration Collective)
+        let globalItemsDetailedStats = {};
+
+        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES (avec saucisse et merguez)
         const COEFFICIENTS_INEVITABLES = {
-            // Viandes & Volailles avec os / cartilages
-            "poulet": 0.30,
-            "cuisse": 0.30,
-            "tex-mex": 0.30,
-            "rôti": 0.25,
-            "cote": 0.25,
-            "blanquette": 0.20,
-            "sauté": 0.20,
-            "bourguignon": 0.20,
-            "steak": 0.00,
-            "haché": 0.00,
-            "boulettes": 0.00,
-            "merguez": 0.10,
-            
-            // Poissons (arêtes et parures)
-            "colin": 0.10,
-            "poisson": 0.15,
-            "saumon": 0.10,
-            "cabillaud": 0.10,
-            
-            // Féculents & Garnitures
-            "frites": 0.00,
-            "potatoes": 0.00,
-            "pâtes": 0.00,
-            "riz": 0.00,
-            "semoule": 0.00,
-            "purée": 0.00,
-            "lentilles": 0.05,
-            
-            // Entrées & Légumes crus
-            "salade verte": 0.10,
-            "endive": 0.15,
-            "tomate": 0.10,
-            "carotte": 0.10,
-            "concombre": 0.15,
-            "betterave": 0.10,
-            "radis": 0.20,
-            "taboulé": 0.05,
-            
-            // Fruits & Desserts
-            "fruit": 0.20,
-            "pomme": 0.15,
-            "poire": 0.15,
-            "banane": 0.35,
-            "orange": 0.30,
-            "clémentine": 0.25,
-            "melon": 0.35,
-            "pastèque": 0.30,
-            "yaourt": 0.00,
-            "île flottante": 0.00,
-            "compote": 0.00
+            "poulet": 0.30, "cuisse": 0.30, "tex-mex": 0.30, "rôti": 0.25, "cote": 0.25, "blanquette": 0.20, "sauté": 0.20, "bourguignon": 0.20, "steak": 0.00, "haché": 0.00, "boulettes": 0.00, "merguez": 0.10, "saucisse": 0.05,
+            "colin": 0.10, "poisson": 0.15, "saumon": 0.10, "cabillaud": 0.10,
+            "frites": 0.00, "potatoes": 0.00, "pâtes": 0.00, "riz": 0.00, "semoule": 0.00, "purée": 0.00, "lentilles": 0.05,
+            "salade verte": 0.10, "endive": 0.15, "tomate": 0.10, "carotte": 0.10, "concombre": 0.15, "betterave": 0.10, "radis": 0.20, "taboulé": 0.05,
+            "fruit": 0.20, "pomme": 0.15, "poire": 0.15, "banane": 0.35, "orange": 0.30, "clémentine": 0.25, "melon": 0.35, "pastèque": 0.30, "yaourt": 0.00, "île flottante": 0.00, "compote": 0.00
         };
 
         function getTauxInevitablesPourTexte(texte) {
             if (!texte) return 0.0;
             let clean = texte.toLowerCase().trim();
-            // Recherche intelligente par mots-clés dans la bibliothèque
             for (let key in COEFFICIENTS_INEVITABLES) {
-                if (clean.includes(key)) {
-                    return COEFFICIENTS_INEVITABLES[key];
-                }
+                if (clean.includes(key)) return COEFFICIENTS_INEVITABLES[key];
             }
-            return 0.0; // Par défaut si non trouvé
+            return 0.0;
         }
 
         function initSystemVoices() {
@@ -752,6 +750,8 @@
             "Steak haché / Boulettes": { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80", emoji: "🥩" },
             "Poisson": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
             "Omelette / Cordons Bleus": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍳" },
+            "Saucisse": { url: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=150&q=80", emoji: "🌭" },
+            "Merguez": { url: "https://images.unsplash.com/photo-1606851094655-b2593a9af63f?w=150&q=80", emoji: "🌭" },
             "Frites / Potatoes": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
             "Pâtes": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
             "Riz": { url: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80", emoji: "🍚" },
@@ -794,9 +794,12 @@
             const startInput = document.getElementById('filter-start-date');
             const endInput = document.getElementById('filter-end-date');
             const peseeDateInput = document.getElementById('input-pesee-date');
+            const menuDateInput = document.getElementById('input-menu-date');
+
             if (startInput) startInput.value = "";
             if (endInput) endInput.value = todayIso;
             if (peseeDateInput) peseeDateInput.value = todayIso;
+            if (menuDateInput) menuDateInput.value = todayIso;
 
             chartTimeline = new Chart(document.getElementById('chart-timeline').getContext('2d'), { 
                 type: 'doughnut', 
@@ -934,7 +937,6 @@
                 }
             }
 
-            // Application dynamique du dictionnaire d'inévitabilité basé sur le menu actif
             let menuActif = localStorage.getItem(`menuActive-${school}`) || "poulet tex-mex";
             let tauxInévitablePlat = getTauxInevitablesPourTexte(menuActif);
             
@@ -1050,6 +1052,7 @@
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
+            const selectFilter = document.getElementById('select-filter-item');
             if (!containerAdhesion || !containerRejets) return;
 
             const scansValides = (scansSource || []).filter(s => {
@@ -1058,14 +1061,25 @@
             });
 
             let school = document.getElementById('select-etablissement').value;
-            let localItems = [];
-            ['entree', 'plat', 'accomp', 'dessert'].forEach(type => {
-                let favs = JSON.parse(localStorage.getItem(`favs_${school}_${type}`) || '[]');
-                localItems = localItems.concat(favs);
-            });
-            let referenceAliments = Array.from(new Set(Object.keys(FOOD_THUMBNAILS).concat(localItems)));
+            
+            let menuActifStr = localStorage.getItem(`menuActive-${school}`) || "";
+            let referenceAliments = [];
+            
+            if (menuActifStr) {
+                let parties = menuActifStr.split('|');
+                parties.forEach(partie => {
+                    let elements = partie.split('+').map(e => e.trim().replace(' 🧑‍🍳', ''));
+                    referenceAliments = referenceAliments.concat(elements);
+                });
+            }
+
+            if (referenceAliments.length === 0) {
+                referenceAliments = ["Poulet tex-mex", "Filet de colin", "Frites", "Salade verte", "Salade d'endives", "Tomates", "Yaourt", "Île flottante", "Fruit de saison", "Pomme"];
+            }
 
             let foodStats = {};
+            globalItemsDetailedStats = {};
+
             referenceAliments.forEach(aliment => {
                 foodStats[aliment] = { totalRestes: 0, count: 0 };
             });
@@ -1083,9 +1097,8 @@
                         return textRaw.includes(kw);
                     });
 
-                    // 🌟 Correspondance élargie pour le poulet et les viandes (si les textes parlent d'os ou de poulet)
-                    if (!isMatch && (alimLower.includes("poulet") || alimLower.includes("tex-mex"))) {
-                        if (textRaw.includes("poulet") || textRaw.includes("os") || textRaw.includes("viande")) {
+                    if (!isMatch && alimLower.includes("poulet tex-mex")) {
+                        if (textRaw.includes("poulet") || textRaw.includes("tex-mex") || textRaw.includes("os")) {
                             isMatch = true;
                         }
                     }
@@ -1096,6 +1109,11 @@
                     }
                 });
             });
+
+            let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
+            if (selectFilter) {
+                selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
+            }
 
             let plebiscites = [];
             let rejets = [];
@@ -1114,13 +1132,23 @@
 
                 let itemObj = {
                     label: cleanLabel,
+                    rawKey: aliment,
                     thumb: mediaObj.url,
                     emoji: mediaObj.emoji,
                     tauxMange: tauxMange,
-                    rejetPct: rejetPct
+                    rejetPct: rejetPct,
+                    occurrences: stats.count
                 };
 
+                globalItemsDetailedStats[aliment] = itemObj;
                 allEvaluatedItems.push(itemObj);
+
+                if (selectFilter) {
+                    let opt = document.createElement('option');
+                    opt.value = aliment;
+                    opt.innerText = `${cleanLabel} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
+                    selectFilter.appendChild(opt);
+                }
 
                 if (tauxMange >= 70) {
                     plebiscites.push(itemObj);
@@ -1128,6 +1156,10 @@
                     rejets.push(itemObj);
                 }
             });
+
+            if (selectFilter) selectFilter.value = currentSelectedFilter;
+
+            renderAnalyseFineSynthese(plebiscites, rejets);
 
             if (allEvaluatedItems.length > 0) {
                 let best = [...allEvaluatedItems].sort((a, b) => b.tauxMange - a.tauxMange)[0];
@@ -1167,6 +1199,53 @@
 
             renderList(plebiscites, containerAdhesion, false);
             renderList(rejets, containerRejets, true);
+        }
+
+        function renderAnalyseFineSynthese(plebiscites, rejets) {
+            const boxVert = document.getElementById('analyse-fine-vert');
+            const boxRouge = document.getElementById('analyse-fine-rouge');
+            if (!boxVert || !boxRouge) return;
+
+            if (plebiscites.length > 0) {
+                boxVert.innerHTML = plebiscites.map(p => `• <strong>${p.label}</strong> : ${p.tauxMange}% d'adhésion (${p.occurrences} plateaux)<br>`).join('');
+            } else {
+                boxVert.innerHTML = "Aucun plat en zone de plébiscite sur cette période.";
+            }
+
+            if (rejets.length > 0) {
+                boxRouge.innerHTML = rejets.map(r => `• <strong>${r.label}</strong> : ${r.rejetPct}% de rejet — <em>À ajuster / Recette</em><br>`).join('');
+            } else {
+                boxRouge.innerHTML = "Aucune alerte de gaspillage majeure sur cette période.";
+            }
+        }
+
+        function filtrerAnalyseFineItem() {
+            const select = document.getElementById('select-filter-item');
+            const boxDetail = document.getElementById('box-detail-item-filtré');
+            const titleElem = document.getElementById('label-item-filtre-titre');
+            const contentElem = document.getElementById('content-item-filtre-stats');
+            if (!select || !boxDetail) return;
+
+            let selectedKey = select.value;
+            if (selectedKey === "all") {
+                boxDetail.style.display = "none";
+                return;
+            }
+
+            let stats = globalItemsDetailedStats[selectedKey];
+            if (stats) {
+                boxDetail.style.display = "block";
+                titleElem.innerText = stats.label;
+                let appreciation = stats.tauxMange >= 70 ? "🟢 Très apprécié par les élèves" : (stats.rejetPct >= 40 ? "🔴 Gaspillage important / À revoir" : "🟡 Consommation moyenne / Correcte");
+                contentElem.innerHTML = `
+                    - Taux de consommation : <strong>${stats.tauxMange}%</strong><br>
+                    - Taux de rejet : <strong>${stats.rejetPct}%</strong><br>
+                    - Volume d'observation : ${stats.occurrences} plateaux croisés<br>
+                    - Bilan qualitatif : ${appreciation}
+                `;
+            } else {
+                boxDetail.style.display = "none";
+            }
         }
 
         function updateBalanceWidget(adhesionList, rejetsList) {
@@ -1534,6 +1613,7 @@
 
         function saveMenu() {
             const school = document.getElementById('select-etablissement').value;
+            const menuDate = document.getElementById('input-menu-date').value || new Date().toISOString().split('T')[0];
             const menuFinal = getCurrentCheckedMenu();
             if (!menuFinal) { alert("Veuillez cocher au moins un élément ou remplir un champ libre pour activer le menu du jour."); return; }
             
@@ -1546,12 +1626,12 @@
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "logMenu", ecole: school, effectif: effectifSaisi, menu_complet: menuFinal }) 
+                body: JSON.stringify({ action: "logMenu", ecole: school, date_menu: menuDate, effectif: effectifSaisi, menu_complet: menuFinal }) 
             })
             .then(r => r.json())
             .then(res => {
                 if(res.success) { 
-                    alert('✅ Menu validé et activé pour le service ! Les éco-délégués peuvent démarrer la borne.'); 
+                    alert('✅ Menu validé et enregistré pour la date du ' + menuDate + ' !'); 
                     document.getElementById('entree_libre').value = "";
                     document.getElementById('plat_libre').value = "";
                     document.getElementById('accomp_libre').value = "";
