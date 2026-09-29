@@ -660,22 +660,22 @@
         </div>
     </div>
 
-    <!-- 🌟 MODALE DE DÉTAIL INTERACTIVE AVEC FILTRE DE CONCURRENCE -->
+    <!-- 🌟 MODALE DE DÉTAIL INTERACTIVE (ANALYSE DE CONCURRENCE DES MENUS) -->
     <div id="modal-item-detail" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: white; border-radius: 12px; padding: 20px; max-width: 600px; width: 92%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 5px solid #2d6a4f; display: flex; flex-direction: column; max-height: 85vh;">
+        <div style="background: white; border-radius: 12px; padding: 20px; max-width: 650px; width: 92%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 5px solid #2d6a4f; display: flex; flex-direction: column; max-height: 85vh;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
-                <h3 id="modal-item-title" style="color: #1b4332; font-size: 15px; font-weight: 900; margin: 0;">🔍 Détail de l'item</h3>
+                <h3 id="modal-item-title" style="color: #1b4332; font-size: 15px; font-weight: 900; margin: 0;">🔍 Analyse de Concurrence</h3>
                 <button type="button" onclick="closeItemModal()" style="background: #ef4444; color: white; border: none; border-radius: 4px; width: 26px; height: 26px; font-weight: bold; cursor: pointer;">✕</button>
             </div>
             
-            <!-- Barre de filtre de concurrence intégrée dans la modale -->
+            <!-- Barre de filtre pour cibler les conflits de concurrence -->
             <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer les conflits / concurrence :</label>
-                <input type="text" id="modal-filter-input" placeholder="Ex: sauce, frites, poisson..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer la concurrence (ex: yaourt, frites, plat) :</label>
+                <input type="text" id="modal-filter-input" placeholder="Filtrer par ingrédient alternatif..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
 
             <div id="modal-item-content" style="font-size: 11.5px; color: #334155; line-height: 1.5; overflow-y: auto; flex-grow: 1; padding-right: 4px;">
-                Chargement des occurrences...
+                Analyse des menus et des services associés en cours...
             </div>
         </div>
     </div>
@@ -693,9 +693,8 @@
         let globalItemsDetailedStats = {};
         let compteurCapturesAutomatiquesJour = 0;
         let dateDerniereCaptureAuto = "";
-        let currentModalOccurrences = []; // Stockage pour le filtrage en direct
+        let currentModalOccurrences = [];
 
-        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES
         const COEFFICIENTS_INEVITABLES = {
             "poulet": 0.30, "cuisse": 0.30, "tex-mex": 0.30, "rôti": 0.25, "cote": 0.25, "blanquette": 0.20, "sauté": 0.20, "bourguignon": 0.20, "steak": 0.00, "haché": 0.00, "boulettes": 0.00, "merguez": 0.10, "saucisse": 0.05,
             "colin": 0.10, "poisson": 0.15, "saumon": 0.10, "cabillaud": 0.10,
@@ -791,7 +790,7 @@
             "Fromage": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
             "Fruit de saison": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍎" },
             "Compote": { url: "https://images.unsplash.com/photo-1568702846914-96b305d2aa18?w=150&q=80", emoji: "🍏" },
-            "Crème dessert / Liégeois": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
+            "Crème dessert": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
             "Île flottante": { url: "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80", emoji: "🍮" },
             "Pâtisserie / Flan": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" },
             "Glace": { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=150&q=80", emoji: "🍨" }
@@ -1072,7 +1071,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🌟 EXTRACTION PROPRE DES VRAIS PLATS (FINI LES PHRASES À RALLONGE)
+        // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1206,7 +1205,7 @@
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
 
                     container.innerHTML += `
-                        <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser les menus et services associés">
+                        <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser les menus et la concurrence">
                             <img src="${item.thumb}" onerror="${fallbackHtml}" class="dish-thumb-photo" alt="">
                             <div style="flex-grow: 1; padding-right: 8px; overflow: hidden;">
                                 <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
@@ -1221,7 +1220,7 @@
             renderList(rejets, containerRejets, true);
         }
 
-        // 🔍 OUVRE LA MODALE DE DÉTAIL CLICABLE AVEC CONCURRENCE & FILTRE
+        // 🔍 ANALYSE CROISÉE : RETROUVE LE MENU DE L'ÉCO-DÉLÉGUÉ ET ANALYSE LA CONCURRENCE
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
@@ -1229,8 +1228,8 @@
             const filterInput = document.getElementById('modal-filter-input');
             if (!modal || !title || !content) return;
 
-            title.innerText = `🔍 Contexte & Concurrence : ${rawKey}`;
-            content.innerHTML = "<em>Analyse croisée des services en cours...</em>";
+            title.innerText = `🔍 Analyse des menus & concurrence : ${rawKey}`;
+            content.innerHTML = "<em>Recherche des menus éco-délégués et des alternatives associées...</em>";
             if (filterInput) filterInput.value = "";
             modal.style.display = "flex";
 
@@ -1243,23 +1242,43 @@
                 });
             }
 
-            currentModalOccurrences = matchingScans.map(s => {
+            currentModalOccurrences = [];
+
+            matchingScans.forEach(s => {
                 let dateIso = normalizeDate(s.dateRaw) || "";
                 let taux = s.plat > 0 ? s.plat : (s.entree > 0 ? s.entree : (s.dessert > 0 ? s.dessert : 0));
                 
-                // Recherche du menu configuré ce jour-là dans l'historique global des menus
-                let menuAssocie = "Menu non renseigné";
+                // 🍽️ RECHERCHE DANS L'HISTORIQUE DES MENUS VALIDÉS PAR LES ÉCO-DÉLÉGUÉS
+                let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
+                let alternativesMemeCategorie = [];
+
                 if (globalRawData && globalRawData.rawGaspillage) {
                     let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
-                    if (menuRow && menuRow.commentaire) menuAssocie = menuRow.commentaire;
+                    if (menuRow && menuRow.commentaire) {
+                        menuCompletDuJour = menuRow.commentaire;
+                        
+                        // Découpage du menu en colonnes : Entrée | Plat | Accompagnement | Dessert
+                        let parts = menuCompletDuJour.split('|').map(p => p.trim());
+                        let entrees = parts[0] || "";
+                        let plats = parts[1] || "";
+                        let accomps = parts[2] || "";
+                        let desserts = parts[3] || "";
+
+                        let keyLower = rawKey.toLowerCase();
+                        if (entrees.toLowerCase().includes(keyLower)) alternativesMemeCategorie = entrees.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
+                        else if (plats.toLowerCase().includes(keyLower)) alternativesMemeCategorie = plats.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
+                        else if (accomps.toLowerCase().includes(keyLower)) alternativesMemeCategorie = accomps.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
+                        else if (desserts.toLowerCase().includes(keyLower)) alternativesMemeCategorie = desserts.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
+                    }
                 }
 
-                return {
+                currentModalOccurrences.push({
                     date: dateIso || "Date inconnue",
                     taux: taux,
-                    menu: menuAssocie,
+                    menu: menuCompletDuJour,
+                    alternatives: alternativesMemeCategorie.length > 0 ? alternativesMemeCategorie.join(', ') : "Aucune autre alternative dans la même catégorie",
                     obs: s.commentaire
-                };
+                });
             });
 
             renderModalOccurrencesList(currentModalOccurrences);
@@ -1270,11 +1289,11 @@
             if (!content) return;
 
             if (occurrences.length === 0) {
-                content.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune occurrence trouvée pour ce filtre.</p>`;
+                content.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune correspondance trouvée pour ce filtre.</p>`;
                 return;
             }
 
-            let htmlList = `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Services enregistrés (${occurrences.length} correspondances) :</div>`;
+            let htmlList = `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Services analysés (${occurrences.length} correspondances) :</div>`;
             htmlList += `<div style="display: flex; flex-direction: column; gap: 8px;">`;
             
             occurrences.forEach(occ => {
@@ -1283,13 +1302,16 @@
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                             <strong style="color: #1b4332; font-size: 11.5px;">📅 ${occ.date}</strong>
-                            <span style="background:${badgeColor}; color:white; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:bold;">Rejet : ${occ.taux}%</span>
+                            <span style="background:${badgeColor}; color:white; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:bold;">Taux de rejet : ${occ.taux}%</span>
                         </div>
                         <div style="font-size: 11px; color: #0f172a; background: #ffffff; padding: 5px 8px; border-radius: 4px; border: 1px dashed #cbd5e1; margin-bottom: 4px;">
-                            <strong>🍽️ Menu complet du jour (Concurrence / Alternatives) :</strong><br>${occ.menu}
+                            <strong>🍽️ Menu éco-délégué du jour :</strong><br>${occ.menu}
+                        </div>
+                        <div style="font-size: 10.5px; color: #b45309; background: #fffbeb; padding: 4px 6px; border-radius: 4px; margin-bottom: 4px;">
+                            <strong>⚖️ Alternatives en concurrence directe :</strong> ${occ.alternatives}
                         </div>
                         <div style="color: #475569; font-size: 10.5px; font-style: italic;">
-                            💬 Obs. : "${occ.obs}"
+                            💬 Constat IA : "${occ.obs}"
                         </div>
                     </div>`;
             });
@@ -1305,7 +1327,7 @@
             }
 
             let filtered = currentModalOccurrences.filter(occ => {
-                return occ.menu.toLowerCase().includes(query) || occ.obs.toLowerCase().includes(query) || occ.date.includes(query);
+                return occ.menu.toLowerCase().includes(query) || occ.alternatives.toLowerCase().includes(query) || occ.obs.toLowerCase().includes(query) || occ.date.includes(query);
             });
             renderModalOccurrencesList(filtered);
         }
