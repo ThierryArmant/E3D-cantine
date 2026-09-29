@@ -713,37 +713,29 @@
 
         function initSystemVoices() {
             if (!('speechSynthesis' in window)) return;
-            systemVoices = window.speechSynthesis.getVoices();
-            if (systemVoices.length > 0) {
-                naturalVoice = systemVoices.find(v => v.lang === 'fr-FR' && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Thomas') || v.name.includes('Audrey'))) ||
-                               systemVoices.find(v => v.lang.startsWith('fr')) || null;
-            }
+            // On récupère les voix
+            let voices = window.speechSynthesis.getVoices();
+            // Si elles ne sont pas encore chargées, on sort (l'événement onvoiceschanged refera le boulot plus tard)
+            if (voices.length === 0) return;
+            
+            // Si on a déjà chargé les voix, on ne refait pas le travail pour éviter la boucle infinie !
+            if (systemVoices.length > 0) return;
+
+            systemVoices = voices;
+            naturalVoice = systemVoices.find(v => v.lang === 'fr-FR' && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Thomas') || v.name.includes('Audrey'))) ||
+                           systemVoices.find(v => v.lang.startsWith('fr')) || null;
+            
+            // On supprime l'écouteur d'événement une fois que les voix sont chargées pour bloquer toute boucle
+            window.speechSynthesis.onvoiceschanged = null;
         }
+
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = initSystemVoices;
+            // Première tentative synchrone
             initSystemVoices();
-        }
-
-        function unlockAudioContext() {
-            if (!('speechSynthesis' in window)) return;
-            try {
-                const dummy = new SpeechSynthesisUtterance('');
-                dummy.volume = 0; window.speechSynthesis.speak(dummy);
-            } catch(e) {}
-        }
-        window.addEventListener('click', unlockAudioContext, { once: true });
-        window.addEventListener('touchstart', unlockAudioContext, { once: true });
-
-        function prononcerMessage(texte) {
-            if (!('speechSynthesis' in window)) return;
-            try {
-                window.speechSynthesis.cancel();
-                const msg = new SpeechSynthesisUtterance(texte);
-                msg.lang = 'fr-FR'; msg.rate = 1.35; msg.pitch = 1.05; msg.volume = 1.0;
-                if (!naturalVoice) initSystemVoices();
-                if (naturalVoice) msg.voice = naturalVoice;
-                window.speechSynthesis.speak(msg);
-            } catch(e) {}
+            // Si elles n'étaient pas prêtes, on écoute l'événement
+            if (systemVoices.length === 0) {
+                window.speechSynthesis.onvoiceschanged = initSystemVoices;
+            }
         }
 
         const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1490818387583-1b5f22222bd2?w=150&q=80"; 
