@@ -674,7 +674,7 @@
         let compteurCapturesAutomatiquesJour = 0;
         let dateDerniereCaptureAuto = "";
 
-        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES (incluant saucisse et merguez)
+        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES
         const COEFFICIENTS_INEVITABLES = {
             "poulet": 0.30, "cuisse": 0.30, "tex-mex": 0.30, "rôti": 0.25, "cote": 0.25, "blanquette": 0.20, "sauté": 0.20, "bourguignon": 0.20, "steak": 0.00, "haché": 0.00, "boulettes": 0.00, "merguez": 0.10, "saucisse": 0.05,
             "colin": 0.10, "poisson": 0.15, "saumon": 0.10, "cabillaud": 0.10,
@@ -1051,6 +1051,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
+        // 🌟 FONCTION MISE À JOUR : Découpage chirurgical et robuste gérant les briques collées ou multiples
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1068,15 +1069,18 @@
             let referenceAliments = [];
             
             if (menuActifStr) {
-                let parties = menuActifStr.split('|');
-                parties.forEach(partie => {
-                    let elements = partie.split('+').map(e => e.trim().replace(' 🧑‍🍳', ''));
-                    referenceAliments = referenceAliments.concat(elements);
+                // Éclatement intelligent par |, par / ou par + pour séparer chaque plat/ingrédient
+                let rawItems = menuActifStr.split(/[\|\/\+]/);
+                rawItems.forEach(item => {
+                    let cleanItem = item.trim().replace(' 🧑‍🍳', '');
+                    if (cleanItem && !referenceAliments.includes(cleanItem)) {
+                        referenceAliments.push(cleanItem);
+                    }
                 });
             }
 
             if (referenceAliments.length === 0) {
-                referenceAliments = ["Poulet tex-mex", "Filet de colin", "Frites", "Salade verte", "Salade d'endives", "Tomates", "Yaourt", "Île flottante", "Fruit de saison", "Pomme"];
+                referenceAliments = ["Poulet tex-mex", "Filet de colin", "Frites", "Salade verte", "Salade d'endives", "Tomates", "Yaourt", "Île flottante", "Fruit de saison", "Pomme", "Saucisse", "Merguez"];
             }
 
             let foodStats = {};
@@ -1090,7 +1094,6 @@
                 let textRaw = (scan.commentaire || "").toLowerCase();
                 let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 20)));
 
-                // 🚨 DÉTECTION AUTOMATIQUE DES PLATEAUX CRITIQUES (>= 70% de gaspillage)
                 if (restePct >= 70) {
                     verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
                 }
@@ -1104,10 +1107,15 @@
                         return textRaw.includes(kw);
                     });
 
-                    if (!isMatch && alimLower.includes("poulet tex-mex")) {
-                        if (textRaw.includes("poulet") || textRaw.includes("tex-mex") || textRaw.includes("os")) {
-                            isMatch = true;
-                        }
+                    // Tolérances sémantiques précises pour éviter les oublis d'affichage
+                    if (!isMatch && (alimLower.includes("poulet") || alimLower.includes("tex-mex"))) {
+                        if (textRaw.includes("poulet") || textRaw.includes("tex-mex") || textRaw.includes("os")) isMatch = true;
+                    }
+                    if (!isMatch && alimLower.includes("colin")) {
+                        if (textRaw.includes("colin") || textRaw.includes("poisson")) isMatch = true;
+                    }
+                    if (!isMatch && (alimLower.includes("saucisse") || alimLower.includes("merguez"))) {
+                        if (textRaw.includes("saucisse") || textRaw.includes("merguez") || textRaw.includes("viande")) isMatch = true;
                     }
 
                     if (isMatch) {
