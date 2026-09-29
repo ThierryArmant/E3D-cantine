@@ -1490,65 +1490,69 @@
             const select = document.getElementById('camera-select');
             if (!select) return;
             try {
-                // On demande une première fois l'accès pour déverrouiller la liste des périphériques
-                const tempStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                tempStream.getTracks().forEach(t => t.stop());
-                
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const videoDevices = devices.filter(d => d.kind === 'videoinput');
                 
+                const currentSelection = select.value;
                 select.innerHTML = "";
                 
-                // Si on est sur mobile, on ajoute des options claires "Caméra Dos / Face"
-                if (videoDevices.length <= 2) {
-                    select.innerHTML = `
-                        <option value="environment">📷 Caméra Arrière (Dos)</option>
-                        <option value="user">🤳 Caméra Avant (Face)</option>
-                    `;
-                } else {
-                    videoDevices.forEach((device, index) => {
-                        const option = document.createElement('option');
-                        option.value = device.deviceId;
-                        option.text = device.label || `Caméra ${index + 1}`;
-                        select.appendChild(option);
-                    });
+                if (videoDevices.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.text = "Aucune caméra détectée";
+                    select.appendChild(opt);
+                    return;
+                }
+
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    // Sur mobile, ça donnera "Back Camera" ou "Front"
+                    option.text = device.label || `Caméra ${index + 1}`;
+                    select.appendChild(option);
+                });
+                
+                if (currentSelection && [...select.options].some(o => o.value === currentSelection)) {
+                    select.value = currentSelection;
                 }
             } catch (err) {
-                // Secours si le navigateur bloque l'énumération
-                select.innerHTML = `
-                    <option value="environment">📷 Caméra Arrière (Dos)</option>
-                    <option value="user">🤳 Caméra Avant (Face)</option>
-                `;
+                console.log("Erreur lors de la récupération des caméras :", err);
             }
         }
 
-        async function initCamera(selectedSource = null) {
+        async function initCamera(selectedDeviceId = null) {
             const video = document.getElementById('camera-feed');
             try {
                 if (localStream) stopCamera();
-
-                let constraints = { audio: false };
-
-                // Si la source sélectionnée est un mode facingMode (user/environment) ou un ID de device
-                if (selectedSource === 'user' || selectedSource === 'environment') {
-                    constraints.video = { facingMode: { exact: selectedSource } };
-                } else if (selectedSource) {
-                    constraints.video = { deviceId: { exact: selectedSource } };
+                
+                let videoConstraints = {};
+                if (selectedDeviceId) {
+                    videoConstraints = { deviceId: { exact: selectedDeviceId } };
                 } else {
-                    // Par défaut sur smartphone, on privilégie la caméra arrière pour la borne
-                    constraints.video = { facingMode: { ideal: 'environment' } };
+                    // Force la caméra arrière par défaut sur smartphone
+                    videoConstraints = { facingMode: "environment", width: { ideal: 640 }, height: { ideal: 480 } };
                 }
-
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
                 video.srcObject = localStream;
+                
+                video.play().catch(e => console.log("Attente d'interaction utilisateur", e));
                 resetBorneUI();
-            } catch (err) {
-                // Fallback souple si l'exact facingMode échoue sur certains mobiles
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                    video.srcObject = localStream;
-                    resetBorneUI();
-                } catch (e) {
+                
+                // On peuple la liste des caméras APRES avoir eu l'autorisation
+                if (!selectedDeviceId) getAvailableCameras();
+                
+            } catch (err) { 
+                if (!selectedDeviceId) {
+                    try {
+                        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                        video.srcObject = localStream;
+                        video.play().catch(e => {});
+                        resetBorneUI();
+                        getAvailableCameras();
+                    } catch(e) {
+                        document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
+                    }
+                } else {
                     document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
                 }
             }
