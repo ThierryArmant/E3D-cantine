@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.B.C. - Assiette Bas Carbone</title>
+    <!-- Chargement de Chart.js et du plugin de labels intégrés -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
@@ -295,20 +296,19 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu) -->
+            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu avec Fait Maison par ligne) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
                     
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
-                        <!-- Remplacement des services manuels par le compteur automatique de scans -->
                         <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 12px; border-radius: 6px; color: #0369a1; font-weight: 800; font-size: 13px;">
                             🤖 Plateaux analysés aujourd'hui : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
                         </div>
                     </div>
 
-                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour (Briques modulaires)</h3>
-                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Sélectionnez la base et l'ajout. N'oubliez pas de cocher <strong>"Fait Maison"</strong> pour valoriser le travail de la cuisine !</p>
+                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour (Briques modulaires & Fait Maison)</h3>
+                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les ingrédients du jour. Cochez la toque <strong>🧑‍🍳</strong> en face de l'élément s'il est fait maison !</p>
                     
                     <div class="table-responsive">
                         <table class="menu-table" style="min-width: 900px;">
@@ -324,56 +324,46 @@
                                 <tr>
                                     <!-- COLONNE ENTRÉES -->
                                     <td>
-                                        <div class="sub-theme">Bases (Choisir)</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie (Saucisson/Jambon)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte / Friand</label>
-
-                                        <div class="sub-theme" style="margin-top: 8px;">Options / Ajouts</div>
+                                        <div class="sub-theme">Bases & Options</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade d'endives (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Carottes râpées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Taboulé (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Œuf dur / Mayonnaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Quiche / Tarte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mozzarella"> + Mozzarella</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Roquefort/Bleu"> + Roquefort / Bleu</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Vinaigrette"> + Vinaigrette</label>
 
-                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
-                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="entree_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
-
                                         <div id="favs_container_entree" class="local-favs-box" style="display: none;"></div>
 
-                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Entrée (Saisie libre)</div>
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Entrée</div>
                                         <div style="display: flex; gap: 4px;">
                                             <input type="text" id="entree_libre" placeholder="Ex: Soupe..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
-                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('entree')" title="Mémoriser pour ce collège">🌟</button>
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('entree')" title="Mémoriser">🌟</button>
                                         </div>
                                     </td>
                                     
                                     <!-- COLONNE PLATS -->
                                     <td>
-                                        <div class="sub-theme">Plats Complets</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Paella"> Paella</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Gardiane de Taureau"> Gardiane de Taureau</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Chili (Con Carné/Végé)"> Chili (Con Carné/Végé)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes</label>
-
-                                        <div class="sub-theme" style="margin-top: 8px;">Viandes & Poissons</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet rôti / Cuisse"> Poulet rôti / Cuisse</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet tex-mex"> Poulet tex-mex</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Sauté de viande (Veau/Porc)"> Sauté de viande (Veau/Porc)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Bœuf Bourguignon"> Bœuf Bourguignon</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson (Blanc/Saumon)"> Poisson (Blanc/Saumon)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané / Kebab Fish"> Poisson pané / Kebab Fish</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette / Cordons Bleus"> Omelette / Cordons Bleus</label>
-
-                                        <div class="sub-theme" style="margin-top: 8px;">Options / Sauces / Garnitures</div>
+                                        <div class="sub-theme">Plats & Viandes</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Couscous (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Paella"> Paella <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Paella (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tajine (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Gardiane de Taureau"> Gardiane de Taureau <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gardiane de Taureau (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Chili (Con Carné/Végé)"> Chili <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Chili (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lasagnes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet rôti / Cuisse"> Poulet rôti / Cuisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poulet rôti (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet tex-mex"> Poulet tex-mex <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poulet tex-mex (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Sauté de viande"> Sauté de viande <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Sauté de viande (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Bœuf Bourguignon"> Bœuf Bourguignon <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Bœuf Bourguignon (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Steak haché (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson"> Poisson <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette / Cordons Bleus"> Omelette / Cordon Bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette / Cordon Bleu (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Merguez"> + Merguez</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate / Bolognaise</label>
@@ -381,73 +371,58 @@
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Poivre"> + Sauce au Poivre</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Aux Olives"> + Aux Olives</label>
 
-                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
-                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="plat_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
-
                                         <div id="favs_container_plat" class="local-favs-box" style="display: none;"></div>
 
-                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Plat (Saisie libre)</div>
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Plat</div>
                                         <div style="display: flex; gap: 4px;">
-                                            <input type="text" id="plat_libre" placeholder="Ex: Kebab viande..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
-                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('plat')" title="Mémoriser pour ce collège">🌟</button>
+                                            <input type="text" id="plat_libre" placeholder="Ex: Kebab..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('plat')" title="Mémoriser">🌟</button>
                                         </div>
                                     </td>
 
                                     <!-- COLONNE ACCOMPAGNEMENTS -->
                                     <td>
-                                        <div class="sub-theme">Féculents</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes / Coquillettes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour / Épeautre</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles</label>
-                                        
-                                        <div class="sub-theme" style="margin-top: 8px;">Légumes</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes Vichy"> Petits pois / Carottes Vichy</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Endives cuites"> Endives cuites</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Gratin courgettes"> Gratin courgettes</label>
-
-                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
-                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="accomp_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
+                                        <div class="sub-theme">Féculents & Légumes</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Riz (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Semoule (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Purée (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Petits pois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ratatouille (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Épinards (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Endives cuites"> Endives cuites <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Endives cuites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
                                         <div id="favs_container_accomp" class="local-favs-box" style="display: none;"></div>
 
-                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Accomp. (Saisie libre)</div>
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Accomp.</div>
                                         <div style="display: flex; gap: 4px;">
-                                            <input type="text" id="accomp_libre" placeholder="Ex: Haricots blancs..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
-                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('accomp')" title="Mémoriser pour ce collège">🌟</button>
+                                            <input type="text" id="accomp_libre" placeholder="Ex: Gratin..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('accomp')" title="Mémoriser">🌟</button>
                                         </div>
                                     </td>
 
                                     <!-- COLONNE DESSERTS & LAITAGES -->
                                     <td>
-                                        <div class="sub-theme">Laitages</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt nature/aromatisé"> Yaourt nature/aromatisé</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage portion"> Fromage portion</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage à la coupe"> Fromage à la coupe</label>
-
-                                        <div class="sub-theme" style="margin-top: 8px;">Fruits & Douceurs</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Fruit de saison"> Fruit de saison</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Compote"> Compote</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Crème dessert / Liégeois"> Crème dessert / Liégeois</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Île flottante"> Île flottante</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie (Tarte/Gâteau/Flan)"> Pâtisserie (Tarte/Gâteau/Flan)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Glace / Glace à l'eau"> Glace / Glace à l'eau</label>
-
-                                        <div class="sub-theme" style="margin-top: 8px; color: #d97706;">🌟 Valorisation</div>
-                                        <label class="checkbox-label" style="color: #b45309; font-weight: 800;"><input type="checkbox" name="dessert_maison" value="Fait Maison"> 🧑‍🍳 Fait Maison</label>
+                                        <div class="sub-theme">Desserts & Laitages</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt"> Yaourt <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage"> Fromage <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Fromage (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Fruit de saison"> Fruit de saison <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Fruit (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Compote"> Compote <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Compote (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Crème dessert / Liégeois"> Crème dessert <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Crème dessert (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Île flottante"> Île flottante <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Île flottante (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie / Flan"> Pâtisserie / Flan <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtisserie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Glace"> Glace <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Glace (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
                                         <div id="favs_container_dessert" class="local-favs-box" style="display: none;"></div>
 
-                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Dessert (Saisie libre)</div>
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Dessert</div>
                                         <div style="display: flex; gap: 4px;">
                                             <input type="text" id="dessert_libre" placeholder="Ex: Mousse..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
-                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('dessert')" title="Mémoriser pour ce collège">🌟</button>
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('dessert')" title="Mémoriser">🌟</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -456,7 +431,7 @@
                     </div>
                     
                     <!-- GESTION DES EFFECTIFS DECLARATIFS -->
-                    <div style="display: flex; gap: 12px; margin-top: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1px solid #cbd5e1; align-items: center;">
+                    <div style="display: flex; gap: 12px; margin-top: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1.5px solid #cbd5e1; align-items: center;">
                         <div style="font-size: 13px; font-weight: 800; color: #1b4332;">👥 Effectif global attendu (pour le calcul EGAlim) :</div>
                         <input type="number" id="convives-total" value="450" onchange="saveExpectedMeals()" style="width: 100px; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 14px; font-weight: bold; text-align: center;">
                     </div>
@@ -688,41 +663,48 @@
         const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1490818387583-1b5f22222bd2?w=150&q=80"; 
         
         const FOOD_THUMBNAILS = {
-            "Tomates": { url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80", emoji: "🍅" },
-            "Tomate Mozzarella": { url: "https://images.unsplash.com/photo-1529312266912-b33cfce2eefd?w=150&q=80", emoji: "🧀" },
-            "Carottes râpées": { url: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80", emoji: "🥕" },
+            "Buffet d'entrées": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
             "Salade verte": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
-            "Céleri rémoulade": { url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&q=80", emoji: "🥗" },
-            "Œuf mayonnaise": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
-            "Taboulé": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
             "Salade d'endives": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
+            "Tomates": { url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80", emoji: "🍅" },
+            "Carottes râpées": { url: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80", emoji: "🥕" },
+            "Taboulé": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
+            "Œuf dur / Mayonnaise": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
             "Charcuterie": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🍖" },
             "Quiche / Tarte": { url: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80", emoji: "🥧" },
+            "Couscous": { url: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=150&q=80", emoji: "🍲" },
+            "Paella": { url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&q=80", emoji: "🥘" },
+            "Tajine": { url: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=150&q=80", emoji: "🥘" },
+            "Gardiane de Taureau": { url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150&q=80", emoji: "🐂" },
+            "Chili (Con Carné/Végé)": { url: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=150&q=80", emoji: "🌶️" },
+            "Lasagnes": { url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80", emoji: "🍝" },
             "Poulet rôti / Cuisse": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
             "Poulet tex-mex": { url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=150&q=80", emoji: "🍗" },
-            "Poisson blanc (Colin/Lieu)": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
-            "Poisson pané": { url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&q=80", emoji: "🐟" },
+            "Sauté de viande": { url: "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80", emoji: "🥩" },
+            "Bœuf Bourguignon": { url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150&q=80", emoji: "🍲" },
             "Steak haché / Boulettes": { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80", emoji: "🥩" },
-            "Sauté de porc/veau": { url: "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80", emoji: "🥩" },
-            "Galette végétale": { url: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=150&q=80", emoji: "🥞" },
-            "Lasagnes": { url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80", emoji: "🍝" },
-            "Frites": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
+            "Poisson": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
+            "Omelette / Cordons Bleus": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍳" },
+            "Frites / Potatoes": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
             "Pâtes": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
             "Riz": { url: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80", emoji: "🍚" },
-            "Semoule / Boulgour": { url: "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80", emoji: "🥣" },
-            "Purée / Pommes rissolées": { url: "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80", emoji: "🥔" },
+            "Semoule / Boulgour / Épeautre": { url: "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80", emoji: "🥣" },
+            "Purée": { url: "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80", emoji: "🥔" },
+            "Lentilles": { url: "https://images.unsplash.com/photo-1585670149967-b4f4da88cc9f?w=150&q=80", emoji: "🫘" },
             "Haricots verts": { url: "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&q=80", emoji: "🟢" },
-            "Ratatouille / Poêlée": { url: "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80", emoji: "🍆" },
-            "Brocolis / Choux": { url: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80", emoji: "🥦" },
             "Petits pois / Carottes": { url: "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80", emoji: "🥕" },
+            "Brocolis / Choux": { url: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80", emoji: "🥦" },
+            "Ratatouille / Aubergines": { url: "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80", emoji: "🍆" },
+            "Épinards": { url: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=150&q=80", emoji: "🍃" },
+            "Endives cuites": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
+            "Yaourt": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
+            "Fromage": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
             "Fruit de saison": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍎" },
-            "Yaourt nature/aromatisé": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
-            "Yaourt aux fruits mixés": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
-            "Fromage portion": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
-            "Fromage à la coupe": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
+            "Compote": { url: "https://images.unsplash.com/photo-1568702846914-96b305d2aa18?w=150&q=80", emoji: "🍏" },
             "Crème dessert / Liégeois": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
             "Île flottante": { url: "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80", emoji: "🍮" },
-            "Pâtisserie": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" }
+            "Pâtisserie / Flan": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" },
+            "Glace": { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=150&q=80", emoji: "🍨" }
         };
 
         function normalizeDate(raw) {
@@ -737,7 +719,7 @@
 
         function getCleanLabel(label) {
             if (!label) return "";
-            return label.split(/[\/\+]/)[0].trim();
+            return label.split(/[\/\+]/)[0].replace(' (Fait Maison)', '').trim();
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -787,7 +769,7 @@
             }, 30000);
         });
 
-        // 🌟 NOUVEAU : SYSTÈME DE FAVORIS LOCAUX
+        // 🌟 SYSTÈME DE FAVORIS LOCAUX
         function addLocalFavorite(type) {
             let inputField = document.getElementById(type + '_libre');
             let val = inputField.value.trim();
@@ -823,8 +805,13 @@
                 if(favs.length > 0) {
                     container.style.display = "block";
                     favs.forEach(f => {
-                        let fieldName = type === "accomp" ? "accomp_leg" : (type === "entree" ? "entree_base" : (type === "plat" ? "plat_base" : "dessert_douceur"));
-                        container.innerHTML += `<label class="checkbox-label" style="display:inline-flex; align-items:center; background:white; padding:2px 6px; border-radius:4px; margin-right:4px; border:1px solid #10b981;"><input type="checkbox" name="${fieldName}" value="${f}"> 🌟 ${f} <span style="color:#ef4444; margin-left:8px; cursor:pointer; font-weight:bold;" onclick="removeLocalFavorite('${type}', '${f}')" title="Supprimer ce favori">✖</span></label>`;
+                        let baseName = type === "entree" ? "entree_base" : (type === "plat" ? "plat_base" : (type === "accomp" ? "accomp_base" : "dessert_douceur"));
+                        container.innerHTML += `
+                            <label class="checkbox-label" style="display:flex; align-items:center; background:white; padding:3px 6px; border-radius:4px; margin-top:4px; border:1px solid #10b981;">
+                                <input type="checkbox" name="${baseName}" value="${f}"> 🌟 ${f} 
+                                <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="${f} (Fait Maison)"> 🧑‍🍳</span>
+                                <span style="color:#ef4444; margin-left:6px; cursor:pointer; font-weight:bold;" onclick="removeLocalFavorite('${type}', '${f}')">✖</span>
+                            </label>`;
                     });
                 } else {
                     container.style.display = "none";
@@ -888,7 +875,6 @@
                 });
             }
 
-            // 🌟 Mise à jour du compteur automatique de scans
             let totalScansToday = 0;
             const todayIsoStr = new Date().toISOString().split('T')[0];
             if (globalRawData.rawGaspillage) {
@@ -898,7 +884,6 @@
             if (compteurScanElem) compteurScanElem.innerText = totalScansToday;
 
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
-            
             let evitablesG = (totalAlimKg + totalPainKg) * 1000;
             let inevitablesG = totalFruitsKg * 1000;
             let totalBioG = evitablesG + inevitablesG;
@@ -983,7 +968,6 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🔄 ANALYSE PAR COMPOSANTE : ALGORITHME CORRIGÉ ET STRICT
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -994,7 +978,6 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            // Fusion du catalogue dur ET des favoris locaux
             let school = document.getElementById('select-etablissement').value;
             let localItems = [];
             ['entree', 'plat', 'accomp', 'dessert'].forEach(type => {
@@ -1412,48 +1395,70 @@
         }
 
         function getCurrentCheckedMenu() {
-            let entrees = Array.from(document.querySelectorAll('input[name="entree_base"]:checked')).map(el => el.value);
+            // Récupération des entrées (bases + options + "fait maison" associés)
+            let entrees = [];
+            document.querySelectorAll('input[name="entree_base"]:checked').forEach(el => {
+                let text = el.value;
+                let parentLabel = el.closest('label');
+                let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                entrees.push(text);
+            });
             let entreesOpt = Array.from(document.querySelectorAll('input[name="entree_opt"]:checked')).map(el => el.value);
-            let entreeMaison = document.querySelector('input[name="entree_maison"]:checked') ? " 🧑‍🍳" : "";
             let entreeLibre = document.getElementById('entree_libre').value.trim();
             
             let entreeFinal = entrees.length > 0 ? entrees.join(' + ') : "";
             if (entreesOpt.length > 0 && entreeFinal) entreeFinal += " (" + entreesOpt.join(', ') + ")";
             if (entreeLibre) entreeFinal = entreeFinal ? entreeFinal + " / " + entreeLibre : entreeLibre;
-            if (entreeFinal && entreeMaison) entreeFinal += entreeMaison;
             if (!entreeFinal) entreeFinal = "Sans entrée";
 
-            let plats = Array.from(document.querySelectorAll('input[name="plat_base"]:checked')).map(el => el.value);
+            // Récupération des plats
+            let plats = [];
+            document.querySelectorAll('input[name="plat_base"]:checked').forEach(el => {
+                let text = el.value;
+                let parentLabel = el.closest('label');
+                let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                plats.push(text);
+            });
             let platsOpt = Array.from(document.querySelectorAll('input[name="plat_opt"]:checked')).map(el => el.value);
-            let platMaison = document.querySelector('input[name="plat_maison"]:checked') ? " 🧑‍🍳" : "";
             let platLibre = document.getElementById('plat_libre').value.trim();
             
             let platFinal = plats.length > 0 ? plats.join(' + ') : "";
             if (platsOpt.length > 0 && platFinal) platFinal += " (" + platsOpt.join(', ') + ")";
             if (platLibre) platFinal = platFinal ? platFinal + " / " + platLibre : platLibre;
-            if (platFinal && platMaison) platFinal += platMaison;
             if (!platFinal) platFinal = "Sans plat";
 
-            let accompsBase = Array.from(document.querySelectorAll('input[name="accomp_base"]:checked')).map(el => el.value);
-            let accompsLeg = Array.from(document.querySelectorAll('input[name="accomp_leg"]:checked')).map(el => el.value);
-            let accompMaison = document.querySelector('input[name="accomp_maison"]:checked') ? " 🧑‍🍳" : "";
+            // Récupération des accompagnements
+            let accomps = [];
+            document.querySelectorAll('input[name="accomp_base"]:checked, input[name="accomp_leg"]:checked').forEach(el => {
+                if(el.checked) {
+                    let text = el.value;
+                    let parentLabel = el.closest('label');
+                    let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                    accomps.push(text);
+                }
+            });
             let accompLibre = document.getElementById('accomp_libre').value.trim();
-            
-            let accompFinalList = accompsBase.concat(accompsLeg);
-            let accompFinal = accompFinalList.length > 0 ? accompFinalList.join(' + ') : "";
+            let accompFinal = accomps.length > 0 ? accomps.join(' + ') : "";
             if (accompLibre) accompFinal = accompFinal ? accompFinal + " / " + accompLibre : accompLibre;
-            if (accompFinal && accompMaison) accompFinal += accompMaison;
             if (!accompFinal) accompFinal = "Sans accomp.";
 
-            let dessertsLait = Array.from(document.querySelectorAll('input[name="dessert_lait"]:checked')).map(el => el.value);
-            let dessertsDouceur = Array.from(document.querySelectorAll('input[name="dessert_douceur"]:checked')).map(el => el.value);
-            let dessertMaison = document.querySelector('input[name="dessert_maison"]:checked') ? " 🧑‍🍳" : "";
+            // Récupération des desserts
+            let desserts = [];
+            document.querySelectorAll('input[name="dessert_lait"]:checked, input[name="dessert_douceur"]:checked').forEach(el => {
+                if(el.checked) {
+                    let text = el.value;
+                    let parentLabel = el.closest('label');
+                    let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                    desserts.push(text);
+                }
+            });
             let dessertLibre = document.getElementById('dessert_libre').value.trim();
-            
-            let dessertFinalList = dessertsLait.concat(dessertsDouceur);
-            let dessertFinal = dessertFinalList.length > 0 ? dessertFinalList.join(' + ') : "";
+            let dessertFinal = desserts.length > 0 ? desserts.join(' + ') : "";
             if (dessertLibre) dessertFinal = dessertFinal ? dessertFinal + " / " + dessertLibre : dessertLibre;
-            if (dessertFinal && dessertMaison) dessertFinal += dessertMaison;
             if (!dessertFinal) dessertFinal = "Sans dessert";
 
             if (entreeFinal === "Sans entrée" && platFinal === "Sans plat" && accompFinal === "Sans accomp." && dessertFinal === "Sans dessert") return null;
@@ -1470,7 +1475,6 @@
             if(displayMenu) displayMenu.innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
             localStorage.setItem(`menuActive-${school}`, menuFinal);
 
-            // Enregistrer l'effectif déclaré
             let effectifSaisi = parseInt(document.getElementById('convives-total').value) || 450;
             localStorage.setItem(`totalConvives-${school}`, effectifSaisi);
 
@@ -1544,7 +1548,7 @@
 
         function printOrPDF() {
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
-            if (!content || content.includes("en cours") || content.includes("attente")) { alert("Veuillez d'abord lancer une analyse."); return; }
+            if (!content || content.includes("en cours")) { alert("Veuillez d'abord lancer une analyse."); return; }
             const win = window.open('', '_blank');
             win.document.write('<html><head><title>Audit_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;} h2{color:#1b4332;border-bottom:2px solid #1b4332;} p{margin-bottom:10px;}</style></head><body><h2>🌱 Audit - Plan Alimentaire</h2>' + content + '</body></html>');
             win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 300);
