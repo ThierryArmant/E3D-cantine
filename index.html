@@ -1954,6 +1954,28 @@
             });
             html += '</table></div>'; return html;
         }
+        ==========================================
+    // AJOUT DE LA FONCTION MANQUANTE POUR L'IA
+    // ==========================================
+    function analyserMenuDuJourIA() {
+        const resultatDiv = document.getElementById('resultat-analyse-menu'); 
+        if (resultatDiv) {
+            resultatDiv.innerHTML = "🤖 Analyse du menu du jour en cours par l'IA...";
+        }
+        
+        // Si tu as une fonction correspondante dans ton fichier .gs, 
+        // c'est ici qu'on fera le lien avec google.script.run :
+        if (typeof google !== 'undefined' && google.script.run) {
+            google.script.run
+                .withSuccessHandler(function(reponse) {
+                    if (resultatDiv) resultatDiv.innerHTML = reponse;
+                })
+                .withFailureHandler(function(err) {
+                    if (resultatDiv) resultatDiv.innerHTML = "Erreur : " + err.message;
+                })
+                .nomDeTaFonctionDansGs(); // À adapter si tu appelles une fonction spécifique sur le serveur
+        }
+    }
     </script>
 </body>
 </html>
