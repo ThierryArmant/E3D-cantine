@@ -243,10 +243,30 @@
                     <!-- KPIs & GRAPHIQUE -->
                     <div class="dashboard-top-split">
                         <div class="kpi-grid-2x2">
-                            <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
-                            <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité évitable</div></div><div class="kpi-right">Hors os et inévitables</div></div>
-                            <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
-                            <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
+                            <div class="kpi-card kpi-blue">
+                                <div class="kpi-left">
+                                    <div class="kpi-val" id="kpi-avg">0 g</div>
+                                    <div class="kpi-lbl">Moyenne / convive</div>
+                                </div>
+                                <div class="kpi-right">Total restes / Effectif total</div>
+                            </div>
+                            
+                            <!-- 🗑️ La carte verte "Quantité évitable" a été retirée pour supprimer le doublon -->
+
+                            <div class="kpi-card kpi-yellow">
+                                <div class="kpi-left">
+                                    <div class="kpi-val" id="kpi-money">0.00 €</div>
+                                    <div class="kpi-lbl">Pertes financières</div>
+                                </div>
+                                <div class="kpi-right">Base 4,50 € / kg</div>
+                            </div>
+                            <div class="kpi-card kpi-red" style="grid-column: span 2;">
+                                <div class="kpi-left">
+                                    <div class="kpi-val" id="kpi-impact">0.0 kg</div>
+                                    <div class="kpi-lbl">Émissions CO₂</div>
+                                </div>
+                                <div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div>
+                            </div>
                         </div>
 
                         <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
