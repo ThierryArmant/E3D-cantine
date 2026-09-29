@@ -334,7 +334,6 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
                         
-                        <!-- 📅 SÉLECTEUR DE DATE DU MENU -->
                         <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #2d6a4f;">
                             <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📅 Date du menu :</label>
                             <input type="date" id="input-menu-date" class="input-date" style="padding: 4px 8px; font-weight: bold; background: white;">
@@ -668,7 +667,6 @@
                 <button type="button" onclick="closeItemModal()" style="background: #ef4444; color: white; border: none; border-radius: 4px; width: 26px; height: 26px; font-weight: bold; cursor: pointer;">✕</button>
             </div>
             
-            <!-- Barre de filtre pour cibler les conflits de concurrence -->
             <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
                 <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer la concurrence (ex: yaourt, frites, plat) :</label>
                 <input type="text" id="modal-filter-input" placeholder="Filtrer par ingrédient alternatif..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
@@ -694,6 +692,7 @@
         let compteurCapturesAutomatiquesJour = 0;
         let dateDerniereCaptureAuto = "";
         let currentModalOccurrences = [];
+        let echecsConnexionConsecutifs = 0;
 
         const COEFFICIENTS_INEVITABLES = {
             "poulet": 0.30, "cuisse": 0.30, "tex-mex": 0.30, "rôti": 0.25, "cote": 0.25, "blanquette": 0.20, "sauté": 0.20, "bourguignon": 0.20, "steak": 0.00, "haché": 0.00, "boulettes": 0.00, "merguez": 0.10, "saucisse": 0.05,
@@ -750,50 +749,24 @@
         const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1490818387583-1b5f22222bd2?w=150&q=80"; 
         
         const FOOD_THUMBNAILS = {
-            "Buffet d'entrées": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
-            "Salade verte": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
-            "Salade d'endives": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
-            "Tomates": { url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80", emoji: "🍅" },
-            "Carottes râpées": { url: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80", emoji: "🥕" },
-            "Taboulé": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
-            "Œuf dur / Mayonnaise": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
-            "Charcuterie": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🍖" },
-            "Quiche / Tarte": { url: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80", emoji: "🥧" },
             "Couscous": { url: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=150&q=80", emoji: "🍲" },
             "Paella": { url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&q=80", emoji: "🥘" },
             "Tajine": { url: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=150&q=80", emoji: "🥘" },
-            "Gardiane de Taureau": { url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150&q=80", emoji: "🐂" },
-            "Chili (Con Carné/Végé)": { url: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=150&q=80", emoji: "🌶️" },
-            "Lasagnes": { url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80", emoji: "🍝" },
-            "Poulet rôti / Cuisse": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
+            "Poulet rôti": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
             "Poulet tex-mex": { url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=150&q=80", emoji: "🍗" },
-            "Sauté de viande": { url: "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80", emoji: "🥩" },
-            "Bœuf Bourguignon": { url: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150&q=80", emoji: "🍲" },
-            "Steak haché / Boulettes": { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80", emoji: "🥩" },
             "Poisson": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
-            "Omelette / Cordons Bleus": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍳" },
-            "Saucisse": { url: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=150&q=80", emoji: "🌭" },
-            "Merguez": { url: "https://images.unsplash.com/photo-1606851094655-b2593a9af63f?w=150&q=80", emoji: "🌭" },
-            "Frites / Potatoes": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
-            "Pâtes": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
+            "Filet de colin": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
+            "Frites": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
             "Riz": { url: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80", emoji: "🍚" },
-            "Semoule / Boulgour / Épeautre": { url: "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80", emoji: "🥣" },
-            "Purée": { url: "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80", emoji: "🥔" },
-            "Lentilles": { url: "https://images.unsplash.com/photo-1585670149967-b4f4da88cc9f?w=150&q=80", emoji: "🫘" },
-            "Haricots verts": { url: "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&q=80", emoji: "🟢" },
-            "Petits pois / Carottes": { url: "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80", emoji: "🥕" },
-            "Brocolis / Choux": { url: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80", emoji: "🥦" },
-            "Ratatouille / Aubergines": { url: "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80", emoji: "🍆" },
-            "Épinards": { url: "https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=150&q=80", emoji: "🍃" },
-            "Endives cuites": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
+            "Salade verte": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
+            "Salade d'endives": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
+            "Tomates": { url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80", emoji: "🍅" },
             "Yaourt": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
             "Fromage": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
             "Fruit de saison": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍎" },
             "Compote": { url: "https://images.unsplash.com/photo-1568702846914-96b305d2aa18?w=150&q=80", emoji: "🍏" },
             "Crème dessert": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
-            "Île flottante": { url: "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80", emoji: "🍮" },
-            "Pâtisserie / Flan": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" },
-            "Glace": { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=150&q=80", emoji: "🍨" }
+            "Île flottante": { url: "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80", emoji: "🍮" }
         };
 
         function normalizeDate(raw) {
@@ -828,12 +801,7 @@
                 plugins: [ChartDataLabels], 
                 data: { 
                     labels: ['Gaspillage Évitable', 'Déchets Inévitables (Os, épluchures)'], 
-                    datasets: [{ 
-                        data: [0, 0], 
-                        backgroundColor: ['#38bdf8', '#cbd5e1'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }] 
+                    datasets: [{ data: [0, 0], backgroundColor: ['#38bdf8', '#cbd5e1'], borderWidth: 2, borderColor: '#ffffff' }] 
                 }, 
                 options: { 
                     responsive: true, maintainAspectRatio: false, cutout: '65%',
@@ -970,7 +938,6 @@
 
             let evitablesG = poidsTotalEvitable * 1000;
             let inevitablesG = poidsTotalInevitables * 1000;
-            let totalBioG = evitablesG + inevitablesG;
 
             let avgGrams = (nbJours > 0 && effectif > 0) ? (evitablesG / (effectif * nbJours)) : 0;
 
@@ -1071,7 +1038,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🌟 EXTRACTION 100% AUTOMATIQUE & AUTO-APPRENANTE (Plus besoin d'ajouter les items à la main)
+        // 🌟 EXTRACTION AUTOMATIQUE DES PLATS DEPUIS L'HISTORIQUE DE L'ÉTABLISSEMENT
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1083,7 +1050,6 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            // 🤖 AUTO-DÉTECTION : On collecte dynamiquement tous les items depuis l'historique des menus et des scans
             let alimentsDynaSet = new Set([
                 "Couscous", "Paella", "Lasagnes", "Poulet rôti", "Poulet tex-mex", "Poisson", "Filet de colin", 
                 "Frites", "Pâtes", "Riz", "Semoule", "Purée", "Haricots verts", "Ratatouille", 
@@ -1091,7 +1057,6 @@
                 "Yaourt", "Fromage", "Fruit de saison", "Compote", "Crème dessert", "Île flottante", "Pain"
             ]);
 
-            // Analyse de l'historique global pour enrichir la liste en autonomie
             if (globalRawData && globalRawData.rawGaspillage) {
                 globalRawData.rawGaspillage.forEach(s => {
                     if (s.type === "CONFIGURATION_MENU" && s.commentaire) {
@@ -1110,7 +1075,6 @@
             }
 
             const alimentsReferencePermis = Array.from(alimentsDynaSet);
-
             let foodStats = {};
             globalItemsDetailedStats = {};
 
@@ -1122,10 +1086,6 @@
                 let textRaw = (scan.commentaire || "").toLowerCase();
                 let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 20)));
 
-                if (restePct >= 70) {
-                    verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
-                }
-
                 alimentsReferencePermis.forEach(aliment => {
                     let alimLower = aliment.toLowerCase();
                     let isMatch = false;
@@ -1136,7 +1096,9 @@
                         isMatch = true;
                     } else if (alimLower.includes("poisson") && (textRaw.includes("poisson") || textRaw.includes("colin"))) {
                         isMatch = true;
-                    } else if (alimLower.includes("flottante") && (textRaw.includes("île flottante") || textRaw.includes("crème anglaise"))) {
+                    } else if (alimLower.includes("crème") && (textRaw.includes("crème dessert") || textRaw.includes("pot"))) {
+                        isMatch = true;
+                    } else if (alimLower.includes("flottante") && (textRaw.includes("flottante") || textRaw.includes("crème anglaise"))) {
                         isMatch = true;
                     }
 
@@ -1186,15 +1148,11 @@
                     selectFilter.appendChild(opt);
                 }
 
-                if (tauxMange >= 70) {
-                    plebiscites.push(itemObj);
-                } else if (rejetPct >= 40) {
-                    rejets.push(itemObj);
-                }
+                if (tauxMange >= 70) plebiscites.push(itemObj);
+                else if (rejetPct >= 40) rejets.push(itemObj);
             });
 
             if (selectFilter) selectFilter.value = currentSelectedFilter;
-
             renderAnalyseFineSynthese(plebiscites, rejets);
 
             if (allEvaluatedItems.length > 0) {
@@ -1211,15 +1169,14 @@
             function renderList(list, container, isRejet) {
                 container.innerHTML = "";
                 if (list.length === 0) {
-                    container.innerHTML = `<div style="font-size: 11.5px; color: #64748b; font-style: italic; padding: 15px; grid-column: 1/-1; text-align: center;">Aucun plat n'a atteint ce seuil.</div>`;
+                    container.innerHTML = `<div style="font-size: 11.5px; color: #64748b; font-style: italic; padding: 15px; text-align: center;">Aucun plat n'a atteint ce seuil.</div>`;
                     return;
                 }
 
                 list.forEach(item => {
                     let cardClass = isRejet ? "gourmet-dish-card alerte" : "gourmet-dish-card plebiscite";
                     let valText = isRejet ? `<span style="color:white; background:#ef4444; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>` : `<span style="color:white; background:#10b981; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
-                    
-                    let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
+                    let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px; display:flex; align-items:center; justify-content:center; font-size:22px; background:#f1f5f9;\\'>${item.emoji}</div>'`;
 
                     container.innerHTML += `
                         <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser les menus et la concurrence">
@@ -1228,8 +1185,7 @@
                                 <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
                                 <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             }
 
@@ -1237,7 +1193,7 @@
             renderList(rejets, containerRejets, true);
         }
 
-        // 🔍 ANALYSE CROISÉE : RETROUVE LE MENU DE L'ÉCO-DÉLÉGUÉ ET ANALYSE LA CONCURRENCE
+        // 🌟 ANALYSE DE LA CONCURRENCE ET DES MENUS ÉCO-DÉLÉGUÉS (AVEC FILTRES TEMPORELS DANS LA MODALE)
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
@@ -1245,8 +1201,8 @@
             const filterInput = document.getElementById('modal-filter-input');
             if (!modal || !title || !content) return;
 
-            title.innerText = `🔍 Analyse des menus & concurrence : ${rawKey}`;
-            content.innerHTML = "<em>Recherche des menus éco-délégués et des alternatives associées...</em>";
+            title.innerText = `🔍 Analyse contextuelle & Concurrence : ${rawKey}`;
+            content.innerHTML = "<em>Recherche des menus éco-délégués et de la consistance des repas...</em>";
             if (filterInput) filterInput.value = "";
             modal.style.display = "flex";
 
@@ -1255,7 +1211,7 @@
                 matchingScans = globalRawData.rawGaspillage.filter(s => {
                     let com = (s.commentaire || "").toLowerCase();
                     let keyLower = rawKey.toLowerCase();
-                    return com.includes(keyLower) || (keyLower === "poisson" && com.includes("colin")) || (keyLower === "poulet" && com.includes("tex-mex"));
+                    return com.includes(keyLower) || (keyLower === "poisson" && com.includes("colin")) || (keyLower === "poulet" && com.includes("tex-mex")) || (keyLower === "crème dessert" && com.includes("crème")) || (keyLower === "île flottante" && com.includes("flottante"));
                 });
             }
 
@@ -1265,17 +1221,25 @@
                 let dateIso = normalizeDate(s.dateRaw) || "";
                 let taux = s.plat > 0 ? s.plat : (s.entree > 0 ? s.entree : (s.dessert > 0 ? s.dessert : 0));
                 
-                // 🍽️ RECHERCHE DANS L'HISTORIQUE DES MENUS VALIDÉS PAR LES ÉCO-DÉLÉGUÉS
                 let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
                 let alternativesMemeCategorie = [];
 
-                if (globalRawData && globalRawData.rawGaspillage) {
-                    let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
-                    if (menuRow && menuRow.commentaire) {
-                        menuCompletDuJour = menuRow.commentaire;
-                        
-                        // Découpage du menu en colonnes : Entrée | Plat | Accompagnement | Dessert
-                        let parts = menuCompletDuJour.split('|').map(p => p.trim());
+                let menusList = window.allMenusCache || [];
+                let foundMenu = menusList.find(m => normalizeDate(m.date) === dateIso || normalizeDate(m.dateRaw) === dateIso);
+
+                if (!foundMenu && globalRawData && globalRawData.rawMenus) {
+                    foundMenu = globalRawData.rawMenus.find(m => normalizeDate(m.date) === dateIso);
+                }
+
+                if (!foundMenu && globalRawData && globalRawData.rawGaspillage) {
+                    foundMenu = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
+                }
+
+                if (foundMenu && (foundMenu.menu || foundMenu.commentaire)) {
+                    menuCompletDuJour = foundMenu.menu || foundMenu.commentaire;
+                    
+                    let parts = menuCompletDuJour.split('|').map(p => p.trim());
+                    if (parts.length >= 4) {
                         let entrees = parts[0] || "";
                         let plats = parts[1] || "";
                         let accomps = parts[2] || "";
@@ -1306,29 +1270,34 @@
             if (!content) return;
 
             if (occurrences.length === 0) {
-                content.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune correspondance trouvée pour ce filtre.</p>`;
+                content.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune correspondance trouvée pour l'item sélectionné.</p>`;
                 return;
             }
 
-            let htmlList = `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Services analysés (${occurrences.length} correspondances) :</div>`;
-            htmlList += `<div style="display: flex; flex-direction: column; gap: 8px;">`;
+            let htmlList = `
+                <div style="display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn-period active" onclick="filterModalByPeriod('all', this)" style="font-size:10px; padding:3px 8px;">Tout</button>
+                    <button type="button" class="btn-period" onclick="filterModalByPeriod('month', this)" style="font-size:10px; padding:3px 8px;">Ce mois-ci</button>
+                    <button type="button" class="btn-period" onclick="filterModalByPeriod('week', this)" style="font-size:10px; padding:3px 8px;">Cette semaine</button>
+                </div>
+                <div id="modal-list-container" style="display: flex; flex-direction: column; gap: 8px;">`;
             
             occurrences.forEach(occ => {
                 let badgeColor = occ.taux >= 40 ? "#ef4444" : "#10b981";
                 htmlList += `
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+                    <div class="modal-occ-card" data-date="${occ.date}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                             <strong style="color: #1b4332; font-size: 11.5px;">📅 ${occ.date}</strong>
                             <span style="background:${badgeColor}; color:white; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:bold;">Taux de rejet : ${occ.taux}%</span>
                         </div>
                         <div style="font-size: 11px; color: #0f172a; background: #ffffff; padding: 5px 8px; border-radius: 4px; border: 1px dashed #cbd5e1; margin-bottom: 4px;">
-                            <strong>🍽️ Menu éco-délégué du jour :</strong><br>${occ.menu}
+                            <strong>🍽️ Repas éco-délégué du jour (Analyse de consistance) :</strong><br>${occ.menu}
                         </div>
                         <div style="font-size: 10.5px; color: #b45309; background: #fffbeb; padding: 4px 6px; border-radius: 4px; margin-bottom: 4px;">
                             <strong>⚖️ Alternatives en concurrence directe :</strong> ${occ.alternatives}
                         </div>
                         <div style="color: #475569; font-size: 10.5px; font-style: italic;">
-                            💬 Constat IA : "${occ.obs}"
+                            💬 Constat terrain : "${occ.obs}"
                         </div>
                     </div>`;
             });
@@ -1336,17 +1305,55 @@
             content.innerHTML = htmlList;
         }
 
-        function filterModalOccurrences() {
-            const query = (document.getElementById('modal-filter-input').value || "").toLowerCase().trim();
-            if (!query) {
-                renderModalOccurrencesList(currentModalOccurrences);
-                return;
-            }
+        function filterModalByPeriod(period, btnElem) {
+            document.querySelectorAll('#modal-item-detail .btn-period').forEach(b => b.classList.remove('active'));
+            if (btnElem) btnElem.classList.add('active');
+
+            let targetDateLimit = new Date();
+            if (period === 'week') targetDateLimit.setDate(targetDateLimit.getDate() - 7);
+            else if (period === 'month') targetDateLimit.setMonth(targetDateLimit.getMonth() - 1);
+            else targetDateLimit = new Date('2000-01-01');
 
             let filtered = currentModalOccurrences.filter(occ => {
-                return occ.menu.toLowerCase().includes(query) || occ.alternatives.toLowerCase().includes(query) || occ.obs.toLowerCase().includes(query) || occ.date.includes(query);
+                if (period === 'all') return true;
+                let occDate = new Date(occ.date);
+                return occDate >= targetDateLimit;
             });
-            renderModalOccurrencesList(filtered);
+
+            let container = document.getElementById('modal-list-container');
+            if (!container) return;
+            
+            let htmlCards = "";
+            filtered.forEach(occ => {
+                let badgeColor = occ.taux >= 40 ? "#ef4444" : "#10b981";
+                htmlCards += `
+                    <div class="modal-occ-card" data-date="${occ.date}" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <strong style="color: #1b4332; font-size: 11.5px;">📅 ${occ.date}</strong>
+                            <span style="background:${badgeColor}; color:white; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:bold;">Taux de rejet : ${occ.taux}%</span>
+                        </div>
+                        <div style="font-size: 11px; color: #0f172a; background: #ffffff; padding: 5px 8px; border-radius: 4px; border: 1px dashed #cbd5e1; margin-bottom: 4px;">
+                            <strong>🍽️ Repas éco-délégué du jour :</strong><br>${occ.menu}
+                        </div>
+                        <div style="font-size: 10.5px; color: #b45309; background: #fffbeb; padding: 4px 6px; border-radius: 4px; margin-bottom: 4px;">
+                            <strong>⚖️ Alternatives en concurrence directe :</strong> ${occ.alternatives}
+                        </div>
+                        <div style="color: #475569; font-size: 10.5px; font-style: italic;">
+                            💬 Constat terrain : "${occ.obs}"
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = htmlCards || `<p style="color: #64748b; font-size: 11.5px; font-style: italic; text-align: center; padding: 10px;">Aucune donnée sur cette période.</p>`;
+        }
+
+        function filterModalOccurrences() {
+            const query = (document.getElementById('modal-filter-input').value || "").toLowerCase().trim();
+            const cards = document.querySelectorAll('.modal-occ-card');
+            cards.forEach(card => {
+                let text = card.innerText.toLowerCase();
+                if (!query || text.includes(query)) card.style.display = "block";
+                else card.style.display = "none";
+            });
         }
 
         function closeItemModal() {
@@ -1597,6 +1604,11 @@
 
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
+
+                // 🌟 Mémorisation globale des menus de l'établissement
+                if (data.rawMenus) {
+                    window.allMenusCache = data.rawMenus;
+                }
                 
                 let activeBtn = document.querySelector('.btn-period.active') || document.querySelectorAll('.btn-period')[0];
                 if (activeBtn) {
