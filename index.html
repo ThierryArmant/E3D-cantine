@@ -1954,26 +1954,45 @@
             });
             html += '</table></div>'; return html;
         }
-        ==========================================
-    // AJOUT DE LA FONCTION MANQUANTE POUR L'IA
+       // ==========================================
+    // ANALYSE DU MENU DU JOUR PAR L'IA
     // ==========================================
     function analyserMenuDuJourIA() {
-        const resultatDiv = document.getElementById('resultat-analyse-menu'); 
+        const boxResultat = document.getElementById('gemini-ai-result-jour');
+        const resultatDiv = document.getElementById('gemini-ai-text-jour'); 
+        
+        if (boxResultat) boxResultat.style.display = "block";
         if (resultatDiv) {
             resultatDiv.innerHTML = "🤖 Analyse du menu du jour en cours par l'IA...";
         }
         
-        // Si tu as une fonction correspondante dans ton fichier .gs, 
-        // c'est ici qu'on fera le lien avec google.script.run :
+        // Appel via l'API Apps Script
         if (typeof google !== 'undefined' && google.script.run) {
             google.script.run
                 .withSuccessHandler(function(reponse) {
-                    if (resultatDiv) resultatDiv.innerHTML = reponse;
+                    if (resultatDiv) resultatDiv.innerHTML = formatAIResponseToUI(reponse);
                 })
                 .withFailureHandler(function(err) {
                     if (resultatDiv) resultatDiv.innerHTML = "Erreur : " + err.message;
                 })
-                .analyzeDailyMenu(); // À adapter si tu appelles une fonction spécifique sur le serveur
+                .analyzeDailyMenu();
+        } else {
+            // Mode de secours si testé hors Google Apps Script (via fetch)
+            const school = document.getElementById('select-etablissement').value;
+            const menuActif = getCurrentCheckedMenu() || "Menu du jour";
+            
+            fetch(ADRESSE_SHEET_OFFICIELLE, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ action: "analyzeDailyMenu", etablissement: school, menu: menuActif })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (resultatDiv) resultatDiv.innerHTML = formatAIResponseToUI(res.answer || res.error || "Réponse vide");
+            })
+            .catch(err => {
+                if (resultatDiv) resultatDiv.innerHTML = "Erreur réseau : " + err.message;
+            });
         }
     }
     </script>
