@@ -1591,12 +1591,34 @@
             document.getElementById('action-progress').style.width = "0%"; 
         }
 
+        // 🌟 1. Fonction pour appliquer les filtres visuels en direct sur la vidéo
+        function applyVideoFilters() {
+            const video = document.getElementById('camera-feed');
+            const brightness = document.getElementById('cam-brightness').value;
+            const contrast = document.getElementById('cam-contrast').value;
+            if (video) {
+                video.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+            }
+        }
+
+        // 🌟 2. Capture de l'image avec les filtres pour l'envoyer à l'IA
         function getBase64FromLiveVideo() {
             const video = document.getElementById('camera-feed');
             if (!video || !localStream || video.readyState < 2) return "data:image/jpeg;base64,image_active_simulee"; 
+            
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
-            const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            canvas.width = video.videoWidth || 640; 
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d'); 
+            
+            // On récupère les valeurs des curseurs (ou 100 par défaut)
+            const brightness = document.getElementById('cam-brightness') ? document.getElementById('cam-brightness').value : 100;
+            const contrast = document.getElementById('cam-contrast') ? document.getElementById('cam-contrast').value : 100;
+            
+            // On applique le filtre sur l'image capturée
+            ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+            
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             return canvas.toDataURL('image/jpeg', 0.7); 
         }
 
