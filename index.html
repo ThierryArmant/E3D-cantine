@@ -244,13 +244,13 @@
                     <div class="dashboard-top-split">
                         <div class="kpi-grid-2x2">
                             <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
-                            <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité totale</div></div><div class="kpi-right">Somme pesée des sacs</div></div>
+                            <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité évitable</div></div><div class="kpi-right">Hors os et inévitables</div></div>
                             <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
                             <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
                         </div>
 
                         <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
-                            <h3>♻️ Répartition des biodéchets</h3>
+                            <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
                             <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
                             <div class="chart-container">
                                 <canvas id="chart-timeline"></canvas>
@@ -581,7 +581,7 @@
                     <div class="report-section-title">1. Synthèse globale des flux sur la période</div>
                     <div class="kpi-grid" style="margin-bottom: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
                         <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div></div>
-                        <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-total">0.0 kg</div><div class="kpi-lbl">Total gaspillé</div></div></div>
+                        <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-total">0.0 kg</div><div class="kpi-lbl">Total gaspillé (évitable)</div></div></div>
                         <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div></div>
                     </div>
 
@@ -624,6 +624,32 @@
         let systemVoices = [];
         let naturalVoice = null;
         let filePayloadData = null; 
+
+        // 🌿 BASE DE DONNÉES DES COEFFICIENTS D'INÉVITABILITÉ (Réf ADEME / Restauration collective)
+        const COEFFICIENTS_INEVITABLES = {
+            "poulet tex-mex": 0.30,
+            "poulet rôti / cuisse": 0.30,
+            "filet de colin": 0.10,
+            "poisson": 0.10,
+            "frites / potatoes": 0.00,
+            "tomates": 0.10,
+            "salade verte": 0.10,
+            "salade d'endives": 0.15,
+            "carottes râpées": 0.05,
+            "fruit de saison": 0.20,
+            "pomme": 0.15,
+            "yaourt": 0.00,
+            "île flottante": 0.00
+        };
+
+        function getTauxInevitablesPourPlat(nomPlat) {
+            if (!nomPlat) return 0.0;
+            let clean = nomPlat.toLowerCase().trim();
+            for (let key in COEFFICIENTS_INEVITABLES) {
+                if (clean.includes(key)) return COEFFICIENTS_INEVITABLES[key];
+            }
+            return 0.0; // 0% par défaut (tout est évitable)
+        }
 
         function initSystemVoices() {
             if (!('speechSynthesis' in window)) return;
@@ -735,7 +761,7 @@
                 type: 'doughnut', 
                 plugins: [ChartDataLabels], 
                 data: { 
-                    labels: ['Évitables', 'Inévitables'], 
+                    labels: ['Gaspillage Évitable', 'Déchets Inévitables (Os, épluchures)'], 
                     datasets: [{ 
                         data: [0, 0], 
                         backgroundColor: ['#38bdf8', '#cbd5e1'],
@@ -861,10 +887,35 @@
                 let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
                     nbJours++;
-                    let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i];
-                    totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
+                    totalAlimKg += (sh.alimentaire[i] || 0);
+                    totalFruitsKg += (sh.fruits[i] || 0);
+                    totalPainKg += (sh.pain[i] || 0);
                 }
             }
+
+            // Application de la correction des inévitables (ex: 30% d'os sur le sac alimentaire/poulet)
+            let tauxInévitableGlobal = 0.30; // Part moyenne d'os estimée par défaut dans les sacs alimentaires
+            let poidsInevitablesAlim = totalAlimKg * tauxInévitableGlobal;
+            let poidsEvitableAlim = totalAlimKg - poidsInevitablesAlim;
+
+            let poidsTotalBrut = totalAlimKg + totalFruitsKg + totalPainKg;
+            let poidsTotalEvitable = poidsEvitableAlim + totalPainKg;
+            let poidsTotalInevitables = poidsInevitablesAlim + totalFruitsKg;
+
+            let evitablesG = poidsTotalEvitable * 1000;
+            let inevitablesG = poidsTotalInevitables * 1000;
+            let totalBioG = evitablesG + inevitablesG;
+
+            let avgGrams = (nbJours > 0 && effectif > 0) ? (evitablesG / (effectif * nbJours)) : 0;
+
+            document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
+            document.getElementById('kpi-total').innerText = `${poidsTotalEvitable.toFixed(1)} kg`;
+            document.getElementById('kpi-money').innerText = `${(poidsTotalEvitable * 4.50).toFixed(2)} €`;
+            document.getElementById('kpi-impact').innerText = `${(poidsTotalEvitable * 2.0).toFixed(1)} kg`;
+            document.getElementById('biodiff-total').innerText = `Total Période : ${totalBioG.toFixed(0)} g`;
+
+            chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
+            chartTimeline.update();
 
             let filteredScans = [];
             if (globalRawData.rawGaspillage) {
@@ -883,32 +934,16 @@
             let compteurScanElem = document.getElementById('compteur-scans-jour');
             if (compteurScanElem) compteurScanElem.innerText = totalScansToday;
 
-            let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
-            let evitablesG = (totalAlimKg + totalPainKg) * 1000;
-            let inevitablesG = totalFruitsKg * 1000;
-            let totalBioG = evitablesG + inevitablesG;
-
-            let avgGrams = (nbJours > 0 && effectif > 0) ? (totalBioG / (effectif * nbJours)) : 0;
-
-            document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
-            document.getElementById('kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
-            document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
-            document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
-            document.getElementById('biodiff-total').innerText = `Total Période : ${totalBioG.toFixed(0)} g`;
-
-            chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
-            chartTimeline.update();
-
             document.getElementById('report-school-name').innerText = school;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
-            document.getElementById('rep-kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
-            document.getElementById('rep-kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
+            document.getElementById('rep-kpi-total').innerText = `${poidsTotalEvitable.toFixed(1)} kg`;
+            document.getElementById('rep-kpi-money').innerText = `${(poidsTotalEvitable * 4.50).toFixed(2)} €`;
 
             runGranularExtraction(filteredScans);
             updateHistoryMode('day');
 
             if (nbJours > 0) {
-                renderBilanEleves(totalAlimKg/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
+                renderBilanEleves(poidsTotalEvitable/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
             } else {
                 document.getElementById('bilan-eleves-container').style.display = "none";
             }
@@ -1307,34 +1342,18 @@
         }
 
         function loadExpectedMealsForSchool(school) {
-            const s1 = parseInt(localStorage.getItem(`convives-s1-${school}`)) || 200; 
-            const s2 = parseInt(localStorage.getItem(`convives-s2-${school}`)) || 250;
-            document.getElementById('convives-s1').value = s1; 
-            document.getElementById('convives-s2').value = s2; 
-            document.getElementById('lbl-total-attendus').innerText = s1 + s2;
-            let totalInput = document.getElementById('convives-total');
-            if(totalInput) totalInput.value = s1 + s2;
-        }
-
-        function updateExpectedMeals() { 
-            let total = (parseInt(document.getElementById('convives-s1').value)||0) + (parseInt(document.getElementById('convives-s2').value)||0);
-            document.getElementById('lbl-total-attendus').innerText = total; 
+            let total = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
             let totalInput = document.getElementById('convives-total');
             if(totalInput) totalInput.value = total;
         }
 
         function saveExpectedMeals() {
             const school = document.getElementById('select-etablissement').value;
-            const s1 = parseInt(document.getElementById('convives-s1').value)||0; 
-            const s2 = parseInt(document.getElementById('convives-s2').value)||0;
-            const totalStr = `${s1}-${s2}`;
-
-            localStorage.setItem(`convives-s1-${school}`, s1); 
-            localStorage.setItem(`convives-s2-${school}`, s2); 
-            localStorage.setItem(`totalConvives-${school}`, s1 + s2);
+            let totalSaisi = parseInt(document.getElementById('convives-total').value) || 450;
+            localStorage.setItem(`totalConvives-${school}`, totalSaisi);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveEffectifs", ecole: school, effectifs_str: totalStr }) 
+                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveEffectifs", ecole: school, effectifs_str: totalSaisi.toString() }) 
             })
             .then(r => r.json())
             .then(res => {
@@ -1380,7 +1399,7 @@
 
             const payload = { action: "logBagWeights", etablissement: school, date_pesee: peseeDate, sac_alimentaire: alim.toFixed(2), sac_fruits: fruits.toFixed(2), sac_pain: pain.toFixed(2), sac_emballages: emb.toFixed(2), sac_serviettes: serv.toFixed(2) };
             
-            renderBilanEleves(alim, fruits, pain, effectif);
+            renderBilanEleves(alim * 0.70, fruits, pain, effectif);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
@@ -1395,7 +1414,6 @@
         }
 
         function getCurrentCheckedMenu() {
-            // Récupération des entrées (bases + options + "fait maison" associés)
             let entrees = [];
             document.querySelectorAll('input[name="entree_base"]:checked').forEach(el => {
                 let text = el.value;
@@ -1412,7 +1430,6 @@
             if (entreeLibre) entreeFinal = entreeFinal ? entreeFinal + " / " + entreeLibre : entreeLibre;
             if (!entreeFinal) entreeFinal = "Sans entrée";
 
-            // Récupération des plats
             let plats = [];
             document.querySelectorAll('input[name="plat_base"]:checked').forEach(el => {
                 let text = el.value;
@@ -1429,7 +1446,6 @@
             if (platLibre) platFinal = platFinal ? platFinal + " / " + platLibre : platLibre;
             if (!platFinal) platFinal = "Sans plat";
 
-            // Récupération des accompagnements
             let accomps = [];
             document.querySelectorAll('input[name="accomp_base"]:checked, input[name="accomp_leg"]:checked').forEach(el => {
                 if(el.checked) {
@@ -1445,7 +1461,6 @@
             if (accompLibre) accompFinal = accompFinal ? accompFinal + " / " + accompLibre : accompLibre;
             if (!accompFinal) accompFinal = "Sans accomp.";
 
-            // Récupération des desserts
             let desserts = [];
             document.querySelectorAll('input[name="dessert_lait"]:checked, input[name="dessert_douceur"]:checked').forEach(el => {
                 if(el.checked) {
@@ -1494,26 +1509,6 @@
                 }
                 else { alert('❌ Erreur serveur : ' + res.error); }
             }).catch(() => alert('❌ Erreur réseau lors de la validation du menu.'));
-        }
-
-        function runGeminiAIAnalysis() {
-            const school = document.getElementById('select-etablissement').value;
-            const menuText = getCurrentCheckedMenu();
-            const resBox = document.getElementById('gemini-ai-result-jour'); 
-            const resText = document.getElementById('gemini-ai-text-jour');
-
-            if (!menuText) { alert("⚠️ Veuillez sélectionner des éléments du menu pour lancer l'analyse."); return; }
-            resBox.style.display = "block"; resText.innerHTML = "<em>🤖 Analyse EGAlim en cours...</em>";
-            
-            fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyzeDailyMenu", etablissement: school, menu: menuText }) 
-            })
-            .then(r => r.json())
-            .then(res => { 
-                if (res.error) resText.innerHTML = `<p style="color:#ef4444; font-weight:bold;">Erreur : ${res.error}</p>`;
-                else { let cleanedAnswer = res.answer.replace(/Valérie Briançon/gi, 'l\'équipe pédagogique'); resText.innerHTML = formatAIResponseToUI(cleanedAnswer); }
-            })
-            .catch(() => { resText.innerHTML = "<p style='color:#ef4444;'>Erreur de communication avec l'IA.</p>"; });
         }
 
         function handleMenuFileUpload(event) {
