@@ -1425,13 +1425,19 @@
             if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
 
+        // Variable globale pour compter les ratés d'affilée
+        let echecsConnexionConsecutifs = 0;
+
         function loadLiveData() {
             const school = document.getElementById('select-etablissement').value;
             const errBanner = document.getElementById('dashboard-error-banner');
-            if(errBanner) errBanner.style.display = "none";
 
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
+                // Succès de la liaison : on remet le compteur d'échecs à zéro et on masque l'alerte
+                echecsConnexionConsecutifs = 0;
+                if(errBanner) errBanner.style.display = "none";
+
                 if (data.error) {
                     if(errBanner) { errBanner.innerText = `Erreur Serveur : ${data.error}`; errBanner.style.display = "block"; }
                     clearDashboardToZero(); return;
@@ -1468,8 +1474,14 @@
                     setQuickPeriod('all', document.querySelectorAll('.btn-period')[0]); 
                 }
             }).catch(err => {
-                if(errBanner) { errBanner.innerText = "Erreur de connexion à Google Sheets."; errBanner.style.display = "block"; }
-                clearDashboardToZero();
+                // 🌟 On incrémente les échecs. Le bandeau ne s'affiche qu'à partir de 3 échecs consécutifs.
+                echecsConnexionConsecutifs++;
+                if (echecsConnexionConsecutifs >= 3) {
+                    if(errBanner) { 
+                        errBanner.innerText = "Erreur de connexion persistante à Google Sheets (Vérifiez le réseau)."; 
+                        errBanner.style.display = "block"; 
+                    }
+                }
             });
         }
 
