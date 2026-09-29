@@ -346,7 +346,7 @@
                     </div>
 
                     <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour</h3>
-                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les éléments principaux. Les options (sauces, fromages, suppléments) sont regroupées dans la zone dédiée en bas de chaque colonne pour éviter toute confusion.</p>
+                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les éléments principaux. Les options (sauces, fromages, suppléments) sont regroupées dans la zone dédiée en bas de chaque colonne.</p>
                     
                     <div class="table-responsive">
                         <table class="menu-table" style="min-width: 900px;">
@@ -671,8 +671,10 @@
         let filePayloadData = null; 
 
         let globalItemsDetailedStats = {};
+        let compteurCapturesAutomatiquesJour = 0;
+        let dateDerniereCaptureAuto = "";
 
-        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES (avec saucisse et merguez)
+        // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES (incluant saucisse et merguez)
         const COEFFICIENTS_INEVITABLES = {
             "poulet": 0.30, "cuisse": 0.30, "tex-mex": 0.30, "rôti": 0.25, "cote": 0.25, "blanquette": 0.20, "sauté": 0.20, "bourguignon": 0.20, "steak": 0.00, "haché": 0.00, "boulettes": 0.00, "merguez": 0.10, "saucisse": 0.05,
             "colin": 0.10, "poisson": 0.15, "saumon": 0.10, "cabillaud": 0.10,
@@ -1088,6 +1090,11 @@
                 let textRaw = (scan.commentaire || "").toLowerCase();
                 let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 20)));
 
+                // 🚨 DÉTECTION AUTOMATIQUE DES PLATEAUX CRITIQUES (>= 70% de gaspillage)
+                if (restePct >= 70) {
+                    verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
+                }
+
                 referenceAliments.forEach(aliment => {
                     let alimLower = aliment.toLowerCase();
                     let keywords = alimLower.split(/[\/\+]/).map(kw => kw.trim());
@@ -1199,6 +1206,30 @@
 
             renderList(plebiscites, containerAdhesion, false);
             renderList(rejets, containerRejets, true);
+        }
+
+        function verifierEtCapturerSiGaspiCritique(resultatAnalyseScan) {
+            let aujourdhui = new Date().toISOString().split('T')[0];
+            if (dateDerniereCaptureAuto !== aujourdhui) {
+                compteurCapturesAutomatiquesJour = 0;
+                dateDerniereCaptureAuto = aujourdhui;
+            }
+
+            // Max 3 photos par jour pour les plateaux >= 70% de gaspillage
+            if (compteurCapturesAutomatiquesJour < 3) {
+                compteurCapturesAutomatiquesJour++;
+                const payload = { 
+                    action: "logPlateauCritique", 
+                    etablissement: document.getElementById('select-etablissement').value, 
+                    menu_jour: document.getElementById('borne-menu-active').innerText, 
+                    taux_gaspillage: resultatAnalyseScan.pourcentageRestes + "%",
+                    image_base64: getBase64FromLiveVideo() 
+                };
+                
+                fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                    method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
+                }).catch(() => {});
+            }
         }
 
         function renderAnalyseFineSynthese(plebiscites, rejets) {
