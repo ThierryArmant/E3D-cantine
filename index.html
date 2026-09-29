@@ -72,8 +72,8 @@
         .dashboard-col h3 { font-size: 13px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
         .chart-container { position: relative; height: 130px; width: 100%; }
 
-        .gourmet-dish-card { background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.1s ease; }
-        .gourmet-dish-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .gourmet-dish-card { background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.1s ease; cursor: pointer; }
+        .gourmet-dish-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #2d6a4f; }
         .gourmet-dish-card.plebiscite { border-left: 5px solid #10b981; }
         .gourmet-dish-card.alerte { border-left: 5px solid #ef4444; }
         .dish-thumb-photo { width: 40px; height: 40px; border-radius: 4px; margin: 4px 4px 4px 6px; flex-shrink: 0; object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: transparent; }
@@ -258,14 +258,14 @@
                         </div>
                     </div>
                     
-                    <!-- 🟢🔴 ANALYSE DES PLATS SUR LA PÉRIODE -->
+                    <!-- 🟢🔴 ANALYSE DES PLATS SUR LA PÉRIODE (CLICABLES) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (Adhésion >= 70%)</h3>
+                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (Cliquez pour auditer)</h3>
                             <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (Rejets >= 40%)</h3>
+                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (Cliquez pour auditer)</h3>
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
@@ -660,6 +660,26 @@
         </div>
     </div>
 
+    <!-- 🌟 MODALE DE DÉTAIL INTERACTIVE AVEC FILTRE DE CONCURRENCE -->
+    <div id="modal-item-detail" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 20px; max-width: 600px; width: 92%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 5px solid #2d6a4f; display: flex; flex-direction: column; max-height: 85vh;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                <h3 id="modal-item-title" style="color: #1b4332; font-size: 15px; font-weight: 900; margin: 0;">🔍 Détail de l'item</h3>
+                <button type="button" onclick="closeItemModal()" style="background: #ef4444; color: white; border: none; border-radius: 4px; width: 26px; height: 26px; font-weight: bold; cursor: pointer;">✕</button>
+            </div>
+            
+            <!-- Barre de filtre de concurrence intégrée dans la modale -->
+            <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer les conflits / concurrence :</label>
+                <input type="text" id="modal-filter-input" placeholder="Ex: sauce, frites, poisson..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
+
+            <div id="modal-item-content" style="font-size: 11.5px; color: #334155; line-height: 1.5; overflow-y: auto; flex-grow: 1; padding-right: 4px;">
+                Chargement des occurrences...
+            </div>
+        </div>
+    </div>
+
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
@@ -673,6 +693,7 @@
         let globalItemsDetailedStats = {};
         let compteurCapturesAutomatiquesJour = 0;
         let dateDerniereCaptureAuto = "";
+        let currentModalOccurrences = []; // Stockage pour le filtrage en direct
 
         // 🌟 DICTIONNAIRE UNIVERSEL DES DÉCHETS INÉVITABLES
         const COEFFICIENTS_INEVITABLES = {
@@ -1051,7 +1072,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🌟 FONCTION CORRIGÉE : Extraction propre des véritables items (fini les phrases à rallonge)
+        // 🌟 EXTRACTION PROPRE DES VRAIS PLATS (FINI LES PHRASES À RALLONGE)
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1063,7 +1084,6 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            // 🎯 LISTE DE RÉFÉRENCE DES VRAIS PLATS ET ALIMENTS COURANTS EN RESTAURATION SCOLAIRE
             const alimentsReferencePermis = [
                 "Couscous", "Paella", "Tajine", "Gardiane de Taureau", "Chili", "Lasagnes", 
                 "Poulet rôti", "Poulet tex-mex", "Sauté de viande", "Bœuf Bourguignon", "Steak haché", 
@@ -1090,7 +1110,6 @@
                     verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
                 }
 
-                // On vérifie quel aliment de notre liste officielle est présent dans le texte du scan ou de l'historique
                 alimentsReferencePermis.forEach(aliment => {
                     let alimLower = aliment.toLowerCase();
                     let isMatch = false;
@@ -1123,7 +1142,7 @@
 
             alimentsReferencePermis.forEach(aliment => {
                 let stats = foodStats[aliment];
-                if (stats.count === 0) return; // On ignore les aliments non croisés sur la période
+                if (stats.count === 0) return; 
 
                 let resteMoyen = stats.totalRestes / stats.count;
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
@@ -1187,7 +1206,7 @@
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
 
                     container.innerHTML += `
-                        <div class="${cardClass}" style="margin-bottom: 0;">
+                        <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser les menus et services associés">
                             <img src="${item.thumb}" onerror="${fallbackHtml}" class="dish-thumb-photo" alt="">
                             <div style="flex-grow: 1; padding-right: 8px; overflow: hidden;">
                                 <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
@@ -1200,6 +1219,100 @@
 
             renderList(plebiscites, containerAdhesion, false);
             renderList(rejets, containerRejets, true);
+        }
+
+        // 🔍 OUVRE LA MODALE DE DÉTAIL CLICABLE AVEC CONCURRENCE & FILTRE
+        function openItemDetail(rawKey) {
+            const modal = document.getElementById('modal-item-detail');
+            const title = document.getElementById('modal-item-title');
+            const content = document.getElementById('modal-item-content');
+            const filterInput = document.getElementById('modal-filter-input');
+            if (!modal || !title || !content) return;
+
+            title.innerText = `🔍 Contexte & Concurrence : ${rawKey}`;
+            content.innerHTML = "<em>Analyse croisée des services en cours...</em>";
+            if (filterInput) filterInput.value = "";
+            modal.style.display = "flex";
+
+            let matchingScans = [];
+            if (globalRawData && globalRawData.rawGaspillage) {
+                matchingScans = globalRawData.rawGaspillage.filter(s => {
+                    let com = (s.commentaire || "").toLowerCase();
+                    let keyLower = rawKey.toLowerCase();
+                    return com.includes(keyLower) || (keyLower === "poisson" && com.includes("colin")) || (keyLower === "poulet" && com.includes("tex-mex"));
+                });
+            }
+
+            currentModalOccurrences = matchingScans.map(s => {
+                let dateIso = normalizeDate(s.dateRaw) || "";
+                let taux = s.plat > 0 ? s.plat : (s.entree > 0 ? s.entree : (s.dessert > 0 ? s.dessert : 0));
+                
+                // Recherche du menu configuré ce jour-là dans l'historique global des menus
+                let menuAssocie = "Menu non renseigné";
+                if (globalRawData && globalRawData.rawGaspillage) {
+                    let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
+                    if (menuRow && menuRow.commentaire) menuAssocie = menuRow.commentaire;
+                }
+
+                return {
+                    date: dateIso || "Date inconnue",
+                    taux: taux,
+                    menu: menuAssocie,
+                    obs: s.commentaire
+                };
+            });
+
+            renderModalOccurrencesList(currentModalOccurrences);
+        }
+
+        function renderModalOccurrencesList(occurrences) {
+            const content = document.getElementById('modal-item-content');
+            if (!content) return;
+
+            if (occurrences.length === 0) {
+                content.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune occurrence trouvée pour ce filtre.</p>`;
+                return;
+            }
+
+            let htmlList = `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Services enregistrés (${occurrences.length} correspondances) :</div>`;
+            htmlList += `<div style="display: flex; flex-direction: column; gap: 8px;">`;
+            
+            occurrences.forEach(occ => {
+                let badgeColor = occ.taux >= 40 ? "#ef4444" : "#10b981";
+                htmlList += `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <strong style="color: #1b4332; font-size: 11.5px;">📅 ${occ.date}</strong>
+                            <span style="background:${badgeColor}; color:white; padding:1px 6px; border-radius:3px; font-size:10px; font-weight:bold;">Rejet : ${occ.taux}%</span>
+                        </div>
+                        <div style="font-size: 11px; color: #0f172a; background: #ffffff; padding: 5px 8px; border-radius: 4px; border: 1px dashed #cbd5e1; margin-bottom: 4px;">
+                            <strong>🍽️ Menu complet du jour (Concurrence / Alternatives) :</strong><br>${occ.menu}
+                        </div>
+                        <div style="color: #475569; font-size: 10.5px; font-style: italic;">
+                            💬 Obs. : "${occ.obs}"
+                        </div>
+                    </div>`;
+            });
+            htmlList += `</div>`;
+            content.innerHTML = htmlList;
+        }
+
+        function filterModalOccurrences() {
+            const query = (document.getElementById('modal-filter-input').value || "").toLowerCase().trim();
+            if (!query) {
+                renderModalOccurrencesList(currentModalOccurrences);
+                return;
+            }
+
+            let filtered = currentModalOccurrences.filter(occ => {
+                return occ.menu.toLowerCase().includes(query) || occ.obs.toLowerCase().includes(query) || occ.date.includes(query);
+            });
+            renderModalOccurrencesList(filtered);
+        }
+
+        function closeItemModal() {
+            const modal = document.getElementById('modal-item-detail');
+            if (modal) modal.style.display = "none";
         }
 
         function verifierEtCapturerSiGaspiCritique(resultatAnalyseScan) {
