@@ -165,9 +165,9 @@
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
             <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖️ Saisie des Déchets</li>
 
-            <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default;">L'Espace des Chefs</li>
+            <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default;">L'Espace des Éco-Délégués</li>
 
-            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Espace Cuisinier</li>
+            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Éco-Délégués (Menu)</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
         </ul>
 
@@ -303,139 +303,138 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE CUISINIER -->
+            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Anciennement Cuisinier) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
-                    <h3 style="margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">👥 Gestion des prévisions d'effectifs</h3>
-                    <div style="display: flex; gap: 12px; margin-bottom: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
-                        <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 1 :</label><input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
-                        <div style="flex: 1; min-width: 140px;"><label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px;">Midi - Service 2 :</label><input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px;">
+                        <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
+                    </div>
+
+                    <!-- GESTION DES EFFECTIFS -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 20px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1px solid #cbd5e1;">
+                        <div style="flex: 1; min-width: 140px;">
+                            <label style="font-size: 12px; font-weight: bold; color: #334155; display: block; margin-bottom: 4px;">Midi - Service 1 (Effectif attendu) :</label>
+                            <input type="number" id="convives-s1" value="200" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 13px; font-weight: bold;">
+                        </div>
+                        <div style="flex: 1; min-width: 140px;">
+                            <label style="font-size: 12px; font-weight: bold; color: #334155; display: block; margin-bottom: 4px;">Midi - Service 2 (Effectif attendu) :</label>
+                            <input type="number" id="convives-s2" value="250" onchange="updateExpectedMeals()" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 13px; font-weight: bold;">
+                        </div>
                         <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; justify-content: flex-end;">
-                            <div style="margin-bottom: 4px; font-size: 12px;">Total attendus : <span id="lbl-total-attendus" style="font-weight: bold; color: #2d6a4f;">450</span></div>
-                            <button class="btn" onclick="saveExpectedMeals()" style="padding: 8px; font-size: 12px;">💾 Enregistrer Effectifs</button>
+                            <div style="margin-bottom: 6px; font-size: 13px; color: #475569;">Total convives : <span id="lbl-total-attendus" style="font-weight: 900; color: #16a34a; font-size: 16px;">450</span></div>
+                            <button class="btn" onclick="saveExpectedMeals()" style="background-color: #1e293b; padding: 10px; font-size: 12px;">💾 Valider les effectifs</button>
                         </div>
                     </div>
 
-                    <h3 style="margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; font-size: 14px;">📋 Composition du menu du jour (Grand Catalogue)</h3>
+                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour (Briques modulaires)</h3>
+                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Sélectionnez la base et l'ajout, ou utilisez le champ "Autre" si le plat n'est pas dans la liste.</p>
+                    
                     <div class="table-responsive">
-                        <table class="menu-table">
-                            <thead><tr><th>🥗 ENTRÉES</th><th>🍖 PLATS</th><th>🍟 ACCOMPAGNEMENTS</th><th>🍰 DESSERTS & LAITAGES</th></tr></thead>
+                        <table class="menu-table" style="min-width: 850px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">🥗 ENTRÉES</th>
+                                    <th style="width: 25%;">🍖 PLATS PRINCIPAUX</th>
+                                    <th style="width: 25%;">🍟 ACCOMPAGNEMENTS</th>
+                                    <th style="width: 25%;">🍰 DESSERTS & LAITAGES</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 <tr>
+                                    <!-- COLONNE ENTRÉES -->
                                     <td>
-                                        <div class="sub-theme">🍅 Crudités / Salades</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomates"> Tomates</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Tomate Mozzarella"> Tomate Mozzarella</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Carottes râpées"> Carottes râpées</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade verte"> Salade verte</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Céleri rémoulade"> Céleri rémoulade</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Œuf mayonnaise"> Œuf mayonnaise</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Taboulé / Salade variée"> Taboulé / Salade variée</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Taboulé aux légumes maison"> Taboulé aux légumes maison</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade endives noix roquefort"> Salade endives noix roquefort</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Œufs mimosa"> Œufs mimosa</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Salade boulgour tomates oignons"> Salade boulgour tomates oignons</label>
-                                        <div class="sub-theme">🐷 Charcuterie</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Saucisson"> Saucisson 🥖</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon de pays"> Jambon de pays</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Jambon blanc"> Jambon blanc</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Pâté / Terrine"> Pâté / Terrine</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Rosette"> Rosette</label>
-                                        <div class="sub-theme">🥧 Entrées Cuites</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Quiche / Tarte salée"> Quiche / Tarte salée</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Pizza"> Pizza</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Friand"> Friand 🥧</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Pissaladière"> Pissaladière</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree" value="Wrap's de poulet"> Wrap's de poulet</label>
+                                        <div class="sub-theme">Bases (Choisir)</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur"> Œuf dur</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie (Saucisson/Jambon)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte / Friand</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px;">Options / Ajouts</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mozzarella"> + Mozzarella</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Roquefort/Bleu"> + Roquefort / Bleu</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Vinaigrette"> + Vinaigrette</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mayonnaise"> + Mayonnaise</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Entrée (Saisie libre)</div>
+                                        <input type="text" id="entree_libre" placeholder="Ex: Soupe de potiron..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
                                     </td>
+                                    
+                                    <!-- COLONNE PLATS -->
                                     <td>
-                                        <div class="sub-theme">🍲 Plats Uniques / Complets</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Gardianne"> Gardianne</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Couscous"> Couscous 🍢</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Paella"> Paella 🥘</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Bœuf bourguignon"> Bœuf bourguignon</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Blanquette de veau"> Blanquette de veau</label>
-                                        <div class="sub-theme">🐓 Volailles</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet rôti"> Poulet rôti</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Nuggets"> Nuggets</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Escalope de dinde"> Escalope de dinde</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Cuisse de poulet miel-épices"> Cuisse de poulet miel/épices</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Poulet tex-mex"> Poulet tex-mex</label>
-                                        <div class="sub-theme">🥩 Viandes (Bœuf / Porc)</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Steak haché"> Steak haché</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Rôti de porc/bœuf"> Rôti de porc / bœuf</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Sauté de porc"> Sauté de porc</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Boulettes de bœuf"> Boulettes de bœuf</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Saucisse fraîche"> Saucisse fraîche / merguez</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Cordon bleu"> Cordon bleu</label>
-                                        <div class="sub-theme">🐟 Poissons</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Poisson pané"> Poisson pané</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Filet de colin"> Filet de colin / merlu</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Beignet de calamar"> Beignet de calamar</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Limande meunière"> Limande meunière</label>
-                                        <div class="sub-theme">🌱 Végétarien & Œufs</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Galette de céréales"> Galette de céréales</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes végétariennes"> Lasagnes végé</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Omelette au fromage"> Omelette au fromage</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Dahl de lentilles corail"> Dahl de lentilles corail</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat" value="Lasagnes courgettes chèvre"> Lasagnes courgettes chèvre</label>
+                                        <div class="sub-theme">Bases (Choisir)</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet rôti / Cuisse"> Poulet rôti / Cuisse</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet tex-mex"> Poulet tex-mex</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson blanc (Colin/Lieu)"> Poisson blanc (Colin/Lieu)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané"> Poisson pané</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Sauté de porc/veau"> Sauté de viande</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Galette végétale"> Galette végétale</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px;">Options / Sauces</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Crème/Fromage"> + Sauce Crème/Fromage</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Curry/Épices"> + Sauce Curry/Épices</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Au jus / Nature"> + Au jus / Nature</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Plat (Saisie libre)</div>
+                                        <input type="text" id="plat_libre" placeholder="Ex: Couscous merguez..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
                                     </td>
+
+                                    <!-- COLONNE ACCOMPAGNEMENTS -->
                                     <td>
-                                        <div class="sub-theme">🥔 Féculents</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Frites"> Frites 🍟</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pâtes / Radiatori"> Pâtes / Radiatori</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Riz"> Riz</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Semoule / Boulgour"> Semoule / Boulgour</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Purée"> Purée</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Pommes de terre rôties"> Pommes de terre rôties / rissolées</label>
-                                        <div class="sub-theme">🌿 Légumes</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Haricots verts"> Haricots verts</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Ratatouille"> Ratatouille</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Brocolis"> Brocolis</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Petits pois / Carottes"> Petits pois / Carottes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Courgettes"> Courgettes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Poêlée de légumes"> Poêlée de légumes / champignons</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Gratin de choux-fleur"> Gratin de choux-fleur</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accompagnement" value="Epinards"> Epinards</label>
+                                        <div class="sub-theme">Féculents</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites"> Frites</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes / Coquillettes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour"> Semoule / Boulgour</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée / Pommes rissolées"> Pommes de terre (Purée/Rissolées)</label>
+                                        
+                                        <div class="sub-theme" style="margin-top: 8px;">Légumes</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux-fleurs</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Poêlée"> Ratatouille / Poêlée légumes</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Accomp. (Saisie libre)</div>
+                                        <input type="text" id="accomp_libre" placeholder="Ex: Lentilles..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
                                     </td>
+
+                                    <!-- COLONNE DESSERTS & LAITAGES -->
                                     <td>
-                                        <div class="sub-theme">🍏 Vergers & Fruits</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Melon"> Melon</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pastèque"> Pastèque</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Pomme / Banane"> Pomme / Banane</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fruit de saison"> Fruit de saison</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Compote / Purée de fruits"> Compote / Purée de fruits</label>
-                                        <div class="sub-theme">🥛 Laitages & Fromages</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt"> Yaourt nature/arôme</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Portion Fromage"> Fromage portion (Kiri/Gouda)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fromage affiné à la coupe"> Fromage à la coupe (Cantal/Tome)</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Fromage blanc"> Fromage blanc</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Liégeois / Crème dessert"> Crème dessert / Liégeois</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Saint paulin bio"> Saint paulin bio</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt aux fruits mixés"> Yaourt aux fruits mixés</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Yaourt à la grecque"> Yaourt à la grecque</label>
-                                        <div class="sub-theme">🍰 Pâtisseries / Douceurs</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Gâteau au chocolat"> Gâteau au chocolat</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Mousse au chocolat"> Mousse au chocolat</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Éclair"> Éclair</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte aux fruits"> Tarte aux fruits / citron</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Flan / Riz au lait maison"> Flan ou riz au lait maison</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Flan patissier"> Flan pâtissier</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Île flottante"> Île flottante</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Tarte pommes"> Tarte aux pommes</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert" value="Crème dessert vanille / chocolat"> Crème dessert vanille / chocolat</label>
+                                        <div class="sub-theme">Laitages</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt nature/aromatisé"> Yaourt nature/aromatisé</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt aux fruits mixés"> Yaourt aux fruits mixés</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage portion (Kiri/Babybel)"> Fromage portion (Kiri/Gouda)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage à la coupe"> Fromage à la coupe</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px;">Fruits & Douceurs</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Fruit de saison (Pomme/Banane)"> Fruit de saison (Pomme/Banane)</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Compote"> Compote</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Crème dessert / Liégeois"> Crème dessert / Liégeois</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Île flottante"> Île flottante</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie (Tarte/Gâteau/Flan)"> Pâtisserie (Tarte/Gâteau/Flan)</label>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Dessert (Saisie libre)</div>
+                                        <input type="text" id="dessert_libre" placeholder="Ex: Mousse au chocolat..." style="width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
-                        <button type="button" class="btn" onclick="runGeminiAIAnalysis()" style="flex: 1; min-width: 220px; background-color: #047857;">🤖 Analyser le menu du jour avec l'IA Gemini</button>
-                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #1e3a8a;">💾 Valider & Lancer le service pour la Borne</button>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #047857; font-size: 14px; padding: 12px;">✅ VALIDER LE MENU POUR LA BORNE</button>
                     </div>
 
-                    <div id="gemini-ai-result-jour" class="ai-box" style="display: none;">
+                    <div id="gemini-ai-result-jour" class="ai-box" style="display: none; margin-top: 16px;">
                         <div class="ai-title">🌱 ANALYSE EGAlim & PRÉVENTION DU GASPILLAGE</div>
                         <div id="gemini-ai-text-jour"></div>
                     </div>
@@ -655,64 +654,64 @@
             } catch(e) {}
         }
 
-        // 🌟 DICTIONNAIRE CULINAIRE HD : Rendu professionnel (Coupe les Alt texts si image non chargée)
         const DEFAULT_THUMBNAIL = "https://images.unsplash.com/photo-1490818387583-1b5f22222bd2?w=150&q=80"; 
         
         const FOOD_THUMBNAILS = {
-            "Tomates": "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80",
-            "Tomate Mozzarella": "https://images.unsplash.com/photo-1529312266912-b33cfce2eefd?w=150&q=80",
-            "Carottes râpées": "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80",
-            "Salade verte": "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80",
-            "Céleri rémoulade": "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&q=80",
-            "Œuf mayonnaise": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80",
-            "Taboulé / Salade variée": "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80",
-            "Taboulé aux légumes maison": "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80",
-            "Salade endives noix roquefort": "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80",
-            "Œufs mimosa": "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80",
-            "Saucisson": "https://images.unsplash.com/photo-1555507036-ab1f40ce88cb?w=150&q=80",
-            "Jambon de pays": "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80",
-            "Jambon blanc": "https://images.unsplash.com/photo-1517093751761-b9a3dc8fcd21?w=150&q=80",
-            "Pâté / Terrine": "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80",
-            "Quiche / Tarte salée": "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80",
-            "Pizza": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&q=80",
-            "Poulet rôti": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80",
-            "Poulet tex-mex": "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=150&q=80",
-            "Nuggets": "https://images.unsplash.com/photo-1562967914-608f82629710?w=150&q=80",
-            "Escalope de dinde": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80",
-            "Cuisse de poulet miel-épices": "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80",
-            "Steak haché": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80",
-            "Rôti de porc/bœuf": "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80",
-            "Boulettes de bœuf": "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=150&q=80",
-            "Saucisse fraîche": "https://images.unsplash.com/photo-1528607929212-2636ec44253e?w=150&q=80",
-            "Cordon bleu": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80",
-            "Poisson pané": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&q=80",
-            "Filet de colin": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80",
-            "Beignet de calamar": "https://images.unsplash.com/photo-1605333396914-2314dce27636?w=150&q=80",
-            "Galette de céréales": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=150&q=80",
-            "Lasagnes végétariennes": "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80",
-            "Frites": "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80",
-            "Pâtes / Radiatori": "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80",
-            "Riz": "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80",
-            "Semoule / Boulgour": "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80",
-            "Purée": "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80",
-            "Haricots verts": "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&q=80",
-            "Ratatouille": "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80",
-            "Brocolis": "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80",
-            "Petits pois / Carottes": "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80",
-            "Pomme / Banane": "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80",
-            "Fruit de saison": "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80",
-            "Yaourt": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80",
-            "Portion Fromage": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80",
-            "Fromage affiné à la coupe": "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80",
-            "Gâteau au chocolat": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80",
-            "Mousse au chocolat": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80",
-            "Tarte aux fruits / citron": "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80",
-            "Flan / Riz au lait maison": "https://images.unsplash.com/photo-1598215439218-f79b40db21ac?w=150&q=80",
-            "Flan patissier": "https://images.unsplash.com/photo-1598215439218-f79b40db21ac?w=150&q=80",
-            "Île flottante": "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80",
-            "Tarte pommes": "https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=150&q=80",
-            "Crème dessert vanille / chocolat": "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80",
-            "Pain": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&q=80"
+            "Tomates": { url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=150&q=80", emoji: "🍅" },
+            "Tomate Mozzarella": { url: "https://images.unsplash.com/photo-1529312266912-b33cfce2eefd?w=150&q=80", emoji: "🧀" },
+            "Carottes râpées": { url: "https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=150&q=80", emoji: "🥕" },
+            "Salade verte": { url: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=150&q=80", emoji: "🥗" },
+            "Céleri rémoulade": { url: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=150&q=80", emoji: "🥗" },
+            "Œuf mayonnaise": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
+            "Taboulé / Salade variée": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
+            "Taboulé aux légumes maison": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
+            "Salade endives noix roquefort": { url: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?w=150&q=80", emoji: "🥗" },
+            "Œufs mimosa": { url: "https://images.unsplash.com/photo-1525351484163-7529414344d8?w=150&q=80", emoji: "🥚" },
+            "Salade boulgour tomates oignons": { url: "https://images.unsplash.com/photo-1556040220-4096d522378d?w=150&q=80", emoji: "🥗" },
+            "Saucisson": { url: "https://images.unsplash.com/photo-1555507036-ab1f40ce88cb?w=150&q=80", emoji: "🥖" },
+            "Jambon de pays": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🍖" },
+            "Jambon blanc": { url: "https://images.unsplash.com/photo-1517093751761-b9a3dc8fcd21?w=150&q=80", emoji: "🍖" },
+            "Pâté / Terrine": { url: "https://images.unsplash.com/photo-1628373383885-4be0bc0172fa?w=150&q=80", emoji: "🥧" },
+            "Quiche / Tarte salée": { url: "https://images.unsplash.com/photo-1583338917451-face2751d8d5?w=150&q=80", emoji: "🥧" },
+            "Pizza": { url: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=150&q=80", emoji: "🍕" },
+            "Poulet rôti": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
+            "Poulet tex-mex": { url: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=150&q=80", emoji: "🍗" },
+            "Nuggets": { url: "https://images.unsplash.com/photo-1562967914-608f82629710?w=150&q=80", emoji: "🍗" },
+            "Escalope de dinde": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍗" },
+            "Cuisse de poulet miel-épices": { url: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=150&q=80", emoji: "🍗" },
+            "Steak haché": { url: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=150&q=80", emoji: "🥩" },
+            "Rôti de porc/bœuf": { url: "https://images.unsplash.com/photo-1600850056054-a8ae660c1dcb?w=150&q=80", emoji: "🥩" },
+            "Boulettes de bœuf": { url: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=150&q=80", emoji: "🧆" },
+            "Saucisse fraîche": { url: "https://images.unsplash.com/photo-1528607929212-2636ec44253e?w=150&q=80", emoji: "🌭" },
+            "Cordon bleu": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍖" },
+            "Poisson pané": { url: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=150&q=80", emoji: "🐟" },
+            "Filet de colin": { url: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=150&q=80", emoji: "🐟" },
+            "Beignet de calamar": { url: "https://images.unsplash.com/photo-1605333396914-2314dce27636?w=150&q=80", emoji: "🦑" },
+            "Galette de céréales": { url: "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=150&q=80", emoji: "🥞" },
+            "Lasagnes végétariennes": { url: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=150&q=80", emoji: "🍝" },
+            "Frites": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
+            "Pâtes / Radiatori": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
+            "Riz": { url: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80", emoji: "🍚" },
+            "Semoule / Boulgour": { url: "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80", emoji: "🥣" },
+            "Purée": { url: "https://images.unsplash.com/photo-1615486171448-4afdcb7b8782?w=150&q=80", emoji: "🥔" },
+            "Haricots verts": { url: "https://images.unsplash.com/photo-1563584358359-905470d91244?w=150&q=80", emoji: "🟢" },
+            "Ratatouille": { url: "https://images.unsplash.com/photo-1572448862559-06d98e6e224b?w=150&q=80", emoji: "🍆" },
+            "Brocolis": { url: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150&q=80", emoji: "🥦" },
+            "Petits pois / Carottes": { url: "https://images.unsplash.com/photo-1590165482129-1b8b27698780?w=150&q=80", emoji: "🥕" },
+            "Pomme / Banane": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍎" },
+            "Fruit de saison": { url: "https://images.unsplash.com/photo-1619546813926-a78fa6370cd2?w=150&q=80", emoji: "🍏" },
+            "Yaourt": { url: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=150&q=80", emoji: "🥛" },
+            "Portion Fromage": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
+            "Fromage affiné à la coupe": { url: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=150&q=80", emoji: "🧀" },
+            "Gâteau au chocolat": { url: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80", emoji: "🍫" },
+            "Mousse au chocolat": { url: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=150&q=80", emoji: "🍫" },
+            "Tarte aux fruits / citron": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🍋" },
+            "Flan / Riz au lait maison": { url: "https://images.unsplash.com/photo-1598215439218-f79b40db21ac?w=150&q=80", emoji: "🍮" },
+            "Flan patissier": { url: "https://images.unsplash.com/photo-1598215439218-f79b40db21ac?w=150&q=80", emoji: "🍮" },
+            "Île flottante": { url: "https://images.unsplash.com/photo-1579954115567-dff2e1182f81?w=150&q=80", emoji: "🍮" },
+            "Tarte pommes": { url: "https://images.unsplash.com/photo-1568571780765-9276ac8b75a2?w=150&q=80", emoji: "🥧" },
+            "Crème dessert vanille / chocolat": { url: "https://images.unsplash.com/photo-1509365465994-3e3a958e990b?w=150&q=80", emoji: "🍮" },
+            "Pain": { url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&q=80", emoji: "🥖" }
         };
 
         function normalizeDate(raw) {
@@ -725,10 +724,9 @@
             return str.substring(0, 10);
         }
 
-        // Simplifie "Pomme / Banane" en "Pomme"
         function getCleanLabel(label) {
             if (!label) return "";
-            return label.split('/')[0].trim();
+            return label.split(/[\/\+]/)[0].trim();
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -814,14 +812,13 @@
             
             let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
             let lastAlimG = 0, lastFruitsG = 0, lastPainG = 0;
-            let nbJours = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
-                    nbJours++;
                     let a = sh.alimentaire[i], f = sh.fruits[i], p = sh.pain[i];
                     totalAlimKg += a; totalFruitsKg += f; totalPainKg += p;
+                    lastAlimG = a * 1000; lastFruitsG = f * 1000; lastPainG = p * 1000;
                 }
             }
 
@@ -835,18 +832,19 @@
             }
 
             let poidsTotal = totalAlimKg + totalFruitsKg + totalPainKg;
-            
-            let evitablesG = (totalAlimKg + totalPainKg) * 1000;
-            let inevitablesG = totalFruitsKg * 1000;
-            let totalBioG = evitablesG + inevitablesG;
-
-            let avgGrams = (nbJours > 0 && effectif > 0) ? (totalBioG / (effectif * nbJours)) : 0;
+            let totalLastNourritureG = lastAlimG + lastFruitsG + lastPainG;
+            let avgGrams = effectif > 0 ? (totalLastNourritureG / effectif) : 0;
 
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('kpi-total').innerText = `${poidsTotal.toFixed(1)} kg`;
             document.getElementById('kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotal * 2.0).toFixed(1)} kg`;
-            document.getElementById('biodiff-total').innerText = `Total Période : ${totalBioG.toFixed(0)} g`;
+
+            let evitablesG = lastAlimG + lastPainG;
+            let inevitablesG = lastFruitsG;
+            let totalBioG = evitablesG + inevitablesG;
+
+            document.getElementById('biodiff-total').innerText = `Total : ${totalBioG.toFixed(0)} g`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
             chartTimeline.update();
@@ -857,70 +855,14 @@
             document.getElementById('rep-kpi-money').innerText = `${(poidsTotal * 4.50).toFixed(2)} €`;
 
             runGranularExtraction(filteredScans);
-            updateHistoryMode('day');
 
-            if (nbJours > 0) {
-                renderBilanEleves(totalAlimKg/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
-            } else {
-                document.getElementById('bilan-eleves-container').style.display = "none";
+            if (sh.alimentaire.length > 0) {
+                const idx = sh.alimentaire.length - 1;
+                renderBilanEleves(sh.alimentaire[idx], sh.fruits[idx], sh.pain[idx], effectif);
             }
         }
 
-        function updateHistoryMode(mode) {
-            if (!globalRawData || !globalRawData.sacsHistory || globalRawData.sacsHistory.labels.length === 0) return;
-            const gridContainer = document.getElementById('history-main-waste-grid');
-            gridContainer.innerHTML = "";
-            let mapAccumulator = {};
-            let cache = globalRawData.sacsHistory;
-
-            let startDate = document.getElementById('filter-start-date').value || "2000-01-01";
-            let endDate = document.getElementById('filter-end-date').value || "2099-12-31";
-
-            for (let i = 0; i < cache.labels.length; i++) {
-                let isoDate = normalizeDate(cache.datesRaw[i]); 
-                let labelDate = cache.labels[i];
-                if (!isoDate) continue;
-                if (isoDate < startDate || isoDate > endDate) continue;
-
-                let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
-                if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
-                mapAccumulator[timeKey].alim += parseFloat(cache.alimentaire[i]) || 0;
-                mapAccumulator[timeKey].fruits += parseFloat(cache.fruits[i]) || 0;
-                mapAccumulator[timeKey].pain += parseFloat(cache.pain[i]) || 0;
-                mapAccumulator[timeKey].emb += parseFloat(cache.emballages[i]) || 0;
-                mapAccumulator[timeKey].serv += parseFloat(cache.serviettes[i]) || 0;
-            }
-
-            const keys = Object.keys(mapAccumulator);
-            if (keys.length === 0) {
-                gridContainer.innerHTML = "<p style='color:#64748b; font-size:12px; text-align:center; padding:15px; grid-column:1/-1;'>Aucune donnée sur cette période.</p>";
-                return;
-            }
-
-            keys.forEach(dateKey => {
-                let data = mapAccumulator[dateKey];
-                let items = [
-                    { name: "Plats alim.", val: data.alim, icon: "🍖" },
-                    { name: "Fruits", val: data.fruits, icon: "🍏" },
-                    { name: "Pain", val: data.pain, icon: "🥖" },
-                    { name: "Emballages", val: data.emb, icon: "📦" },
-                    { name: "Serviettes", val: data.serv, icon: "📃" }
-                ];
-                items.sort((a, b) => b.val - a.val);
-                let topItem = items[0];
-
-                const card = document.createElement('div');
-                card.className = "history-day-card";
-                card.innerHTML = `<div class="history-day-date">${dateKey}</div><div class="history-day-icon">${topItem.icon}</div><div class="history-day-name">${topItem.name}</div><div class="history-day-val">${topItem.val.toFixed(1)} kg</div>`;
-                gridContainer.appendChild(card);
-            });
-
-            document.querySelectorAll('.btn-toggle-hist').forEach(b => { b.style.backgroundColor = 'transparent'; b.style.color = '#475569'; b.style.border = 'none'; });
-            let targetBtn = document.getElementById('btn-hist-' + mode);
-            if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
-        }
-
-        // 🔄 ANALYSE : 2 ZONES FRONTALES AVEC PHOTOS
+        // 🔄 ANALYSE PAR COMPOSANTE : ALGORITHME CORRIGÉ ET STRICT
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -944,11 +886,14 @@
 
                 referenceAliments.forEach(aliment => {
                     let alimLower = aliment.toLowerCase();
-                    let keywords = alimLower.split(/[\/\s\+]+/);
-                    let matchDirect = textRaw.includes(alimLower);
-                    let matchKeyword = keywords.some(kw => kw.length > 2 && textRaw.includes(kw));
+                    let keywords = alimLower.split(/[\/\+]/).map(kw => kw.trim());
+                    
+                    let isMatch = keywords.some(kw => {
+                        if(kw.length < 4) return false; 
+                        return textRaw.includes(kw);
+                    });
 
-                    if (matchDirect || matchKeyword) {
+                    if (isMatch) {
                         foodStats[aliment].totalRestes += restePct;
                         foodStats[aliment].count += 1;
                     }
@@ -966,12 +911,14 @@
                 let resteMoyen = stats.totalRestes / stats.count;
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
                 let rejetPct = 100 - tauxMange;
+                
                 let cleanLabel = getCleanLabel(aliment);
-                let thumbUrl = FOOD_THUMBNAILS[aliment] || DEFAULT_THUMBNAIL;
+                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
 
                 let itemObj = {
                     label: cleanLabel,
-                    thumb: thumbUrl,
+                    thumb: mediaObj.url,
+                    emoji: mediaObj.emoji,
                     tauxMange: tauxMange,
                     rejetPct: rejetPct
                 };
@@ -999,20 +946,22 @@
             function renderList(list, container, isRejet) {
                 container.innerHTML = "";
                 if (list.length === 0) {
-                    container.innerHTML = `<div style="font-size: 11px; color: #64748b; font-style: italic; padding: 15px; grid-column: 1/-1; text-align: center;">Aucun plat dans cette catégorie.</div>`;
+                    container.innerHTML = `<div style="font-size: 11.5px; color: #64748b; font-style: italic; padding: 15px; grid-column: 1/-1; text-align: center;">Aucun plat n'a atteint ce seuil.</div>`;
                     return;
                 }
 
                 list.forEach(item => {
                     let cardClass = isRejet ? "gourmet-dish-card alerte" : "gourmet-dish-card plebiscite";
-                    let valText = isRejet ? `<span style="color:#ef4444;">${item.rejetPct}% rejet</span>` : `<span style="color:#10b981;">${item.tauxMange}% mangé</span>`;
+                    let valText = isRejet ? `<span style="color:white; background:#ef4444; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>` : `<span style="color:white; background:#10b981; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     
+                    let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
+
                     container.innerHTML += `
                         <div class="${cardClass}" style="margin-bottom: 0;">
-                            <img src="${item.thumb}" onerror="this.src='${DEFAULT_THUMBNAIL}'" class="dish-thumb-photo" alt="">
+                            <img src="${item.thumb}" onerror="${fallbackHtml}" class="dish-thumb-photo" alt="">
                             <div style="flex-grow: 1; padding-right: 8px; overflow: hidden;">
-                                <div class="text-truncate" title="${item.label}" style="font-size:12px;">${item.label}</div>
-                                <div style="font-size: 10px; font-weight: 800;">${valText}</div>
+                                <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
+                                <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
                             </div>
                         </div>
                     `;
@@ -1034,7 +983,8 @@
 
             if (adhesionList && adhesionList.length > 0 && topName) {
                 let best = adhesionList[0];
-                topIcon.innerHTML = `<img src="${best.thumb}" onerror="this.src='${DEFAULT_THUMBNAIL}'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; color: transparent;" alt="">`;
+                let fallbackHtml = `this.outerHTML='<div style=\\'width:100%; height:100%; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:26px; background:#ecfdf5;\\'>${best.emoji}</div>'`;
+                topIcon.innerHTML = `<img src="${best.thumb}" onerror="${fallbackHtml}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="">`;
                 topName.innerText = best.label;
                 topVal.innerText = `${best.tauxMange}% d'adhésion`;
             } else if (topName) {
@@ -1045,7 +995,8 @@
 
             if (rejetsList && rejetsList.length > 0 && defiName) {
                 let worst = rejetsList[0];
-                defiIcon.innerHTML = `<img src="${worst.thumb}" onerror="this.src='${DEFAULT_THUMBNAIL}'" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px; color: transparent;" alt="">`;
+                let fallbackHtml = `this.outerHTML='<div style=\\'width:100%; height:100%; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:26px; background:#fef2f2;\\'>${worst.emoji}</div>'`;
+                defiIcon.innerHTML = `<img src="${worst.thumb}" onerror="${fallbackHtml}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="">`;
                 defiName.innerText = worst.label;
                 defiVal.innerText = `${worst.rejetPct}% gaspillé`;
             } else if (defiName) {
@@ -1189,7 +1140,6 @@
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
                 
-                // Re-applique le filtre actuellement sélectionné (ou "all" par défaut)
                 let activeBtn = document.querySelector('.btn-period.active') || document.querySelectorAll('.btn-period')[0];
                 if (activeBtn) {
                     if(activeBtn.innerText.includes('Tout')) setQuickPeriod('all', activeBtn);
@@ -1325,19 +1275,58 @@
         }
 
         function getCurrentCheckedMenu() {
-            const entrees = Array.from(document.querySelectorAll('input[name="entree"]:checked')).map(el => el.value);
-            const plats = Array.from(document.querySelectorAll('input[name="plat"]:checked')).map(el => el.value);
-            const accomps = Array.from(document.querySelectorAll('input[name="accompagnement"]:checked')).map(el => el.value);
-            const desserts = Array.from(document.querySelectorAll('input[name="dessert"]:checked')).map(el => el.value);
-            if (entrees.length === 0 && plats.length === 0 && accomps.length === 0 && desserts.length === 0) return null;
-            return `${entrees.join('+') || 'Sans entrée'} / ${plats.join('+') || 'Sans plat'} / ${accomps.join('+') || 'Sans accomp.'} / ${desserts.join('+') || 'Sans dessert'}`;
+            // Assemblage dynamique des entrées
+            let entrees = Array.from(document.querySelectorAll('input[name="entree_base"]:checked')).map(el => el.value);
+            let entreesOpt = Array.from(document.querySelectorAll('input[name="entree_opt"]:checked')).map(el => el.value);
+            let entreeLibre = document.getElementById('entree_libre').value.trim();
+            let entreeFinal = entrees.length > 0 ? entrees.join(' + ') : "";
+            if (entreesOpt.length > 0 && entreeFinal) entreeFinal += " (" + entreesOpt.join(', ') + ")";
+            if (entreeLibre) entreeFinal = entreeFinal ? entreeFinal + " / " + entreeLibre : entreeLibre;
+            if (!entreeFinal) entreeFinal = "Sans entrée";
+
+            // Assemblage dynamique des plats
+            let plats = Array.from(document.querySelectorAll('input[name="plat_base"]:checked')).map(el => el.value);
+            let platsOpt = Array.from(document.querySelectorAll('input[name="plat_opt"]:checked')).map(el => el.value);
+            let platLibre = document.getElementById('plat_libre').value.trim();
+            let platFinal = plats.length > 0 ? plats.join(' + ') : "";
+            if (platsOpt.length > 0 && platFinal) platFinal += " (" + platsOpt.join(', ') + ")";
+            if (platLibre) platFinal = platFinal ? platFinal + " / " + platLibre : platLibre;
+            if (!platFinal) platFinal = "Sans plat";
+
+            // Assemblage dynamique des accompagnements
+            let accompsBase = Array.from(document.querySelectorAll('input[name="accomp_base"]:checked')).map(el => el.value);
+            let accompsLeg = Array.from(document.querySelectorAll('input[name="accomp_leg"]:checked')).map(el => el.value);
+            let accompLibre = document.getElementById('accomp_libre').value.trim();
+            let accompFinalList = accompsBase.concat(accompsLeg);
+            let accompFinal = accompFinalList.length > 0 ? accompFinalList.join(' + ') : "";
+            if (accompLibre) accompFinal = accompFinal ? accompFinal + " / " + accompLibre : accompLibre;
+            if (!accompFinal) accompFinal = "Sans accomp.";
+
+            // Assemblage dynamique des desserts
+            let dessertsLait = Array.from(document.querySelectorAll('input[name="dessert_lait"]:checked')).map(el => el.value);
+            let dessertsDouceur = Array.from(document.querySelectorAll('input[name="dessert_douceur"]:checked')).map(el => el.value);
+            let dessertLibre = document.getElementById('dessert_libre').value.trim();
+            let dessertFinalList = dessertsLait.concat(dessertsDouceur);
+            let dessertFinal = dessertFinalList.length > 0 ? dessertFinalList.join(' + ') : "";
+            if (dessertLibre) dessertFinal = dessertFinal ? dessertFinal + " / " + dessertLibre : dessertLibre;
+            if (!dessertFinal) dessertFinal = "Sans dessert";
+
+            // Si absolument rien n'a été coché ni écrit
+            if (entreeFinal === "Sans entrée" && platFinal === "Sans plat" && accompFinal === "Sans accomp." && dessertFinal === "Sans dessert") {
+                return null;
+            }
+
+            // Concaténation finale pour l'envoi au serveur
+            return `${entreeFinal} | ${platFinal} | ${accompFinal} | ${dessertFinal}`;
         }
 
         function saveMenu() {
             const school = document.getElementById('select-etablissement').value;
             const menuFinal = getCurrentCheckedMenu();
-            if (!menuFinal) { alert("Veuillez cocher au moins un élément pour activer le menu du jour."); return; }
-            document.getElementById('borne-menu-active').innerText = menuFinal; 
+            if (!menuFinal) { alert("Veuillez cocher au moins un élément ou remplir un champ libre pour activer le menu du jour."); return; }
+            
+            // Met à jour l'affichage de la Borne avec le menu simplifié pour la lisibilité
+            document.getElementById('borne-menu-active').innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
             localStorage.setItem(`menuActive-${school}`, menuFinal);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
@@ -1346,7 +1335,15 @@
             })
             .then(r => r.json())
             .then(res => {
-                if(res.success) { alert('✅ Menu validé et activé pour le service !'); loadLiveData(); }
+                if(res.success) { 
+                    alert('✅ Menu validé et activé pour le service ! Les éco-délégués peuvent démarrer la borne.'); 
+                    // Vide les champs libres après validation
+                    document.getElementById('entree_libre').value = "";
+                    document.getElementById('plat_libre').value = "";
+                    document.getElementById('accomp_libre').value = "";
+                    document.getElementById('dessert_libre').value = "";
+                    loadLiveData(); 
+                }
                 else { alert('❌ Erreur serveur : ' + res.error); }
             }).catch(() => alert('❌ Erreur réseau lors de la validation du menu.'));
         }
@@ -1357,7 +1354,7 @@
             const resBox = document.getElementById('gemini-ai-result-jour'); 
             const resText = document.getElementById('gemini-ai-text-jour');
 
-            if (!menuText) { alert("⚠️ Veuillez cocher au moins un aliment dans le tableau pour analyser votre projet de menu."); return; }
+            if (!menuText) { alert("⚠️ Veuillez sélectionner des éléments du menu pour lancer l'analyse."); return; }
             resBox.style.display = "block"; resText.innerHTML = "<em>🤖 Analyse EGAlim en cours...</em>";
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
