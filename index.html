@@ -648,7 +648,7 @@
             for (let key in COEFFICIENTS_INEVITABLES) {
                 if (clean.includes(key)) return COEFFICIENTS_INEVITABLES[key];
             }
-            return 0.0; // 0% par défaut (tout est évitable)
+            return 0.0; 
         }
 
         function initSystemVoices() {
@@ -880,25 +880,24 @@
             const school = document.getElementById('select-etablissement').value;
             const effectif = parseInt(document.getElementById('convives-total').value) || parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
             
-            let totalAlimKg = 0, totalFruitsKg = 0, totalPainKg = 0;
+            let totalAlimBrutKg = 0, totalFruitsKg = 0, totalPainKg = 0;
             let nbJours = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
                     nbJours++;
-                    totalAlimKg += (sh.alimentaire[i] || 0);
+                    totalAlimBrutKg += (sh.alimentaire[i] || 0);
                     totalFruitsKg += (sh.fruits[i] || 0);
                     totalPainKg += (sh.pain[i] || 0);
                 }
             }
 
-            // Application de la correction des inévitables (ex: 30% d'os sur le sac alimentaire/poulet)
-            let tauxInévitableGlobal = 0.30; // Part moyenne d'os estimée par défaut dans les sacs alimentaires
-            let poidsInevitablesAlim = totalAlimKg * tauxInévitableGlobal;
-            let poidsEvitableAlim = totalAlimKg - poidsInevitablesAlim;
+            // Correction des déchets inévitables (30% d'os sur le sac alimentaire)
+            let tauxInevitableGlobal = 0.30; 
+            let poidsInevitablesAlim = totalAlimBrutKg * tauxInevitableGlobal;
+            let poidsEvitableAlim = totalAlimBrutKg - poidsInevitablesAlim;
 
-            let poidsTotalBrut = totalAlimKg + totalFruitsKg + totalPainKg;
             let poidsTotalEvitable = poidsEvitableAlim + totalPainKg;
             let poidsTotalInevitables = poidsInevitablesAlim + totalFruitsKg;
 
@@ -912,7 +911,7 @@
             document.getElementById('kpi-total').innerText = `${poidsTotalEvitable.toFixed(1)} kg`;
             document.getElementById('kpi-money').innerText = `${(poidsTotalEvitable * 4.50).toFixed(2)} €`;
             document.getElementById('kpi-impact').innerText = `${(poidsTotalEvitable * 2.0).toFixed(1)} kg`;
-            document.getElementById('biodiff-total').innerText = `Total Période : ${totalBioG.toFixed(0)} g`;
+            document.getElementById('biodiff-total').innerText = `Total Évitable : ${evitablesG.toFixed(0)} g (Inévitables : ${inevitablesG.toFixed(0)} g)`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
             chartTimeline.update();
@@ -967,7 +966,10 @@
 
                 let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
                 if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
-                mapAccumulator[timeKey].alim += parseFloat(cache.alimentaire[i]) || 0;
+                
+                // Correction appliquée directement dans l'historique (70% évitable, 30% inévitable)
+                let alimBrute = parseFloat(cache.alimentaire[i]) || 0;
+                mapAccumulator[timeKey].alim += alimBrute * 0.70; 
                 mapAccumulator[timeKey].fruits += parseFloat(cache.fruits[i]) || 0;
                 mapAccumulator[timeKey].pain += parseFloat(cache.pain[i]) || 0;
                 mapAccumulator[timeKey].emb += parseFloat(cache.emballages[i]) || 0;
@@ -983,7 +985,7 @@
             keys.forEach(dateKey => {
                 let data = mapAccumulator[dateKey];
                 let items = [
-                    { name: "Plats alim.", val: data.alim, icon: "🍖" },
+                    { name: "Plats (évitables)", val: data.alim, icon: "🍖" },
                     { name: "Fruits", val: data.fruits, icon: "🍏" },
                     { name: "Pain", val: data.pain, icon: "🥖" },
                     { name: "Emballages", val: data.emb, icon: "📦" },
