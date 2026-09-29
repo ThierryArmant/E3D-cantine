@@ -1051,7 +1051,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🌟 FONCTION CORRIGÉE : Analyse de TOUS les menus enregistrés sur la période (et non plus seulement du dernier)
+        // 🌟 FONCTION CORRIGÉE : Extraction propre des véritables items (fini les phrases à rallonge)
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1063,41 +1063,22 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            let referenceAliments = [];
-            let allMenuTexts = [];
-
-            // 1. Récupération de tous les textes de menus depuis l'historique brut des scans/commentaires
-            if (globalRawData && globalRawData.rawGaspillage) {
-                globalRawData.rawGaspillage.forEach(s => {
-                    if (s.commentaire) allMenuTexts.push(s.commentaire);
-                });
-            }
-            
-            // 2. Ajout du menu actif actuel de l'établissement
-            let school = document.getElementById('select-etablissement').value;
-            let menuActifStr = localStorage.getItem(`menuActive-${school}`) || "";
-            if (menuActifStr) allMenuTexts.push(menuActifStr);
-
-            // 3. Découpage chirurgical et extraction de tous les ingrédients/plats uniques de la période
-            allMenuTexts.forEach(textBlock => {
-                let rawItems = textBlock.split(/[\|\/\+]/);
-                rawItems.forEach(item => {
-                    let cleanItem = item.trim().replace(' 🧑‍🍳', '').replace('Scan_', '').trim();
-                    if (cleanItem && cleanItem.length > 2 && !referenceAliments.includes(cleanItem)) {
-                        referenceAliments.push(cleanItem);
-                    }
-                });
-            });
-
-            // Fallback si aucun historique textuel n'est trouvé
-            if (referenceAliments.length === 0) {
-                referenceAliments = ["Poulet tex-mex", "Filet de colin", "Frites", "Salade verte", "Salade d'endives", "Tomates", "Yaourt", "Île flottante", "Fruit de saison", "Pomme", "Saucisse", "Merguez", "Couscous"];
-            }
+            // 🎯 LISTE DE RÉFÉRENCE DES VRAIS PLATS ET ALIMENTS COURANTS EN RESTAURATION SCOLAIRE
+            const alimentsReferencePermis = [
+                "Couscous", "Paella", "Tajine", "Gardiane de Taureau", "Chili", "Lasagnes", 
+                "Poulet rôti", "Poulet tex-mex", "Sauté de viande", "Bœuf Bourguignon", "Steak haché", 
+                "Poisson", "Filet de colin", "Omelette", "Cordon Bleu", "Saucisse", "Merguez",
+                "Frites", "Pâtes", "Riz", "Semoule", "Purée", "Lentilles", "Haricots verts", 
+                "Petits pois", "Brocolis", "Ratatouille", "Épinards", "Endives cuites",
+                "Salade verte", "Salade d'endives", "Tomates", "Carottes râpées", "Taboulé", 
+                "Œuf dur", "Quiche", "Tarte", "Charcuterie",
+                "Yaourt", "Fromage", "Fruit de saison", "Compote", "Crème dessert", "Île flottante", "Pâtisserie", "Flan", "Glace", "Pain"
+            ];
 
             let foodStats = {};
             globalItemsDetailedStats = {};
 
-            referenceAliments.forEach(aliment => {
+            alimentsReferencePermis.forEach(aliment => {
                 foodStats[aliment] = { totalRestes: 0, count: 0 };
             });
 
@@ -1109,24 +1090,19 @@
                     verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
                 }
 
-                referenceAliments.forEach(aliment => {
+                // On vérifie quel aliment de notre liste officielle est présent dans le texte du scan ou de l'historique
+                alimentsReferencePermis.forEach(aliment => {
                     let alimLower = aliment.toLowerCase();
-                    let keywords = alimLower.split(/[\/\+]/).map(kw => kw.trim());
-                    
-                    let isMatch = keywords.some(kw => {
-                        if(kw.length < 3) return false; 
-                        return textRaw.includes(kw);
-                    });
+                    let isMatch = false;
 
-                    // Tolérances sémantiques précises
-                    if (!isMatch && (alimLower.includes("poulet") || alimLower.includes("tex-mex"))) {
-                        if (textRaw.includes("poulet") || textRaw.includes("tex-mex") || textRaw.includes("os")) isMatch = true;
-                    }
-                    if (!isMatch && alimLower.includes("colin")) {
-                        if (textRaw.includes("colin") || textRaw.includes("poisson")) isMatch = true;
-                    }
-                    if (!isMatch && (alimLower.includes("saucisse") || alimLower.includes("merguez") || alimLower.includes("couscous"))) {
-                        if (textRaw.includes("saucisse") || textRaw.includes("merguez") || textRaw.includes("couscous") || textRaw.includes("viande")) isMatch = true;
+                    if (textRaw.includes(alimLower)) {
+                        isMatch = true;
+                    } else if (alimLower === "poulet" && (textRaw.includes("poulet") || textRaw.includes("tex-mex"))) {
+                        isMatch = true;
+                    } else if (alimLower === "poisson" && (textRaw.includes("poisson") || textRaw.includes("colin"))) {
+                        isMatch = true;
+                    } else if (alimLower === "viande" && (textRaw.includes("viande") || textRaw.includes("bœuf") || textRaw.includes("veau"))) {
+                        isMatch = true;
                     }
 
                     if (isMatch) {
@@ -1145,19 +1121,18 @@
             let rejets = [];
             let allEvaluatedItems = [];
 
-            referenceAliments.forEach(aliment => {
+            alimentsReferencePermis.forEach(aliment => {
                 let stats = foodStats[aliment];
-                if (stats.count === 0) return; 
+                if (stats.count === 0) return; // On ignore les aliments non croisés sur la période
 
                 let resteMoyen = stats.totalRestes / stats.count;
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
                 let rejetPct = 100 - tauxMange;
                 
-                let cleanLabel = getCleanLabel(aliment);
-                let mediaObj = FOOD_THUMBNAILS[aliment] || FOOD_THUMBNAILS[cleanLabel] || { url: DEFAULT_THUMBNAIL, emoji: "🌟" };
+                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
 
                 let itemObj = {
-                    label: cleanLabel,
+                    label: aliment,
                     rawKey: aliment,
                     thumb: mediaObj.url,
                     emoji: mediaObj.emoji,
@@ -1172,7 +1147,7 @@
                 if (selectFilter) {
                     let opt = document.createElement('option');
                     opt.value = aliment;
-                    opt.innerText = `${cleanLabel} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
+                    opt.innerText = `${aliment} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
                     selectFilter.appendChild(opt);
                 }
 
