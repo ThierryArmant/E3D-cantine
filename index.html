@@ -1051,7 +1051,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        // 🌟 FONCTION MISE À JOUR : Découpage chirurgical et robuste gérant les briques collées ou multiples
+        // 🌟 FONCTION CORRIGÉE : Analyse de TOUS les menus enregistrés sur la période (et non plus seulement du dernier)
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1063,24 +1063,35 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            let school = document.getElementById('select-etablissement').value;
-            
-            let menuActifStr = localStorage.getItem(`menuActive-${school}`) || "";
             let referenceAliments = [];
+            let allMenuTexts = [];
+
+            // 1. Récupération de tous les textes de menus depuis l'historique brut des scans/commentaires
+            if (globalRawData && globalRawData.rawGaspillage) {
+                globalRawData.rawGaspillage.forEach(s => {
+                    if (s.commentaire) allMenuTexts.push(s.commentaire);
+                });
+            }
             
-            if (menuActifStr) {
-                // Éclatement intelligent par |, par / ou par + pour séparer chaque plat/ingrédient
-                let rawItems = menuActifStr.split(/[\|\/\+]/);
+            // 2. Ajout du menu actif actuel de l'établissement
+            let school = document.getElementById('select-etablissement').value;
+            let menuActifStr = localStorage.getItem(`menuActive-${school}`) || "";
+            if (menuActifStr) allMenuTexts.push(menuActifStr);
+
+            // 3. Découpage chirurgical et extraction de tous les ingrédients/plats uniques de la période
+            allMenuTexts.forEach(textBlock => {
+                let rawItems = textBlock.split(/[\|\/\+]/);
                 rawItems.forEach(item => {
-                    let cleanItem = item.trim().replace(' 🧑‍🍳', '');
-                    if (cleanItem && !referenceAliments.includes(cleanItem)) {
+                    let cleanItem = item.trim().replace(' 🧑‍🍳', '').replace('Scan_', '').trim();
+                    if (cleanItem && cleanItem.length > 2 && !referenceAliments.includes(cleanItem)) {
                         referenceAliments.push(cleanItem);
                     }
                 });
-            }
+            });
 
+            // Fallback si aucun historique textuel n'est trouvé
             if (referenceAliments.length === 0) {
-                referenceAliments = ["Poulet tex-mex", "Filet de colin", "Frites", "Salade verte", "Salade d'endives", "Tomates", "Yaourt", "Île flottante", "Fruit de saison", "Pomme", "Saucisse", "Merguez"];
+                referenceAliments = ["Poulet tex-mex", "Filet de colin", "Frites", "Salade verte", "Salade d'endives", "Tomates", "Yaourt", "Île flottante", "Fruit de saison", "Pomme", "Saucisse", "Merguez", "Couscous"];
             }
 
             let foodStats = {};
@@ -1107,15 +1118,15 @@
                         return textRaw.includes(kw);
                     });
 
-                    // Tolérances sémantiques précises pour éviter les oublis d'affichage
+                    // Tolérances sémantiques précises
                     if (!isMatch && (alimLower.includes("poulet") || alimLower.includes("tex-mex"))) {
                         if (textRaw.includes("poulet") || textRaw.includes("tex-mex") || textRaw.includes("os")) isMatch = true;
                     }
                     if (!isMatch && alimLower.includes("colin")) {
                         if (textRaw.includes("colin") || textRaw.includes("poisson")) isMatch = true;
                     }
-                    if (!isMatch && (alimLower.includes("saucisse") || alimLower.includes("merguez"))) {
-                        if (textRaw.includes("saucisse") || textRaw.includes("merguez") || textRaw.includes("viande")) isMatch = true;
+                    if (!isMatch && (alimLower.includes("saucisse") || alimLower.includes("merguez") || alimLower.includes("couscous"))) {
+                        if (textRaw.includes("saucisse") || textRaw.includes("merguez") || textRaw.includes("couscous") || textRaw.includes("viande")) isMatch = true;
                     }
 
                     if (isMatch) {
@@ -1143,7 +1154,7 @@
                 let rejetPct = 100 - tauxMange;
                 
                 let cleanLabel = getCleanLabel(aliment);
-                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🌟" };
+                let mediaObj = FOOD_THUMBNAILS[aliment] || FOOD_THUMBNAILS[cleanLabel] || { url: DEFAULT_THUMBNAIL, emoji: "🌟" };
 
                 let itemObj = {
                     label: cleanLabel,
@@ -1223,7 +1234,6 @@
                 dateDerniereCaptureAuto = aujourdhui;
             }
 
-            // Max 3 photos par jour pour les plateaux >= 70% de gaspillage
             if (compteurCapturesAutomatiquesJour < 3) {
                 compteurCapturesAutomatiquesJour++;
                 const payload = { 
@@ -1425,7 +1435,6 @@
             if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
 
-        // Variable globale pour compter les ratés d'affilée
         let echecsConnexionConsecutifs = 0;
 
         function loadLiveData() {
@@ -1434,7 +1443,6 @@
 
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
-                // Succès de la liaison : on remet le compteur d'échecs à zéro et on masque l'alerte
                 echecsConnexionConsecutifs = 0;
                 if(errBanner) errBanner.style.display = "none";
 
@@ -1474,7 +1482,6 @@
                     setQuickPeriod('all', document.querySelectorAll('.btn-period')[0]); 
                 }
             }).catch(err => {
-                // 🌟 On incrémente les échecs. Le bandeau ne s'affiche qu'à partir de 3 échecs consécutifs.
                 echecsConnexionConsecutifs++;
                 if (echecsConnexionConsecutifs >= 3) {
                     if(errBanner) { 
