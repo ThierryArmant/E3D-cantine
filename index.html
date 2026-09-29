@@ -241,43 +241,22 @@
                     </div>
 
                     <!-- KPIs & GRAPHIQUE -->
-<div class="dashboard-top-split">
-    <div class="kpi-grid-2x2">
-        <div class="kpi-card kpi-blue">
-            <div class="kpi-left">
-                <div class="kpi-val" id="kpi-avg">0 g</div>
-                <div class="kpi-lbl">Moyenne / convive</div>
-            </div>
-            <div class="kpi-right">Total restes / Effectif total</div>
-        </div>
-        
-        <!-- Élément masqué pour que le JavaScript trouve son ID et ne plante pas -->
-        <div id="kpi-total" style="display: none;">0.0 kg</div>
+                    <div class="dashboard-top-split">
+                        <div class="kpi-grid-2x2">
+                            <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
+                            <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité évitable</div></div><div class="kpi-right">Hors os et inévitables</div></div>
+                            <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
+                            <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
+                        </div>
 
-        <div class="kpi-card kpi-yellow">
-            <div class="kpi-left">
-                <div class="kpi-val" id="kpi-money">0.00 €</div>
-                <div class="kpi-lbl">Pertes financières</div>
-            </div>
-            <div class="kpi-right">Base 4,50 € / kg</div>
-        </div>
-        <div class="kpi-card kpi-red" style="grid-column: span 2;">
-            <div class="kpi-left">
-                <div class="kpi-val" id="kpi-impact">0.0 kg</div>
-                <div class="kpi-lbl">Émissions CO₂</div>
-            </div>
-            <div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div>
-        </div>
-    </div>
-
-    <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
-        <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
-        <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
-        <div class="chart-container">
-            <canvas id="chart-timeline"></canvas>
-        </div>
-    </div>
-</div>
+                        <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
+                            <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
+                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
+                            <div class="chart-container">
+                                <canvas id="chart-timeline"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- 🟢🔴 ANALYSE DES PLATS SUR LA PÉRIODE (CLICABLES) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -1145,7 +1124,7 @@
                         isMatch = true;
                     } else if (alimLower === "viande" && (textRaw.includes("viande") || textRaw.includes("bœuf") || textRaw.includes("veau"))) {
                         isMatch = true;
-                    } 
+                    }
 
                     if (isMatch) {
                         foodStats[aliment].totalRestes += restePct;
@@ -1954,47 +1933,6 @@
             });
             html += '</table></div>'; return html;
         }
-       // ==========================================
-    // ANALYSE DU MENU DU JOUR PAR L'IA
-    // ==========================================
-    function analyserMenuDuJourIA() {
-        const boxResultat = document.getElementById('gemini-ai-result-jour');
-        const resultatDiv = document.getElementById('gemini-ai-text-jour'); 
-        
-        if (boxResultat) boxResultat.style.display = "block";
-        if (resultatDiv) {
-            resultatDiv.innerHTML = "🤖 Analyse du menu du jour en cours par l'IA...";
-        }
-        
-        // Appel via l'API Apps Script
-        if (typeof google !== 'undefined' && google.script.run) {
-            google.script.run
-                .withSuccessHandler(function(reponse) {
-                    if (resultatDiv) resultatDiv.innerHTML = formatAIResponseToUI(reponse);
-                })
-                .withFailureHandler(function(err) {
-                    if (resultatDiv) resultatDiv.innerHTML = "Erreur : " + err.message;
-                })
-                .analyzeDailyMenu();
-        } else {
-            // Mode de secours si testé hors Google Apps Script (via fetch)
-            const school = document.getElementById('select-etablissement').value;
-            const menuActif = getCurrentCheckedMenu() || "Menu du jour";
-            
-            fetch(ADRESSE_SHEET_OFFICIELLE, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "analyzeDailyMenu", etablissement: school, menu: menuActif })
-            })
-            .then(r => r.json())
-            .then(res => {
-                if (resultatDiv) resultatDiv.innerHTML = formatAIResponseToUI(res.answer || res.error || "Réponse vide");
-            })
-            .catch(err => {
-                if (resultatDiv) resultatDiv.innerHTML = "Erreur réseau : " + err.message;
-            });
-        }
-    }
     </script>
 </body>
 </html>
