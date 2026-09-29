@@ -475,18 +475,20 @@
                         </table>
                     </div>
                     
-                    <!-- GESTION DES EFFECTIFS DECLARATIFS -->
+                   <!-- GESTION DES EFFECTIFS DECLARATIFS -->
                     <div style="display: flex; gap: 12px; margin-top: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1.5px solid #cbd5e1; align-items: center;">
                         <div style="font-size: 13px; font-weight: 800; color: #1b4332;">👥 Effectif global attendu (pour le calcul EGAlim) :</div>
                         <input type="number" id="convives-total" value="450" onchange="saveExpectedMeals()" style="width: 100px; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 14px; font-weight: bold; text-align: center;">
                     </div>
 
+                    <!-- BOUTONS DE VALIDATION & ANALYSE IA CÔTE À CÔTE -->
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
-                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 1; min-width: 220px; background-color: #047857; font-size: 14px; padding: 12px;">✅ VALIDER LE MENU POUR LA BORNE</button>
+                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 2; min-width: 200px; background-color: #047857; font-size: 14px; padding: 12px;">✅ VALIDER LE MENU POUR LA BORNE</button>
+                        <button type="button" class="btn" onclick="analyserMenuDuJourIA()" style="flex: 1; min-width: 180px; background-color: #1e3a8a; font-size: 14px; padding: 12px;">🤖 ANALYSER CE MENU (IA)</button>
                     </div>
 
                     <div id="gemini-ai-result-jour" class="ai-box" style="display: none; margin-top: 16px;">
-                        <div class="ai-title">🌱 ANALYSE EGAlim & PRÉVENTION DU GASPILLAGE</div>
+                        <div class="ai-title" style="font-weight: 800; font-size: 12px; color: #1b4332; margin-bottom: 6px;">🌱 ANALYSE RÉGLEMENTAIRE & PRÉVENTION DU GASPILLAGE</div>
                         <div id="gemini-ai-text-jour"></div>
                     </div>
                 </div>
