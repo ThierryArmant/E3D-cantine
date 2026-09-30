@@ -283,33 +283,63 @@
 
             <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
-                <div class="borne-container">
+                <div class="borne-container" style="max-width: 1050px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <div id="instruction-text" class="instruction-banner state-searching" style="flex-grow: 1; margin-bottom: 0;">🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER</div>
+                        <div id="instruction-text" class="instruction-banner state-searching" style="flex-grow: 1; margin-bottom: 0;">🤖 DÉPOSE TON PLATEAU, CHOISIS TON AVIS ET SCANNE</div>
                         <button type="button" class="btn-period" onclick="toggleBorneFullscreen()" style="background: #1b4332; color: white; padding: 8px 12px; font-size: 11px; font-weight: bold; border-radius: 6px;">⛶ Plein écran</button>
                     </div>
 
-                   <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap;">
-                        <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source :</label>
-                        <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; min-width: 120px; background: #fff;"></select>
+                    <!-- ORGANISATION EN DEUX COLONNES (CAMÉRA À GAUCHE / GROS POUSSOIRS À DROITE) -->
+                    <div style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
                         
-                        <!-- Curseurs de réglage pour éviter le blanc brûlé -->
-                        <div style="display: flex; gap: 8px; align-items: center; border-left: 2px solid #cbd5e1; padding-left: 8px;">
-                            <label style="font-size: 10px; font-weight: bold; color: #1b4332;" title="Baisser si l'assiette est trop éblouissante">🔅 Lum. :</label>
-                            <input type="range" id="cam-brightness" min="40" max="150" value="100" oninput="applyVideoFilters()" style="width: 50px;">
-                            
-                            <label style="font-size: 10px; font-weight: bold; color: #1b4332;">🌗 Contraste :</label>
-                            <input type="range" id="cam-contrast" min="50" max="200" value="100" oninput="applyVideoFilters()" style="width: 50px;">
+                        <!-- COLONNE GAUCHE : FLUX VIDÉO ET SCAN -->
+                        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+                                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source :</label>
+                                <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; min-width: 120px; background: #fff;"></select>
+                                
+                                <div style="display: flex; gap: 6px; align-items: center; border-left: 2px solid #cbd5e1; padding-left: 6px;">
+                                    <label style="font-size: 10px; font-weight: bold; color: #1b4332;">🔅 Lum :</label>
+                                    <input type="range" id="cam-brightness" min="40" max="150" value="100" oninput="applyVideoFilters()" style="width: 45px;">
+                                    <label style="font-size: 10px; font-weight: bold; color: #1b4332;">🌗 Contr :</label>
+                                    <input type="range" id="cam-contrast" min="50" max="200" value="100" oninput="applyVideoFilters()" style="width: 45px;">
+                                </div>
+                            </div>
+
+                            <div style="position: relative; flex-grow: 1; min-height: 320px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 10px;">
+                                <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
+                            </div>
+
+                            <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()"><span>📸</span><span>APPUYEZ POUR SCANNER LE PLATEAU</span></button>
                         </div>
+
+                        <!-- COLONNE DROITE : LES 3 GROS POUSSOIRS TACTILES -->
+                        <div style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+                            <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
+                            <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Appuie sur ton ressenti avant de scanner</div>
+
+                            <!-- POUSSOIR VERT -->
+                            <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🟢</span>
+                                <span>J'ai tout fini</span>
+                            </button>
+
+                            <!-- POUSSOIR ORANGE -->
+                            <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🟠</span>
+                                <span>Pas le temps</span>
+                            </button>
+
+                            <!-- POUSSOIR ROUGE -->
+                            <button type="button" id="push-btn-rouge" onclick="setPushAvis('rouge', this)" style="flex: 1; background: linear-gradient(145deg, #ef4444, #b91c1c); color: white; border: 3px solid #fca5a5; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(220,38,38,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🔴</span>
+                                <span>J'ai pas aimé</span>
+                            </button>
+                        </div>
+
                     </div>
 
-                    <div style="position: relative; flex-grow: 1; min-height: 300px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 12px;">
-                        <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
-                        <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
-                    </div>
-
-                    <button type="button" class="btn-scan-trigger" onclick="triggerManualCapture()"><span>📸</span><span>APPUYEZ POUR SCANNER LE PLATEAU</span></button>
-                    
                     <div style="margin-top: 8px; font-size: 11px; color: #475569; text-align: center;">Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span></div>
                 </div>
             </div>
