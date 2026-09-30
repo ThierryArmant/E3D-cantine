@@ -1145,7 +1145,47 @@
             let targetBtn = document.getElementById('btn-hist-' + mode);
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
+        function updateEtApresModule(scansValides) {
+            const boxCuisine = document.getElementById('et-apres-cuisine-content');
+            const boxEleves = document.getElementById('et-apres-eleves-content');
+            if (!boxCuisine || !boxEleves) return;
 
+            if (!scansValides || scansValides.length === 0) {
+                boxCuisine.innerHTML = "Aucun signal enregistré sur cette période.";
+                boxEleves.innerHTML = "Aucun signal enregistré sur cette période.";
+                return;
+            }
+
+            let totalVotes = scansValides.length;
+            let countOrange = 0; 
+            let countRouge = 0;  
+
+            scansValides.forEach(s => {
+                let avis = (s.commentaire || "").toLowerCase();
+                if (s.avis_eleve) {
+                    if (s.avis_eleve.includes("temps")) countOrange++;
+                    else if (s.avis_eleve.includes("aimé")) countRouge++;
+                } else {
+                    if (avis.includes("orange") || avis.includes("temps")) countOrange++;
+                    else if (avis.includes("rouge") || avis.includes("aimé")) countRouge++;
+                }
+            });
+
+            let pOrange = totalVotes > 0 ? (countOrange / totalVotes) * 100 : 35;
+            let pRouge = totalVotes > 0 ? (countRouge / totalVotes) * 100 : 45;
+
+            if (pRouge >= pOrange) {
+                boxCuisine.innerHTML = `<strong>🔴 Diagnostic : Surcharge organoleptique.</strong><br>• <em>Action :</em> Demander au chef de réinterroger la cuisine sur l'assaisonnement ou les modes de cuisson.<br>• <em>EGAlim :</em> Vérifier la qualité des approvisionnements bruts.`;
+            } else {
+                boxCuisine.innerHTML = `<strong>🟡 Diagnostic : Contrainte logistique de production.</strong><br>• <em>Action :</em> Instaurer un bac "petite faim" ou moduler les portions de service en flux tendu.`;
+            }
+
+            if (pOrange > 30) {
+                boxEleves.innerHTML = `<strong>⏱️ Alerte Climat : Le facteur temps étouffe l'alimentation.</strong><br>• <em>Constat :</em> Une part importante des élèves clique sur "Pas le temps" (stress du passage en caisse).<br>• <em>Levier :</em> Lisser l'entrée au self et garantir 20 minutes effectives à table.`;
+            } else {
+                boxEleves.innerHTML = `<strong>🎓 Responsabilisation :</strong><br>• <em>Constat :</em> Le rejet est qualitatif. Animer un temps de concertation en vie de classe.<br>• <em>Principe :</em> Rappeler le droit au "Goûter-tester" de petites portions.`;
+            }
+        }
         // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
