@@ -722,28 +722,45 @@
 
         // 🌟 DICTIONNAIRE EMBARQUÉ (Vitesse instantanée, aucun bug de cache)
         const COEFFICIENTS_INEVITABLES = {
-            "poulet": 0.30, "cuisse": 0.30, "tex-mex": 0.30, "poulet tex-mex": 0.30, 
-            "rôti": 0.25, "cote": 0.25, "blanquette": 0.20, "sauté": 0.20, 
-            "bourguignon": 0.20, "steak": 0.00, "haché": 0.00, "boulettes": 0.00, 
-            "merguez": 0.10, "saucisse": 0.05, // Viandes & Plats complets
-            "couscous": 0.20, // os de poulet/agneau, parures
-            "paella": 0.15,   // carcasses crevettes, moules
-            "tajine": 0.20,
+            // === ENTRÉES & CRUDITÉS ===
+            "salade verte": 0.10, "laitue": 0.10, "mâche": 0.05, "batavia": 0.10, "concombre": 0.15,
+            "tomate": 0.10, "tomates": 0.10, "carottes râpées": 0.05, "carotte": 0.10,
+            "betterave": 0.10, "betteraves": 0.10, "céleri rémoulade": 0.05, "céleri": 0.15,
+            "radis": 0.20, "radis roses": 0.20, "endive": 0.15, "endives": 0.15,
+            "salade d'endives": 0.15, "taboulé": 0.05, "piémontaise": 0.05, "macédoine": 0.05,
+            "avocat": 0.30, "avocat crevettes": 0.25, "melon": 0.35, "pastèque": 0.30,
+            "pamplemousse": 0.40, "oeuf dur": 0.12, "mayonnaise": 0.00, "charcuterie": 0.05,
+            "pâté": 0.00, "terrine": 0.00, "quiche": 0.05, "tarte salée": 0.05, "soupe": 0.00, "velouté": 0.00,
+
+            // === PLATS PROTIDIQUES (VIANDES, VOLAILLES, POISSONS, VÉGÉ) ===
+            "poulet": 0.30, "cuisse de poulet": 0.30, "suprême de poulet": 0.15, "filet de poulet": 0.05,
+            "rôti": 0.25, "rôti de porc": 0.20, "rôti de bœuf": 0.20, "veau": 0.20, "sauté de veau": 0.20,
+            "bœuf bourguignon": 0.20, "bourguignon": 0.20, "blanquette": 0.20, "blanquette de veau": 0.20,
+            "steak": 0.00, "steak haché": 0.00, "haché": 0.00, "boulettes": 0.00, "boulettes de bœuf": 0.00,
+            "merguez": 0.10, "saucisse": 0.05, "saucisse de Toulouse": 0.05, "chipolata": 0.05,
+            "côte de porc": 0.25, "côte d'agneau": 0.30, "gigot": 0.25, "steak végétarien": 0.00,
+            "lasagnes": 0.05, "lasagnes bolognaise": 0.05, "hachis parmentier": 0.00,
+            "couscous": 0.20, "paella": 0.15, "tajine": 0.20, "chili": 0.05, "gardiane de taureau": 0.20,
             
-            "colin": 0.10, "filet de colin": 0.10, "poisson": 0.15, 
-            "saumon": 0.10, "cabillaud": 0.10,
-            
-            "frites": 0.00, "potatoes": 0.00, "pâtes": 0.00, "riz": 0.00, 
-            "semoule": 0.00, "purée": 0.00, "lentilles": 0.05,
-            
-            "salade verte": 0.10, "endive": 0.15, "salade endives noix roquefort": 0.15,
-            "tomate": 0.10, "tomate mozzarella": 0.10, "carotte": 0.10, 
-            "concombre": 0.15, "betterave": 0.10, "radis": 0.20, "taboulé": 0.05,
-            
-            "fruit": 0.20, "fruit de saison": 0.20, "pomme": 0.15, "poire": 0.15, 
-            "banane": 0.35, "orange": 0.30, "clémentine": 0.25, "melon": 0.35, 
-            "pastèque": 0.30, "yaourt": 0.00, "yaourt aux fruits mixés": 0.00, 
-            "île flottante": 0.00, "compote": 0.00
+            // Poissons & Coquillages
+            "poisson": 0.15, "colin": 0.10, "filet de colin": 0.10, "saumon": 0.10, "pavé de saumon": 0.05,
+            "cabillaud": 0.10, "merlu": 0.15, "sardine": 0.20, "thon": 0.05, "surimi": 0.00, "nuggets de poisson": 0.00,
+
+            // === ACCOMPAGNEMENTS (FÉCULENTS & LÉGUMES CUITS) ===
+            "frites": 0.00, "potatoes": 0.00, "pâtes": 0.00, "riz": 0.00, "semoule": 0.00,
+            "boulgour": 0.00, "épeautre": 0.00, "purée": 0.00, "purée de pommes de terre": 0.00,
+            "lentilles": 0.05, "haricots verts": 0.05, "petits pois": 0.05, "carottes cuites": 0.05,
+            "brocolis": 0.10, "choux-fleurs": 0.15, "ratatouille": 0.05, "aubergines": 0.05,
+            "épinards": 0.05, "endives cuites": 0.10, "gratin dauphinois": 0.00, "polenta": 0.00,
+
+            // === PRODUITS LAITIERS & DESSERTS ===
+            "yaourt": 0.00, "yaourt nature": 0.00, "yaourt aux fruits": 0.00, "fromage blanc": 0.00,
+            "petit suisse": 0.00, "fromage": 0.00, "comté": 0.00, "camembert": 0.00, "portion de kiri": 0.00,
+            "fruit": 0.20, "fruit de saison": 0.20, "pomme": 0.15, "poire": 0.15, "banane": 0.35,
+            "orange": 0.30, "clémentine": 0.25, "mandarine": 0.25, "kiwi": 0.10, "pêche": 0.15,
+            "abricot": 0.10, "prune": 0.10, "fraise": 0.05, "compote": 0.00, "crème dessert": 0.00,
+            "île flottante": 0.00, "flan": 0.00, "pâtisserie": 0.00, "gâteau au chocolat": 0.00,
+            "tarte aux pommes": 0.10, "glace": 0.00, "pain": 0.00
         };
         
         function getTauxInevitablesPourTexte(texte) {
@@ -817,7 +834,9 @@
             "Omelette / Cordons Bleus": { url: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=150&q=80", emoji: "🍳" },
             "Saucisse": { url: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=150&q=80", emoji: "🌭" },
             "Merguez": { url: "https://images.unsplash.com/photo-1606851094655-b2593a9af63f?w=150&q=80", emoji: "🌭" },
+            "Frites": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
             "Frites / Potatoes": { url: "https://images.unsplash.com/photo-1576107232684-1279f390859f?w=150&q=80", emoji: "🍟" },
+            "Pain": { url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=150&q=80", emoji: "🥖" },
             "Pâtes": { url: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=150&q=80", emoji: "🍝" },
             "Riz": { url: "https://images.unsplash.com/photo-1516684732162-798a0062be99?w=150&q=80", emoji: "🍚" },
             "Semoule / Boulgour / Épeautre": { url: "https://images.unsplash.com/photo-1542528180-0c79567c66de?w=150&q=80", emoji: "🥣" },
