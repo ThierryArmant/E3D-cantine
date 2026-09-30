@@ -1090,7 +1090,6 @@
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            // 🌟 LISTE NETTOYÉE (Colin fusionné dans Poisson)
             const alimentsReferencePermis = [
                 "Couscous", "Paella", "Tajine", "Gardiane de Taureau", "Chili", "Lasagnes", 
                 "Poulet rôti", "Poulet tex-mex", "Sauté de viande", "Bœuf Bourguignon", "Steak haché", 
@@ -1143,7 +1142,6 @@
                 selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
             }
 
-            // ON PRÉPARE LES 4 ZONES
             let plebiscites = [];
             let bonneVoie = [];
             let acceptables = [];
@@ -1180,7 +1178,6 @@
                     selectFilter.appendChild(opt);
                 }
 
-                // LE TRI MATHEMATIQUE DANS LES 4 NIVEAUX
                 if (tauxMange >= 75) {
                     plebiscites.push(itemObj);
                 } else if (tauxMange >= 60) {
@@ -1196,66 +1193,11 @@
 
             renderAnalyseFineSynthese(plebiscites, rejets);
 
-            // ON TRIE LES RESULTATS
-           let plebiscites = [];
-            let bonneVoie = [];
-            let acceptables = [];
-            let rejets = [];
-            let allEvaluatedItems = [];
-
-            alimentsReferencePermis.forEach(aliment => {
-                let stats = foodStats[aliment];
-                if (stats.count === 0) return; 
-
-                let resteMoyen = stats.totalRestes / stats.count;
-                let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
-                let rejetPct = 100 - tauxMange;
-                
-                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
-
-                let itemObj = {
-                    label: aliment,
-                    rawKey: aliment,
-                    thumb: mediaObj.url,
-                    emoji: mediaObj.emoji,
-                    tauxMange: tauxMange,
-                    rejetPct: rejetPct,
-                    occurrences: stats.count
-                };
-
-                globalItemsDetailedStats[aliment] = itemObj;
-                allEvaluatedItems.push(itemObj);
-
-                if (selectFilter) {
-                    let opt = document.createElement('option');
-                    opt.value = aliment;
-                    opt.innerText = `${aliment} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
-                    selectFilter.appendChild(opt);
-                }
-
-                // MATRICE À 4 NIVEAUX
-                if (tauxMange >= 75) {
-                    plebiscites.push(itemObj);
-                } else if (tauxMange >= 60) {
-                    bonneVoie.push(itemObj);
-                } else if (tauxMange >= 45) {
-                    acceptables.push(itemObj);
-                } else {
-                    rejets.push(itemObj);
-                }
-            });
-
-            if (selectFilter) selectFilter.value = currentSelectedFilter;
-
-            renderAnalyseFineSynthese(plebiscites, rejets);
-
-            // TRI DES 4 LISTES
             plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
             bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
             acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
             rejets.sort((a, b) => b.rejetPct - a.rejetPct);
 
-            // GÉNÉRATION DES CARTES AVEC IMAGE ET CLIC IA
             function renderList(list, containerId, theme) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
@@ -1268,12 +1210,11 @@
 
                 list.forEach(item => {
                     let cardClass, valText;
-                   if (theme === 'vert') {
+                    if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
                         valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'jaune') {
                         cardClass = "gourmet-dish-card bonne-voie";
-                        // Vert pomme contrasté pour la bonne lisibilité du texte blanc
                         valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'orange') {
                         cardClass = "gourmet-dish-card acceptable";
@@ -1297,12 +1238,11 @@
                 });
             }
 
-            // INJECTION DANS L'INTERFACE
             renderList(plebiscites, 'period-adhesion-grid', 'vert');
             renderList(bonneVoie, 'period-bonnevoie-grid', 'jaune');
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
-        } // Fin de la fonction runGranularExtraction
+        }
 
         // 🔍 ANALYSE CROISÉE : RETROUVE LE MENU DE L'ÉCO-DÉLÉGUÉ ET ANALYSE LA CONCURRENCE
         function openItemDetail(rawKey) {
