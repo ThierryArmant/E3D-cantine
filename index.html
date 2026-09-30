@@ -1273,18 +1273,19 @@
 
                 list.forEach(item => {
                     let cardClass, valText;
-                    if (theme === 'vert') {
+                   if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
-                        valText = `<span style="color:white; background:#10b981; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
+                        valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'jaune') {
                         cardClass = "gourmet-dish-card bonne-voie";
-                        valText = `<span style="color:white; background:#eab308; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
+                        // Vert pomme contrasté pour la bonne lisibilité du texte blanc
+                        valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'orange') {
                         cardClass = "gourmet-dish-card acceptable";
-                        valText = `<span style="color:white; background:#f97316; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
+                        valText = `<span style="color:white; background:#ea580c; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
                     } else {
                         cardClass = "gourmet-dish-card alerte";
-                        valText = `<span style="color:white; background:#ef4444; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
+                        valText = `<span style="color:white; background:#dc2626; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
                     }
                     
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
