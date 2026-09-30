@@ -990,37 +990,58 @@
             const effectif = parseInt(document.getElementById('convives-total').value) || parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
             
             let totalAlimBrutKg = 0, totalFruitsKg = 0, totalPainKg = 0;
+            let poidsTotalEvitablePeriode = 0;
+            let poidsTotalInevitablesPeriode = 0;
             let nbJours = 0;
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = normalizeDate(sh.datesRaw[i]);
                 if (d >= startDate && d <= endDate) {
                     nbJours++;
-                    totalAlimBrutKg += (sh.alimentaire[i] || 0);
-                    totalFruitsKg += (sh.fruits[i] || 0);
-                    totalPainKg += (sh.pain[i] || 0);
+                    let alimJour = (sh.alimentaire[i] || 0);
+                    let fruitsJour = (sh.fruits[i] || 0);
+                    let painJour = (sh.pain[i] || 0);
+
+                    totalAlimBrutKg += alimJour;
+                    totalFruitsKg += fruitsJour;
+                    totalPainKg += painJour;
+
+                    // 🌟 Recherche dynamique du menu exact de CE jour-là dans l'historique Sheets
+                    let menuDuJourExact = "";
+                    if (globalRawData.rawGaspillage) {
+                        let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === d && m.type === "CONFIGURATION_MENU");
+                        if (menuRow && menuRow.commentaire) {
+                            menuDuJourExact = menuRow.commentaire;
+                        }
+                    }
+
+                    // Application du taux inévitable spécifique (ou taux de sécurité de 15% par défaut si aucun menu archivé)
+                    let tauxJour = 0.15; 
+                    if (menuDuJourExact) {
+                        tauxJour = getTauxInevitablesPourTexte(menuDuJourExact);
+                    } else {
+                        // S'il n'y a pas d'historique de menu ce jour-là, on tente le menu actif actuel, sinon 15%
+                        let fallbackMenu = localStorage.getItem(`menuActive-${school}`) || "";
+                        tauxJour = getTauxInevitablesPourTexte(fallbackMenu) > 0 ? getTauxInevitablesPourTexte(fallbackMenu) : 0.15;
+                    }
+
+                    let inevitablesJourAlim = alimJour * tauxJour;
+                    let evitableJourAlim = alimJour - inevitablesJourAlim;
+
+                    poidsTotalEvitablePeriode += (evitableJourAlim + painJour);
+                    poidsTotalInevitablesPeriode += (inevitablesJourAlim + fruitsJour);
                 }
             }
 
-            let menuActif = localStorage.getItem(`menuActive-${school}`) || "";
-            let tauxInévitablePlat = getTauxInevitablesPourTexte(menuActif);
-            
-            let poidsInevitablesAlim = totalAlimBrutKg * tauxInévitablePlat;
-            let poidsEvitableAlim = totalAlimBrutKg - poidsInevitablesAlim;
-
-            let poidsTotalEvitable = poidsEvitableAlim + totalPainKg;
-            let poidsTotalInevitables = poidsInevitablesAlim + totalFruitsKg;
-
-            let evitablesG = poidsTotalEvitable * 1000;
-            let inevitablesG = poidsTotalInevitables * 1000;
-            let totalBioG = evitablesG + inevitablesG;
+            let evitablesG = poidsTotalEvitablePeriode * 1000;
+            let inevitablesG = poidsTotalInevitablesPeriode * 1000;
 
             let avgGrams = (nbJours > 0 && effectif > 0) ? (evitablesG / (effectif * nbJours)) : 0;
 
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
-            document.getElementById('kpi-total').innerText = `${poidsTotalEvitable.toFixed(1)} kg`;
-            document.getElementById('kpi-money').innerText = `${(poidsTotalEvitable * 4.50).toFixed(2)} €`;
-            document.getElementById('kpi-impact').innerText = `${(poidsTotalEvitable * 2.0).toFixed(1)} kg`;
+            document.getElementById('kpi-total').innerText = `${poidsTotalEvitablePeriode.toFixed(1)} kg`;
+            document.getElementById('kpi-money').innerText = `${(poidsTotalEvitablePeriode * 4.50).toFixed(2)} €`;
+            document.getElementById('kpi-impact').innerText = `${(poidsTotalEvitablePeriode * 2.0).toFixed(1)} kg`;
             document.getElementById('biodiff-total').innerText = `Total Évitable : ${evitablesG.toFixed(0)} g (Inévitables : ${inevitablesG.toFixed(0)} g)`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
@@ -1045,14 +1066,16 @@
 
             document.getElementById('report-school-name').innerText = school;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
-            document.getElementById('rep-kpi-total').innerText = `${poidsTotalEvitable.toFixed(1)} kg`;
-            document.getElementById('rep-kpi-money').innerText = `${(poidsTotalEvitable * 4.50).toFixed(2)} €`;
+            document.getElementById('rep-kpi-total').innerText = `${poidsTotalEvitablePeriode.toFixed(1)} kg`;
+            document.getElementById('rep-kpi-money').innerText = `${(poidsTotalEvitablePeriode * 4.50).toFixed(2)} €`;
 
             runGranularExtraction(filteredScans);
-            updateHistoryMode('day', tauxInévitablePlat);
+            
+            let menuActifActuel = localStorage.getItem(`menuActive-${school}`) || "";
+            updateHistoryMode('day', getTauxInevitablesPourTexte(menuActifActuel));
 
             if (nbJours > 0) {
-                renderBilanEleves(poidsTotalEvitable/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
+                renderBilanEleves(poidsTotalEvitablePeriode/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
             } else {
                 document.getElementById('bilan-eleves-container').style.display = "none";
             }
