@@ -1166,47 +1166,63 @@
             let targetBtn = document.getElementById('btn-hist-' + mode);
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
-        function updateEtApresModule(scansValides) {
-            const boxCuisine = document.getElementById('et-apres-cuisine-content');
-            const boxEleves = document.getElementById('et-apres-eleves-content');
-            if (!boxCuisine || !boxEleves) return;
+        async function updateEtApresModule(scansValides) {
+    const boxCuisine = document.getElementById('et-apres-cuisine-content');
+    const boxEleves = document.getElementById('et-apres-eleves-content');
+    const boxAffiche = document.getElementById('et-apres-affiche-content');
+    if (!boxCuisine || !boxEleves) return;
 
-            if (!scansValides || scansValides.length === 0) {
-                boxCuisine.innerHTML = "Aucun signal enregistré sur cette période.";
-                boxEleves.innerHTML = "Aucun signal enregistré sur cette période.";
-                return;
+    if (!scansValides || scansValides.length === 0) {
+        boxCuisine.innerHTML = "Aucun signal enregistré sur cette période.";
+        boxEleves.innerHTML = "Aucun signal enregistré sur cette période.";
+        if (boxAffiche) boxAffiche.innerHTML = "Aucune donnée pour générer une affiche.";
+        return;
+    }
+
+    boxCuisine.innerHTML = "<em>🤖 L'IA analyse les votes cuisine...</em>";
+    boxEleves.innerHTML = "<em>🤖 L'IA analyse les leviers élèves...</em>";
+    if (boxAffiche) boxAffiche.innerHTML = "<em>🎨 Conception de l'affiche par l'IA...</em>";
+
+    const school = document.getElementById('select-etablissement').value;
+    const menuActif = localStorage.getItem(`menuActive-${school}`) || "Menu standard";
+
+    const payload = {
+        action: "analyserPlanAction",
+        etablissement: school,
+        menu_jour: menuActif,
+        nb_votes: scansValides.length
+    };
+
+    try {
+        const response = await fetch(ADRESSE_SHEET_OFFICIELLE, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(payload)
+        });
+        const res = await response.json();
+
+        if (res.success && res.plan) {
+            boxCuisine.innerHTML = res.plan.cuisine;
+            boxEleves.innerHTML = res.plan.eleves;
+            
+            if (boxAffiche && res.plan.affiche) {
+                boxAffiche.innerHTML = `
+                    <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${res.plan.affiche.titre}</div>
+                    <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${res.plan.affiche.slogan} »</div>
+                    <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${res.plan.affiche.action}</div>
+                `;
             }
-
-            let totalVotes = scansValides.length;
-            let countOrange = 0; 
-            let countRouge = 0;  
-
-            scansValides.forEach(s => {
-                let avis = (s.commentaire || "").toLowerCase();
-                if (s.avis_eleve) {
-                    if (s.avis_eleve.includes("temps")) countOrange++;
-                    else if (s.avis_eleve.includes("aimé")) countRouge++;
-                } else {
-                    if (avis.includes("orange") || avis.includes("temps")) countOrange++;
-                    else if (avis.includes("rouge") || avis.includes("aimé")) countRouge++;
-                }
-            });
-
-            let pOrange = totalVotes > 0 ? (countOrange / totalVotes) * 100 : 35;
-            let pRouge = totalVotes > 0 ? (countRouge / totalVotes) * 100 : 45;
-
-            if (pRouge >= pOrange) {
-                boxCuisine.innerHTML = `<strong>🔴 Diagnostic : Surcharge organoleptique.</strong><br>• <em>Action :</em> Demander au chef de réinterroger la cuisine sur l'assaisonnement ou les modes de cuisson.<br>• <em>EGAlim :</em> Vérifier la qualité des approvisionnements bruts.`;
-            } else {
-                boxCuisine.innerHTML = `<strong>🟡 Diagnostic : Contrainte logistique de production.</strong><br>• <em>Action :</em> Instaurer un bac "petite faim" ou moduler les portions de service en flux tendu.`;
-            }
-
-            if (pOrange > 30) {
-                boxEleves.innerHTML = `<strong>⏱️ Alerte Climat : Le facteur temps étouffe l'alimentation.</strong><br>• <em>Constat :</em> Une part importante des élèves clique sur "Pas le temps" (stress du passage en caisse).<br>• <em>Levier :</em> Lisser l'entrée au self et garantir 20 minutes effectives à table.`;
-            } else {
-                boxEleves.innerHTML = `<strong>🎓 Responsabilisation :</strong><br>• <em>Constat :</em> Le rejet est qualitatif. Animer un temps de concertation en vie de classe.<br>• <em>Principe :</em> Rappeler le droit au "Goûter-tester" de petites portions.`;
-            }
+        } else {
+            boxCuisine.innerHTML = "Erreur de génération du plan d'action par l'IA.";
+            boxEleves.innerHTML = "Erreur de génération du plan d'action par l'IA.";
+            if (boxAffiche) boxAffiche.innerHTML = "Erreur de chargement de l'affiche.";
         }
+    } catch (err) {
+        boxCuisine.innerHTML = "Erreur réseau avec l'assistant IA.";
+        boxEleves.innerHTML = "Erreur réseau avec l'assistant IA.";
+        if (boxAffiche) boxAffiche.innerHTML = "Erreur réseau.";
+    }
+}
         // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
