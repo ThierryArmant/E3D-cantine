@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.B.C. - Assiette Bas Carbone</title>
-    <!-- Chargement de Chart.js et du plugin de labels intégrés -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
@@ -158,7 +157,7 @@
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
-            <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖️ Saisie des Déchets</li>
+            <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖ Saisie des Déchets</li>
 
             <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default;">L'Espace des Éco-Délégués</li>
 
@@ -166,7 +165,6 @@
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
         </ul>
 
-        <!-- Plaque Hub IA EPS -->
         <div class="dev-badge-card">
             <div class="dev-badge-title">Architecture & Conception</div>
             <div class="dev-badge-name">Thierry Armant</div>
@@ -207,7 +205,6 @@
                         </div>
                     </div>
 
-                    <!-- 1. EN HAUT : KPIs & GRAPHIQUE -->
                     <div class="dashboard-top-split" style="margin-top: 12px;">
                         <div class="kpi-grid-2x2">
                             <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
@@ -225,7 +222,6 @@
                         </div>
                     </div>
                     
-                    <!-- 2. MATRICE DES PLATS (4 NIVEAUX) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
@@ -248,7 +244,6 @@
                         </div>
                     </div>
 
-                    <!-- 3. SECTION : ANALYSE FINE DU MENU & MODULE "ET APRÈS !" -->
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                             <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
@@ -260,7 +255,6 @@
                             </div>
                         </div>
 
-                        <!-- Synthèse visuelle Vert / Rouge -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px;">
                                 <div style="font-size: 11px; font-weight: 800; color: #166534; margin-bottom: 6px; text-transform: uppercase;">🟢 Ce qui a fonctionné (Succès de service)</div>
@@ -272,13 +266,11 @@
                             </div>
                         </div>
 
-                        <!-- Zone de détail de l'item filtré -->
                         <div id="box-detail-item-filtré" style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 6px; padding: 10px; font-size: 11.5px; color: #334155; display: none; margin-bottom: 12px;">
                             <strong>📊 Bilan ciblé pour l'item :</strong> <span id="label-item-filtre-titre" style="color: #1b4332; font-weight: bold;">--</span>
                             <div id="content-item-filtre-stats" style="margin-top: 4px; font-weight: 600;"></div>
                         </div>
 
-                        <!-- ⚡ SOUS-BLOC : MODULE "ET APRÈS !" — PLAN D'ACTION CROISÉ -->
                         <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px solid #1b4332; border-radius: 8px; padding: 12px; margin-top: 10px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                                 <h3 style="color: #1b4332; font-size: 13px; font-weight: 900; margin: 0;">⚡ "ET APRÈS !" — Plan d'action croisé (Cuisine & Élèves)</h3>
@@ -286,37 +278,39 @@
                             </div>
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                <!-- COLONNE CUISINE -->
                                 <div style="background: white; border-left: 4px solid #047857; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                                     <h4 style="color: #047857; font-size: 11px; font-weight: 800; margin-bottom: 4px;">👨‍🍳 LEVIERS CUISINE (Ajuster l'offre)</h4>
-                                    <div id="et-apres-cuisine-content" style="font-size: 11px; color: #334155; line-height: 1.4;">
-                                        En attente des retours tactiles de la borne...
-                                    </div>
+                                    <div id="et-apres-cuisine-content" style="font-size: 11px; color: #334155; line-height: 1.4;">En attente des retours tactiles de la borne...</div>
                                 </div>
-
-                                <!-- COLONNE ELEVES -->
                                 <div style="background: white; border-left: 4px solid #b45309; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                                     <h4 style="color: #b45309; font-size: 11px; font-weight: 800; margin-bottom: 4px;">🎓 LEVIERS ÉLÈVES (Éduquer la demande & Climat)</h4>
-                                    <div id="et-apres-eleves-content" style="font-size: 11px; color: #334155; line-height: 1.4;">
-                                        En attente des retours tactiles de la borne...
-                                    </div>
+                                    <div id="et-apres-eleves-content" style="font-size: 11px; color: #334155; line-height: 1.4;">En attente des retours tactiles de la borne...</div>
                                 </div>
                             </div>
+
+                            <div style="background: #ffffff; border: 2px dashed #047857; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="color: #047857; font-size: 11.5px; font-weight: 800; margin: 0;">🎨 IDÉE D'AFFICHAGE DU JOUR (Générée par l'IA)</h4>
+                                    <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 4px 10px; font-size: 10.5px; background: #047857;">🖨️ Imprimer ce message</button>
+                                </div>
+                                <div id="et-apres-affiche-content" style="font-size: 11px; color: #334155; line-height: 1.4; background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0;">En attente des votes de la borne pour concevoir l'affiche...</div>
+                            </div>
                         </div>
-
                     </div>
-
+                </div>
+            </div>
+            
             <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container" style="max-width: 1050px;">
-                    
-                    <!-- ORGANISATION EN DEUX COLONNES (CAMÉRA À GAUCHE / GROS POUSSOIRS À DROITE) -->
                     <div style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
-                        
-                        <!-- COLONNE GAUCHE : FLUX VIDÉO ET SCAN -->
                         <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             
-                            <!-- BARRE DE CONTRÔLE CAMÉRA & PLEIN ÉCRAN (PLUS DE BANNIÈRE EN HAUT) -->
+                            <!-- 🌟 LA BANNIÈRE CRITIQUE POUR LA CAMÉRA RESTAURÉE ICI -->
+                            <div id="instruction-text" class="instruction-banner state-searching" style="margin-bottom: 8px;">
+                                🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER
+                            </div>
+
                             <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                                 <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 180px;">
                                     <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source :</label>
@@ -334,45 +328,35 @@
                                 </div>
                             </div>
 
-                            <!-- FLUX VIDÉO (PLUS GRAND) -->
                             <div style="position: relative; flex-grow: 1; min-height: 360px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 10px;">
                                 <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
                                 <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
                             </div>
 
-                            <!-- 🚀 LE GROS BOUTON UNIQUE EN BAS -->
                             <button type="button" id="btn-scan-main" onclick="triggerManualCapture()" style="background-color: #2563eb; color: white; border: none; border-radius: 12px; padding: 18px; font-size: 16px; font-weight: 900; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); transition: background-color 0.2s; text-transform: uppercase;">
                                 <span style="font-size: 22px;">📸</span>
                                 <span id="scan-btn-text">APPUYEZ POUR SCANNER LE PLATEAU</span>
                             </button>
                         </div>
 
-                        <!-- COLONNE DROITE : LES 3 GROS POUSSOIRS TACTILES -->
                         <div style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
                             <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
                             <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Appuie sur ton ressenti avant de scanner</div>
 
-                            <!-- POUSSOIR VERT -->
                             <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span style="font-size: 26px;">🟢</span>
                                 <span>J'ai tout fini</span>
                             </button>
-
-                            <!-- POUSSOIR ORANGE -->
                             <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span style="font-size: 26px;">🟠</span>
                                 <span>Pas le temps</span>
                             </button>
-
-                            <!-- POUSSOIR ROUGE -->
                             <button type="button" id="push-btn-rouge" onclick="setPushAvis('rouge', this)" style="flex: 1; background: linear-gradient(145deg, #ef4444, #b91c1c); color: white; border: 3px solid #fca5a5; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(220,38,38,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span style="font-size: 26px;">🔴</span>
                                 <span>J'ai pas aimé</span>
                             </button>
                         </div>
-
                     </div>
-
                     <div style="margin-top: 6px; font-size: 10.5px; color: #475569; text-align: center;">Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span></div>
                 </div>
             </div>
@@ -383,13 +367,10 @@
                     
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
-                        
-                        <!-- 📅 SÉLECTEUR DE DATE DU MENU -->
                         <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #2d6a4f;">
                             <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📅 Date du menu :</label>
                             <input type="date" id="input-menu-date" class="input-date" style="padding: 4px 8px; font-weight: bold; background: white;">
                         </div>
-
                         <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 12px; border-radius: 6px; color: #0369a1; font-weight: 800; font-size: 13px;">
                             🤖 Plateaux analysés aujourd'hui : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
                         </div>
@@ -410,7 +391,6 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <!-- COLONNE ENTRÉES -->
                                     <td>
                                         <div class="sub-theme">Bases & Entrées</div>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -423,7 +403,6 @@
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Quiche / Tarte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
-                                        <!-- ZONE OPTIONS DÉDIÉE -->
                                         <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Suppléments</div>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mozzarella"> + Mozzarella</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
@@ -439,7 +418,6 @@
                                         </div>
                                     </td>
                                     
-                                    <!-- COLONNE PLATS -->
                                     <td>
                                         <div class="sub-theme">Plats & Viandes</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Couscous (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -458,7 +436,6 @@
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Saucisse"> Saucisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Saucisse (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Merguez"> Merguez <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Merguez (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
-                                        <!-- ZONE OPTIONS DÉDIÉE -->
                                         <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Accompagnements Plats</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate / Bolognaise</label>
@@ -475,7 +452,6 @@
                                         </div>
                                     </td>
 
-                                    <!-- COLONNE ACCOMPAGNEMENTS -->
                                     <td>
                                         <div class="sub-theme">Féculents & Légumes</div>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -487,7 +463,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Petits pois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ratatouille (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ratatouille (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Épinards (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Endives cuites"> Endives cuites <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Endives cuites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
@@ -500,7 +476,6 @@
                                         </div>
                                     </td>
 
-                                    <!-- COLONNE DESSERTS & LAITAGES -->
                                     <td>
                                         <div class="sub-theme">Desserts & Laitages</div>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt"> Yaourt <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -509,7 +484,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Compote"> Compote <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Compote (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Crème dessert / Liégeois"> Crème dessert <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Crème dessert (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Île flottante"> Île flottante <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Île flottante (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie / Flan"> Pâtisserie / Flan <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtisserie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie / Flan"> Pâtisserie / Flan <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtisserie (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Glace"> Glace <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Glace (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
                                         <div id="favs_container_dessert" class="local-favs-box" style="display: none;"></div>
@@ -525,13 +500,11 @@
                         </table>
                     </div>
                     
-                   <!-- GESTION DES EFFECTIFS DECLARATIFS -->
                     <div style="display: flex; gap: 12px; margin-top: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1.5px solid #cbd5e1; align-items: center;">
                         <div style="font-size: 13px; font-weight: 800; color: #1b4332;">👥 Effectif global attendu (pour le calcul EGAlim) :</div>
                         <input type="number" id="convives-total" value="450" onchange="saveExpectedMeals()" style="width: 100px; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 14px; font-weight: bold; text-align: center;">
                     </div>
 
-                    <!-- BOUTONS DE VALIDATION & ANALYSE IA CÔTE À CÔTE -->
                     <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
                         <button type="button" class="btn" onclick="saveMenu()" style="flex: 2; min-width: 200px; background-color: #047857; font-size: 14px; padding: 12px;">✅ VALIDER LE MENU POUR LA BORNE</button>
                         <button type="button" class="btn" onclick="analyserMenuDuJourIA()" style="flex: 1; min-width: 180px; background-color: #1e3a8a; font-size: 14px; padding: 12px;">🤖 ANALYSER CE MENU (IA)</button>
@@ -1141,6 +1114,87 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
+        async function updateEtApresModule(scansValides) {
+            const boxCuisine = document.getElementById('et-apres-cuisine-content');
+            const boxEleves = document.getElementById('et-apres-eleves-content');
+            const boxAffiche = document.getElementById('et-apres-affiche-content');
+            if (!boxCuisine || !boxEleves) return;
+
+            if (!scansValides || scansValides.length === 0) {
+                boxCuisine.innerHTML = "Aucun signal enregistré sur cette période.";
+                boxEleves.innerHTML = "Aucun signal enregistré sur cette période.";
+                if (boxAffiche) boxAffiche.innerHTML = "Aucune donnée pour générer une affiche.";
+                return;
+            }
+
+            const school = document.getElementById('select-etablissement')?.value || "defaut";
+            const menuActif = localStorage.getItem(`menuActive-${school}`) || "Menu standard";
+            const cacheKey = `ia_plan_${school}_${menuActif}_${scansValides.length}`;
+
+            if (localStorage.getItem(cacheKey)) {
+                try {
+                    const cachedPlan = JSON.parse(localStorage.getItem(cacheKey));
+                    boxCuisine.innerHTML = cachedPlan.cuisine;
+                    boxEleves.innerHTML = cachedPlan.eleves;
+                    if (boxAffiche && cachedPlan.affiche) {
+                        boxAffiche.innerHTML = `
+                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${cachedPlan.affiche.titre}</div>
+                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${cachedPlan.affiche.slogan} »</div>
+                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${cachedPlan.affiche.action}</div>
+                        `;
+                    }
+                    return; 
+                } catch(e) {}
+            }
+
+            boxCuisine.innerHTML = "<em>🤖 Analyse culinaire en cours...</em>";
+            boxEleves.innerHTML = "<em>🤖 Analyse GES et pédagogie en cours...</em>";
+            if (boxAffiche) boxAffiche.innerHTML = "<em>🎨 Création de l'affiche par l'IA...</em>";
+
+            let detailsRecueillis = [];
+            scansValides.forEach(s => {
+                if (s.plat || s.item) detailsRecueillis.push(`${s.plat || s.item}: ${s.avis_eleve || s.commentaire || ''}`);
+                else if (s.commentaire) detailsRecueillis.push(s.commentaire);
+            });
+
+            const payload = {
+                action: "analyserPlanAction",
+                etablissement: school,
+                menu_jour: menuActif,
+                nb_votes: scansValides.length,
+                details: detailsRecueillis.join(" | ") || "Retours de la borne tactile"
+            };
+
+            try {
+                const response = await fetch(ADRESSE_SHEET_OFFICIELLE, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify(payload)
+                });
+                const res = await response.json();
+
+                if (res.success && res.plan) {
+                    localStorage.setItem(cacheKey, JSON.stringify(res.plan));
+                    boxCuisine.innerHTML = res.plan.cuisine;
+                    boxEleves.innerHTML = res.plan.eleves;
+                    
+                    if (boxAffiche && res.plan.affiche) {
+                        boxAffiche.innerHTML = `
+                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${res.plan.affiche.titre}</div>
+                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${res.plan.affiche.slogan} »</div>
+                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${res.plan.affiche.action}</div>
+                        `;
+                    }
+                } else {
+                    boxCuisine.innerHTML = "Erreur de génération par l'IA.";
+                    boxEleves.innerHTML = "Erreur de génération par l'IA.";
+                }
+            } catch (err) {
+                boxCuisine.innerHTML = "Erreur réseau.";
+                boxEleves.innerHTML = "Erreur réseau.";
+            }
+        }
+
         // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
@@ -1305,6 +1359,8 @@
             renderList(bonneVoie, 'period-bonnevoie-grid', 'jaune');
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
+
+            updateEtApresModule(scansValides);
         }
 
         // 🔍 ANALYSE CROISÉE : RETROUVE LE MENU DE L'ÉCO-DÉLÉGUÉ ET ANALYSE LA CONCURRENCE
@@ -1409,6 +1465,7 @@
             htmlList += `</div>`;
             content.innerHTML = htmlList;
         }
+
         function lancerAnalyseAlignementIA(index) {
             const occ = currentModalOccurrences[index];
             const resultBox = document.getElementById(`ia-alignement-result-${index}`);
@@ -1440,14 +1497,18 @@
             .then(res => {
                 if (res.answer) {
                     resultBox.innerHTML = `<strong>💡 Diagnostic et Alignement Idéal (IA) :</strong><br>` + formatAIResponseToUI(res.answer);
+                } else if (res.error) {
+                    // C'est ici que l'on révèle la vraie erreur du serveur !
+                    resultBox.innerHTML = `<span style="color: #ef4444;"><strong>Erreur IA :</strong> ${res.error}</span>`;
                 } else {
-                    resultBox.innerHTML = `<span style="color: #ef4444;">Erreur lors de l'analyse.</span>`;
+                    resultBox.innerHTML = `<span style="color: #ef4444;">Erreur inconnue lors de l'analyse.</span>`;
                 }
             })
-            .catch(() => {
-                resultBox.innerHTML = `<span style="color: #ef4444;">Erreur réseau lors de la communication avec l'IA.</span>`;
+            .catch((err) => {
+                resultBox.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
             });
         }
+        
         function filterModalOccurrences() {
             const query = (document.getElementById('modal-filter-input').value || "").toLowerCase().trim();
             if (!query) {
@@ -1536,40 +1597,6 @@
             }
         }
 
-        function updateBalanceWidget(adhesionList, rejetsList) {
-            const topIcon = document.getElementById('balance-top-icon');
-            const topName = document.getElementById('balance-top-name');
-            const topVal = document.getElementById('balance-top-val');
-            
-            const defiIcon = document.getElementById('balance-defi-icon');
-            const defiName = document.getElementById('balance-defi-name');
-            const defiVal = document.getElementById('balance-defi-val');
-
-            if (adhesionList && adhesionList.length > 0 && topName) {
-                let best = adhesionList[0];
-                let fallbackHtml = `this.outerHTML='<div style=\\'width:100%; height:100%; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:26px; background:#ecfdf5;\\'>${best.emoji}</div>'`;
-                topIcon.innerHTML = `<img src="${best.thumb}" onerror="${fallbackHtml}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="">`;
-                topName.innerText = best.label;
-                topVal.innerText = `${best.tauxMange}% d'adhésion`;
-            } else if (topName) {
-                topIcon.innerHTML = "🍽️";
-                topName.innerText = "En attente de données...";
-                topVal.innerText = "--% d'adhésion";
-            }
-
-            if (rejetsList && rejetsList.length > 0 && defiName) {
-                let worst = rejetsList[0];
-                let fallbackHtml = `this.outerHTML='<div style=\\'width:100%; height:100%; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:26px; background:#fef2f2;\\'>${worst.emoji}</div>'`;
-                defiIcon.innerHTML = `<img src="${worst.thumb}" onerror="${fallbackHtml}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;" alt="">`;
-                defiName.innerText = worst.label;
-                defiVal.innerText = `${worst.rejetPct}% gaspillé`;
-            } else if (defiName) {
-                defiIcon.innerHTML = "⚖️";
-                defiName.innerText = "En attente de données...";
-                defiVal.innerText = "--% gaspillé";
-            }
-        }
-
         async function getAvailableCameras() {
             const select = document.getElementById('camera-select');
             if (!select) return;
@@ -1590,7 +1617,6 @@
                 videoDevices.forEach((device, index) => {
                     const option = document.createElement('option');
                     option.value = device.deviceId;
-                    // Sur mobile, ça donnera "Back Camera" ou "Front"
                     option.text = device.label || `Caméra ${index + 1}`;
                     select.appendChild(option);
                 });
@@ -1611,11 +1637,8 @@
                 let videoConstraints = { width: { ideal: 640 }, height: { ideal: 480 } };
                 
                 if (selectedDeviceId) {
-                    // Si tu as sélectionné une caméra précise dans la liste
                     videoConstraints.deviceId = { exact: selectedDeviceId };
                 } else {
-                    // 🌟 LA MAGIE EST ICI : "ideal" au lieu d'une contrainte stricte
-                    // Sur smartphone -> Caméra Dos. Sur PC -> Webcam normale. (0 bug !)
                     videoConstraints.facingMode = { ideal: "environment" };
                 }
                 
@@ -1623,7 +1646,6 @@
                 video.srcObject = localStream;
                 resetBorneUI();
                 
-                // On met à jour la liste des caméras une fois que le flux vidéo est autorisé
                 if (!selectedDeviceId) getAvailableCameras();
                 
             } catch (err) { 
@@ -1656,7 +1678,6 @@
             document.getElementById('action-progress').style.width = "0%"; 
         }
 
-        // 🌟 1. Fonction pour appliquer les filtres visuels en direct sur la vidéo
         function applyVideoFilters() {
             const video = document.getElementById('camera-feed');
             const brightness = document.getElementById('cam-brightness').value;
@@ -1666,7 +1687,6 @@
             }
         }
 
-        // 🌟 2. Capture de l'image avec les filtres pour l'envoyer à l'IA
         function getBase64FromLiveVideo() {
             const video = document.getElementById('camera-feed');
             if (!video || !localStream || video.readyState < 2) return "data:image/jpeg;base64,image_active_simulee"; 
@@ -1676,20 +1696,18 @@
             canvas.height = video.videoHeight || 480;
             const ctx = canvas.getContext('2d'); 
             
-            // On récupère les valeurs des curseurs (ou 100 par défaut)
             const brightness = document.getElementById('cam-brightness') ? document.getElementById('cam-brightness').value : 100;
             const contrast = document.getElementById('cam-contrast') ? document.getElementById('cam-contrast').value : 100;
             
-            // On applique le filtre sur l'image capturée
             ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
             
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             return canvas.toDataURL('image/jpeg', 0.7); 
         }
+        
         let choixAvisCourant = "Non renseigné";
 
         function setPushAvis(type, elem) {
-            // Effet visuel "enfoncé" (reset des 3 boutons)
             ['vert', 'orange', 'rouge'].forEach(t => {
                 let b = document.getElementById(`push-btn-${t}`);
                 if (b) {
@@ -1699,7 +1717,6 @@
                 }
             });
 
-            // Effet visuel "enfoncé" et sélection sur le bouton cliqué
             elem.style.transform = "scale(0.96)";
             elem.style.borderWidth = "5px";
             elem.style.boxShadow = "0 0 20px #ffffff, " + elem.style.boxShadow;
@@ -1710,6 +1727,7 @@
 
             prononcerMessage(type === 'vert' ? "Tout fini" : (type === 'orange' ? "Pas le temps" : "Pas aimé"));
         }
+        
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
@@ -1723,7 +1741,7 @@
                 action: "logScanImage", 
                 etablissement: document.getElementById('select-etablissement').value, 
                 menu_jour: document.getElementById('borne-menu-active').innerText, 
-                avis_eleve: choixAvisCourant, // Transmet l'avis du poussoir tactile
+                avis_eleve: choixAvisCourant,
                 image_base64: getBase64FromLiveVideo() 
             };
             
@@ -1735,7 +1753,6 @@
                     banner.className = "instruction-banner state-success";
                     prononcerMessage("Merci ! Suivant");
                     
-                    // Remet à zéro les poussoirs pour l'élève suivant
                     choixAvisCourant = "Non renseigné";
                     ['vert', 'orange', 'rouge'].forEach(t => {
                         let b = document.getElementById(`push-btn-${t}`);
@@ -1748,14 +1765,15 @@
 
                     setTimeout(() => resetBorneUI(), 800);
                 } else {
-                    banner.innerText = "❌ ERREUR DE SAUVEGARDE";
+                    banner.innerText = "❌ ERREUR : " + (res.error || "IA BLOQUÉE");
                     banner.style.backgroundColor = "#ef4444";
-                    setTimeout(() => resetBorneUI(), 2000);
+                    banner.style.fontSize = "13px";
+                    setTimeout(() => resetBorneUI(), 4000);
                 }
-            }).catch(() => {
-                banner.innerText = "❌ ERREUR RÉSEAU";
+            }).catch((err) => {
+                banner.innerText = "❌ ERREUR RÉSEAU : " + err.message;
                 banner.style.backgroundColor = "#ef4444";
-                setTimeout(() => resetBorneUI(), 2000);
+                setTimeout(() => resetBorneUI(), 4000);
             });
         }
 
@@ -1767,8 +1785,6 @@
             
             if (viewId === 'view-borne') {
                 initCamera(); 
-                
-                // 🌟 NOUVEAU : Affiche instantanément le dernier menu connu en mémoire
                 const school = document.getElementById('select-etablissement').value;
                 const menuLocal = localStorage.getItem(`menuActive-${school}`);
                 if (menuLocal) {
@@ -1779,7 +1795,6 @@
                 stopCamera();
             }
 
-            // 🌟 CORRECTION : J'ai ajouté 'view-borne' ici pour forcer la synchronisation avec le serveur !
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport' || viewId === 'view-borne') {
                 loadLiveData(); 
             }
@@ -2006,7 +2021,7 @@
                     let text = el.value;
                     let parentLabel = el.closest('label');
                     let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
-                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍‍🍳";
                     desserts.push(text);
                 }
             });
@@ -2128,6 +2143,47 @@
                 if (!headerProcessed) headerProcessed = true;
             });
             html += '</table></div>'; return html;
+        }
+
+        function analyserMenuDuJourIA() {
+            const menuActif = getCurrentCheckedMenu();
+            if (!menuActif) {
+                alert("Veuillez cocher les éléments du menu avant de lancer l'analyse.");
+                return;
+            }
+
+            const resBox = document.getElementById('gemini-ai-result-jour');
+            const resText = document.getElementById('gemini-ai-text-jour');
+            if (!resBox || !resText) return;
+
+            resBox.style.display = "block";
+            resText.innerHTML = "<em>🤖 Analyse nutritionnelle et réglementaire en cours...</em>";
+
+            const school = document.getElementById('select-etablissement').value;
+            const payload = {
+                action: "analyzeDailyMenu",
+                menu: menuActif,
+                ecole: school
+            };
+
+            fetch(ADRESSE_SHEET_OFFICIELLE, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.answer) {
+                    resText.innerHTML = formatAIResponseToUI(res.answer);
+                } else if (res.error) {
+                    resText.innerHTML = `<span style="color: #ef4444;"><strong>Erreur IA :</strong> ${res.error}</span>`;
+                } else {
+                    resText.innerHTML = `<span style="color: #ef4444;">Erreur inconnue lors de l'analyse.</span>`;
+                }
+            })
+            .catch(err => {
+                resText.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
+            });
         }
     </script>
 </body>
