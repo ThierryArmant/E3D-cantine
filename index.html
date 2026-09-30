@@ -1162,18 +1162,46 @@
         return;
     }
 
-    boxCuisine.innerHTML = "<em>🤖 L'IA analyse les votes cuisine...</em>";
-    boxEleves.innerHTML = "<em>🤖 L'IA analyse les leviers élèves...</em>";
-    if (boxAffiche) boxAffiche.innerHTML = "<em>🎨 Conception de l'affiche par l'IA...</em>";
-
-    const school = document.getElementById('select-etablissement').value;
+    const school = document.getElementById('select-etablissement')?.value || "defaut";
     const menuActif = localStorage.getItem(`menuActive-${school}`) || "Menu standard";
+    const cacheKey = `ia_plan_${school}_${menuActif}_${scansValides.length}`;
+
+    // 1. Si on a déjà le résultat en cache, on l'affiche direct (zéro scintillement !)
+    if (localStorage.getItem(cacheKey)) {
+        try {
+            const cachedPlan = JSON.parse(localStorage.getItem(cacheKey));
+            boxCuisine.innerHTML = cachedPlan.cuisine;
+            boxEleves.innerHTML = cachedPlan.eleves;
+            if (boxAffiche && cachedPlan.affiche) {
+                boxAffiche.innerHTML = `
+                    <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${cachedPlan.affiche.titre}</div>
+                    <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${cachedPlan.affiche.slogan} »</div>
+                    <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${cachedPlan.affiche.action}</div>
+                `;
+            }
+            return; // On sort, pas besoin de réinterroger l'API pour rien
+        } catch(e) {
+            // Si le cache est corrompu, on continue vers l'appel normal
+        }
+    }
+
+    // 2. Sinon, on interroge l'IA (uniquement si nécessaire)
+    boxCuisine.innerHTML = "<em>🤖 Analyse culinaire en cours...</em>";
+    boxEleves.innerHTML = "<em>🤖 Analyse GES et pédagogie en cours...</em>";
+    if (boxAffiche) boxAffiche.innerHTML = "<em>🎨 Création de l'affiche par l'IA...</em>";
+
+    let detailsRecueillis = [];
+    scansValides.forEach(s => {
+        if (s.plat || s.item) detailsRecueillis.push(`${s.plat || s.item}: ${s.avis_eleve || s.commentaire || ''}`);
+        else if (s.commentaire) detailsRecueillis.push(s.commentaire);
+    });
 
     const payload = {
         action: "analyserPlanAction",
         etablissement: school,
         menu_jour: menuActif,
-        nb_votes: scansValides.length
+        nb_votes: scansValides.length,
+        details: detailsRecueillis.join(" | ") || "Retours de la borne tactile"
     };
 
     try {
@@ -1185,6 +1213,9 @@
         const res = await response.json();
 
         if (res.success && res.plan) {
+            // Sauvegarde dans le cache du navigateur
+            localStorage.setItem(cacheKey, JSON.stringify(res.plan));
+
             boxCuisine.innerHTML = res.plan.cuisine;
             boxEleves.innerHTML = res.plan.eleves;
             
@@ -1196,14 +1227,12 @@
                 `;
             }
         } else {
-            boxCuisine.innerHTML = "Erreur de génération du plan d'action par l'IA.";
-            boxEleves.innerHTML = "Erreur de génération du plan d'action par l'IA.";
-            if (boxAffiche) boxAffiche.innerHTML = "Erreur de chargement de l'affiche.";
+            boxCuisine.innerHTML = "Erreur de génération par l'IA.";
+            boxEleves.innerHTML = "Erreur de génération par l'IA.";
         }
     } catch (err) {
-        boxCuisine.innerHTML = "Erreur réseau avec l'assistant IA.";
-        boxEleves.innerHTML = "Erreur réseau avec l'assistant IA.";
-        if (boxAffiche) boxAffiche.innerHTML = "Erreur réseau.";
+        boxCuisine.innerHTML = "Erreur réseau.";
+        boxEleves.innerHTML = "Erreur réseau.";
     }
 }
         // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
