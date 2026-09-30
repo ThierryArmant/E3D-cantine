@@ -2151,6 +2151,46 @@
             });
             html += '</table></div>'; return html;
         }
+        function analyserMenuDuJourIA() {
+            const menuActif = getCurrentCheckedMenu();
+            if (!menuActif) {
+                alert("Veuillez cocher les éléments du menu avant de lancer l'analyse.");
+                return;
+            }
+
+            const resBox = document.getElementById('gemini-ai-result-jour');
+            const resText = document.getElementById('gemini-ai-text-jour');
+            if (!resBox || !resText) return;
+
+            resBox.style.display = "block";
+            resText.innerHTML = "<em>🤖 Analyse nutritionnelle et réglementaire en cours...</em>";
+
+            const school = document.getElementById('select-etablissement').value;
+            const payload = {
+                action: "analyzeDailyMenu",
+                menu: menuActif,
+                ecole: school
+            };
+
+            fetch(ADRESSE_SHEET_OFFICIELLE, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.answer) {
+                    resText.innerHTML = formatAIResponseToUI(res.answer);
+                } else if (res.error) {
+                    resText.innerHTML = `<span style="color: #ef4444;"><strong>Erreur IA :</strong> ${res.error}</span>`;
+                } else {
+                    resText.innerHTML = `<span style="color: #ef4444;">Erreur inconnue lors de l'analyse.</span>`;
+                }
+            })
+            .catch(err => {
+                resText.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
+            });
+        }
     </script>
 </body>
 </html>
