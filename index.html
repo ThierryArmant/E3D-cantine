@@ -1765,10 +1765,18 @@
 
                     setTimeout(() => resetBorneUI(), 800);
                 } else {
-                    banner.innerText = "❌ ERREUR DE SAUVEGARDE";
+                    // 🌟 C'EST ICI QUE LA MAGIE OPÈRE : ON AFFICHE LE MESSAGE DU SERVEUR
+                    banner.innerText = "❌ ERREUR : " + (res.error || "IA BLOQUÉE");
                     banner.style.backgroundColor = "#ef4444";
-                    setTimeout(() => resetBorneUI(), 2000);
+                    banner.style.fontSize = "13px";
+                    setTimeout(() => resetBorneUI(), 4000);
                 }
+            }).catch((err) => {
+                banner.innerText = "❌ ERREUR RÉSEAU : " + err.message;
+                banner.style.backgroundColor = "#ef4444";
+                setTimeout(() => resetBorneUI(), 4000);
+            });
+        }
             }).catch(() => {
                 banner.innerText = "❌ ERREUR RÉSEAU";
                 banner.style.backgroundColor = "#ef4444";
