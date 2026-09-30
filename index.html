@@ -1497,12 +1497,15 @@
             .then(res => {
                 if (res.answer) {
                     resultBox.innerHTML = `<strong>💡 Diagnostic et Alignement Idéal (IA) :</strong><br>` + formatAIResponseToUI(res.answer);
+                } else if (res.error) {
+                    // C'est ici que l'on révèle la vraie erreur du serveur !
+                    resultBox.innerHTML = `<span style="color: #ef4444;"><strong>Erreur IA :</strong> ${res.error}</span>`;
                 } else {
-                    resultBox.innerHTML = `<span style="color: #ef4444;">Erreur lors de l'analyse.</span>`;
+                    resultBox.innerHTML = `<span style="color: #ef4444;">Erreur inconnue lors de l'analyse.</span>`;
                 }
             })
-            .catch(() => {
-                resultBox.innerHTML = `<span style="color: #ef4444;">Erreur réseau lors de la communication avec l'IA.</span>`;
+            .catch((err) => {
+                resultBox.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
             });
         }
         
