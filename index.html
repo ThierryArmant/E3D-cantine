@@ -205,43 +205,8 @@
                         </div>
                     </div>
 
-                    <!-- WIDGET : LA BALANCE A.B.C. -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div style="background: rgba(236, 253, 245, 0.95); border: 1.5px solid #34d399; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <span style="font-size: 11.5px; font-weight: 800; color: #065f46; text-transform: uppercase;">🌿 Le Plateau des Fiertés (Plébiscite)</span>
-                                <span style="font-size: 16px;">🏆</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #a7f3d0;">
-                                <div id="balance-top-icon" style="width: 44px; height: 44px;">🍽️</div>
-                                <div style="flex-grow: 1; overflow: hidden;">
-                                    <div class="text-truncate" style="font-size: 11.5px; font-weight: 700; color: #047857;" id="balance-top-name">En attente de données...</div>
-                                    <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-top-val">--% d'adhésion</div>
-                                </div>
-                                <div style="background: #10b981; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">TOP GOÛT</div>
-                            </div>
-                            <div style="font-size: 9.5px; color: #047857; font-style: italic; margin-top: 6px; text-align: center;">« Bravo aux équipes, un plat plébiscité par les élèves ! »</div>
-                        </div>
-
-                        <div style="background: rgba(254, 242, 242, 0.95); border: 1.5px solid #f87171; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); display: flex; flex-direction: column; justify-content: space-between;">
-                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                                <span style="font-size: 11.5px; font-weight: 800; color: #991b1b; text-transform: uppercase;">🎯 Le Défi du Service (À améliorer)</span>
-                                <span style="font-size: 16px;">⚖️</span>
-                            </div>
-                            <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #fecaca;">
-                                <div id="balance-defi-icon" style="width: 44px; height: 44px;">⚖️</div>
-                                <div style="flex-grow: 1; overflow: hidden;">
-                                    <div class="text-truncate" style="font-size: 11.5px; font-weight: 700; color: #b91c1c;" id="balance-defi-name">En attente de données...</div>
-                                    <div style="font-size: 13px; font-weight: 900; color: #0f172a;" id="balance-defi-val">--% gaspillé</div>
-                                </div>
-                                <div style="background: #ef4444; color: white; font-size: 9.5px; font-weight: 900; padding: 3px 8px; border-radius: 4px;">OBJECTIF</div>
-                            </div>
-                            <div style="font-size: 9.5px; color: #b91c1c; font-style: italic; margin-top: 6px; text-align: center;">« Ajustons les portions pour le prochain service ! »</div>
-                        </div>
-                    </div>
-
-                    <!-- KPIs & GRAPHIQUE -->
-                    <div class="dashboard-top-split">
+                    <!-- 1. EN HAUT : KPIs & GRAPHIQUE -->
+                    <div class="dashboard-top-split" style="margin-top: 12px;">
                         <div class="kpi-grid-2x2">
                             <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
                             <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité évitable</div></div><div class="kpi-right">Hors os et inévitables</div></div>
@@ -258,19 +223,30 @@
                         </div>
                     </div>
                     
-                    <!-- 🟢🔴 ANALYSE DES PLATS SUR LA PÉRIODE (CLICABLES) -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <!-- 2. MATRICE DES PLATS (4 NIVEAUX) -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (Cliquez pour auditer)</h3>
-                            <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
+                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
+                            <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
+                        </div>
+                        <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
+                            <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
+                            <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="dashboard-col" style="background: rgba(255, 237, 213, 0.95) !important; border: 1.5px solid #fdba74;">
+                            <h3 style="color: #9a3412; margin-bottom: 10px; font-size: 13px;">🟠 Acceptable (45% - 59%)</h3>
+                            <div id="period-acceptable-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (Cliquez pour auditer)</h3>
-                            <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 320px; overflow-y: auto; padding-right: 5px;"></div>
+                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (< 45%)</h3>
+                            <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
 
-                    <!-- 🔬 SECTION : ANALYSE FINE DU MENU & FILTRAGE PAR ITEM -->
+                    <!-- 3. SECTION : ANALYSE FINE DU MENU & FILTRAGE PAR ITEM -->
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                             <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
