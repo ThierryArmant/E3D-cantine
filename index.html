@@ -988,7 +988,7 @@
                 }
             }
 
-            let menuActif = localStorage.getItem(`menuActive-${school}`) || "poulet tex-mex";
+            let menuActif = localStorage.getItem(`menuActive-${school}`) || "";
             let tauxInévitablePlat = getTauxInevitablesPourTexte(menuActif);
             
             let poidsInevitablesAlim = totalAlimBrutKg * tauxInévitablePlat;
