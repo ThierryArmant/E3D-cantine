@@ -1653,7 +1653,30 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             return canvas.toDataURL('image/jpeg', 0.7); 
         }
+        let choixAvisCourant = "Non renseigné";
 
+        function setPushAvis(type, elem) {
+            // Effet visuel "enfoncé" (reset des 3 boutons)
+            ['vert', 'orange', 'rouge'].forEach(t => {
+                let b = document.getElementById(`push-btn-${t}`);
+                if (b) {
+                    b.style.transform = "scale(1)";
+                    b.style.boxShadow = b.style.boxShadow.replace(/0 0 \d+px #ffffff,\s*/, '');
+                    b.style.borderWidth = "3px";
+                }
+            });
+
+            // Effet visuel "enfoncé" et sélection sur le bouton cliqué
+            elem.style.transform = "scale(0.96)";
+            elem.style.borderWidth = "5px";
+            elem.style.boxShadow = "0 0 20px #ffffff, " + elem.style.boxShadow;
+
+            if (type === 'vert') choixAvisCourant = "🟢 J'ai tout fini";
+            else if (type === 'orange') choixAvisCourant = "🟠 Pas le temps";
+            else if (type === 'rouge') choixAvisCourant = "🔴 J'ai pas aimé";
+
+            prononcerMessage(type === 'vert' ? "Tout fini" : (type === 'orange' ? "Pas le temps" : "Pas aimé"));
+        }
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
