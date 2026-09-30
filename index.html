@@ -1663,15 +1663,33 @@
             document.getElementById('bar-container').style.display = "block"; 
             document.getElementById('action-progress').style.width = '100%';
             
-            const payload = { action: "logScanImage", etablissement: document.getElementById('select-etablissement').value, menu_jour: document.getElementById('borne-menu-active').innerText, image_base64: getBase64FromLiveVideo() };
+            const payload = { 
+                action: "logScanImage", 
+                etablissement: document.getElementById('select-etablissement').value, 
+                menu_jour: document.getElementById('borne-menu-active').innerText, 
+                avis_eleve: choixAvisCourant, // Transmet l'avis du poussoir tactile
+                image_base64: getBase64FromLiveVideo() 
+            };
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
             }).then(r => r.json()).then(res => {
                 if(res.success) {
-                    banner.innerText = "🟢 SUIVANT !"; 
+                    banner.innerText = "🟢 MERCI ! SUIVANT"; 
                     banner.className = "instruction-banner state-success";
-                    prononcerMessage("Suivant !");
+                    prononcerMessage("Merci ! Suivant");
+                    
+                    // Remet à zéro les poussoirs pour l'élève suivant
+                    choixAvisCourant = "Non renseigné";
+                    ['vert', 'orange', 'rouge'].forEach(t => {
+                        let b = document.getElementById(`push-btn-${t}`);
+                        if (b) {
+                            b.style.transform = "scale(1)";
+                            b.style.boxShadow = b.style.boxShadow.replace(/0 0 \d+px #ffffff,\s*/, '');
+                            b.style.borderWidth = "3px";
+                        }
+                    });
+
                     setTimeout(() => resetBorneUI(), 800);
                 } else {
                     banner.innerText = "❌ ERREUR DE SAUVEGARDE";
