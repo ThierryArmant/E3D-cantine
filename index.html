@@ -895,16 +895,20 @@
         function normalizeDate(raw) {
             if (!raw) return "";
             let str = String(raw).trim();
+            
+            // Format JJ/MM/AAAA (avec ou sans heure derrière comme "01/10/2026 12:15:05")
             let matchFR = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-            if (matchFR) return `${matchFR[3]}-${matchFR[2]}-${matchFR[1]}`;
+            if (matchFR) {
+                return `${matchFR[3]}-${matchFR[2]}-${matchFR[1]}`;
+            }
+            
+            // Format AAAA-MM-JJ (avec ou sans heure)
             let matchISO = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (matchISO) return `${matchISO[1]}-${matchISO[2]}-${matchISO[3]}`;
+            if (matchISO) {
+                return `${matchISO[1]}-${matchISO[2]}-${matchISO[3]}`;
+            }
+            
             return str.substring(0, 10);
-        }
-
-        function getCleanLabel(label) {
-            if (!label) return "";
-            return label.split(/[\/\+]/)[0].replace(' (Fait Maison)', '').trim();
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
