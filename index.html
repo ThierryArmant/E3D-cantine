@@ -1154,7 +1154,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-       async function updateEtApresModule(scansValides) {
+      async function updateEtApresModule(scansValides) {
             const boxCuisine = document.getElementById('et-apres-cuisine-content');
             const boxEleves = document.getElementById('et-apres-eleves-content');
             const boxAffiche = document.getElementById('et-apres-affiche-content');
@@ -1197,7 +1197,7 @@
                 else if (s.commentaire) detailsRecueillis.push(s.commentaire);
             });
 
-            // 🛡️ LE GARDE-FOU : On tronque le texte s'il est trop long pour éviter de faire planter le serveur
+            // 🛡️ GARDE-FOU 1 : Tronquer le texte pour éviter l'indigestion de l'IA
             let detailsBruts = detailsRecueillis.join(" | ");
             if (detailsBruts.length > 2000) {
                 detailsBruts = detailsBruts.substring(0, 2000) + "... (résumé tronqué pour l'IA)";
@@ -1218,7 +1218,6 @@
                     body: JSON.stringify(payload)
                 });
                 
-                // 🛡️ LECTURE ROBUSTE : On lit d'abord en texte pur au cas où le serveur renvoie une erreur HTML
                 const textRes = await response.text();
                 let res;
                 try {
@@ -1227,11 +1226,24 @@
                     throw new Error("L'IA a mis trop de temps à répondre ou le serveur est surchargé.");
                 }
 
-                // Récupération intelligente de l'objet plan IA
                 let planToUse = res.plan || (res.cuisine ? res : null) || (res.answer ? JSON.parse(res.answer) : null);
 
                 if (planToUse && planToUse.cuisine) {
-                    localStorage.setItem(cacheKey, JSON.stringify(planToUse));
+                    
+                    // 🛡️ GARDE-FOU 2 : Gérer la mémoire pleine du navigateur (Quota Exceeded)
+                    try {
+                        localStorage.setItem(cacheKey, JSON.stringify(planToUse));
+                    } catch (storageErr) {
+                        console.warn("Mémoire locale pleine. Nettoyage du cache IA...");
+                        // Si la mémoire est pleine, on vide les anciennes sauvegardes de l'IA pour faire de la place
+                        Object.keys(localStorage).forEach(k => {
+                            if (k.startsWith('ia_plan_')) localStorage.removeItem(k);
+                        });
+                        // On réessaie de sauvegarder une fois le ménage fait
+                        try { localStorage.setItem(cacheKey, JSON.stringify(planToUse)); } catch(e) {}
+                    }
+
+                    // Affichage des données (même si la sauvegarde a échoué)
                     boxCuisine.innerHTML = planToUse.cuisine;
                     boxEleves.innerHTML = planToUse.eleves;
                     
@@ -1247,7 +1259,6 @@
                     boxEleves.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
                 }
             } catch (err) {
-                // 🛡️ AFFICHAGE PRÉCIS DE L'ERREUR
                 boxCuisine.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Échec : ${err.message}</span>`;
                 boxEleves.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Vérifiez la connexion ou réduisez la période de filtrage.</span>`;
             }
