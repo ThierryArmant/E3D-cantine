@@ -873,7 +873,25 @@
             "Pâtisserie / Flan": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" },
             "Glace": { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=150&q=80", emoji: "🍨" }
         };
-
+        // 🌟 LA FONCTION QUI FAIT LE LIEN ENTRE LE NOM ET L'IMAGE 🌟
+        function getThumbFallback(rawName) {
+            if (!rawName) return { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
+            let clean = rawName.trim();
+            
+            // 1. Recherche exacte
+            if (FOOD_THUMBNAILS[clean]) return FOOD_THUMBNAILS[clean];
+            
+            // 2. Recherche partielle (ex: si l'IA dit "Poulet sauce", on trouve "Poulet")
+            let cleanLower = clean.toLowerCase();
+            for (let key in FOOD_THUMBNAILS) {
+                if (cleanLower.includes(key.toLowerCase()) || key.toLowerCase().includes(cleanLower)) {
+                    return FOOD_THUMBNAILS[key];
+                }
+            }
+            
+            // 3. Image par défaut si l'aliment est inconnu
+            return { url: DEFAULT_THUMBNAIL, emoji: "🥗" };
+        }
         function normalizeDate(raw) {
             if (!raw) return "";
             let str = String(raw).trim();
