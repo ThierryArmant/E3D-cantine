@@ -1285,6 +1285,22 @@
             return 1.2;
         }
 
+       // 🌟 NETTOYEUR DE LIBELLÉ POUR GARDER UN NOM COURT SUR LES CARTES
+        function getCleanItemShortName(raw) {
+            if (!raw) return "";
+            let clean = raw.trim();
+            let parts = clean.split(' - ').map(p => p.trim());
+            
+            const categories = ["fruit", "plat", "entrée", "dessert", "pain", "légume", "féculent", "viande"];
+            if (parts.length >= 3 && categories.includes(parts[0].toLowerCase())) {
+                return parts[1]; // ex: "Fruit - Poire - Entier" -> "Poire"
+            }
+            if (parts.length === 2 && categories.includes(parts[0].toLowerCase())) {
+                return parts[1];
+            }
+            return parts[0];
+        }
+
         // 🗑️ GESTION DE LA LISTE NOIRE CONTEXTUELLE (ANTI-HALLUCINATION)
         function getListeNoireMenuActif() {
             const school = document.getElementById('select-etablissement')?.value || "defaut";
@@ -1342,16 +1358,19 @@
                             let restePct = pctMatch ? parseInt(pctMatch[1]) : 0;
                             let tauxMange = Math.max(0, Math.min(100, 100 - restePct));
 
-                            if (rawItemName && !banniList.includes(rawItemName)) {
-                                if (!dynamicFoodStats[rawItemName]) {
-                                    dynamicFoodStats[rawItemName] = { totalRestes: 0, count: 0, rawName: rawItemName, totalTauxMange: 0 };
+                            // Extraction du nom court pour l'affichage propre
+                            let cleanShortName = getCleanItemShortName(rawItemName);
+
+                            if (cleanShortName && !banniList.includes(cleanShortName)) {
+                                if (!dynamicFoodStats[cleanShortName]) {
+                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0 };
                                 }
-                                dynamicFoodStats[rawItemName].totalRestes += restePct;
-                                dynamicFoodStats[rawItemName].totalTauxMange += tauxMange;
-                                dynamicFoodStats[rawItemName].count += 1;
+                                dynamicFoodStats[cleanShortName].totalRestes += restePct;
+                                dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
+                                dynamicFoodStats[cleanShortName].count += 1;
 
                                 let masseKg = (150 * (restePct / 100)) / 1000;
-                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(rawItemName);
+                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
                             }
                         }
                     });
@@ -1386,6 +1405,7 @@
                 if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
                 if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
                 if (text.includes('chou-fleur')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
+                if (text.includes('poire') || text.includes('banane') || text.includes('pomme')) return { emoji: "🍐", url: DEFAULT_THUMBNAIL };
                 return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
             }
 
