@@ -1307,6 +1307,7 @@
             applyCustomDateFilter();
         }
 
+        // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1316,43 +1317,42 @@
             const banniList = getListeNoireMenuActif();
 
             const scansValides = (scansSource || []).filter(s => {
-                const c = (s.commentaire || "").toLowerCase();
-                return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
+                const c = (s.commentaire || s.entree || "").toLowerCase();
+                return !c.includes("noire") && !c.includes("inexploitable");
             });
 
             let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
             let poidsTotalCarbonePeriodeKg = 0;
 
-            // 1. LECTURE DES DONNÉES MICROSCOPIQUES DE L'IA ([Aliment - Forme - Préparation : X% restes])
-            scansValides.forEach(scan => {
-                let textRaw = scan.commentaire || "";
-                let regex = /\[(.*?)\s*-\s*(.*?)\s*-\s*(.*?)\s*:\s*(\d+)\%\s*restes?\]/gi;
-                let match;
-                
-                while ((match = regex.exec(textRaw)) !== null) {
-                    let aliment = match[1].trim(); 
-                    let forme = match[2].trim();   
-                    let restePct = parseInt(match[4], 10);
+            scansValides.exports = scansValides.forEach(scan => {
+                // On lit directement les champs de ton Google Sheet (Entree, Plat, etc.)
+                let texteEntree = scan.entree || scan.commentaire || "";
+                let grammesPlat = parseFloat(scan.plat) || 0;
+                let grammesDessert = parseFloat(scan.dessert) || 0;
+                let grammesPain = parseFloat(scan.pain) || 0;
 
-                    let labelAffichage = `${aliment} (${forme})`;
-
-                    if (banniList.includes(labelAffichage) || banniList.includes(aliment)) continue;
-
-                    if (!dynamicFoodStats[labelAffichage]) {
-                        dynamicFoodStats[labelAffichage] = { totalRestes: 0, count: 0, rawName: aliment };
+                // Fonction utilitaire pour enregistrer un item dans les stats du dashboard
+                function ajouterStatItem(nomItem, poidsG) {
+                    if (!nomItem || banniList.includes(nomItem)) return;
+                    if (!dynamicFoodStats[nomItem]) {
+                        dynamicFoodStats[nomItem] = { totalRestes: 0, count: 0, rawName: nomItem };
                     }
+                    // On convertit le poids en pourcentage estimé (ex: 100g de reste sur une portion type de 150g)
+                    let pctReste = Math.min(100, Math.max(0, (poidsG / 150) * 100));
                     
-                    if (restePct >= 70) {
-                        verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
-                    }
+                    dynamicFoodStats[nomItem].totalRestes += pctReste;
+                    dynamicFoodStats[nomItem].count += 1;
 
-                    dynamicFoodStats[labelAffichage].totalRestes += restePct;
-                    dynamicFoodStats[labelAffichage].count += 1;
-
-                    let masseDechetEstimeeKg = (150 * (restePct / 100)) / 1000;
-                    poidsTotalCarbonePeriodeKg += masseDechetEstimeeKg * getFacteurCarbone(aliment);
+                    let masseKg = poidsG / 1000;
+                    poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(nomItem);
                 }
+
+                // Analyse textuelle ou numérique de tes colonnes réelles
+                if (texteEntree) ajouterStatItem(texteEntree, 50);
+                if (grammesPlat > 0) ajouterStatItem("Plat principal (Paupiette / Viande)", grammesPlat);
+                if (grammesDessert > 0) ajouterStatItem("Dessert / Laitage", grammesDessert);
+                if (grammesPain > 0) ajouterStatItem("Pain", grammesPain);
             });
 
             const kpiImpactElem = document.getElementById('kpi-impact');
@@ -1363,20 +1363,10 @@
             function getThumbFallback(alimentName) {
                 let text = alimentName.toLowerCase();
                 if (FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
-                if (text.includes('carotte')) return { emoji: "🥕", url: DEFAULT_THUMBNAIL };
-                if (text.includes('boeuf') || text.includes('viande') || text.includes('veau')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
-                if (text.includes('poulet') || text.includes('volaille')) return { emoji: "🍗", url: DEFAULT_THUMBNAIL };
-                if (text.includes('poisson') || text.includes('colin')) return { emoji: "🐟", url: DEFAULT_THUMBNAIL };
-                if (text.includes('pâte') || text.includes('coquillette')) return { emoji: "🍝", url: DEFAULT_THUMBNAIL };
-                if (text.includes('riz')) return { emoji: "🍚", url: DEFAULT_THUMBNAIL };
-                if (text.includes('pomme de terre') || text.includes('frite') || text.includes('purée')) return { emoji: "🥔", url: DEFAULT_THUMBNAIL };
-                if (text.includes('chou') || text.includes('brocoli')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
-                if (text.includes('salade')) return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
-                if (text.includes('tomate')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
-                if (text.includes('fromage') || text.includes('brie')) return { emoji: "🧀", url: DEFAULT_THUMBNAIL };
-                if (text.includes('fruit') || text.includes('pomme') || text.includes('banane')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
+                if (text.includes('plat') || text.includes('viande') || text.includes('paupiette')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
+                if (text.includes('dessert') || text.includes('laitage')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
                 if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
-                return { emoji: "🍽️️", url: DEFAULT_THUMBNAIL };
+                return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
             }
 
             let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
@@ -1386,7 +1376,6 @@
 
             let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [];
 
-            // 2. DISTRIBUTION DANS LES GRILLES DU TABLEAU DE BORD
             Object.keys(dynamicFoodStats).forEach(key => {
                 let stats = dynamicFoodStats[key];
                 if (stats.count === 0) return; 
@@ -1482,7 +1471,6 @@
 
             updateEtApresModule(scansValides);
         }
-
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
