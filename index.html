@@ -1264,88 +1264,142 @@
             }
         }
 
+        // 🌟 DICTIONNAIRE CARBONE ADEME (Agribalyse simplifié - kg CO2eq / kg d'aliment)
+        const COEFFICIENTS_CARBONE_ADEME = {
+            "bœuf": 22.0, "viande": 15.0, "veau": 13.0, "agneau": 25.0, "gardiane": 22.0,
+            "porc": 6.5, "saucisse": 6.0, "merguez": 8.0, "charcuterie": 6.0,
+            "poulet": 5.5, "volaille": 5.5, "dinde": 5.5, "cuisse de poulet": 5.5,
+            "poisson": 5.0, "colin": 4.5, "saumon": 7.5, "thon": 6.0,
+            "fromage": 7.5, "emmental": 8.0, "comté": 8.5, "camembert": 6.0, "yaourt": 2.2, "lait": 1.5, "œuf": 2.8,
+            "riz": 2.7, "pâtes": 1.6, "semoule": 1.5, "blé": 1.4, "pain": 1.2,
+            "frites": 1.8, "pomme de terre": 0.8, "purée": 1.0, "lentilles": 0.9,
+            "haricots verts": 0.8, "petits pois": 1.1, "brocolis": 0.7, "carotte": 0.5, "tomate": 0.8,
+            "salade": 0.5, "laitue": 0.5, "fruit": 0.6, "pomme": 0.4, "banane": 0.8, "compote": 0.7, "pâtisserie": 2.0
+        };
+
+        function getFacteurCarbone(nomAliment) {
+            let clean = (nomAliment || "").toLowerCase();
+            for (let key in COEFFICIENTS_CARBONE_ADEME) {
+                if (clean.includes(key)) return COEFFICIENTS_CARBONE_ADEME[key];
+            }
+            return 1.2;
+        }
+
+        // 🗑️ GESTION DE LA LISTE NOIRE CONTEXTUELLE (ANTI-HALLUCINATION)
+        function getListeNoireMenuActif() {
+            const school = document.getElementById('select-etablissement')?.value || "defaut";
+            const menuActif = localStorage.getItem(`menuActive-${school}`) || "defaut";
+            let key = `listeNoire_${school}_${menuActif}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function bannirItemHallucine(rawKey, event) {
+            event.stopPropagation();
+            const school = document.getElementById('select-etablissement')?.value || "defaut";
+            const menuActif = localStorage.getItem(`menuActive-${school}`) || "defaut";
+            let key = `listeNoire_${school}_${menuActif}`;
+            
+            let banniList = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!banniList.includes(rawKey)) {
+                banniList.push(rawKey);
+                localStorage.setItem(key, JSON.stringify(banniList));
+            }
+            applyCustomDateFilter();
+        }
+
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
             const selectFilter = document.getElementById('select-filter-item');
             if (!containerAdhesion || !containerRejets) return;
 
+            const banniList = getListeNoireMenuActif();
+
             const scansValides = (scansSource || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
                 return !c.includes("noire") && !c.includes("inexploitable") && !c.includes("sombre") && !c.includes("aucun plateau") && !c.includes("pas de plateau");
             });
 
-            const alimentsReferencePermis = [
-                "Couscous", "Paella", "Tajine", "Gardiane de Taureau", "Chili", "Lasagnes", 
-                "Poulet rôti", "Poulet tex-mex", "Sauté de viande", "Bœuf Bourguignon", "Steak haché", 
-                "Poisson", "Omelette", "Cordon Bleu", "Saucisse", "Merguez",
-                "Frites", "Pâtes", "Riz", "Semoule", "Purée", "Lentilles", "Haricots verts", 
-                "Petits pois", "Brocolis", "Ratatouille", "Épinards", "Endives cuites",
-                "Salade verte", "Salade d'endives", "Tomates", "Carottes râpées", "Taboulé", 
-                "Œuf dur", "Quiche", "Tarte", "Charcuterie",
-                "Yaourt", "Fromage", "Fruit de saison", "Compote", "Crème dessert", "Île flottante", "Pâtisserie", "Flan", "Glace", "Pain"
-            ];
-
-            let foodStats = {};
+            let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
+            let poidsTotalCarbonePeriodeKg = 0;
 
-            alimentsReferencePermis.forEach(aliment => {
-                foodStats[aliment] = { totalRestes: 0, count: 0 };
-            });
-
+            // 1. LECTURE DES DONNÉES MICROSCOPIQUES DE L'IA ([Aliment - Forme - Préparation : X% restes])
             scansValides.forEach(scan => {
-                let textRaw = (scan.commentaire || "").toLowerCase();
-                let restePct = scan.plat > 0 ? scan.plat : (scan.entree > 0 ? scan.entree : (scan.dessert > 0 ? scan.dessert : (scan.pain > 0 ? scan.pain : 20)));
+                let textRaw = scan.commentaire || "";
+                let regex = /\[(.*?)\s*-\s*(.*?)\s*-\s*(.*?)\s*:\s*(\d+)\%\s*restes?\]/gi;
+                let match;
+                
+                while ((match = regex.exec(textRaw)) !== null) {
+                    let aliment = match[1].trim(); 
+                    let forme = match[2].trim();   
+                    let restePct = parseInt(match[4], 10);
 
-                if (restePct >= 70) {
-                    verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
+                    let labelAffichage = `${aliment} (${forme})`;
+
+                    if (banniList.includes(labelAffichage) || banniList.includes(aliment)) continue;
+
+                    if (!dynamicFoodStats[labelAffichage]) {
+                        dynamicFoodStats[labelAffichage] = { totalRestes: 0, count: 0, rawName: aliment };
+                    }
+                    
+                    if (restePct >= 70) {
+                        verifierEtCapturerSiGaspiCritique({ pourcentageRestes: restePct, commentaire: scan.commentaire });
+                    }
+
+                    dynamicFoodStats[labelAffichage].totalRestes += restePct;
+                    dynamicFoodStats[labelAffichage].count += 1;
+
+                    let masseDechetEstimeeKg = (150 * (restePct / 100)) / 1000;
+                    poidsTotalCarbonePeriodeKg += masseDechetEstimeeKg * getFacteurCarbone(aliment);
                 }
-
-                alimentsReferencePermis.forEach(aliment => {
-                    let alimLower = aliment.toLowerCase();
-                    let isMatch = false;
-
-                    if (textRaw.includes(alimLower)) {
-                        isMatch = true;
-                    } else if (alimLower === "poulet" && (textRaw.includes("poulet") || textRaw.includes("tex-mex"))) {
-                        isMatch = true;
-                    } else if (alimLower === "poisson" && (textRaw.includes("poisson") || textRaw.includes("colin"))) {
-                        isMatch = true;
-                    } else if (alimLower === "viande" && (textRaw.includes("viande") || textRaw.includes("bœuf") || textRaw.includes("veau"))) {
-                        isMatch = true;
-                    }
-
-                    if (isMatch) {
-                        foodStats[aliment].totalRestes += restePct;
-                        foodStats[aliment].count += 1;
-                    }
-                });
             });
+
+            const kpiImpactElem = document.getElementById('kpi-impact');
+            if (kpiImpactElem) {
+                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
+            }
+
+            function getThumbFallback(alimentName) {
+                let text = alimentName.toLowerCase();
+                if (FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
+                if (text.includes('carotte')) return { emoji: "🥕", url: DEFAULT_THUMBNAIL };
+                if (text.includes('boeuf') || text.includes('viande') || text.includes('veau')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
+                if (text.includes('poulet') || text.includes('volaille')) return { emoji: "🍗", url: DEFAULT_THUMBNAIL };
+                if (text.includes('poisson') || text.includes('colin')) return { emoji: "🐟", url: DEFAULT_THUMBNAIL };
+                if (text.includes('pâte') || text.includes('coquillette')) return { emoji: "🍝", url: DEFAULT_THUMBNAIL };
+                if (text.includes('riz')) return { emoji: "🍚", url: DEFAULT_THUMBNAIL };
+                if (text.includes('pomme de terre') || text.includes('frite') || text.includes('purée')) return { emoji: "🥔", url: DEFAULT_THUMBNAIL };
+                if (text.includes('chou') || text.includes('brocoli')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
+                if (text.includes('salade')) return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
+                if (text.includes('tomate')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
+                if (text.includes('fromage') || text.includes('brie')) return { emoji: "🧀", url: DEFAULT_THUMBNAIL };
+                if (text.includes('fruit') || text.includes('pomme') || text.includes('banane')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
+                if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
+                return { emoji: "🍽️️", url: DEFAULT_THUMBNAIL };
+            }
 
             let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
             if (selectFilter) {
                 selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
             }
 
-            let plebiscites = [];
-            let bonneVoie = [];
-            let acceptables = [];
-            let rejets = [];
-            let allEvaluatedItems = [];
+            let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [];
 
-            alimentsReferencePermis.forEach(aliment => {
-                let stats = foodStats[aliment];
+            // 2. DISTRIBUTION DANS LES GRILLES DU TABLEAU DE BORD
+            Object.keys(dynamicFoodStats).forEach(key => {
+                let stats = dynamicFoodStats[key];
                 if (stats.count === 0) return; 
 
                 let resteMoyen = stats.totalRestes / stats.count;
-                let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
+                let tauxMange = Math.max(0, Math.min(100, Math.round(100 - resteMoyen)));
                 let rejetPct = 100 - tauxMange;
                 
-                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️️" };
+                let mediaObj = getThumbFallback(stats.rawName);
 
                 let itemObj = {
-                    label: aliment,
-                    rawKey: aliment,
+                    label: key,
+                    rawKey: key,
                     thumb: mediaObj.url,
                     emoji: mediaObj.emoji,
                     tauxMange: tauxMange,
@@ -1353,28 +1407,25 @@
                     occurrences: stats.count
                 };
 
-                globalItemsDetailedStats[aliment] = itemObj;
-                allEvaluatedItems.push(itemObj);
+                globalItemsDetailedStats[key] = itemObj;
 
                 if (selectFilter) {
                     let opt = document.createElement('option');
-                    opt.value = aliment;
-                    opt.innerText = `${aliment} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
+                    opt.value = key;
+                    opt.innerText = `${key} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
                     selectFilter.appendChild(opt);
                 }
 
-                if (tauxMange >= 75) {
-                    plebiscites.push(itemObj);
-                } else if (tauxMange >= 60) {
-                    bonneVoie.push(itemObj);
-                } else if (tauxMange >= 45) {
-                    acceptables.push(itemObj);
-                } else {
-                    rejets.push(itemObj);
-                }
+                if (tauxMange >= 75) plebiscites.push(itemObj);
+                else if (tauxMange >= 60) bonneVoie.push(itemObj);
+                else if (tauxMange >= 45) acceptables.push(itemObj);
+                else rejets.push(itemObj);
             });
 
-            if (selectFilter) selectFilter.value = currentSelectedFilter;
+            if (selectFilter) {
+                let options = Array.from(selectFilter.options).map(o => o.value);
+                if (options.includes(currentSelectedFilter)) selectFilter.value = currentSelectedFilter;
+            }
 
             renderAnalyseFineSynthese(plebiscites, rejets);
 
@@ -1389,7 +1440,7 @@
                 container.innerHTML = "";
                 
                 if (list.length === 0) {
-                    container.innerHTML = `<div style="font-size: 11.5px; color: #64748b; font-style: italic; padding: 15px; grid-column: 1/-1; text-align: center;">Aucun plat dans cette zone.</div>`;
+                    container.innerHTML = `<div style="font-size: 11.5px; color: #64748b; font-style: italic; padding: 15px; grid-column: 1/-1; text-align: center;">Aucun ingrédient détecté dans cette zone.</div>`;
                     return;
                 }
 
@@ -1412,12 +1463,13 @@
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
 
                     container.innerHTML += `
-                        <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser les menus et la concurrence">
+                        <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser cet ingrédient" style="position: relative;">
                             <img src="${item.thumb}" onerror="${fallbackHtml}" class="dish-thumb-photo" alt="">
                             <div style="flex-grow: 1; padding-right: 8px; overflow: hidden;">
                                 <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
                                 <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
                             </div>
+                            <button type="button" onclick="bannirItemHallucine('${item.rawKey}', event)" title="Supprimer cette hallucination pour ce menu" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️</button>
                         </div>
                     `;
                 });
