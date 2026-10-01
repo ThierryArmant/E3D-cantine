@@ -218,12 +218,25 @@
                             </div>
                         </div>
                     </div>
-                    
+                    <!-- 🛑 DÉBUT DU BLOC BOUTONS (Transparence & Carbone) 🛑 -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
+                        <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
+                            <span style="font-size: 14px;">🛡️</span> Transparence & Audit des calculs
+                        </button>
+
+                        <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
+                            <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
+                        </button>
+                    </div>
+                    <!-- 🛑 FIN DU BLOC BOUTONS 🛑 -->
+
+                    <!-- DÉBUT DE TES 4 CASES DE COULEURS -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
                             <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
+                        
                         <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
                             <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
                             <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
@@ -240,6 +253,7 @@
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
+                    <!-- FIN DE TES 4 CASES DE COULEURS -->
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
