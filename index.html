@@ -41,10 +41,13 @@
 
         .borne-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
         .instruction-banner { font-size: 16px; font-weight: 900; text-align: center; padding: 12px; border-radius: 8px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; } .state-analyzing { background-color: #7c3aed; } .state-manual { background-color: #b45309; }
+        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; }
 
         .progress-container { position: absolute; bottom: 10px; left: 10px; right: 10px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; display: none; }
         .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
+
+        .btn-scan-trigger { background-color: #059669; color: white; border: none; border-radius: 10px; padding: 16px 20px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4); transition: background-color 0.2s; }
+        .btn-scan-trigger:hover { background-color: #047857; }
 
         .filter-period-bar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 8px; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #2d6a4f; }
         .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -67,6 +70,16 @@
         .dashboard-col { background: rgba(255, 255, 255, 0.94) !important; backdrop-filter: blur(10px); border-radius: 8px; padding: 14px; border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .dashboard-col h3 { font-size: 13px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
         .chart-container { position: relative; height: 130px; width: 100%; }
+
+        .gourmet-dish-card { background: white; border-radius: 8px; overflow: hidden; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: transform 0.1s ease; cursor: pointer; }
+        .gourmet-dish-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-color: #2d6a4f; }
+        .gourmet-dish-card.plebiscite { border-left: 5px solid #059669; }
+        .gourmet-dish-card.bonne-voie { border-left: 5px solid #84cc16; }
+        .gourmet-dish-card.acceptable { border-left: 5px solid #f97316; }
+        .gourmet-dish-card.alerte { border-left: 5px solid #dc2626; }
+        .dish-thumb-photo { width: 40px; height: 40px; border-radius: 4px; margin: 4px 4px 4px 6px; flex-shrink: 0; object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: transparent; }
+        
+        .text-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; font-weight: 900; color: #0f172a; margin-bottom: 2px; width: 100%; display: block; }
 
         .report-paper, .form-section, .bilan-eleves-wrapper, .ai-box { background: rgba(255, 255, 255, 0.9) !important; backdrop-filter: blur(10px); border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.6); padding: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 1050px; }
         .report-header { border-bottom: 3px solid #1b4332; padding-bottom: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
@@ -107,6 +120,9 @@
 
         .bilan-eleves-wrapper { margin-top: 12px; border-radius: 8px; background: rgba(248, 250, 252, 0.95); border: 1px solid #cbd5e1; padding: 12px; }
         .bilan-header-box { padding: 10px; border-radius: 6px; text-align: center; background: #dcfce7; color: #166534; margin-bottom: 8px; }
+        .bilan-header-box.zone-jaune { background: #fef9c3; color: #854d0e; }
+        .bilan-header-box.zone-orange { background: #ffedd5; color: #9a3412; }
+        .bilan-header-box.zone-rouge { background: #fee2e2; color: #991b1b; }
         .score-pill { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 9.5px; font-weight: 800; margin-bottom: 2px; background: rgba(255,255,255,0.9); }
         .score-title { font-size: 16px; font-weight: 900; line-height: 1.1; }
         .score-sub { font-size: 9.5px; font-weight: 600; opacity: 0.9; margin-top: 1px; }
@@ -205,6 +221,82 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                        <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
+                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
+                            <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
+                        </div>
+                        <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
+                            <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
+                            <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div class="dashboard-col" style="background: rgba(255, 237, 213, 0.95) !important; border: 1.5px solid #fdba74;">
+                            <h3 style="color: #9a3412; margin-bottom: 10px; font-size: 13px;">🟠 Acceptable (45% - 59%)</h3>
+                            <div id="period-acceptable-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
+                        </div>
+                        <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
+                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (< 45%)</h3>
+                            <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
+                            <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">Filtrer un item :</label>
+                                <select id="select-filter-item" onchange="filtrerAnalyseFineItem()" style="padding: 5px 8px; border-radius: 5px; border: 1px solid #cbd5e1; font-size: 11px; background: white; font-weight: bold;">
+                                    <option value="all">-- Tous les items de la période --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px;">
+                                <div style="font-size: 11px; font-weight: 800; color: #166534; margin-bottom: 6px; text-transform: uppercase;">🟢 Ce qui a fonctionné (Succès de service)</div>
+                                <div id="analyse-fine-vert" style="font-size: 11.5px; color: #14532d; line-height: 1.4;">Sélectionnez une période ou un item...</div>
+                            </div>
+                            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 10px;">
+                                <div style="font-size: 11px; font-weight: 800; color: #991b1b; margin-bottom: 6px; text-transform: uppercase;">🔴 Ce qui n'a pas marché (À ajuster / Recette)</div>
+                                <div id="analyse-fine-rouge" style="font-size: 11.5px; color: #7f1d1d; line-height: 1.4;">Sélectionnez une période ou un item...</div>
+                            </div>
+                        </div>
+
+                        <div id="box-detail-item-filtré" style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 6px; padding: 10px; font-size: 11.5px; color: #334155; display: none; margin-bottom: 12px;">
+                            <strong>📊 Bilan ciblé pour l'item :</strong> <span id="label-item-filtre-titre" style="color: #1b4332; font-weight: bold;">--</span>
+                            <div id="content-item-filtre-stats" style="margin-top: 4px; font-weight: 600;"></div>
+                        </div>
+
+                        <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px solid #1b4332; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="color: #1b4332; font-size: 13px; font-weight: 900; margin: 0;">⚡ "ET APRÈS !" — Plan d'action croisé (Cuisine & Élèves)</h3>
+                                <span style="background: #1b4332; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: bold;">PILOTAGE GIEC & TERRAIN</span>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div style="background: white; border-left: 4px solid #047857; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                    <h4 style="color: #047857; font-size: 11px; font-weight: 800; margin-bottom: 4px;">👨‍🍳 LEVIERS CUISINE (Ajuster l'offre)</h4>
+                                    <div id="et-apres-cuisine-content" style="font-size: 11px; color: #334155; line-height: 1.4;">En attente des retours tactiles de la borne...</div>
+                                </div>
+                                <div style="background: white; border-left: 4px solid #b45309; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                                    <h4 style="color: #b45309; font-size: 11px; font-weight: 800; margin-bottom: 4px;">🎓 LEVIERS ÉLÈVES (Éduquer la demande & Climat)</h4>
+                                    <div id="et-apres-eleves-content" style="font-size: 11px; color: #334155; line-height: 1.4;">En attente des retours tactiles de la borne...</div>
+                                </div>
+                            </div>
+
+                            <div style="background: #ffffff; border: 2px dashed #047857; border-radius: 8px; padding: 12px; margin-top: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="color: #047857; font-size: 11.5px; font-weight: 800; margin: 0;">🎨 IDÉE D'AFFICHAGE DU JOUR (Générée par l'IA)</h4>
+                                    <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 4px 10px; font-size: 10.5px; background: #047857;">🖨️ Imprimer ce message</button>
+                                </div>
+                                <div id="et-apres-affiche-content" style="font-size: 11px; color: #334155; line-height: 1.4; background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0;">En attente des votes de la borne pour concevoir l'affiche...</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -214,6 +306,7 @@
                     <div style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
                         <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             
+                            <!-- 🌟 LA BANNIÈRE CRITIQUE POUR LA CAMÉRA RESTAURÉE ICI -->
                             <div id="instruction-text" class="instruction-banner state-searching" style="margin-bottom: 8px;">
                                 🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER
                             </div>
@@ -224,12 +317,7 @@
                                     <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; background: #fff;"></select>
                                 </div>
                                 
-                                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                                    <!-- ⚙️ BOUTON DISCRET AUTO / MANUEL INTÉGRÉ -->
-                                    <button type="button" id="btn-discret-mode" onclick="toggleModeFonctionnement()" style="background: #dcfce7; border: 1.5px solid #22c55e; color: #166534; font-size: 10px; font-weight: bold; padding: 5px 8px; border-radius: 5px; cursor: pointer; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);">
-                                        🟢 Mode: Auto (IA)
-                                    </button>
-
+                                <div style="display: flex; gap: 8px; align-items: center;">
                                     <div style="display: flex; gap: 4px; align-items: center;">
                                         <label style="font-size: 10px; font-weight: bold; color: #1b4332;">Lum :</label>
                                         <input type="range" id="cam-brightness" min="40" max="150" value="100" oninput="applyVideoFilters()" style="width: 45px;">
@@ -253,7 +341,7 @@
 
                         <div style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
                             <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
-                            <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Appuie sur ton ressenti (avant ou après)</div>
+                            <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Appuie sur ton ressenti avant de scanner</div>
 
                             <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span style="font-size: 26px;">🟢</span>
@@ -273,169 +361,368 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS -->
+            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu avec Fait Maison, Options et Date) -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
-                    <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
+                        <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #2d6a4f;">
+                            <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📅 Date du menu :</label>
+                            <input type="date" id="input-menu-date" class="input-date" style="padding: 4px 8px; font-weight: bold; background: white;">
+                        </div>
+                        <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 12px; border-radius: 6px; color: #0369a1; font-weight: 800; font-size: 13px;">
+                            🤖 Plateaux analysés aujourd'hui : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour</h3>
+                    <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les éléments principaux. Les options (sauces, fromages, suppléments) sont regroupées dans la zone dédiée en bas de chaque colonne.</p>
+                    
+                    <div class="table-responsive">
+                        <table class="menu-table" style="min-width: 900px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">🥗 ENTRÉES</th>
+                                    <th style="width: 25%;">🍖 PLATS PRINCIPAUX</th>
+                                    <th style="width: 25%;">🍟 ACCOMPAGNEMENTS</th>
+                                    <th style="width: 25%;">🍰 DESSERTS & LAITAGES</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="sub-theme">Bases & Entrées</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade d'endives (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Carottes râpées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Taboulé (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Œuf dur / Mayonnaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Quiche / Tarte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade piémontaise"> Salade piémontaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade piémontaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Pâté en croûte"> Pâté en croûte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâté en croûte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+
+                                        <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Suppléments</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Mozzarella"> + Mozzarella</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Roquefort/Bleu"> + Roquefort / Bleu</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Vinaigrette"> + Vinaigrette</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Assaisonnement à part"> + Assaisonnement à part[cite: 3]</label>
+
+                                        <div id="favs_container_entree" class="local-favs-box" style="display: none;"></div>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Entrée</div>
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="entree_libre" placeholder="Ex: Soupe..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('entree')" title="Mémoriser">🌟</button>
+                                        </div>
+                                    </td>
+                                    
+                                    <td>
+                                        <div class="sub-theme">Plats & Viandes</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Couscous (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Paella"> Paella <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Paella (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tajine (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Gardiane de Taureau"> Gardiane de Taureau <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gardiane de Taureau (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Chili (Con Carné/Végé)"> Chili <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Chili (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lasagnes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet rôti / Cuisse"> Poulet rôti / Cuisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poulet rôti (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poulet tex-mex"> Poulet tex-mex <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poulet tex-mex (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Sauté de viande"> Sauté de viande <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Sauté de viande (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Bœuf Bourguignon"> Bœuf Bourguignon <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Bœuf Bourguignon (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Steak haché (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson"> Poisson <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané"> Poisson pané <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson pané (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Cordon bleu"> Cordon bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Cordon bleu (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette"> Omelette <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Saucisse"> Saucisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Saucisse (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Merguez"> Merguez <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Merguez (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Croustillant fromager bio"> Croustillant fromager bio<span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Croustillant fromager (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+
+                                        <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Accompagnements Plats</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Tomate"> + Sauce Tomate / Bolognaise</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Champignons"> + Sauce Champignons</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce Poivre"> + Sauce au Poivre</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Aux Olives"> + Aux Olives</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Sauce poulette"> + Sauce poulette</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Bio"> + Bio</label>
+
+                                        <div id="favs_container_plat" class="local-favs-box" style="display: none;"></div>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Plat</div>
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="plat_libre" placeholder="Ex: Kebab..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('plat')" title="Mémoriser">🌟</button>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="sub-theme">Féculents & Légumes</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Riz (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Semoule (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Purée (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Petits pois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ratatouille (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Épinards (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Endives cuites"> Endives cuites <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Endives cuites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Tomates provençales"> Tomates provençales <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates provençales (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Pommes de terre persillées"> Pommes de terre persillées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pommes de terre persillées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Gratin d'aubergines"> Gratin d'aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gratin d'aubergines (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Poêlée de courgettes au curry"> Poêlée courgettes curry <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poêlée courgettes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+
+                                        <div id="favs_container_accomp" class="local-favs-box" style="display: none;"></div>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Accomp.</div>
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="accomp_libre" placeholder="Ex: Gratin..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('accomp')" title="Mémoriser">🌟</button> 
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="sub-theme">Desserts & Laitages</div>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt"> Yaourt <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt aromatisé"> Yaourt aromatisé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt aromatisé (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt bio brassé"> Yaourt bio brassé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt bio (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage"> Fromage <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Fromage (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Emmental"> Emmental <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Emmental (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Tomme"> Tomme / Camembert<span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Fromage (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Ortolan bio"> Ortolan bio <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ortolan bio (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Fruit de saison"> Fruit de saison <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Fruit (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Compote"> Compote <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Compote (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Crème dessert / Liégeois"> Crème dessert / Liégeois <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Liégeois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Île flottante"> Île flottante <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Île flottante (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Pâtisserie / Flan"> Pâtisserie / Flan <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtisserie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_douceur" value="Glace"> Glace <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Glace (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+
+                                        <div id="favs_container_dessert" class="local-favs-box" style="display: none;"></div>
+
+                                        <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Dessert</div>
+                                        <div style="display: flex; gap: 4px;">
+                                            <input type="text" id="dessert_libre" placeholder="Ex: Mousse..." style="flex: 1; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;">
+                                            <button type="button" class="btn btn-outline" style="padding: 4px; width: auto;" onclick="addLocalFavorite('dessert')" title="Mémoriser">🌟</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 16px; background-color: #f8fafc; padding: 12px; border-radius: 6px; flex-wrap: wrap; border: 1.5px solid #cbd5e1; align-items: center;">
+                        <div style="font-size: 13px; font-weight: 800; color: #1b4332;">👥 Effectif global attendu (pour le calcul EGAlim) :</div>
+                        <input type="number" id="convives-total" value="450" onchange="saveExpectedMeals()" style="width: 100px; padding: 8px; border-radius: 6px; border: 1px solid #94a3b8; font-size: 14px; font-weight: bold; text-align: center;">
+                    </div>
+
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px;">
+                        <button type="button" class="btn" onclick="saveMenu()" style="flex: 2; min-width: 200px; background-color: #047857; font-size: 14px; padding: 12px;">✅ VALIDER LE MENU POUR LA BORNE</button>
+                        <button type="button" class="btn" onclick="analyserMenuDuJourIA()" style="flex: 1; min-width: 180px; background-color: #1e3a8a; font-size: 14px; padding: 12px;">🤖 ANALYSER CE MENU (IA)</button>
+                    </div>
+
+                    <div id="gemini-ai-result-jour" class="ai-box" style="display: none; margin-top: 16px;">
+                        <div class="ai-title" style="font-weight: 800; font-size: 12px; color: #1b4332; margin-bottom: 6px;">🌱 ANALYSE RÉGLEMENTAIRE & PRÉVENTION DU GASPILLAGE</div>
+                        <div id="gemini-ai-text-jour"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- PÔLE 4 : SAISIE DES DÉCHETS -->
             <div id="view-saisie-dechets" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
-                    <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets</h2>
+                    <div class="form-section" style="border-top: 5px solid #2d6a4f; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.01);">
+                        <h2 style="color: #1b4332; font-size: 16px; font-weight: 800;">⚖️ Caractérisation Métrique des Déchets en Fin de Service</h2>
+                        <p style="font-size: 12px; color: #475569; margin-top: 4px; margin-bottom: 14px; line-height: 1.4;">Module de pesée accéléré. Saisis au clavier ou utilise les flèches : à gauche pour les Kilos (±1.00), à droite pour les Grammes (±0.10).</p>
+                        
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1.5px solid #cbd5e1;">
+                            <label style="font-size: 11.5px; font-weight: bold; color: #1b4332;">📅 Date de la pesée :</label>
+                            <input type="date" id="input-pesee-date" class="input-date" style="padding: 5px 8px; font-size: 12px; font-weight: bold; background: white;">
+                            <span style="font-size: 10.5px; color: #64748b; font-style: italic;">(Modifiable pour enregistrer ou corriger une pesée passée)</span>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="waste-control-card" style="background-color: #ffe5d9; border: 1px solid #ffcad4;">
+                                <label>🍖 Déchets Alimentaires [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-alimentaire', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -1.00)">▼</button></div>
+                                    <input type="number" id="sac-alimentaire" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-alimentaire', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-alimentaire', -0.10)">▼</button></div>
+                                </div>
+                            </div>
+                            <div class="waste-control-card" style="background-color: #e8f5e9; border: 1px solid #c8e6c9;">
+                                <label>🍏 Déchets Fruits [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-fruits', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -1.00)">▼</button></div>
+                                    <input type="number" id="sac-fruits" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-fruits', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-fruits', -0.10)">▼</button></div>
+                                </div>
+                            </div>
+                            <div class="waste-control-card" style="background-color: #fefae0; border: 1px solid #e9d8a6;">
+                                <label>🥖 Déchets Pain [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-pain', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -1.00)">▼</button></div>
+                                    <input type="number" id="sac-pain" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-pain', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-pain', -0.10)">▼</button></div>
+                                </div>
+                            </div>
+                            <div class="waste-control-card" style="background-color: #e0f2fe; border: 1px solid #bae6fd;">
+                                <label>📦 Emballages [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-emballages', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -1.00)">▼</button></div>
+                                    <input type="number" id="sac-emballages" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-emballages', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-emballages', -0.10)">▼</button></div>
+                                </div>
+                            </div>
+                            <div class="waste-control-card" style="background-color: #faf5ff; border: 1px solid #e9d5ff;">
+                                <label>📃 Serviettes [kg]</label>
+                                <div class="spinner-container">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" onclick="adjustWeight('sac-serviettes', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -1.00)">▼</button></div>
+                                    <input type="number" id="sac-serviettes" class="input-center" placeholder="0.00" value="0.00" step="0.01" min="0">
+                                    <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-g" onclick="adjustWeight('sac-serviettes', 0.10)">▲</button><button type="button" class="btn-spinner btn-down" onclick="adjustWeight('sac-serviettes', -0.10)">▼</button></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 14px; margin-bottom: 14px;">
+                            <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">💾 Enregistrer les pesées & Afficher le bilan</button>
+                        </div>
+
+                        <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
+                            <div class="bilan-header-box" id="bilan-header-color">
+                                <div class="score-pill" id="bilan-score-pill">🟢 NIVEAU 4 — EXCELLENT</div>
+                                <div class="score-title" id="bilan-score-val">0 g / convive</div>
+                                <div class="score-sub">Objectif national EGAlim : &lt; 80 g / repas</div>
+                            </div>
+                            <div class="eq-grid">
+                                <div class="eq-card"><span class="eq-card-icon">🥖</span><div class="eq-card-val" id="bilan-eq-pain">0</div><div class="eq-card-lbl">Baguettes de pain jetées</div></div>
+                                <div class="eq-card"><span class="eq-card-icon">🍽️</span><div class="eq-card-val" id="bilan-eq-repas">0</div><div class="eq-card-lbl">Repas complets perdus</div></div>
+                                <div class="eq-card"><span class="eq-card-icon">💶</span><div class="eq-card-val" id="bilan-eq-euros">0.00 €</div><div class="eq-card-lbl">Coût financier estimé</div></div>
+                                <div class="eq-card" style="border-top: 3px solid #0284c7;"><span class="eq-card-icon">🌍</span><div class="eq-card-val" id="bilan-eq-monde">0</div><div class="eq-card-lbl">Rations d'écoliers (base PAM)</div></div>
+                            </div>
+                            <div class="ia-feedback-area">
+                                <h4>🤖 L'Œil de l'IA sur le service :</h4>
+                                <div class="ia-diag-box" id="bilan-ia-diag">En attente des données de pesée...</div>
+                                <div class="ia-challenge-box" id="bilan-ia-defi">🎯 <strong>Défi du jour :</strong> Moins de pain jeté dès le prochain service !</div>
+                            </div>
+                        </div>
+
+                        <div style="border-top: 2px solid #e2e8f0; padding-top: 14px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="font-size: 13px; color: #1b4332; text-transform: uppercase; font-weight: bold;">🏆 Historique du principal déchet par jour</h3>
+                                <div style="display: flex; gap: 4px; background-color: #f1f5f9; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                    <button type="button" id="btn-hist-day" class="btn-toggle-hist" onclick="updateHistoryMode('day')" style="background-color: #2d6a4f; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; border: none;">Jour</button>
+                                    <button type="button" id="btn-hist-month" class="btn-toggle-hist" onclick="updateHistoryMode('month')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Mois</button>
+                                    <button type="button" id="btn-hist-year" class="btn-toggle-hist" onclick="updateHistoryMode('year')" style="background-color: transparent; color: #475569; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">Année</button>
+                                </div>
+                            </div>
+                            <div id="history-main-waste-grid" class="history-cards-grid">
+                                <p style="color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;">Chargement de l'historique...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- PÔLE 5 : CONFORMITÉ PLAN ALIMENTAIRE -->
             <div id="view-rapport" class="view-section">
                 <div class="report-paper">
-                    <h2 style="color: #1b4332; font-size: 18px; font-weight: 900;">🥗 CONFORMITÉ PLAN ALIMENTAIRE</h2>
+                    <div class="report-header">
+                        <div>
+                            <h2 style="color: #1b4332; font-size: 18px; font-weight: 900;">🥗 CONFORMITÉ PLAN ALIMENTAIRE — GRCN</h2>
+                            <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Validation des cycles (Valérie Briançon) & Laboratoire de Simulation d'Audit</p>
+                        </div>
+                        <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter le rapport officiel</button>
+                    </div>
+
+                    <div style="margin-bottom: 16px; padding: 14px; background: #f0fdf4; border: 2px dashed #059669; border-radius: 8px;">
+                        <h4 style="font-size: 13.5px; color: #065f46; font-weight: 900; margin-bottom: 6px;">🧪 Laboratoire de Simulation des Cycles de Menus (Formats CSV, PDF, JPG)</h4>
+                        <p style="font-size: 11.5px; color: #334155; margin-bottom: 10px; line-height: 1.5;">
+                            <strong>Mode Itératif de Pré-validation :</strong> Déposez votre grille. L'IA lit directement le document et croise votre proposition avec le plan alimentaire départemental.
+                        </p>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: white; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                            <input type="file" id="csv-file-input" accept=".csv,.txt,.pdf,image/jpeg,image/png" style="font-size: 11px; flex: 1; min-width: 220px;" onchange="handleMenuFileUpload(event)">
+                            <button type="button" class="btn" onclick="runCSVAIAnalysis()" style="background-color: #047857; width: auto; padding: 8px 14px; font-size: 11.5px; font-weight: 800;">🤖 Lancer l'audit indépendant du cycle</button>
+                        </div>
+                    </div>
+
+                    <div id="gemini-ai-result-csv" class="ai-box" style="margin-bottom: 14px; display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <div class="ai-title" style="margin: 0; font-weight: 800; font-size: 12px; color: #1b4332;">🌱 RAPPORT D'AUDIT DU CYCLE DE MENUS</div>
+                            <button type="button" class="btn" onclick="printOrPDF()" style="width: auto; padding: 4px 10px; font-size: 11px; background: #1b4332;">🖨️ Imprimer / PDF</button>
+                        </div>
+                        <div id="gemini-ai-text-csv"></div>
+                    </div>
+
+                    <div style="font-size: 12px; color: #334155; line-height: 1.6; margin-bottom: 14px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <p><strong>Établissement :</strong> <span id="report-school-name" style="color: #1b4332; font-weight: bold;">--</span></p>
+                        <p><strong>Cadre normatif :</strong> Référentiel GRCN et Plan Alimentaire départemental (Direction des Collèges et des Sports).</p>
+                    </div>
+
+                    <div class="report-section-title">1. Synthèse globale des flux sur la période</div>
+                    <div class="kpi-grid" style="margin-bottom: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div></div>
+                        <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-total">0.0 kg</div><div class="kpi-lbl">Total gaspillé (évitable)</div></div></div>
+                        <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="rep-kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div></div>
+                    </div>
+
+                    <div class="report-section-title">2. Contrôle des 6 Composantes et des Règles GRCN</div>
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Composante (Plan Alimentaire)</th>
+                                <th>Fréquence / Règles GRCN</th>
+                                <th>Taux d'Adhésion Réel (Borne A.B.C.)</th>
+                                <th>Analyse & Recommandation Terrain</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>1. Entrées</strong></td><td>Crudités / légumes ou fruits crus</td><td id="rep-stat-crudites" style="font-weight: bold;">-- %</td><td id="rep-text-crudites">En attente de données</td></tr>
+                            <tr><td><strong>2. Plats protidiques</strong></td><td>Viandes, poissons, œufs, végé</td><td id="rep-stat-poisson" style="font-weight: bold;">-- %</td><td id="rep-text-poisson">En attente de données</td></tr>
+                            <tr><td><strong>3. Garnitures</strong></td><td>Féculents / légumes cuits</td><td id="rep-stat-frits" style="font-weight: bold;">-- %</td><td id="rep-text-frits">En attente de données</td></tr>
+                            <tr><td><strong>4. Produits laitiers</strong></td><td>Présence obligatoire</td><td id="rep-stat-laitiers" style="font-weight: bold;">-- %</td><td id="rep-text-laitiers">En attente de données</td></tr>
+                            <tr><td><strong>5. Desserts</strong></td><td>Fruits de saison, pâtisseries</td><td id="rep-stat-desserts" style="font-weight: bold;">-- %</td><td id="rep-text-desserts">En attente de données</td></tr>
+                            <tr><td><strong>6. Pain</strong></td><td>Présence continue</td><td id="rep-stat-pain" style="font-weight: bold;">-- %</td><td id="rep-text-pain">En attente de données</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="report-section-title">3. Remontée qualitative (Observatoire Départemental)</div>
+                    <div style="background: #f8fafc; border-left: 4px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-top: 8px;">
+                        <h4 style="font-size: 12px; color: #334155; font-weight: 800; margin-bottom: 4px;">💡 Synthèse de l'IA :</h4>
+                        <p style="font-size: 11.5px; color: #475569; line-height: 1.5;" id="report-ai-synthesis">Aucune donnée enregistrée.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT JAVASCRIPT GLOBAL INTÉGRÉ -->
+    <!-- 🌟 MODALE DE DÉTAIL INTERACTIVE (ANALYSE DE CONCURRENCE DES MENUS) -->
+    <div id="modal-item-detail" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; padding: 20px; max-width: 650px; width: 92%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border-top: 5px solid #2d6a4f; display: flex; flex-direction: column; max-height: 85vh;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                <h3 id="modal-item-title" style="color: #1b4332; font-size: 15px; font-weight: 900; margin: 0;">🔍 Analyse de Concurrence</h3>
+                <button type="button" onclick="closeItemModal()" style="background: #ef4444; color: white; border: none; border-radius: 4px; width: 26px; height: 26px; font-weight: bold; cursor: pointer;">✕</button>
+            </div>
+            
+            <!-- Barre de filtre pour cibler les conflits de concurrence -->
+            <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer la concurrence (ex: yaourt, frites, plat) :</label>
+                <input type="text" id="modal-filter-input" placeholder="Filtrer par ingrédient alternatif..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
+
+            <div id="modal-item-content" style="font-size: 11.5px; color: #334155; line-height: 1.5; overflow-y: auto; flex-grow: 1; padding-right: 4px;">
+                Analyse des menus et des services associés en cours...
+            </div>
+        </div>
+    </div>
+
     <script>
-        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/1lq_TgnNm7AAT5IPWKaGjYgqgSeol__8F5jf5agboH6M/exec";
-
-        // Variables globales Borne & IA
-        let modeScanAuto = true; // Par défaut en mode Auto (IA active)
-        let currentAvisEleve = "Non renseigné";
-        let timerSecuriteLibération = null;
-
-        // Fonction de navigation entre les onglets
-        function switchView(viewId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            let menuEl = document.getElementById('menu-' + viewId);
-            if(menuEl) menuEl.classList.add('active');
-        }
-
-        // Variable globale d'état (Mode Auto par défaut)
-let modeScanAuto = true;
-
-// Fonction du bouton discret pour basculer ET afficher clairement le mode
-function toggleModeFonctionnement() {
-    modeScanAuto = !modeScanAuto;
-    let btnMode = document.getElementById('btn-discret-mode');
-    let instructionBanner = document.getElementById('instruction-text');
-    
-    if (btnMode) {
-        if (modeScanAuto) {
-            // --- MODE AUTO (VERT) ---
-            btnMode.innerHTML = "🟢 Mode: Auto (IA)";
-            btnMode.style.background = "#dcfce7";
-            btnMode.style.color = "#166534";
-            btnMode.style.borderColor = "#22c55e";
-            btnMode.style.boxShadow = "0 0 10px rgba(34, 197, 94, 0.4)";
-            
-            if(instructionBanner) {
-                instructionBanner.innerText = "🟢 BORNE EN MODE AUTO (IA) — DÉPOSE TON PLATEAU";
-                instructionBanner.className = "instruction-banner state-searching";
-            }
-            console.log("🟢 Mode basculé : AUTOMATIQUE (IA activée)");
-        } else {
-            // --- MODE MANUEL / SECOURS (ORANGE) ---
-            btnMode.innerHTML = "🟠 Mode: Manuel (Secours)";
-            btnMode.style.background = "#ffedd5";
-            btnMode.style.color = "#9a3412";
-            btnMode.style.borderColor = "#f97316";
-            btnMode.style.boxShadow = "0 0 10px rgba(249, 115, 22, 0.4)";
-            
-            if(instructionBanner) {
-                instructionBanner.innerText = "⚠️ BORNE EN MODE MANUEL (Secours actif sans IA)";
-                instructionBanner.className = "instruction-banner state-manual";
-            }
-            console.log("🟠 Mode basculé : MANUEL (Caméra/IA neutralisée, secours actif)");
-        }
-    }
-}
-
-        // 2. Enregistrement flash de l'avis de l'élève (Libre choix de l'ordre)
-        function setPushAvis(typeAvis, btnElement) {
-            currentAvisEleve = typeAvis;
-            
-            document.querySelectorAll('[id^="push-btn-"]').forEach(b => b.style.transform = "scale(1)");
-            if(btnElement) btnElement.style.transform = "scale(1.05)";
-
-            console.log(`💡 Avis flash enregistré : ${currentAvisEleve}`);
-            finaliserEtEnvoyerPassage("Avis Flash : " + typeAvis);
-        }
-
-        // 3. Déclenchement du scan (bouton principal ou capteur plateau)
-        function triggerManualCapture() {
-            console.log("📥 Début du cycle de passage plateau...");
-            currentAvisEleve = "Non renseigné";
-
-            if (modeScanAuto) {
-                document.getElementById('instruction-text').innerText = "🤖 ANALYSE IA EN COURS (Focale 55cm)...";
-                document.getElementById('instruction-text').className = "instruction-banner state-analyzing";
-                executerScanIAEnFond();
-            } else {
-                document.getElementById('instruction-text').innerText = "⚠️ MODE SECOURS ACTIF (Enregistrement direct)";
-                document.getElementById('instruction-text').className = "instruction-banner state-manual";
-                console.log("⚠️ Scan IA ignoré (Mode manuel). Enregistrement direct.");
-            }
-
-            // Sécurité de 3,5 secondes pour libérer automatiquement la borne si l'élève part sans rien toucher
-            clearTimeout(timerSecuriteLibération);
-            timerSecuriteLibération = setTimeout(() => {
-                finaliserEtEnvoyerPassage(modeScanAuto ? "Timeout Auto (Sans avis)" : "Validation Manuelle Secours");
-            }, 3500);
-        }
-
-        async function executerScanIAEnFond() {
-            try {
-                // Traitement ou appel API vision pour la caméra eMeet C960 à 55 cm
-                await new Promise(resolve => setTimeout(resolve, 800));
-                console.log("✅ Scan IA réussi !");
-            } catch (e) {
-                console.error("Erreur de l'IA :", e);
-            }
-        }
-
-        // 4. Clôture, envoi asynchrone et réinitialisation instantanée
-        function finaliserEtEnvoyerPassage(motifCloture) {
-            clearTimeout(timerSecuriteLibération);
-
-            const payload = {
-                type: "PASSAGE_BORNE",
-                modeUtilise: modeScanAuto ? "AUTO_IA" : "MANUEL_SECOURS",
-                avis: currentAvisEleve,
-                motif: motifCloture,
-                horodatage: new Date().toISOString()
-            };
-
-            if (GOOGLE_SHEET_URL) {
-                fetch(GOOGLE_SHEET_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                }).catch(err => console.error("Erreur réseau Google Sheets :", err));
-            }
-
-            document.getElementById('instruction-text').innerText = "🟢 ENREGISTRÉ ! AU SUIVANT 👉";
-            document.getElementById('instruction-text').className = "instruction-banner state-success";
-
-            setTimeout(() => {
-                currentAvisEleve = "Non renseigné";
-                document.querySelectorAll('[id^="push-btn-"]').forEach(b => b.style.transform = "scale(1)");
-                document.getElementById('instruction-text').innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER";
-                document.getElementById('instruction-text').className = "instruction-banner state-searching";
-            }, 1200);
-        }
-
-        // Fonctions utilitaires caméras et filtres existantes
-        function switchCameraSource() {}
-        function applyVideoFilters() {}
-        function toggleBorneFullscreen() {}
-    </script>
-</body>
-</html>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         let localStream = null, isScanningProcess = false, chartTimeline;
         let cacheSacsHistory = null;
