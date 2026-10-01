@@ -314,27 +314,45 @@
             if(menuEl) menuEl.classList.add('active');
         }
 
-        // 1. Bouton discret Auto / Manuel de secours
-        function toggleModeFonctionnement() {
-            modeScanAuto = !modeScanAuto;
-            let btnMode = document.getElementById('btn-discret-mode');
+        // Variable globale d'état (Mode Auto par défaut)
+let modeScanAuto = true;
+
+// Fonction du bouton discret pour basculer ET afficher clairement le mode
+function toggleModeFonctionnement() {
+    modeScanAuto = !modeScanAuto;
+    let btnMode = document.getElementById('btn-discret-mode');
+    let instructionBanner = document.getElementById('instruction-text');
+    
+    if (btnMode) {
+        if (modeScanAuto) {
+            // --- MODE AUTO (VERT) ---
+            btnMode.innerHTML = "🟢 Mode: Auto (IA)";
+            btnMode.style.background = "#dcfce7";
+            btnMode.style.color = "#166534";
+            btnMode.style.borderColor = "#22c55e";
+            btnMode.style.boxShadow = "0 0 10px rgba(34, 197, 94, 0.4)";
             
-            if (btnMode) {
-                if (modeScanAuto) {
-                    btnMode.innerText = "⚙️ Mode: Auto (IA)";
-                    btnMode.style.borderColor = "#059669";
-                    btnMode.style.color = "#059669";
-                    btnMode.style.background = "#f8fafc";
-                    console.log("🟢 Mode basculé : AUTOMATIQUE (IA activée)");
-                } else {
-                    btnMode.innerText = "⚙️ Mode: Manuel (Secours)";
-                    btnMode.style.borderColor = "#d97706";
-                    btnMode.style.color = "#d97706";
-                    btnMode.style.background = "#fffbeb";
-                    console.log("🟠 Mode basculé : MANUEL (Caméra/IA neutralisée, secours actif)");
-                }
+            if(instructionBanner) {
+                instructionBanner.innerText = "🟢 BORNE EN MODE AUTO (IA) — DÉPOSE TON PLATEAU";
+                instructionBanner.className = "instruction-banner state-searching";
             }
+            console.log("🟢 Mode basculé : AUTOMATIQUE (IA activée)");
+        } else {
+            // --- MODE MANUEL / SECOURS (ORANGE) ---
+            btnMode.innerHTML = "🟠 Mode: Manuel (Secours)";
+            btnMode.style.background = "#ffedd5";
+            btnMode.style.color = "#9a3412";
+            btnMode.style.borderColor = "#f97316";
+            btnMode.style.boxShadow = "0 0 10px rgba(249, 115, 22, 0.4)";
+            
+            if(instructionBanner) {
+                instructionBanner.innerText = "⚠️ BORNE EN MODE MANUEL (Secours actif sans IA)";
+                instructionBanner.className = "instruction-banner state-manual";
+            }
+            console.log("🟠 Mode basculé : MANUEL (Caméra/IA neutralisée, secours actif)");
         }
+    }
+}
 
         // 2. Enregistrement flash de l'avis de l'élève (Libre choix de l'ordre)
         function setPushAvis(typeAvis, btnElement) {
