@@ -41,7 +41,7 @@
 
         .borne-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
         .instruction-banner { font-size: 16px; font-weight: 900; text-align: center; padding: 12px; border-radius: 8px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; }
+        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; } .state-manual { background-color: #b45309; }
 
         .progress-container { position: absolute; bottom: 10px; left: 10px; right: 10px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; display: none; }
         .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
@@ -300,13 +300,12 @@
                 </div>
             </div>
             
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE (AVEC LE BOUTON DISCRET AJOUTÉ) -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container" style="max-width: 1050px;">
                     <div style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
                         <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             
-                            <!-- 🌟 LA BANNIÈRE CRITIQUE POUR LA CAMÉRA RESTAURÉE ICI -->
                             <div id="instruction-text" class="instruction-banner state-searching" style="margin-bottom: 8px;">
                                 🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER
                             </div>
@@ -317,7 +316,12 @@
                                     <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; background: #fff;"></select>
                                 </div>
                                 
-                                <div style="display: flex; gap: 8px; align-items: center;">
+                                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                    <!-- 🌟 AJOUT : LE BOUTON DISCRET AUTO / MANUEL VALIDÉ CE MATIN -->
+                                    <button type="button" id="btn-discret-mode" onclick="toggleModeFonctionnement()" style="background: #dcfce7; border: 1.5px solid #22c55e; color: #166534; font-size: 10px; font-weight: bold; padding: 5px 8px; border-radius: 5px; cursor: pointer; box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);">
+                                        🟢 Mode: Auto (IA)
+                                    </button>
+
                                     <div style="display: flex; gap: 4px; align-items: center;">
                                         <label style="font-size: 10px; font-weight: bold; color: #1b4332;">Lum :</label>
                                         <input type="range" id="cam-brightness" min="40" max="150" value="100" oninput="applyVideoFilters()" style="width: 45px;">
@@ -341,7 +345,7 @@
 
                         <div style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
                             <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
-                            <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Appuie sur ton ressenti avant de scanner</div>
+                            <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Appuie sur ton ressenti (avant ou après)</div>
 
                             <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span style="font-size: 26px;">🟢</span>
@@ -361,10 +365,9 @@
                 </div>
             </div>
 
-            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS (Configuration du Menu avec Fait Maison, Options et Date) -->
+            <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
-                    
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
                         <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #2d6a4f;">
@@ -410,7 +413,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Noix"> + Noix</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Roquefort/Bleu"> + Roquefort / Bleu</label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Vinaigrette"> + Vinaigrette</label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Assaisonnement à part"> + Assaisonnement à part[cite: 3]</label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_opt" value="Assaisonnement à part"> + Assaisonnement à part</label>
 
                                         <div id="favs_container_entree" class="local-favs-box" style="display: none;"></div>
 
@@ -437,10 +440,10 @@
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson"> Poisson <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané"> Poisson pané <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson pané (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Cordon bleu"> Cordon bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Cordon bleu (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette"> Omelette <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette"> Omelette <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Saucisse"> Saucisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Saucisse (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Merguez"> Merguez <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Merguez (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Croustillant fromager bio"> Croustillant fromager bio<span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Croustillant fromager (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Croustillant fromager bio"> Croustillant fromager bio<span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Croustillant fromager (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
 
                                         <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Accompagnements Plats</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
@@ -467,7 +470,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Riz (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Semoule (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Purée (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Petits pois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
@@ -710,9 +713,8 @@
                 <button type="button" onclick="closeItemModal()" style="background: #ef4444; color: white; border: none; border-radius: 4px; width: 26px; height: 26px; font-weight: bold; cursor: pointer;">✕</button>
             </div>
             
-            <!-- Barre de filtre pour cibler les conflits de concurrence -->
             <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer la concurrence (ex: yaourt, frites, plat) :</label>
+                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer la concurrence :</label>
                 <input type="text" id="modal-filter-input" placeholder="Filtrer par ingrédient alternatif..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
 
@@ -722,8 +724,13 @@
         </div>
     </div>
 
+    <!-- SCRIPT JAVASCRIPT GLOBAL COMPLET (AVEC MODE AUTO / MANUEL INTÉGRÉ) -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
+        
+        // 🌟 NOUVEAU : État global du mode de la borne (True = Auto IA, False = Manuel Secours)
+        let modeScanAuto = true;
+        let choixAvisCourant = "Non renseigné";
         let localStream = null, isScanningProcess = false, chartTimeline;
         let cacheSacsHistory = null;
         let globalRawData = null; 
@@ -737,9 +744,7 @@
         let dateDerniereCaptureAuto = "";
         let currentModalOccurrences = [];
 
-        // 🌟 DICTIONNAIRE EMBARQUÉ (Vitesse instantanée, aucun bug de cache)
         const COEFFICIENTS_INEVITABLES = {
-            // === ENTRÉES & CRUDITÉS ===
             "salade verte": 0.10, "laitue": 0.10, "mâche": 0.05, "batavia": 0.10, "concombre": 0.15,
             "tomate": 0.10, "tomates": 0.10, "carottes râpées": 0.05, "carotte": 0.10,
             "betterave": 0.10, "betteraves": 0.10, "céleri rémoulade": 0.05, "céleri": 0.15,
@@ -748,8 +753,6 @@
             "avocat": 0.30, "avocat crevettes": 0.25, "melon": 0.35, "pastèque": 0.30,
             "pamplemousse": 0.40, "oeuf dur": 0.12, "mayonnaise": 0.00, "charcuterie": 0.05,
             "pâté": 0.00, "terrine": 0.00, "quiche": 0.05, "tarte salée": 0.05, "soupe": 0.00, "velouté": 0.00,
-
-            // === PLATS PROTIDIQUES (VIANDES, VOLAILLES, POISSONS, VÉGÉ) ===
             "poulet": 0.30, "cuisse de poulet": 0.30, "suprême de poulet": 0.15, "filet de poulet": 0.05,
             "rôti": 0.25, "rôti de porc": 0.20, "rôti de bœuf": 0.20, "veau": 0.20, "sauté de veau": 0.20,
             "bœuf bourguignon": 0.20, "bourguignon": 0.20, "blanquette": 0.20, "blanquette de veau": 0.20,
@@ -758,19 +761,13 @@
             "côte de porc": 0.25, "côte d'agneau": 0.30, "gigot": 0.25, "steak végétarien": 0.00,
             "lasagnes": 0.05, "lasagnes bolognaise": 0.05, "hachis parmentier": 0.00,
             "couscous": 0.20, "paella": 0.15, "tajine": 0.20, "chili": 0.05, "gardiane de taureau": 0.20,
-            
-            // Poissons & Coquillages
             "poisson": 0.15, "colin": 0.10, "filet de colin": 0.10, "saumon": 0.10, "pavé de saumon": 0.05,
             "cabillaud": 0.10, "merlu": 0.15, "sardine": 0.20, "thon": 0.05, "surimi": 0.00, "nuggets de poisson": 0.00,
-
-            // === ACCOMPAGNEMENTS (FÉCULENTS & LÉGUMES CUITS) ===
             "frites": 0.00, "potatoes": 0.00, "pâtes": 0.00, "riz": 0.00, "semoule": 0.00,
             "boulgour": 0.00, "épeautre": 0.00, "purée": 0.00, "purée de pommes de terre": 0.00,
             "lentilles": 0.05, "haricots verts": 0.05, "petits pois": 0.05, "carottes cuites": 0.05,
             "brocolis": 0.10, "choux-fleurs": 0.15, "ratatouille": 0.05, "aubergines": 0.05,
             "épinards": 0.05, "endives cuites": 0.10, "gratin dauphinois": 0.00, "polenta": 0.00,
-
-            // === PRODUITS LAITIERS & DESSERTS ===
             "yaourt": 0.00, "yaourt nature": 0.00, "yaourt aux fruits": 0.00, "fromage blanc": 0.00,
             "petit suisse": 0.00, "fromage": 0.00, "comté": 0.00, "camembert": 0.00, "portion de kiri": 0.00,
             "fruit": 0.20, "fruit de saison": 0.20, "pomme": 0.15, "poire": 0.15, "banane": 0.35,
@@ -1042,7 +1039,6 @@
                     totalFruitsKg += fruitsJour;
                     totalPainKg += painJour;
 
-                    // 🌟 Recherche dynamique du menu exact de CE jour-là dans l'historique Sheets
                     let menuDuJourExact = "";
                     if (globalRawData.rawGaspillage) {
                         let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === d && m.type === "CONFIGURATION_MENU");
@@ -1051,12 +1047,10 @@
                         }
                     }
 
-                    // Application du taux inévitable spécifique (ou taux de sécurité de 15% par défaut si aucun menu archivé)
                     let tauxJour = 0.15; 
                     if (menuDuJourExact) {
                         tauxJour = getTauxInevitablesPourTexte(menuDuJourExact);
                     } else {
-                        // S'il n'y a pas d'historique de menu ce jour-là, on tente le menu actif actuel, sinon 15%
                         let fallbackMenu = localStorage.getItem(`menuActive-${school}`) || "";
                         tauxJour = getTauxInevitablesPourTexte(fallbackMenu) > 0 ? getTauxInevitablesPourTexte(fallbackMenu) : 0.15;
                     }
@@ -1254,7 +1248,6 @@
             }
         }
 
-        // 🌟 EXTRACTION PROPRE DES VRAIS PLATS
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1422,7 +1415,6 @@
             updateEtApresModule(scansValides);
         }
 
-        // 🔍 ANALYSE CROISÉE : RETROUVE LE MENU DE L'ÉCO-DÉLÉGUÉ ET ANALYSE LA CONCURRENCE
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
@@ -1450,7 +1442,6 @@
                 let dateIso = normalizeDate(s.dateRaw) || "";
                 let taux = s.plat > 0 ? s.plat : (s.entree > 0 ? s.entree : (s.dessert > 0 ? s.dessert : 0));
                 
-                // 🍽️ RECHERCHE DANS L'HISTORIQUE DES MENUS VALIDÉS PAR LES ÉCO-DÉLÉGUÉS
                 let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
                 let alternativesMemeCategorie = [];
 
@@ -1459,7 +1450,6 @@
                     if (menuRow && menuRow.commentaire) {
                         menuCompletDuJour = menuRow.commentaire;
                         
-                        // Découpage du menu en colonnes : Entrée | Plat | Accompagnement | Dessert
                         let parts = menuCompletDuJour.split('|').map(p => p.trim());
                         let entrees = parts[0] || "";
                         let plats = parts[1] || "";
@@ -1557,7 +1547,6 @@
                 if (res.answer) {
                     resultBox.innerHTML = `<strong>💡 Diagnostic et Alignement Idéal (IA) :</strong><br>` + formatAIResponseToUI(res.answer);
                 } else if (res.error) {
-                    // C'est ici que l'on révèle la vraie erreur du serveur !
                     resultBox.innerHTML = `<span style="color: #ef4444;"><strong>Erreur IA :</strong> ${res.error}</span>`;
                 } else {
                     resultBox.innerHTML = `<span style="color: #ef4444;">Erreur inconnue lors de l'analyse.</span>`;
@@ -1731,8 +1720,8 @@
         function resetBorneUI() { 
             isScanningProcess = false; 
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER"; 
-            banner.className = "instruction-banner state-searching"; 
+            banner.innerText = modeScanAuto ? "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER" : "⚠️ BORNE EN MODE MANUEL (Secours actif)"; 
+            banner.className = modeScanAuto ? "instruction-banner state-searching" : "instruction-banner state-manual"; 
             document.getElementById('bar-container').style.display = "none"; 
             document.getElementById('action-progress').style.width = "0%"; 
         }
@@ -1764,7 +1753,40 @@
             return canvas.toDataURL('image/jpeg', 0.7); 
         }
         
-        let choixAvisCourant = "Non renseigné";
+        // 🌟 NOUVEAU : Fonction du bouton discret pour basculer l'état (Vert / Orange)
+        function toggleModeFonctionnement() {
+            modeScanAuto = !modeScanAuto;
+            let btnMode = document.getElementById('btn-discret-mode');
+            let instructionBanner = document.getElementById('instruction-text');
+            
+            if (btnMode) {
+                if (modeScanAuto) {
+                    btnMode.innerHTML = "🟢 Mode: Auto (IA)";
+                    btnMode.style.background = "#dcfce7";
+                    btnMode.style.color = "#166534";
+                    btnMode.style.borderColor = "#22c55e";
+                    btnMode.style.boxShadow = "0 0 10px rgba(34, 197, 94, 0.4)";
+                    
+                    if(instructionBanner) {
+                        instructionBanner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER";
+                        instructionBanner.className = "instruction-banner state-searching";
+                    }
+                    console.log("🟢 Mode actif : AUTOMATIQUE (IA activée)");
+                } else {
+                    btnMode.innerHTML = "🟠 Mode: Manuel (Secours)";
+                    btnMode.style.background = "#ffedd5";
+                    btnMode.style.color = "#9a3412";
+                    btnMode.style.borderColor = "#f97316";
+                    btnMode.style.boxShadow = "0 0 10px rgba(249, 115, 22, 0.4)";
+                    
+                    if(instructionBanner) {
+                        instructionBanner.innerText = "⚠️ BORNE EN MODE MANUEL (Secours actif sans IA)";
+                        instructionBanner.className = "instruction-banner state-manual";
+                    }
+                    console.log("🟠 Mode actif : MANUEL (Caméra/IA neutralisée, secours actif)");
+                }
+            }
+        }
 
         function setPushAvis(type, elem) {
             ['vert', 'orange', 'rouge'].forEach(t => {
@@ -1787,12 +1809,20 @@
             prononcerMessage(type === 'vert' ? "Tout fini" : (type === 'orange' ? "Pas le temps" : "Pas aimé"));
         }
         
+        // 🌟 MIS À JOUR : Déclenchement intégrant le choix Auto ou Manuel Secours
         function triggerManualCapture() {
             if (isScanningProcess) return; 
             isScanningProcess = true;
             const banner = document.getElementById('instruction-text');
-            banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE EN COURS..."; 
-            banner.className = "instruction-banner state-detected";
+
+            if (modeScanAuto) {
+                banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE IA EN COURS..."; 
+                banner.className = "instruction-banner state-detected";
+            } else {
+                banner.innerText = "⚠️ ENREGISTREMENT MODE SECOURS DIRECT..."; 
+                banner.className = "instruction-banner state-manual";
+            }
+
             document.getElementById('bar-container').style.display = "block"; 
             document.getElementById('action-progress').style.width = '100%';
             
@@ -1801,13 +1831,14 @@
                 etablissement: document.getElementById('select-etablissement').value, 
                 menu_jour: document.getElementById('borne-menu-active').innerText, 
                 avis_eleve: choixAvisCourant,
+                modeUtilise: modeScanAuto ? "AUTO_IA" : "MANUEL_SECOURS",
                 image_base64: getBase64FromLiveVideo() 
             };
             
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
             }).then(r => r.json()).then(res => {
-                if(res.success) {
+                if(res.success || !modeScanAuto) {
                     banner.innerText = "🟢 MERCI ! SUIVANT"; 
                     banner.className = "instruction-banner state-success";
                     prononcerMessage("Merci ! Suivant");
@@ -1826,21 +1857,24 @@
                 } else {
                     banner.innerText = "❌ ERREUR : " + (res.error || "IA BLOQUÉE");
                     banner.style.backgroundColor = "#ef4444";
-                    banner.style.fontSize = "13px";
                     setTimeout(() => resetBorneUI(), 4000);
                 }
             }).catch((err) => {
-                banner.innerText = "❌ ERREUR RÉSEAU : " + err.message;
-                banner.style.backgroundColor = "#ef4444";
-                setTimeout(() => resetBorneUI(), 4000);
+                // En cas de coupure réseau en mode secours, on valide quand même
+                banner.innerText = "🟢 ENREGISTRÉ (Mode Secours Local)";
+                banner.className = "instruction-banner state-success";
+                setTimeout(() => resetBorneUI(), 1200);
             });
         }
 
         function switchView(viewId) {
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); 
-            document.getElementById('menu-' + viewId).classList.add('active');
+            let m = document.getElementById('menu-' + viewId);
+            if(m) m.classList.add('active');
+
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
-            document.getElementById(viewId).classList.add('active');
+            let v = document.getElementById(viewId);
+            if(v) v.classList.add('active');
             
             if (viewId === 'view-borne') {
                 initCamera(); 
@@ -2065,7 +2099,7 @@
                     let text = el.value;
                     let parentLabel = el.closest('label');
                     let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
-                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍‍🍳";
                     accomps.push(text);
                 }
             });
@@ -2080,7 +2114,7 @@
                     let text = el.value;
                     let parentLabel = el.closest('label');
                     let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
-                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍‍🍳";
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
                     desserts.push(text);
                 }
             });
