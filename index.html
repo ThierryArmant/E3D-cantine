@@ -218,25 +218,12 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 🛑 DÉBUT DU BLOC BOUTONS (Transparence & Carbone) 🛑 -->
-                    <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
-                        <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🛡️</span> Transparence & Audit des calculs
-                        </button>
-
-                        <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
-                        </button>
-                    </div>
-                    <!-- 🛑 FIN DU BLOC BOUTONS 🛑 -->
-
-                    <!-- DÉBUT DE TES 4 CASES DE COULEURS -->
+                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
                             <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
-                        
                         <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
                             <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
                             <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
@@ -253,7 +240,6 @@
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
-                    <!-- FIN DE TES 4 CASES DE COULEURS -->
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
@@ -1183,6 +1169,23 @@
 
             const school = document.getElementById('select-etablissement')?.value || "defaut";
             const menuActif = localStorage.getItem(`menuActive-${school}`) || "Menu standard";
+            const cacheKey = `ia_plan_${school}_${menuActif}_${scansValides.length}`;
+
+            if (localStorage.getItem(cacheKey)) {
+                try {
+                    const cachedPlan = JSON.parse(localStorage.getItem(cacheKey));
+                    boxCuisine.innerHTML = cachedPlan.cuisine;
+                    boxEleves.innerHTML = cachedPlan.eleves;
+                    if (boxAffiche && cachedPlan.affiche) {
+                        boxAffiche.innerHTML = `
+                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${cachedPlan.affiche.titre}</div>
+                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${cachedPlan.affiche.slogan} »</div>
+                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${cachedPlan.affiche.action}</div>
+                        `;
+                    }
+                    return; 
+                } catch(e) {}
+            }
 
             boxCuisine.innerHTML = "<em>🤖 Analyse culinaire en cours...</em>";
             boxEleves.innerHTML = "<em>🤖 Analyse GES et pédagogie en cours...</em>";
@@ -1194,9 +1197,10 @@
                 else if (s.commentaire) detailsRecueillis.push(s.commentaire);
             });
 
+            // 🛡️ GARDE-FOU 1 : Tronquer le texte pour éviter l'indigestion de l'IA
             let detailsBruts = detailsRecueillis.join(" | ");
             if (detailsBruts.length > 2000) {
-                detailsBruts = detailsBruts.substring(0, 2000) + "...";
+                detailsBruts = detailsBruts.substring(0, 2000) + "... (résumé tronqué pour l'IA)";
             }
 
             const payload = {
@@ -1219,33 +1223,44 @@
                 try {
                     res = JSON.parse(textRes);
                 } catch (e) {
-                    res = { plan: { cuisine: textRes, eleves: "Analyse validée par le comité.", affiche: { titre: "Objectif Zéro Gaspi", slogan: "Le goût avant tout", action: "Finir son assiette" } } };
+                    throw new Error("L'IA a mis trop de temps à répondre ou le serveur est surchargé.");
                 }
 
-                // Résolution ultra-souple pour récupérer les blocs peu importe la structure
-                let plan = res.plan || res.answer || res;
-                if (typeof plan === 'string') {
-                    try { plan = JSON.parse(plan); } catch(e) { plan = { cuisine: plan, eleves: "Poursuite des actions éco-citoyennes." }; }
-                }
+                let planToUse = res.plan || (res.cuisine ? res : null) || (res.answer ? JSON.parse(res.answer) : null);
 
-                let cuisineText = plan.cuisine || res.cuisine || "Ajuster l'assaisonnement et la présentation des plats selon les retours de la borne.";
-                let elevesText = plan.eleves || res.eleves || "Mobilisation des éco-délégués pour valoriser le travail en cuisine et sensibiliser au tri.";
-                let afficheObj = plan.affiche || res.affiche || { titre: "Objectif Zéro Gaspillage", slogan: "Le goût d'abord, le reste dans l'assiette !", action: "Ne prenez que ce que vous allez manger." };
+                if (planToUse && planToUse.cuisine) {
+                    
+                    // 🛡️ GARDE-FOU 2 : Gérer la mémoire pleine du navigateur (Quota Exceeded)
+                    try {
+                        localStorage.setItem(cacheKey, JSON.stringify(planToUse));
+                    } catch (storageErr) {
+                        console.warn("Mémoire locale pleine. Nettoyage du cache IA...");
+                        // Si la mémoire est pleine, on vide les anciennes sauvegardes de l'IA pour faire de la place
+                        Object.keys(localStorage).forEach(k => {
+                            if (k.startsWith('ia_plan_')) localStorage.removeItem(k);
+                        });
+                        // On réessaie de sauvegarder une fois le ménage fait
+                        try { localStorage.setItem(cacheKey, JSON.stringify(planToUse)); } catch(e) {}
+                    }
 
-                boxCuisine.innerHTML = cuisineText;
-                boxEleves.innerHTML = elevesText;
-                
-                if (boxAffiche) {
-                    boxAffiche.innerHTML = `
-                        <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${afficheObj.titre || "Affiche self"}</div>
-                        <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${afficheObj.slogan || "Agissons ensemble"} »</div>
-                        <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${afficheObj.action || "Sensibilisation"}</div>
-                    `;
+                    // Affichage des données (même si la sauvegarde a échoué)
+                    boxCuisine.innerHTML = planToUse.cuisine;
+                    boxEleves.innerHTML = planToUse.eleves;
+                    
+                    if (boxAffiche && planToUse.affiche) {
+                        boxAffiche.innerHTML = `
+                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${planToUse.affiche.titre}</div>
+                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${planToUse.affiche.slogan} »</div>
+                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${planToUse.affiche.action}</div>
+                        `;
+                    }
+                } else {
+                    boxCuisine.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
+                    boxEleves.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
                 }
             } catch (err) {
-                boxCuisine.innerHTML = "Analyse validée par le comité de pilotage A.B.C.";
-                boxEleves.innerHTML = "Poursuite des actions de sensibilisation éco-citoyenne.";
-                if (boxAffiche) boxAffiche.innerHTML = "📌 Objectif Zéro Gaspillage<br><em>« Mangeons mieux, gaspillons moins »</em>";
+                boxCuisine.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Échec : ${err.message}</span>`;
+                boxEleves.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Vérifiez la connexion ou réduisez la période de filtrage.</span>`;
             }
         }
 
@@ -1268,22 +1283,6 @@
                 if (clean.includes(key)) return COEFFICIENTS_CARBONE_ADEME[key];
             }
             return 1.2;
-        }
-
-       // 🌟 NETTOYEUR DE LIBELLÉ POUR GARDER UN NOM COURT SUR LES CARTES
-        function getCleanItemShortName(raw) {
-            if (!raw) return "";
-            let clean = raw.trim();
-            let parts = clean.split(' - ').map(p => p.trim());
-            
-            const categories = ["fruit", "plat", "entrée", "dessert", "pain", "légume", "féculent", "viande"];
-            if (parts.length >= 3 && categories.includes(parts[0].toLowerCase())) {
-                return parts[1]; // ex: "Fruit - Poire - Entier" -> "Poire"
-            }
-            if (parts.length === 2 && categories.includes(parts[0].toLowerCase())) {
-                return parts[1];
-            }
-            return parts[0];
         }
 
         // 🗑️ GESTION DE LA LISTE NOIRE CONTEXTUELLE (ANTI-HALLUCINATION)
@@ -1309,7 +1308,6 @@
         }
 
         // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
-        // --- 🔍 L'EXTRACTION GRANULAIRE (Avec calcul du poids jeté par item) ---
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1317,7 +1315,11 @@
             if (!containerAdhesion || !containerRejets) return;
 
             const banniList = getListeNoireMenuActif();
-            const scansValides = (scansSource || []).filter(s => !String(s.commentaire).toLowerCase().includes("noire") && !String(s.commentaire).toLowerCase().includes("inexploitable"));
+
+            const scansValides = (scansSource || []).filter(s => {
+                const c = (s.commentaire || "").toLowerCase();
+                return !c.includes("noire") && !c.includes("inexploitable");
+            });
 
             let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
@@ -1325,8 +1327,9 @@
 
             scansValides.forEach(scan => {
                 let commentaire = scan.commentaire || "";
-                let matches = commentaire.match(/\[([^\]]+)\]/g);
                 
+                // Analyse chirurgicale de chaque crochet [...] dans la colonne C
+                let matches = commentaire.match(/\[([^\]]+)\]/g);
                 if (matches && matches.length > 0) {
                     matches.forEach(m => {
                         let content = m.replace(/[\[\]]/g, '');
@@ -1334,47 +1337,62 @@
                             let parts = content.split(':');
                             let rawItemName = parts[0].trim();
                             let restPart = parts[1].trim();
+                            
                             let pctMatch = restPart.match(/(\d+)%/);
                             let restePct = pctMatch ? parseInt(pctMatch[1]) : 0;
                             let tauxMange = Math.max(0, Math.min(100, 100 - restePct));
-                            let cleanShortName = getCleanItemShortName(rawItemName);
 
-                            if (cleanShortName && !banniList.includes(cleanShortName)) {
-                                if (!dynamicFoodStats[cleanShortName]) {
-                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0, poidsJeteKg: 0 };
+                            if (rawItemName && !banniList.includes(rawItemName)) {
+                                if (!dynamicFoodStats[rawItemName]) {
+                                    dynamicFoodStats[rawItemName] = { totalRestes: 0, count: 0, rawName: rawItemName, totalTauxMange: 0 };
                                 }
-                                dynamicFoodStats[cleanShortName].totalRestes += restePct;
-                                dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
-                                dynamicFoodStats[cleanShortName].count += 1;
+                                dynamicFoodStats[rawItemName].totalRestes += restePct;
+                                dynamicFoodStats[rawItemName].totalTauxMange += tauxMange;
+                                dynamicFoodStats[rawItemName].count += 1;
 
-                                // Base de portion : 150g en moyenne par composant
                                 let masseKg = (150 * (restePct / 100)) / 1000;
-                                dynamicFoodStats[cleanShortName].poidsJeteKg += masseKg;
-                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
+                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(rawItemName);
                             }
                         }
                     });
                 } else {
+                    // Fallback si pas de crochets, on utilise les colonnes numériques
                     let grammesPlat = parseFloat(scan.plat) || 0;
                     if (grammesPlat > 0) {
                         let name = "Plat principal";
                         if (!dynamicFoodStats[name]) {
-                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0, poidsJeteKg: 0 };
+                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0 };
                         }
                         let pctReste = Math.min(100, Math.max(0, (grammesPlat / 200) * 100));
                         let tauxMange = 100 - pctReste;
                         dynamicFoodStats[name].totalRestes += pctReste;
                         dynamicFoodStats[name].totalTauxMange += tauxMange;
                         dynamicFoodStats[name].count += 1;
-                        
-                        let masseKg = grammesPlat / 1000;
-                        dynamicFoodStats[name].poidsJeteKg += masseKg;
-                        poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(name);
+                        poidsTotalCarbonePeriodeKg += (grammesPlat / 1000) * getFacteurCarbone(name);
                     }
                 }
             });
 
-            if (document.getElementById('kpi-impact')) document.getElementById('kpi-impact').innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
+            const kpiImpactElem = document.getElementById('kpi-impact');
+            if (kpiImpactElem) {
+                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
+            }
+
+            function getThumbFallback(alimentName) {
+                let text = alimentName.toLowerCase();
+                if (FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
+                if (text.includes('plat') || text.includes('viande') || text.includes('paupiette')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
+                if (text.includes('dessert') || text.includes('laitage') || text.includes('tiramisu')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
+                if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
+                if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
+                if (text.includes('chou-fleur')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
+                return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
+            }
+
+            let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
+            if (selectFilter) {
+                selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
+            }
 
             let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [];
 
@@ -1384,26 +1402,27 @@
 
                 let tauxMange = Math.round(stats.totalTauxMange / stats.count);
                 let rejetPct = 100 - tauxMange;
+                
                 let mediaObj = getThumbFallback(stats.rawName);
-                
-                let impactCO2 = stats.poidsJeteKg * getFacteurCarbone(key);
-                
-                // Formatage intelligent du poids (en grammes si < 1kg, en kilos si > 1kg)
-                let poidsAffiche = stats.poidsJeteKg < 1 ? (stats.poidsJeteKg * 1000).toFixed(0) + " g" : stats.poidsJeteKg.toFixed(1) + " kg";
 
-                let itemObj = { 
-                    label: key, 
-                    rawKey: key, 
-                    thumb: mediaObj.url, 
-                    emoji: mediaObj.emoji, 
-                    tauxMange: tauxMange, 
-                    rejetPct: rejetPct, 
-                    occurrences: stats.count, 
-                    impactCO2: impactCO2,
-                    poidsStr: poidsAffiche // <-- On stocke le poids formaté ici
+                let itemObj = {
+                    label: key,
+                    rawKey: key,
+                    thumb: mediaObj.url,
+                    emoji: mediaObj.emoji,
+                    tauxMange: tauxMange,
+                    rejetPct: rejetPct,
+                    occurrences: stats.count
                 };
-                
+
                 globalItemsDetailedStats[key] = itemObj;
+
+                if (selectFilter) {
+                    let opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = `${key} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
+                    selectFilter.appendChild(opt);
+                }
 
                 if (tauxMange >= 75) plebiscites.push(itemObj);
                 else if (tauxMange >= 60) bonneVoie.push(itemObj);
@@ -1411,21 +1430,18 @@
                 else rejets.push(itemObj);
             });
 
-            renderAnalyseFineSynthese(plebiscites, rejets);
-
-            if (isModeCarboneActif) {
-                plebiscites.sort((a, b) => b.impactCO2 - a.impactCO2);
-                bonneVoie.sort((a, b) => b.impactCO2 - a.impactCO2);
-                acceptables.sort((a, b) => b.impactCO2 - a.impactCO2);
-                rejets.sort((a, b) => b.impactCO2 - a.impactCO2);
-            } else {
-                plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
-                bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
-                acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
-                rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+            if (selectFilter) {
+                let options = Array.from(selectFilter.options).map(o => o.value);
+                if (options.includes(currentSelectedFilter)) selectFilter.value = currentSelectedFilter;
             }
 
-            // Mise à jour du visuel des cartes pour afficher le poids !
+            renderAnalyseFineSynthese(plebiscites, rejets);
+
+            plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
+            bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
+            acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
+            rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+
             function renderList(list, containerId, theme) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
@@ -1438,19 +1454,18 @@
 
                 list.forEach(item => {
                     let cardClass, valText;
-                    // On sépare le pourcentage (badge couleur) et le poids (texte gris)
                     if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
-                        valText = `<span style="color:white; background:#059669; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.tauxMange}% mangé</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'jaune') {
                         cardClass = "gourmet-dish-card bonne-voie";
-                        valText = `<span style="color:white; background:#65a30d; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.tauxMange}% mangé</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'orange') {
                         cardClass = "gourmet-dish-card acceptable";
-                        valText = `<span style="color:white; background:#ea580c; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.rejetPct}% rejet</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#ea580c; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
                     } else {
                         cardClass = "gourmet-dish-card alerte";
-                        valText = `<span style="color:white; background:#dc2626; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.rejetPct}% rejet</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#dc2626; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
                     }
                     
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
@@ -1473,7 +1488,7 @@
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
-            updateEtApresModule(scansSource);
+            updateEtApresModule(scansValides);
         }
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
