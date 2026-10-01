@@ -218,32 +218,25 @@
                             </div>
                         </div>
                     </div>
-                    <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
-                            <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
-                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
-                            <div class="chart-container">
-                                <canvas id="chart-timeline"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 🛑 BLOC DES 2 BOUTONS (Transparence & Carbone) 🛑 -->
+                    <!-- 🛑 DÉBUT DU BLOC BOUTONS (Transparence & Carbone) 🛑 -->
                     <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
                         <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🛡️️</span> Transparence & Audit des calculs
+                            <span style="font-size: 14px;">🛡️</span> Transparence & Audit des calculs
                         </button>
 
                         <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
                             <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
                         </button>
                     </div>
+                    <!-- 🛑 FIN DU BLOC BOUTONS 🛑 -->
 
-                    <!-- Grille propre des 2 premières cases (Vert et Jaune) -->
+                    <!-- DÉBUT DE TES 4 CASES DE COULEURS -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
                             <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
+                        
                         <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
                             <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
                             <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
@@ -260,6 +253,7 @@
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
+                    <!-- FIN DE TES 4 CASES DE COULEURS -->
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
@@ -784,66 +778,7 @@
             "île flottante": 0.00, "flan": 0.00, "pâtisserie": 0.00, "gâteau au chocolat": 0.00,
             "tarte aux pommes": 0.10, "glace": 0.00, "pain": 0.00
         };
-        <!-- SCRIPT JAVASCRIPT GLOBAL COMPLET ET STABLE -->
-    <script>
-        const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         
-        let choixAvisCourant = "Non renseigné";
-        let localStream = null, isScanningProcess = false, chartTimeline;
-        let cacheSacsHistory = null;
-        let globalRawData = null; 
-
-        let systemVoices = [];
-        let naturalVoice = null;
-        let filePayloadData = null; 
-
-        let globalItemsDetailedStats = {};
-        let compteurCapturesAutomatiquesJour = 0;
-        let dateDerniereCaptureAuto = "";
-        let currentModalOccurrences = [];
-
-        // 🌟 LES 3 FONCTIONS CARBONE ET TRANSPARENCE ICI :
-        let isModeCarboneActif = false;
-
-        function toggleModeCarbone() {
-            isModeCarboneActif = !isModeCarboneActif;
-            const btn = document.getElementById('btn-mode-carbone');
-            if (isModeCarboneActif) {
-                btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : <strong>ACTIF</strong>';
-                btn.style.backgroundColor = '#10b981';
-                btn.style.color = 'white';
-                btn.style.borderColor = '#059669';
-            } else {
-                btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ';
-                btn.style.backgroundColor = '#f1f5f9';
-                btn.style.color = '#475569';
-                btn.style.borderColor = '#cbd5e1';
-            }
-            if (typeof applyCustomDateFilter === 'function') applyCustomDateFilter();
-        }
-
-        function openMethodologyModal() {
-            const modal = document.getElementById('modal-methodology');
-            if (modal) modal.style.display = 'flex';
-        }
-
-        function getFacteurCarbone(alimentName) {
-            let clean = (alimentName || "").toLowerCase();
-            const coeffs = {
-                "bœuf": 22.0, "viande": 15.0, "veau": 13.0, "agneau": 25.0,
-                "porc": 6.5, "saucisse": 6.0, "poulet": 5.5, "poisson": 5.0,
-                "fromage": 7.5, "yaourt": 2.2, "lait": 1.5, "œuf": 2.8,
-                "riz": 2.7, "pâtes": 1.6, "pain": 1.2, "frites": 1.8, "pomme de terre": 0.8
-            };
-            for (let key in coeffs) {
-                if (clean.includes(key)) return coeffs[key];
-            }
-            return 1.2;
-        }
-
-        const COEFFICIENTS_INEVITABLES = {
-            // ... tes coefficients existants ...
-        };
         function getTauxInevitablesPourTexte(texte) {
             if (!texte) return 0.0;
             let clean = texte.toLowerCase().trim();
@@ -1374,6 +1309,7 @@
         }
 
         // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
+        // --- 🔍 L'EXTRACTION GRANULAIRE (Avec calcul du poids jeté par item) ---
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1381,11 +1317,7 @@
             if (!containerAdhesion || !containerRejets) return;
 
             const banniList = getListeNoireMenuActif();
-
-            const scansValides = (scansSource || []).filter(s => {
-                const c = (s.commentaire || "").toLowerCase();
-                return !c.includes("noire") && !c.includes("inexploitable");
-            });
+            const scansValides = (scansSource || []).filter(s => !String(s.commentaire).toLowerCase().includes("noire") && !String(s.commentaire).toLowerCase().includes("inexploitable"));
 
             let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
@@ -1393,9 +1325,8 @@
 
             scansValides.forEach(scan => {
                 let commentaire = scan.commentaire || "";
-                
-                // Analyse chirurgicale de chaque crochet [...] dans la colonne C
                 let matches = commentaire.match(/\[([^\]]+)\]/g);
+                
                 if (matches && matches.length > 0) {
                     matches.forEach(m => {
                         let content = m.replace(/[\[\]]/g, '');
@@ -1403,66 +1334,47 @@
                             let parts = content.split(':');
                             let rawItemName = parts[0].trim();
                             let restPart = parts[1].trim();
-                            
                             let pctMatch = restPart.match(/(\d+)%/);
                             let restePct = pctMatch ? parseInt(pctMatch[1]) : 0;
                             let tauxMange = Math.max(0, Math.min(100, 100 - restePct));
-
-                            // Extraction du nom court pour l'affichage propre
                             let cleanShortName = getCleanItemShortName(rawItemName);
 
                             if (cleanShortName && !banniList.includes(cleanShortName)) {
                                 if (!dynamicFoodStats[cleanShortName]) {
-                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0 };
+                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0, poidsJeteKg: 0 };
                                 }
                                 dynamicFoodStats[cleanShortName].totalRestes += restePct;
                                 dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
                                 dynamicFoodStats[cleanShortName].count += 1;
 
+                                // Base de portion : 150g en moyenne par composant
                                 let masseKg = (150 * (restePct / 100)) / 1000;
+                                dynamicFoodStats[cleanShortName].poidsJeteKg += masseKg;
                                 poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
                             }
                         }
                     });
                 } else {
-                    // Fallback si pas de crochets, on utilise les colonnes numériques
                     let grammesPlat = parseFloat(scan.plat) || 0;
                     if (grammesPlat > 0) {
                         let name = "Plat principal";
                         if (!dynamicFoodStats[name]) {
-                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0 };
+                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0, poidsJeteKg: 0 };
                         }
                         let pctReste = Math.min(100, Math.max(0, (grammesPlat / 200) * 100));
                         let tauxMange = 100 - pctReste;
                         dynamicFoodStats[name].totalRestes += pctReste;
                         dynamicFoodStats[name].totalTauxMange += tauxMange;
                         dynamicFoodStats[name].count += 1;
-                        poidsTotalCarbonePeriodeKg += (grammesPlat / 1000) * getFacteurCarbone(name);
+                        
+                        let masseKg = grammesPlat / 1000;
+                        dynamicFoodStats[name].poidsJeteKg += masseKg;
+                        poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(name);
                     }
                 }
             });
 
-            const kpiImpactElem = document.getElementById('kpi-impact');
-            if (kpiImpactElem) {
-                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
-            }
-
-            function getThumbFallback(alimentName) {
-                let text = alimentName.toLowerCase();
-                if (FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
-                if (text.includes('plat') || text.includes('viande') || text.includes('paupiette')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
-                if (text.includes('dessert') || text.includes('laitage') || text.includes('tiramisu')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
-                if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
-                if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
-                if (text.includes('chou-fleur')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
-                if (text.includes('poire') || text.includes('banane') || text.includes('pomme')) return { emoji: "🍐", url: DEFAULT_THUMBNAIL };
-                return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
-            }
-
-            let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
-            if (selectFilter) {
-                selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
-            }
+            if (document.getElementById('kpi-impact')) document.getElementById('kpi-impact').innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
 
             let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [];
 
@@ -1472,27 +1384,26 @@
 
                 let tauxMange = Math.round(stats.totalTauxMange / stats.count);
                 let rejetPct = 100 - tauxMange;
-                
                 let mediaObj = getThumbFallback(stats.rawName);
+                
+                let impactCO2 = stats.poidsJeteKg * getFacteurCarbone(key);
+                
+                // Formatage intelligent du poids (en grammes si < 1kg, en kilos si > 1kg)
+                let poidsAffiche = stats.poidsJeteKg < 1 ? (stats.poidsJeteKg * 1000).toFixed(0) + " g" : stats.poidsJeteKg.toFixed(1) + " kg";
 
-                let itemObj = {
-                    label: key,
-                    rawKey: key,
-                    thumb: mediaObj.url,
-                    emoji: mediaObj.emoji,
-                    tauxMange: tauxMange,
-                    rejetPct: rejetPct,
-                    occurrences: stats.count
+                let itemObj = { 
+                    label: key, 
+                    rawKey: key, 
+                    thumb: mediaObj.url, 
+                    emoji: mediaObj.emoji, 
+                    tauxMange: tauxMange, 
+                    rejetPct: rejetPct, 
+                    occurrences: stats.count, 
+                    impactCO2: impactCO2,
+                    poidsStr: poidsAffiche // <-- On stocke le poids formaté ici
                 };
-
+                
                 globalItemsDetailedStats[key] = itemObj;
-
-                if (selectFilter) {
-                    let opt = document.createElement('option');
-                    opt.value = key;
-                    opt.innerText = `${key} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
-                    selectFilter.appendChild(opt);
-                }
 
                 if (tauxMange >= 75) plebiscites.push(itemObj);
                 else if (tauxMange >= 60) bonneVoie.push(itemObj);
@@ -1500,18 +1411,21 @@
                 else rejets.push(itemObj);
             });
 
-            if (selectFilter) {
-                let options = Array.from(selectFilter.options).map(o => o.value);
-                if (options.includes(currentSelectedFilter)) selectFilter.value = currentSelectedFilter;
-            }
-
             renderAnalyseFineSynthese(plebiscites, rejets);
 
-            plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
-            bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
-            acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
-            rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+            if (isModeCarboneActif) {
+                plebiscites.sort((a, b) => b.impactCO2 - a.impactCO2);
+                bonneVoie.sort((a, b) => b.impactCO2 - a.impactCO2);
+                acceptables.sort((a, b) => b.impactCO2 - a.impactCO2);
+                rejets.sort((a, b) => b.impactCO2 - a.impactCO2);
+            } else {
+                plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
+                bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
+                acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
+                rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+            }
 
+            // Mise à jour du visuel des cartes pour afficher le poids !
             function renderList(list, containerId, theme) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
@@ -1524,18 +1438,19 @@
 
                 list.forEach(item => {
                     let cardClass, valText;
+                    // On sépare le pourcentage (badge couleur) et le poids (texte gris)
                     if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
-                        valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
+                        valText = `<span style="color:white; background:#059669; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.tauxMange}% mangé</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
                     } else if (theme === 'jaune') {
                         cardClass = "gourmet-dish-card bonne-voie";
-                        valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
+                        valText = `<span style="color:white; background:#65a30d; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.tauxMange}% mangé</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
                     } else if (theme === 'orange') {
                         cardClass = "gourmet-dish-card acceptable";
-                        valText = `<span style="color:white; background:#ea580c; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
+                        valText = `<span style="color:white; background:#ea580c; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.rejetPct}% rejet</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
                     } else {
                         cardClass = "gourmet-dish-card alerte";
-                        valText = `<span style="color:white; background:#dc2626; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
+                        valText = `<span style="color:white; background:#dc2626; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.rejetPct}% rejet</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
                     }
                     
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
@@ -1558,7 +1473,7 @@
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
-            updateEtApresModule(scansValides);
+            updateEtApresModule(scansSource);
         }
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
@@ -2381,38 +2296,6 @@
                 resText.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
             });
         }
-    </script> <!-- 👈 FERMETURE PROPRE DU SCRIPT ICI -->
-
-    <!-- MODAL MÉTHODOLOGIE & AUDIT (Le panneau de transparence pour le Département) -->
-    <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
-        <div style="background:white; width:90%; max-width:700px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-            <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence : Cheminement de la Donnée</h3>
-                <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
-            </div>
-            <div style="padding:24px; overflow-y:auto; font-size:13px; color:#334155; line-height:1.6;">
-                <p style="margin-bottom:20px; font-size: 14px;">
-                    Pour garantir l'intégrité des bilans au Conseil Départemental, l'application <strong>A.B.C.</strong> repose sur un algorithme déterministe. <strong>L'Intelligence Artificielle ne génère aucun poids ni chiffre financier.</strong> Son rôle est strictement limité à l'analyse visuelle.
-                </p>
-                <div style="border-left: 4px solid #3b82f6; padding-left: 16px; margin-bottom: 16px; background: #eff6ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #1d4ed8; font-size:14px;">1. Lecture Visuelle (IA Gemini)</strong><br>
-                    La borne photo analyse le plateau et estime uniquement un pourcentage volumétrique restant, sans notion de masse.
-                </div>
-                <div style="border-left: 4px solid #8b5cf6; padding-left: 16px; margin-bottom: 16px; background: #f5f3ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #6d28d9; font-size:14px;">2. Conversion Réglementaire (GEMRCN)</strong><br>
-                    Le script croise le pourcentage relevé avec la matrice des portions étalons nationales (Entrée: 100g, Plat: 200g, Composant: 150g, Dessert: 100g, Pain: 40g).
-                </div>
-                <div style="border-left: 4px solid #10b981; padding-left: 16px; margin-bottom: 16px; background: #f0fdf4; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #047857; font-size:14px;">3. Filtre Carbone & Biodéchets (ADEME)</strong><br>
-                    Application des facteurs d'émission GES et déduction automatique de la part des déchets inévitables fixée à 10%.
-                </div>
-                <div style="border-left: 4px solid #f59e0b; padding-left: 16px; margin-bottom: 16px; background: #fffbeb; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #b45309; font-size:14px;">4. Valorisation Financière</strong><br>
-                    Application d'un coût unitaire standardisé de la matière première en restauration scolaire (4,50 € / kg).
-                </div>
-            </div>
-        </div>
-    </div>
-
+    </script>
 </body>
 </html>
