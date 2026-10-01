@@ -784,7 +784,66 @@
             "île flottante": 0.00, "flan": 0.00, "pâtisserie": 0.00, "gâteau au chocolat": 0.00,
             "tarte aux pommes": 0.10, "glace": 0.00, "pain": 0.00
         };
+        <!-- SCRIPT JAVASCRIPT GLOBAL COMPLET ET STABLE -->
+    <script>
+        const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         
+        let choixAvisCourant = "Non renseigné";
+        let localStream = null, isScanningProcess = false, chartTimeline;
+        let cacheSacsHistory = null;
+        let globalRawData = null; 
+
+        let systemVoices = [];
+        let naturalVoice = null;
+        let filePayloadData = null; 
+
+        let globalItemsDetailedStats = {};
+        let compteurCapturesAutomatiquesJour = 0;
+        let dateDerniereCaptureAuto = "";
+        let currentModalOccurrences = [];
+
+        // 🌟 LES 3 FONCTIONS CARBONE ET TRANSPARENCE ICI :
+        let isModeCarboneActif = false;
+
+        function toggleModeCarbone() {
+            isModeCarboneActif = !isModeCarboneActif;
+            const btn = document.getElementById('btn-mode-carbone');
+            if (isModeCarboneActif) {
+                btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : <strong>ACTIF</strong>';
+                btn.style.backgroundColor = '#10b981';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#059669';
+            } else {
+                btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ';
+                btn.style.backgroundColor = '#f1f5f9';
+                btn.style.color = '#475569';
+                btn.style.borderColor = '#cbd5e1';
+            }
+            if (typeof applyCustomDateFilter === 'function') applyCustomDateFilter();
+        }
+
+        function openMethodologyModal() {
+            const modal = document.getElementById('modal-methodology');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function getFacteurCarbone(alimentName) {
+            let clean = (alimentName || "").toLowerCase();
+            const coeffs = {
+                "bœuf": 22.0, "viande": 15.0, "veau": 13.0, "agneau": 25.0,
+                "porc": 6.5, "saucisse": 6.0, "poulet": 5.5, "poisson": 5.0,
+                "fromage": 7.5, "yaourt": 2.2, "lait": 1.5, "œuf": 2.8,
+                "riz": 2.7, "pâtes": 1.6, "pain": 1.2, "frites": 1.8, "pomme de terre": 0.8
+            };
+            for (let key in coeffs) {
+                if (clean.includes(key)) return coeffs[key];
+            }
+            return 1.2;
+        }
+
+        const COEFFICIENTS_INEVITABLES = {
+            // ... tes coefficients existants ...
+        };
         function getTauxInevitablesPourTexte(texte) {
             if (!texte) return 0.0;
             let clean = texte.toLowerCase().trim();
