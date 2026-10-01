@@ -1295,7 +1295,6 @@
         }
 
         // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
-        // --- 🔍 L'EXTRACTION GRANULAIRE (Avec calcul du poids jeté par item) ---
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
@@ -1303,7 +1302,11 @@
             if (!containerAdhesion || !containerRejets) return;
 
             const banniList = getListeNoireMenuActif();
-            const scansValides = (scansSource || []).filter(s => !String(s.commentaire).toLowerCase().includes("noire") && !String(s.commentaire).toLowerCase().includes("inexploitable"));
+
+            const scansValides = (scansSource || []).filter(s => {
+                const c = (s.commentaire || "").toLowerCase();
+                return !c.includes("noire") && !c.includes("inexploitable");
+            });
 
             let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
@@ -1311,8 +1314,9 @@
 
             scansValides.forEach(scan => {
                 let commentaire = scan.commentaire || "";
-                let matches = commentaire.match(/\[([^\]]+)\]/g);
                 
+                // Analyse chirurgicale de chaque crochet [...] dans la colonne C
+                let matches = commentaire.match(/\[([^\]]+)\]/g);
                 if (matches && matches.length > 0) {
                     matches.forEach(m => {
                         let content = m.replace(/[\[\]]/g, '');
@@ -1320,47 +1324,66 @@
                             let parts = content.split(':');
                             let rawItemName = parts[0].trim();
                             let restPart = parts[1].trim();
+                            
                             let pctMatch = restPart.match(/(\d+)%/);
                             let restePct = pctMatch ? parseInt(pctMatch[1]) : 0;
                             let tauxMange = Math.max(0, Math.min(100, 100 - restePct));
+
+                            // Extraction du nom court pour l'affichage propre
                             let cleanShortName = getCleanItemShortName(rawItemName);
 
                             if (cleanShortName && !banniList.includes(cleanShortName)) {
                                 if (!dynamicFoodStats[cleanShortName]) {
-                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0, poidsJeteKg: 0 };
+                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0 };
                                 }
                                 dynamicFoodStats[cleanShortName].totalRestes += restePct;
                                 dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
                                 dynamicFoodStats[cleanShortName].count += 1;
 
-                                // Base de portion : 150g en moyenne par composant
                                 let masseKg = (150 * (restePct / 100)) / 1000;
-                                dynamicFoodStats[cleanShortName].poidsJeteKg += masseKg;
                                 poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
                             }
                         }
                     });
                 } else {
+                    // Fallback si pas de crochets, on utilise les colonnes numériques
                     let grammesPlat = parseFloat(scan.plat) || 0;
                     if (grammesPlat > 0) {
                         let name = "Plat principal";
                         if (!dynamicFoodStats[name]) {
-                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0, poidsJeteKg: 0 };
+                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0 };
                         }
                         let pctReste = Math.min(100, Math.max(0, (grammesPlat / 200) * 100));
                         let tauxMange = 100 - pctReste;
                         dynamicFoodStats[name].totalRestes += pctReste;
                         dynamicFoodStats[name].totalTauxMange += tauxMange;
                         dynamicFoodStats[name].count += 1;
-                        
-                        let masseKg = grammesPlat / 1000;
-                        dynamicFoodStats[name].poidsJeteKg += masseKg;
-                        poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(name);
+                        poidsTotalCarbonePeriodeKg += (grammesPlat / 1000) * getFacteurCarbone(name);
                     }
                 }
             });
 
-            if (document.getElementById('kpi-impact')) document.getElementById('kpi-impact').innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
+            const kpiImpactElem = document.getElementById('kpi-impact');
+            if (kpiImpactElem) {
+                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
+            }
+
+            function getThumbFallback(alimentName) {
+                let text = alimentName.toLowerCase();
+                if (FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
+                if (text.includes('plat') || text.includes('viande') || text.includes('paupiette')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
+                if (text.includes('dessert') || text.includes('laitage') || text.includes('tiramisu')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
+                if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
+                if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
+                if (text.includes('chou-fleur')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
+                if (text.includes('poire') || text.includes('banane') || text.includes('pomme')) return { emoji: "🍐", url: DEFAULT_THUMBNAIL };
+                return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
+            }
+
+            let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
+            if (selectFilter) {
+                selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
+            }
 
             let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [];
 
@@ -1370,26 +1393,27 @@
 
                 let tauxMange = Math.round(stats.totalTauxMange / stats.count);
                 let rejetPct = 100 - tauxMange;
+                
                 let mediaObj = getThumbFallback(stats.rawName);
-                
-                let impactCO2 = stats.poidsJeteKg * getFacteurCarbone(key);
-                
-                // Formatage intelligent du poids (en grammes si < 1kg, en kilos si > 1kg)
-                let poidsAffiche = stats.poidsJeteKg < 1 ? (stats.poidsJeteKg * 1000).toFixed(0) + " g" : stats.poidsJeteKg.toFixed(1) + " kg";
 
-                let itemObj = { 
-                    label: key, 
-                    rawKey: key, 
-                    thumb: mediaObj.url, 
-                    emoji: mediaObj.emoji, 
-                    tauxMange: tauxMange, 
-                    rejetPct: rejetPct, 
-                    occurrences: stats.count, 
-                    impactCO2: impactCO2,
-                    poidsStr: poidsAffiche // <-- On stocke le poids formaté ici
+                let itemObj = {
+                    label: key,
+                    rawKey: key,
+                    thumb: mediaObj.url,
+                    emoji: mediaObj.emoji,
+                    tauxMange: tauxMange,
+                    rejetPct: rejetPct,
+                    occurrences: stats.count
                 };
-                
+
                 globalItemsDetailedStats[key] = itemObj;
+
+                if (selectFilter) {
+                    let opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = `${key} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
+                    selectFilter.appendChild(opt);
+                }
 
                 if (tauxMange >= 75) plebiscites.push(itemObj);
                 else if (tauxMange >= 60) bonneVoie.push(itemObj);
@@ -1397,21 +1421,18 @@
                 else rejets.push(itemObj);
             });
 
-            renderAnalyseFineSynthese(plebiscites, rejets);
-
-            if (isModeCarboneActif) {
-                plebiscites.sort((a, b) => b.impactCO2 - a.impactCO2);
-                bonneVoie.sort((a, b) => b.impactCO2 - a.impactCO2);
-                acceptables.sort((a, b) => b.impactCO2 - a.impactCO2);
-                rejets.sort((a, b) => b.impactCO2 - a.impactCO2);
-            } else {
-                plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
-                bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
-                acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
-                rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+            if (selectFilter) {
+                let options = Array.from(selectFilter.options).map(o => o.value);
+                if (options.includes(currentSelectedFilter)) selectFilter.value = currentSelectedFilter;
             }
 
-            // Mise à jour du visuel des cartes pour afficher le poids !
+            renderAnalyseFineSynthese(plebiscites, rejets);
+
+            plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
+            bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
+            acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
+            rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+
             function renderList(list, containerId, theme) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
@@ -1424,19 +1445,18 @@
 
                 list.forEach(item => {
                     let cardClass, valText;
-                    // On sépare le pourcentage (badge couleur) et le poids (texte gris)
                     if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
-                        valText = `<span style="color:white; background:#059669; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.tauxMange}% mangé</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'jaune') {
                         cardClass = "gourmet-dish-card bonne-voie";
-                        valText = `<span style="color:white; background:#65a30d; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.tauxMange}% mangé</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
                     } else if (theme === 'orange') {
                         cardClass = "gourmet-dish-card acceptable";
-                        valText = `<span style="color:white; background:#ea580c; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.rejetPct}% rejet</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#ea580c; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
                     } else {
                         cardClass = "gourmet-dish-card alerte";
-                        valText = `<span style="color:white; background:#dc2626; padding:2px 4px; border-radius:4px; margin-right:4px;">${item.rejetPct}% rejet</span><span style="color:#475569; font-size: 8.5px; font-weight: bold;">⚖️ ${item.poidsStr}</span>`;
+                        valText = `<span style="color:white; background:#dc2626; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
                     }
                     
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
@@ -1459,7 +1479,7 @@
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
-            updateEtApresModule(scansSource);
+            updateEtApresModule(scansValides);
         }
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
