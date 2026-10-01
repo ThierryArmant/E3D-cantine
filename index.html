@@ -1154,7 +1154,7 @@
             if (targetBtn) { targetBtn.style.backgroundColor = '#2d6a4f'; targetBtn.style.color = 'white'; targetBtn.style.border = '1px solid #2d6a4f'; }
         }
 
-        async function updateEtApresModule(scansValides) {
+       async function updateEtApresModule(scansValides) {
             const boxCuisine = document.getElementById('et-apres-cuisine-content');
             const boxEleves = document.getElementById('et-apres-eleves-content');
             const boxAffiche = document.getElementById('et-apres-affiche-content');
@@ -1197,12 +1197,18 @@
                 else if (s.commentaire) detailsRecueillis.push(s.commentaire);
             });
 
+            // 🛡️ LE GARDE-FOU : On tronque le texte s'il est trop long pour éviter de faire planter le serveur
+            let detailsBruts = detailsRecueillis.join(" | ");
+            if (detailsBruts.length > 2000) {
+                detailsBruts = detailsBruts.substring(0, 2000) + "... (résumé tronqué pour l'IA)";
+            }
+
             const payload = {
                 action: "analyserPlanAction",
                 etablissement: school,
                 menu_jour: menuActif,
                 nb_votes: scansValides.length,
-                details: detailsRecueillis.join(" | ") || "Retours de la borne tactile"
+                details: detailsBruts || "Retours de la borne tactile"
             };
 
             try {
@@ -1211,27 +1217,39 @@
                     headers: { "Content-Type": "text/plain" },
                     body: JSON.stringify(payload)
                 });
-                const res = await response.json();
+                
+                // 🛡️ LECTURE ROBUSTE : On lit d'abord en texte pur au cas où le serveur renvoie une erreur HTML
+                const textRes = await response.text();
+                let res;
+                try {
+                    res = JSON.parse(textRes);
+                } catch (e) {
+                    throw new Error("L'IA a mis trop de temps à répondre ou le serveur est surchargé.");
+                }
 
-                if (res.success && res.plan) {
-                    localStorage.setItem(cacheKey, JSON.stringify(res.plan));
-                    boxCuisine.innerHTML = res.plan.cuisine;
-                    boxEleves.innerHTML = res.plan.eleves;
+                // Récupération intelligente de l'objet plan IA
+                let planToUse = res.plan || (res.cuisine ? res : null) || (res.answer ? JSON.parse(res.answer) : null);
+
+                if (planToUse && planToUse.cuisine) {
+                    localStorage.setItem(cacheKey, JSON.stringify(planToUse));
+                    boxCuisine.innerHTML = planToUse.cuisine;
+                    boxEleves.innerHTML = planToUse.eleves;
                     
-                    if (boxAffiche && res.plan.affiche) {
+                    if (boxAffiche && planToUse.affiche) {
                         boxAffiche.innerHTML = `
-                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${res.plan.affiche.titre}</div>
-                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${res.plan.affiche.slogan} »</div>
-                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${res.plan.affiche.action}</div>
+                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${planToUse.affiche.titre}</div>
+                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${planToUse.affiche.slogan} »</div>
+                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${planToUse.affiche.action}</div>
                         `;
                     }
                 } else {
-                    boxCuisine.innerHTML = "Erreur de génération par l'IA.";
-                    boxEleves.innerHTML = "Erreur de génération par l'IA.";
+                    boxCuisine.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
+                    boxEleves.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
                 }
             } catch (err) {
-                boxCuisine.innerHTML = "Erreur réseau.";
-                boxEleves.innerHTML = "Erreur réseau.";
+                // 🛡️ AFFICHAGE PRÉCIS DE L'ERREUR
+                boxCuisine.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Échec : ${err.message}</span>`;
+                boxEleves.innerHTML = `<span style="color:#ef4444; font-weight:bold;">Vérifiez la connexion ou réduisez la période de filtrage.</span>`;
             }
         }
 
