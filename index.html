@@ -218,32 +218,19 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 🛑 DÉBUT DU BLOC BOUTONS (Transparence & Carbone) 🛑 -->
-                    <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
-                        <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🛡️</span> Transparence & Audit des calculs
-                        </button>
-
-                        <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
-                        </button>
-                    </div>
-                    <!-- 🛑 FIN DU BLOC BOUTONS 🛑 -->
-
-                    <!-- DÉBUT DE TES 4 CASES DE COULEURS -->
+                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
                             <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
-                        
                         <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
                             <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
                             <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; margin-top: 12px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div class="dashboard-col" style="background: rgba(255, 237, 213, 0.95) !important; border: 1.5px solid #fdba74;">
                             <h3 style="color: #9a3412; margin-bottom: 10px; font-size: 13px;">🟠 Acceptable (45% - 59%)</h3>
                             <div id="period-acceptable-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
@@ -253,7 +240,6 @@
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
-                    <!-- FIN DE TES 4 CASES DE COULEURS -->
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
@@ -873,42 +859,20 @@
             "Pâtisserie / Flan": { url: "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?w=150&q=80", emoji: "🥧" },
             "Glace": { url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=150&q=80", emoji: "🍨" }
         };
-        // 🌟 LA FONCTION QUI FAIT LE LIEN ENTRE LE NOM ET L'IMAGE 🌟
-        function getThumbFallback(rawName) {
-            if (!rawName) return { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
-            let clean = rawName.trim();
-            
-            // 1. Recherche exacte
-            if (FOOD_THUMBNAILS[clean]) return FOOD_THUMBNAILS[clean];
-            
-            // 2. Recherche partielle (ex: si l'IA dit "Poulet sauce", on trouve "Poulet")
-            let cleanLower = clean.toLowerCase();
-            for (let key in FOOD_THUMBNAILS) {
-                if (cleanLower.includes(key.toLowerCase()) || key.toLowerCase().includes(cleanLower)) {
-                    return FOOD_THUMBNAILS[key];
-                }
-            }
-            
-            // 3. Image par défaut si l'aliment est inconnu
-            return { url: DEFAULT_THUMBNAIL, emoji: "🥗" };
-        }
+
         function normalizeDate(raw) {
             if (!raw) return "";
             let str = String(raw).trim();
-            
-            // Format JJ/MM/AAAA (avec ou sans heure derrière comme "01/10/2026 12:15:05")
             let matchFR = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-            if (matchFR) {
-                return `${matchFR[3]}-${matchFR[2]}-${matchFR[1]}`;
-            }
-            
-            // Format AAAA-MM-JJ (avec ou sans heure)
+            if (matchFR) return `${matchFR[3]}-${matchFR[2]}-${matchFR[1]}`;
             let matchISO = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
-            if (matchISO) {
-                return `${matchISO[1]}-${matchISO[2]}-${matchISO[3]}`;
-            }
-            
+            if (matchISO) return `${matchISO[1]}-${matchISO[2]}-${matchISO[3]}`;
             return str.substring(0, 10);
+        }
+
+        function getCleanLabel(label) {
+            if (!label) return "";
+            return label.split(/[\/\+]/)[0].replace(' (Fait Maison)', '').trim();
         }
 
         window.addEventListener('DOMContentLoaded', () => { 
@@ -2317,50 +2281,7 @@
             .catch(err => {
                 resText.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
             });
-        } // 🌟 LA FONCTION QUI OUVRE LE PANNEAU DE TRANSPARENCE 🌟
-        function openMethodologyModal() {
-            document.getElementById('modal-methodology').style.display = 'flex';    
         }
     </script>
-    <!-- MODAL MÉTHODOLOGIE & AUDIT (Le panneau de transparence pour le Département) -->
-    <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
-        <div style="background:white; width:90%; max-width:700px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
-            <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence : Cheminement de la Donnée</h3>
-                <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
-            </div>
-            <div style="padding:24px; overflow-y:auto; font-size:13px; color:#334155; line-height:1.6;">
-                <p style="margin-bottom:20px; font-size: 14px;">
-                    Pour garantir l'intégrité des bilans au Conseil Départemental, l'application <strong>A.B.C.</strong> repose sur un algorithme déterministe. <strong>L'Intelligence Artificielle ne génère aucun poids ni chiffre financier.</strong> Son rôle est strictement limité à l'analyse visuelle.
-                </p>
-                
-                <div style="border-left: 4px solid #3b82f6; padding-left: 16px; margin-bottom: 16px; background: #eff6ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #1d4ed8; font-size:14px;">1. Lecture Visuelle (IA Gemini)</strong><br>
-                    La borne photo analyse le plateau et estime uniquement un pourcentage volumétrique restant, sans notion de masse.<br>
-                    <em style="color:#475569;">Exemple : L'IA identifie une "Paupiette de bœuf" et détecte "33 % de restes".</em>
-                </div>
-
-                <div style="border-left: 4px solid #8b5cf6; padding-left: 16px; margin-bottom: 16px; background: #f5f3ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #6d28d9; font-size:14px;">2. Conversion Réglementaire (GEMRCN)</strong><br>
-                    Le script croise le pourcentage relevé avec la matrice des portions étalons nationales (Entrée: 100g, Plat chaud: 200g, Composant isolé: 150g, Dessert: 100g, Pain: 40g).<br>
-                    <em style="color:#475569;">Calcul : 150g (portion viande) × 33% (taux de restes) = <strong>49,5 grammes jetés</strong>.</em>
-                </div>
-
-                <div style="border-left: 4px solid #10b981; padding-left: 16px; margin-bottom: 16px; background: #f0fdf4; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #047857; font-size:14px;">3. Filtre Carbone & Biodéchets (Agribalyse / ADEME)</strong><br>
-                    Le dictionnaire interne identifie la nature du produit pour lui appliquer son facteur d'émission de Gaz à Effet de Serre (GES). En parallèle, l'algorithme soustrait automatiquement la part des déchets inévitables (os, épluchures) fixée à 10% pour le repas.<br>
-                    <em style="color:#475569;">Calcul (CO2) : 49,5 g de bœuf × 22 kg CO2eq/kg = <strong>1,08 kg CO2eq générés en pure perte</strong>.</em>
-                </div>
-
-                <div style="border-left: 4px solid #f59e0b; padding-left: 16px; margin-bottom: 16px; background: #fffbeb; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #b45309; font-size:14px;">4. Valorisation Financière</strong><br>
-                    Les pertes sont traduites en impact budgétaire en utilisant un coût unitaire standardisé de la matière première en restauration scolaire.<br>
-                    <em style="color:#475569;">Constante comptable appliquée : <strong>4,50 € / kg</strong>.</em>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-</html>                            
 </body>
 </html>
