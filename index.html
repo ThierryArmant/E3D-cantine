@@ -218,7 +218,27 @@
                             </div>
                         </div>
                     </div>
+                    <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
+                            <h3>♻️ Répartition des biodéchets (Corrigée des inévitables)</h3>
+                            <div style="font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;" id="biodiff-total">Total : 0 g</div>
+                            <div class="chart-container">
+                                <canvas id="chart-timeline"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     
+                    <!-- 🛑 BLOC DES 2 BOUTONS (Transparence & Carbone) 🛑 -->
+                    <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
+                        <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
+                            <span style="font-size: 14px;">🛡️️</span> Transparence & Audit des calculs
+                        </button>
+
+                        <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
+                            <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
+                        </button>
+                    </div>
+
+                    <!-- Grille propre des 2 premières cases (Vert et Jaune) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
@@ -2302,6 +2322,36 @@
                 resText.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
             });
         }
-    </script>
+    <!-- MODAL MÉTHODOLOGIE & AUDIT (Le panneau de transparence pour le Département) -->
+    <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:white; width:90%; max-width:700px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+            <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence : Cheminement de la Donnée</h3>
+                <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:24px; overflow-y:auto; font-size:13px; color:#334155; line-height:1.6;">
+                <p style="margin-bottom:20px; font-size: 14px;">
+                    Pour garantir l'intégrité des bilans au Conseil Départemental, l'application <strong>A.B.C.</strong> repose sur un algorithme déterministe. <strong>L'Intelligence Artificielle ne génère aucun poids ni chiffre financier.</strong> Son rôle est strictement limité à l'analyse visuelle.
+                </p>
+                <div style="border-left: 4px solid #3b82f6; padding-left: 16px; margin-bottom: 16px; background: #eff6ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #1d4ed8; font-size:14px;">1. Lecture Visuelle (IA Gemini)</strong><br>
+                    La borne photo analyse le plateau et estime uniquement un pourcentage volumétrique restant, sans notion de masse.
+                </div>
+                <div style="border-left: 4px solid #8b5cf6; padding-left: 16px; margin-bottom: 16px; background: #f5f3ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #6d28d9; font-size:14px;">2. Conversion Réglementaire (GEMRCN)</strong><br>
+                    Le script croise le pourcentage relevé avec la matrice des portions étalons nationales (Entrée: 100g, Plat: 200g, Composant: 150g, Dessert: 100g, Pain: 40g).
+                </div>
+                <div style="border-left: 4px solid #10b981; padding-left: 16px; margin-bottom: 16px; background: #f0fdf4; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #047857; font-size:14px;">3. Filtre Carbone & Biodéchets (ADEME)</strong><br>
+                    Application des facteurs d'émission GES et déduction automatique de la part des déchets inévitables fixée à 10%.
+                </div>
+                <div style="border-left: 4px solid #f59e0b; padding-left: 16px; margin-bottom: 16px; background: #fffbeb; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #b45309; font-size:14px;">4. Valorisation Financière</strong><br>
+                    Application d'un coût unitaire standardisé de la matière première en restauration scolaire (4,50 € / kg).
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
