@@ -2295,7 +2295,50 @@
             .catch(err => {
                 resText.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
             });
+        } // 🌟 LA FONCTION QUI OUVRE LE PANNEAU DE TRANSPARENCE 🌟
+        function openMethodologyModal() {
+            document.getElementById('modal-methodology').style.display = 'flex';    
         }
     </script>
+    <!-- MODAL MÉTHODOLOGIE & AUDIT (Le panneau de transparence pour le Département) -->
+    <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:white; width:90%; max-width:700px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+            <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence : Cheminement de la Donnée</h3>
+                <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:24px; overflow-y:auto; font-size:13px; color:#334155; line-height:1.6;">
+                <p style="margin-bottom:20px; font-size: 14px;">
+                    Pour garantir l'intégrité des bilans au Conseil Départemental, l'application <strong>A.B.C.</strong> repose sur un algorithme déterministe. <strong>L'Intelligence Artificielle ne génère aucun poids ni chiffre financier.</strong> Son rôle est strictement limité à l'analyse visuelle.
+                </p>
+                
+                <div style="border-left: 4px solid #3b82f6; padding-left: 16px; margin-bottom: 16px; background: #eff6ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #1d4ed8; font-size:14px;">1. Lecture Visuelle (IA Gemini)</strong><br>
+                    La borne photo analyse le plateau et estime uniquement un pourcentage volumétrique restant, sans notion de masse.<br>
+                    <em style="color:#475569;">Exemple : L'IA identifie une "Paupiette de bœuf" et détecte "33 % de restes".</em>
+                </div>
+
+                <div style="border-left: 4px solid #8b5cf6; padding-left: 16px; margin-bottom: 16px; background: #f5f3ff; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #6d28d9; font-size:14px;">2. Conversion Réglementaire (GEMRCN)</strong><br>
+                    Le script croise le pourcentage relevé avec la matrice des portions étalons nationales (Entrée: 100g, Plat chaud: 200g, Composant isolé: 150g, Dessert: 100g, Pain: 40g).<br>
+                    <em style="color:#475569;">Calcul : 150g (portion viande) × 33% (taux de restes) = <strong>49,5 grammes jetés</strong>.</em>
+                </div>
+
+                <div style="border-left: 4px solid #10b981; padding-left: 16px; margin-bottom: 16px; background: #f0fdf4; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #047857; font-size:14px;">3. Filtre Carbone & Biodéchets (Agribalyse / ADEME)</strong><br>
+                    Le dictionnaire interne identifie la nature du produit pour lui appliquer son facteur d'émission de Gaz à Effet de Serre (GES). En parallèle, l'algorithme soustrait automatiquement la part des déchets inévitables (os, épluchures) fixée à 10% pour le repas.<br>
+                    <em style="color:#475569;">Calcul (CO2) : 49,5 g de bœuf × 22 kg CO2eq/kg = <strong>1,08 kg CO2eq générés en pure perte</strong>.</em>
+                </div>
+
+                <div style="border-left: 4px solid #f59e0b; padding-left: 16px; margin-bottom: 16px; background: #fffbeb; padding-top: 12px; padding-bottom: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #b45309; font-size:14px;">4. Valorisation Financière</strong><br>
+                    Les pertes sont traduites en impact budgétaire en utilisant un coût unitaire standardisé de la matière première en restauration scolaire.<br>
+                    <em style="color:#475569;">Constante comptable appliquée : <strong>4,50 € / kg</strong>.</em>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>                            
 </body>
 </html>
