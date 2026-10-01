@@ -41,13 +41,10 @@
 
         .borne-container { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 12px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
         .instruction-banner { font-size: 16px; font-weight: 900; text-align: center; padding: 12px; border-radius: 8px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; } .state-manual { background-color: #b45309; }
+        .state-searching { background-color: #2563eb; } .state-detected { background-color: #d97706; } .state-success { background-color: #059669; }
 
         .progress-container { position: absolute; bottom: 10px; left: 10px; right: 10px; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; display: none; }
         .progress-bar { height: 100%; width: 0%; background: #10b981; transition: width 0.4s ease; }
-
-        .btn-scan-trigger { background-color: #059669; color: white; border: none; border-radius: 10px; padding: 16px 20px; font-size: 18px; font-weight: 900; width: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4); transition: background-color 0.2s; }
-        .btn-scan-trigger:hover { background-color: #047857; }
 
         .filter-period-bar { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 8px; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid #2d6a4f; }
         .filter-btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -300,7 +297,7 @@
                 </div>
             </div>
             
-            <!-- PÔLE 2 : BORNE ET SMARTPHONE -->
+            <!-- PÔLE 2 : BORNE ET SMARTPHONE (RÉVISÉ : 1 CLIC = AVIS + SCAN) -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container" style="max-width: 1050px;">
                     <div style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
@@ -309,7 +306,7 @@
                         <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             
                             <div id="instruction-text" class="instruction-banner state-searching" style="margin-bottom: 8px;">
-                                🤖 DÉPOSE TON PLATEAU ET APPUIE SUR LE BOUTON
+                                🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS
                             </div>
 
                             <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
@@ -318,8 +315,7 @@
                                     <select id="camera-select" onchange="switchCameraSource()" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px; flex: 1; background: #fff;"></select>
                                 </div>
                                 
-                                <!-- 🌟 LES CURSEURS LUM & CONTRASTE BIEN PRÉSENTS -->
-                                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 8px; align-items: center;">
                                     <div style="display: flex; gap: 4px; align-items: center;">
                                         <label style="font-size: 10px; font-weight: bold; color: #1b4332;">Lum :</label>
                                         <input type="range" id="cam-brightness" min="40" max="150" value="100" oninput="applyVideoFilters()" style="width: 45px;">
@@ -336,18 +332,29 @@
                             </div>
                         </div>
 
-                        <!-- Le gros bouton unique sur le côté -->
-                        <div style="width: 280px; display: flex; flex-direction: column; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 15px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
-                            <button type="button" id="btn-scan-side" onclick="triggerManualCapture()" style="width: 100%; height: 100%; min-height: 250px; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 4px solid #86efac; border-radius: 16px; padding: 20px; font-size: 20px; font-weight: 900; cursor: pointer; box-shadow: 0 8px 25px rgba(22,163,74,0.5); transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; text-transform: uppercase;">
-                                <span style="font-size: 45px;">📸</span>
-                                <span id="side-btn-text">Appuyer pour scanner</span>
+                        <!-- Zone des 3 GROS boutons (colonne de droite) -->
+                        <div style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+                            <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
+                            <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Un clic envoie ton scan directement !</div>
+
+                            <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🟢</span>
+                                <span>J'ai tout fini</span>
+                            </button>
+                            <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🟠</span>
+                                <span>Pas le temps</span>
+                            </button>
+                            <button type="button" id="push-btn-rouge" onclick="setPushAvis('rouge', this)" style="flex: 1; background: linear-gradient(145deg, #ef4444, #b91c1c); color: white; border: 3px solid #fca5a5; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(220,38,38,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🔴</span>
+                                <span>J'ai pas aimé</span>
                             </button>
                         </div>
-
                     </div>
                     <div style="margin-top: 6px; font-size: 10.5px; color: #475569; text-align: center;">Configuration menu actif : <span id="borne-menu-active" style="font-weight: bold; color: #1b4332;">--</span></div>
                 </div>
             </div>
+
             <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
@@ -380,13 +387,13 @@
                                     <td>
                                         <div class="sub-theme">Bases & Entrées</div>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade d'endives (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Carottes râpées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Taboulé (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Œuf dur / Mayonnaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Quiche / Tarte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade piémontaise"> Salade piémontaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade piémontaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Pâté en croûte"> Pâté en croûte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâté en croûte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -411,7 +418,7 @@
                                         <div class="sub-theme">Plats & Viandes</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Couscous (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Paella"> Paella <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Paella (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tajine (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tajine (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Gardiane de Taureau"> Gardiane de Taureau <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gardiane de Taureau (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Chili (Con Carné/Végé)"> Chili <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Chili (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lasagnes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -422,7 +429,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Steak haché (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson"> Poisson <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané"> Poisson pané <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson pané (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Cordon bleu"> Cordon bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Cordon bleu (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Cordon bleu"> Cordon bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Cordon bleu (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette"> Omelette <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Saucisse"> Saucisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Saucisse (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Merguez"> Merguez <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Merguez (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -448,13 +455,13 @@
 
                                     <td>
                                         <div class="sub-theme">Féculents & Légumes</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Riz (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Semoule (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Purée (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Petits pois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ratatouille (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -707,12 +714,10 @@
         </div>
     </div>
 
-    <!-- SCRIPT JAVASCRIPT GLOBAL COMPLET (AVEC MODE AUTO / MANUEL INTÉGRÉ) -->
+    <!-- SCRIPT JAVASCRIPT GLOBAL COMPLET ET STABLE -->
     <script>
         const ADRESSE_SHEET_OFFICIELLE = "https://script.google.com/macros/s/AKfycbwMew3wLzOP1BbkRyCEisHU1ouZczBagzDFEYJQGSVc2HKA91-n6AK129XJiw3nZ6oT3Q/exec";
         
-        // 🌟 NOUVEAU : État global du mode de la borne (True = Auto IA, False = Manuel Secours)
-        let modeScanAuto = true;
         let choixAvisCourant = "Non renseigné";
         let localStream = null, isScanningProcess = false, chartTimeline;
         let cacheSacsHistory = null;
@@ -920,7 +925,6 @@
             }, 60000);
         });
 
-        // 🌟 SYSTÈME DE FAVORIS LOCAUX
         function addLocalFavorite(type) {
             let inputField = document.getElementById(type + '_libre');
             let val = inputField.value.trim();
@@ -1308,7 +1312,7 @@
                 let tauxMange = Math.max(5, Math.min(99, Math.round(100 - resteMoyen)));
                 let rejetPct = 100 - tauxMange;
                 
-                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️" };
+                let mediaObj = FOOD_THUMBNAILS[aliment] || { url: DEFAULT_THUMBNAIL, emoji: "🍽️️" };
 
                 let itemObj = {
                     label: aliment,
@@ -1703,8 +1707,8 @@
         function resetBorneUI() { 
             isScanningProcess = false; 
             const banner = document.getElementById('instruction-text');
-            banner.innerText = modeScanAuto ? "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER" : "⚠️ BORNE EN MODE MANUEL (Secours actif)"; 
-            banner.className = modeScanAuto ? "instruction-banner state-searching" : "instruction-banner state-manual"; 
+            banner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; 
+            banner.className = "instruction-banner state-searching"; 
             document.getElementById('bar-container').style.display = "none"; 
             document.getElementById('action-progress').style.width = "0%"; 
         }
@@ -1735,43 +1739,13 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             return canvas.toDataURL('image/jpeg', 0.7); 
         }
-        
-        // 🌟 NOUVEAU : Fonction du bouton discret pour basculer l'état (Vert / Orange)
-        function toggleModeFonctionnement() {
-            modeScanAuto = !modeScanAuto;
-            let btnMode = document.getElementById('btn-discret-mode');
-            let instructionBanner = document.getElementById('instruction-text');
-            
-            if (btnMode) {
-                if (modeScanAuto) {
-                    btnMode.innerHTML = "🟢 Mode: Auto (IA)";
-                    btnMode.style.background = "#dcfce7";
-                    btnMode.style.color = "#166534";
-                    btnMode.style.borderColor = "#22c55e";
-                    btnMode.style.boxShadow = "0 0 10px rgba(34, 197, 94, 0.4)";
-                    
-                    if(instructionBanner) {
-                        instructionBanner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR SCANNER";
-                        instructionBanner.className = "instruction-banner state-searching";
-                    }
-                    console.log("🟢 Mode actif : AUTOMATIQUE (IA activée)");
-                } else {
-                    btnMode.innerHTML = "🟠 Mode: Manuel (Secours)";
-                    btnMode.style.background = "#ffedd5";
-                    btnMode.style.color = "#9a3412";
-                    btnMode.style.borderColor = "#f97316";
-                    btnMode.style.boxShadow = "0 0 10px rgba(249, 115, 22, 0.4)";
-                    
-                    if(instructionBanner) {
-                        instructionBanner.innerText = "⚠️ BORNE EN MODE MANUEL (Secours actif sans IA)";
-                        instructionBanner.className = "instruction-banner state-manual";
-                    }
-                    console.log("🟠 Mode actif : MANUEL (Caméra/IA neutralisée, secours actif)");
-                }
-            }
-        }
 
+        // 🌟 LA NOUVELLE FONCTION MAGIQUE "FIRE AND FORGET" LIÉE AUX 3 BOUTONS
         function setPushAvis(type, elem) {
+            if (isScanningProcess) return; // Empêche le double-clic
+            isScanningProcess = true;
+
+            // 1. Animation des boutons
             ['vert', 'orange', 'rouge'].forEach(t => {
                 let b = document.getElementById(`push-btn-${t}`);
                 if (b) {
@@ -1785,69 +1759,55 @@
             elem.style.borderWidth = "5px";
             elem.style.boxShadow = "0 0 20px #ffffff, " + elem.style.boxShadow;
 
+            // 2. Récupération de l'avis
             if (type === 'vert') choixAvisCourant = "🟢 J'ai tout fini";
             else if (type === 'orange') choixAvisCourant = "🟠 Pas le temps";
             else if (type === 'rouge') choixAvisCourant = "🔴 J'ai pas aimé";
 
-            prononcerMessage(type === 'vert' ? "Tout fini" : (type === 'orange' ? "Pas le temps" : "Pas aimé"));
-        }
-        
-        // 🌟 MIS À JOUR : Déclenchement intégrant le choix Auto ou Manuel Secours
-        function triggerManualCapture() {
-            if (isScanningProcess) return; 
-            isScanningProcess = true;
+            // 3. Changement d'état visuel et vocal direct
             const banner = document.getElementById('instruction-text');
-
-            if (modeScanAuto) {
-                banner.innerText = "🛑 NE BOUGE PAS ! ANALYSE IA EN COURS..."; 
-                banner.className = "instruction-banner state-detected";
-            } else {
-                banner.innerText = "⚠️ ENREGISTREMENT MODE SECOURS DIRECT..."; 
-                banner.className = "instruction-banner state-manual";
-            }
-
-            document.getElementById('bar-container').style.display = "block"; 
-            document.getElementById('action-progress').style.width = '100%';
+            banner.innerText = "📸 SCAN EN COURS..."; 
+            banner.className = "instruction-banner state-detected";
             
+            prononcerMessage(type === 'vert' ? "Tout fini, merci" : (type === 'orange' ? "Pas le temps, merci" : "Pas aimé, merci"));
+
+            // 4. Capture et préparation silencieuse
             const payload = { 
                 action: "logScanImage", 
-                etablissement: document.getElementById('select-etablissement').value, 
-                menu_jour: document.getElementById('borne-menu-active').innerText, 
+                etablissement: document.getElementById('select-etablissement') ? document.getElementById('select-etablissement').value : "Établissement", 
+                menu_jour: document.getElementById('borne-menu-active') ? document.getElementById('borne-menu-active').innerText : "--", 
                 avis_eleve: choixAvisCourant,
-                modeUtilise: modeScanAuto ? "AUTO_IA" : "MANUEL_SECOURS",
                 image_base64: getBase64FromLiveVideo() 
             };
-            
+
+            // 5. Envoi au Google Sheets (L'IA fera son traitement en arrière-plan pendant 8 sec, sans nous bloquer)
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
-            }).then(r => r.json()).then(res => {
-                if(res.success || !modeScanAuto) {
-                    banner.innerText = "🟢 MERCI ! SUIVANT"; 
-                    banner.className = "instruction-banner state-success";
-                    prononcerMessage("Merci ! Suivant");
-                    
+            }).catch(err => console.log("Envoi silencieux :", err));
+
+            // 6. LIBÉRATION IMMÉDIATE (1 SECONDE)
+            setTimeout(() => {
+                banner.innerText = "🟢 MERCI ! AU SUIVANT 👉"; 
+                banner.className = "instruction-banner state-success";
+                
+                // Réinitialisation de la borne pour l'élève suivant
+                setTimeout(() => {
+                    isScanningProcess = false; 
+                    banner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; 
+                    banner.className = "instruction-banner state-searching"; 
                     choixAvisCourant = "Non renseigné";
+                    
                     ['vert', 'orange', 'rouge'].forEach(t => {
                         let b = document.getElementById(`push-btn-${t}`);
                         if (b) {
                             b.style.transform = "scale(1)";
-                            b.style.boxShadow = b.style.boxShadow.replace(/0 0 \d+px #ffffff,\s*/, '');
                             b.style.borderWidth = "3px";
+                            b.style.boxShadow = b.style.boxShadow.replace(/0 0 \d+px #ffffff,\s*/, '');
                         }
                     });
-
-                    setTimeout(() => resetBorneUI(), 800);
-                } else {
-                    banner.innerText = "❌ ERREUR : " + (res.error || "IA BLOQUÉE");
-                    banner.style.backgroundColor = "#ef4444";
-                    setTimeout(() => resetBorneUI(), 4000);
-                }
-            }).catch((err) => {
-                // En cas de coupure réseau en mode secours, on valide quand même
-                banner.innerText = "🟢 ENREGISTRÉ (Mode Secours Local)";
-                banner.className = "instruction-banner state-success";
-                setTimeout(() => resetBorneUI(), 1200);
-            });
+                }, 1500);
+                
+            }, 400); // 400ms d'attente pour simuler la prise de photo
         }
 
         function switchView(viewId) {
