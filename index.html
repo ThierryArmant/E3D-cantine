@@ -1782,7 +1782,10 @@
 
             // 5. Envoi au Google Sheets (L'IA fera son traitement en arrière-plan pendant 8 sec, sans nous bloquer)
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
+                method: "POST", 
+                mode: "no-cors", // 👈 AJOUT DU BOUCLIER ANTI-ERREUR RÉSEAU
+                headers: { "Content-Type": "text/plain" }, 
+                body: JSON.stringify(payload) 
             }).catch(err => console.log("Envoi silencieux :", err));
 
             // 6. LIBÉRATION IMMÉDIATE (1 SECONDE)
@@ -1809,7 +1812,6 @@
                 
             }, 400); // 400ms d'attente pour simuler la prise de photo
         }
-
         function switchView(viewId) {
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); 
             let m = document.getElementById('menu-' + viewId);
