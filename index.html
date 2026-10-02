@@ -1515,7 +1515,30 @@
 
             matchingScans.forEach(s => {
                 let dateIso = normalizeDate(s.dateRaw) || "";
-                let taux = s.plat > 0 ? s.plat : (s.entree > 0 ? s.entree : (s.dessert > 0 ? s.dessert : 0));
+                let commentaire = s.commentaire || "";
+                
+                // --- CORRECTION : EXTRACTION DU VRAI POURCENTAGE PAR L'IA ---
+                let tauxExact = 0;
+                let blocks = commentaire.split(/\[([^\]]+)\]/g);
+                blocks.forEach(b => {
+                    if (b.toLowerCase().includes(rawKey.toLowerCase()) && b.includes('%')) {
+                        let pctMatch = b.match(/(\d+)%/);
+                        if (pctMatch) {
+                            tauxExact = parseInt(pctMatch[1], 10);
+                        }
+                    }
+                });
+
+                // Fallback sécurisé : si l'IA n'a pas mis de crochets (anciens scans)
+                if (tauxExact === 0 && !commentaire.includes('[')) {
+                    if (s.plat > 0) tauxExact = Math.round((s.plat / 200) * 100);
+                    else if (s.entree > 0) tauxExact = Math.round((s.entree / 100) * 100);
+                    else if (s.dessert > 0) tauxExact = Math.round((s.dessert / 100) * 100);
+                }
+                
+                // Verrou de sécurité mathématique : plafonner à 100% max
+                let tauxFinal = Math.min(100, Math.max(0, tauxExact));
+                // ------------------------------------------------------------
                 
                 let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
                 let alternativesMemeCategorie = [];
@@ -1541,7 +1564,7 @@
 
                 currentModalOccurrences.push({
                     date: dateIso || "Date inconnue",
-                    taux: taux,
+                    taux: tauxFinal,
                     menu: menuCompletDuJour,
                     alternatives: alternativesMemeCategorie.length > 0 ? alternativesMemeCategorie.join(', ') : "Aucune autre alternative dans la même catégorie",
                     obs: s.commentaire
