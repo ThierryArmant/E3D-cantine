@@ -2378,5 +2378,71 @@
             });
         }
     </script>
+
+    <!-- 🛑 MODALE DE TRANSPARENCE & AUDIT DES CALCULS -->
+    <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
+        <div style="background:white; width:90%; max-width:700px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+            <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence : Cheminement de la Donnée</h3>
+                <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
+            </div>
+            <div style="padding:24px; overflow-y:auto; font-size:13px; color:#334155; line-height:1.6;">
+                <p style="margin-bottom:20px; font-size: 14px;">
+                    Pour garantir l'intégrité des bilans au Conseil Départemental, l'application <strong>A.B.C.</strong> repose sur un algorithme déterministe. <strong>L'Intelligence Artificielle ne génère aucun poids ni chiffre financier.</strong> Son rôle est strictement limité à l'analyse visuelle.
+                </p>
+                <div style="border-left: 4px solid #3b82f6; padding-left: 16px; margin-bottom: 16px; background: #eff6ff; padding: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #1d4ed8; font-size:14px;">1. Lecture Visuelle (IA Gemini)</strong><br>Analyse volumétrique du plateau (ex: "[Pomme : 100% restes]").
+                </div>
+                <div style="border-left: 4px solid #8b5cf6; padding-left: 16px; margin-bottom: 16px; background: #f5f3ff; padding: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #6d28d9; font-size:14px;">2. Conversion Réglementaire (GEMRCN)</strong><br>Croisement avec les portions étalons nationales (Entrée: 100g, Plat: 200g, Dessert: 100g).
+                </div>
+                <div style="border-left: 4px solid #10b981; padding-left: 16px; margin-bottom: 16px; background: #f0fdf4; padding: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #047857; font-size:14px;">3. Filtre Carbone & Biodéchets (ADEME)</strong><br>Application des facteurs GES et déduction des inévitables.
+                </div>
+                <div style="border-left: 4px solid #f59e0b; padding-left: 16px; margin-bottom: 16px; background: #fffbeb; padding: 12px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #b45309; font-size:14px;">4. Valorisation Financière</strong><br>Coût unitaire standardisé (4,50 € / kg).
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE FORÇAGE DES BOUTONS INTERACTIFS -->
+    <script>
+        window.isModeCarboneActif = false;
+
+        window.toggleModeCarbone = function() {
+            window.isModeCarboneActif = !window.isModeCarboneActif;
+            
+            if (typeof isModeCarboneActif !== 'undefined') {
+                isModeCarboneActif = window.isModeCarboneActif;
+            }
+
+            const btn = document.getElementById('btn-mode-carbone');
+            if (btn) {
+                if (window.isModeCarboneActif) {
+                    btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : <strong>ACTIF</strong>';
+                    btn.style.backgroundColor = '#10b981';
+                    btn.style.color = 'white';
+                    btn.style.borderColor = '#059669';
+                } else {
+                    btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ';
+                    btn.style.backgroundColor = '#f1f5f9';
+                    btn.style.color = '#475569';
+                    btn.style.borderColor = '#cbd5e1';
+                }
+            }
+            
+            if (typeof applyCustomDateFilter === 'function') {
+                applyCustomDateFilter();
+            }
+        };
+
+        window.openMethodologyModal = function() {
+            const modal = document.getElementById('modal-methodology');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        };
+    </script>
 </body>
 </html>
