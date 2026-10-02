@@ -1314,7 +1314,8 @@
             const selectFilter = document.getElementById('select-filter-item');
             if (!containerAdhesion || !containerRejets) return;
 
-            const banniList = getListeNoireMenuActif();
+            // Fonction supposée existante dans ton code
+            const banniList = typeof getListeNoireMenuActif === 'function' ? getListeNoireMenuActif() : [];
 
             const scansValides = (scansSource || []).filter(s => {
                 const c = (s.commentaire || "").toLowerCase();
@@ -1328,7 +1329,7 @@
             scansValides.forEach(scan => {
                 let commentaire = scan.commentaire || "";
                 
-                // Analyse chirurgicale de chaque crochet [...] dans la colonne C
+                // Extraction stricte via regex des données Gemini (ex: [Pomme: 100% restes])
                 let matches = commentaire.match(/\[([^\]]+)\]/g);
                 if (matches && matches.length > 0) {
                     matches.forEach(m => {
@@ -1339,54 +1340,72 @@
                             let restPart = parts[1].trim();
                             
                             let pctMatch = restPart.match(/(\d+)%/);
-                            let restePct = pctMatch ? parseInt(pctMatch[1]) : 0;
-                            let tauxMange = Math.max(0, Math.min(100, 100 - restePct));
+                            let restePct = pctMatch ? parseInt(pctMatch[1], 10) : 0;
+                            // SÉCURITÉ : Plafond à 100% strict
+                            restePct = Math.min(100, Math.max(0, restePct));
+                            let tauxMange = 100 - restePct;
 
-                            if (rawItemName && !banniList.includes(rawItemName)) {
-                                if (!dynamicFoodStats[rawItemName]) {
-                                    dynamicFoodStats[rawItemName] = { totalRestes: 0, count: 0, rawName: rawItemName, totalTauxMange: 0 };
+                            // Fonction supposée existante ou fallback
+                            let cleanShortName = typeof getCleanItemShortName === 'function' ? getCleanItemShortName(rawItemName) : rawItemName;
+
+                            if (cleanShortName && !banniList.includes(cleanShortName)) {
+                                if (!dynamicFoodStats[cleanShortName]) {
+                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0, poidsJeteKg: 0 };
                                 }
-                                dynamicFoodStats[rawItemName].totalRestes += restePct;
-                                dynamicFoodStats[rawItemName].totalTauxMange += tauxMange;
-                                dynamicFoodStats[rawItemName].count += 1;
+                                dynamicFoodStats[cleanShortName].totalRestes += restePct;
+                                dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
+                                dynamicFoodStats[cleanShortName].count += 1;
 
-                                let masseKg = (150 * (restePct / 100)) / 1000;
-                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(rawItemName);
+                                // Base de calcul : 1 portion = 150g (0.15kg)
+                                let masseKg = 0.15 * (restePct / 100);
+                                dynamicFoodStats[cleanShortName].poidsJeteKg += masseKg;
+                                
+                                if(typeof getFacteurCarbone === 'function') {
+                                    poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
+                                }
                             }
                         }
                     });
                 } else {
-                    // Fallback si pas de crochets, on utilise les colonnes numériques
+                    // Fallback (Anciens Scans numériques)
                     let grammesPlat = parseFloat(scan.plat) || 0;
                     if (grammesPlat > 0) {
                         let name = "Plat principal";
                         if (!dynamicFoodStats[name]) {
-                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0 };
+                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0, poidsJeteKg: 0 };
                         }
-                        let pctReste = Math.min(100, Math.max(0, (grammesPlat / 200) * 100));
+                        let pctReste = Math.min(100, Math.max(0, Math.round((grammesPlat / 200) * 100)));
                         let tauxMange = 100 - pctReste;
                         dynamicFoodStats[name].totalRestes += pctReste;
                         dynamicFoodStats[name].totalTauxMange += tauxMange;
                         dynamicFoodStats[name].count += 1;
-                        poidsTotalCarbonePeriodeKg += (grammesPlat / 1000) * getFacteurCarbone(name);
+                        let masseKg = grammesPlat / 1000;
+                        dynamicFoodStats[name].poidsJeteKg += masseKg;
+                        if(typeof getFacteurCarbone === 'function') {
+                            poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(name);
+                        }
                     }
                 }
             });
 
+            // Mise à jour du KPI global Impact Carbone
             const kpiImpactElem = document.getElementById('kpi-impact');
-            if (kpiImpactElem) {
-                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
+            if (kpiImpactElem && typeof isModeCarboneActif !== 'undefined' && isModeCarboneActif) {
+                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg CO₂`;
+            } else if (kpiImpactElem) {
+                kpiImpactElem.innerText = "0.0 kg";
             }
 
+            // Fallback pour les vignettes
             function getThumbFallback(alimentName) {
                 let text = alimentName.toLowerCase();
-                if (FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
-                if (text.includes('plat') || text.includes('viande') || text.includes('paupiette')) return { emoji: "🥩", url: DEFAULT_THUMBNAIL };
-                if (text.includes('dessert') || text.includes('laitage') || text.includes('tiramisu')) return { emoji: "🍎", url: DEFAULT_THUMBNAIL };
-                if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
-                if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
-                if (text.includes('chou-fleur')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
-                return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
+                if (typeof FOOD_THUMBNAILS !== 'undefined' && FOOD_THUMBNAILS[alimentName]) return FOOD_THUMBNAILS[alimentName];
+                if (text.includes('plat') || text.includes('viande') || text.includes('paupiette')) return { emoji: "🥩", url: typeof DEFAULT_THUMBNAIL !== 'undefined' ? DEFAULT_THUMBNAIL : "" };
+                if (text.includes('dessert') || text.includes('laitage') || text.includes('tiramisu')) return { emoji: "🍎", url: typeof DEFAULT_THUMBNAIL !== 'undefined' ? DEFAULT_THUMBNAIL : "" };
+                if (text.includes('pain')) return { emoji: "🥖", url: typeof DEFAULT_THUMBNAIL !== 'undefined' ? DEFAULT_THUMBNAIL : "" };
+                if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: typeof DEFAULT_THUMBNAIL !== 'undefined' ? DEFAULT_THUMBNAIL : "" };
+                if (text.includes('chou-fleur')) return { emoji: "🥦", url: typeof DEFAULT_THUMBNAIL !== 'undefined' ? DEFAULT_THUMBNAIL : "" };
+                return { emoji: "🥗", url: typeof DEFAULT_THUMBNAIL !== 'undefined' ? DEFAULT_THUMBNAIL : "" };
             }
 
             let currentSelectedFilter = selectFilter ? selectFilter.value : "all";
@@ -1412,7 +1431,9 @@
                     emoji: mediaObj.emoji,
                     tauxMange: tauxMange,
                     rejetPct: rejetPct,
-                    occurrences: stats.count
+                    occurrences: stats.count,
+                    poidsJeteKg: stats.poidsJeteKg,
+                    poidsTotalCarbone: typeof getFacteurCarbone === 'function' ? stats.poidsJeteKg * getFacteurCarbone(stats.rawName) : 0
                 };
 
                 globalItemsDetailedStats[key] = itemObj;
@@ -1435,7 +1456,7 @@
                 if (options.includes(currentSelectedFilter)) selectFilter.value = currentSelectedFilter;
             }
 
-            renderAnalyseFineSynthese(plebiscites, rejets);
+            if (typeof renderAnalyseFineSynthese === 'function') renderAnalyseFineSynthese(plebiscites, rejets);
 
             plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
             bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
@@ -1453,7 +1474,15 @@
                 }
 
                 list.forEach(item => {
-                    let cardClass, valText;
+                    let cardClass, valText, extraText = "";
+
+                    // AJOUT CHIRURGICAL : Poids en Kg et CO2 sur les étiquettes
+                    if (typeof isModeCarboneActif !== 'undefined' && isModeCarboneActif && item.rejetPct > 0) {
+                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;">⚖️ ${item.poidsJeteKg.toFixed(2)} kg jetés (⚠️ ${item.poidsTotalCarbone.toFixed(2)} kg CO₂)</div>`;
+                    } else if (item.rejetPct > 0) {
+                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;">⚖️ ${item.poidsJeteKg.toFixed(2)} kg jetés</div>`;
+                    }
+
                     if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
                         valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
@@ -1471,13 +1500,14 @@
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
 
                     container.innerHTML += `
-                        <div class="${cardClass}" onclick="openItemDetail('${item.rawKey}')" title="Cliquer pour analyser cet ingrédient" style="position: relative;">
+                        <div class="${cardClass}" onclick="typeof openItemDetail === 'function' ? openItemDetail('${item.rawKey}') : null" title="Cliquer pour analyser cet ingrédient" style="position: relative;">
                             <img src="${item.thumb}" onerror="${fallbackHtml}" class="dish-thumb-photo" alt="">
-                            <div style="flex-grow: 1; padding-right: 8px; overflow: hidden;">
+                            <div style="flex-grow: 1; padding-right: 8px; overflow: hidden; padding-bottom: 4px;">
                                 <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
                                 <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
+                                ${extraText}
                             </div>
-                            <button type="button" onclick="bannirItemHallucine('${item.rawKey}', event)" title="Supprimer cette hallucination" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️</button>
+                            <button type="button" onclick="typeof bannirItemHallucine === 'function' ? bannirItemHallucine('${item.rawKey}', event) : null" title="Supprimer cette hallucination" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️</button>
                         </div>
                     `;
                 });
@@ -1488,8 +1518,11 @@
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
-            updateEtApresModule(scansValides);
+            if (typeof updateEtApresModule === "function") {
+                updateEtApresModule(scansValides);
+            }
         }
+
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
@@ -1511,13 +1544,14 @@
                 });
             }
 
+            // On utilise la globale currentModalOccurrences définie plus haut dans ton fichier
             currentModalOccurrences = [];
 
             matchingScans.forEach(s => {
-                let dateIso = normalizeDate(s.dateRaw) || "";
+                let dateIso = (typeof normalizeDate === 'function' ? normalizeDate(s.dateRaw) : s.dateRaw) || "";
                 let commentaire = s.commentaire || "";
                 
-                // --- CORRECTION : EXTRACTION DU VRAI POURCENTAGE PAR L'IA ---
+                // --- CORRECTION BUG > 100% : LECTURE DE LA CHAÎNE IA ---
                 let tauxExact = 0;
                 let blocks = commentaire.split(/\[([^\]]+)\]/g);
                 blocks.forEach(b => {
@@ -1529,22 +1563,20 @@
                     }
                 });
 
-                // Fallback sécurisé : si l'IA n'a pas mis de crochets (anciens scans)
                 if (tauxExact === 0 && !commentaire.includes('[')) {
                     if (s.plat > 0) tauxExact = Math.round((s.plat / 200) * 100);
                     else if (s.entree > 0) tauxExact = Math.round((s.entree / 100) * 100);
                     else if (s.dessert > 0) tauxExact = Math.round((s.dessert / 100) * 100);
                 }
                 
-                // Verrou de sécurité mathématique : plafonner à 100% max
                 let tauxFinal = Math.min(100, Math.max(0, tauxExact));
-                // ------------------------------------------------------------
+                // --------------------------------------------------------
                 
                 let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
                 let alternativesMemeCategorie = [];
 
                 if (globalRawData && globalRawData.rawGaspillage) {
-                    let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
+                    let menuRow = globalRawData.rawGaspillage.find(m => (typeof normalizeDate === 'function' ? normalizeDate(m.dateRaw) : m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
                     if (menuRow && menuRow.commentaire) {
                         menuCompletDuJour = menuRow.commentaire;
                         
@@ -1566,12 +1598,14 @@
                     date: dateIso || "Date inconnue",
                     taux: tauxFinal,
                     menu: menuCompletDuJour,
-                    alternatives: alternativesMemeCategorie.length > 0 ? alternativesMemeCategorie.join(', ') : "Aucune autre alternative dans la même catégorie",
+                    alternatives: alternativesMemeCategorie.length > 0 ? alternativesMemeCategorie.join(', ') : "Aucune",
                     obs: s.commentaire
                 });
             });
 
-            renderModalOccurrencesList(currentModalOccurrences);
+            if (typeof renderModalOccurrencesList === 'function') {
+                renderModalOccurrencesList(currentModalOccurrences);
+            }
         }
 
         function renderModalOccurrencesList(occurrences) {
