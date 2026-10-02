@@ -219,18 +219,6 @@
                         </div>
                     </div>
                     
-                    <!-- 🛑 BLOC DES 2 BOUTONS (Transparence & Carbone) 🛑 -->
-                    <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
-                        <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🛡</span> Transparence & Audit des calculs
-                        </button>
-
-                        <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
-                        </button>
-                    </div>
-
-                    <!-- Grille propre des 2 premières cases (Vert et Jaune) -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
                             <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
@@ -398,14 +386,14 @@
                                 <tr>
                                     <td>
                                         <div class="sub-theme">Bases & Entrées</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Buffet d'entrées"> Buffet d'entrées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Buffet d'entrées (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade verte"> Salade verte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade verte (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade d'endives"> Salade d'endives <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade d'endives (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Tomates"> Tomates <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Carottes râpées"> Carottes râpées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Carottes râpées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Taboulé"> Taboulé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Taboulé (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Œuf dur / Mayonnaise"> Œuf dur / Mayonnaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Œuf dur / Mayonnaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Charcuterie"> Charcuterie <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Charcuterie (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Quiche / Tarte"> Quiche / Tarte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Quiche / Tarte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Salade piémontaise"> Salade piémontaise <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Salade piémontaise (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="entree_base" value="Pâté en croûte"> Pâté en croûte <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâté en croûte (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -430,7 +418,7 @@
                                         <div class="sub-theme">Plats & Viandes</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Couscous"> Couscous <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Couscous (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Paella"> Paella <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Paella (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tajine (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Tajine"> Tajine <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tajine (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Gardiane de Taureau"> Gardiane de Taureau <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gardiane de Taureau (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Chili (Con Carné/Végé)"> Chili <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Chili (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Lasagnes"> Lasagnes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lasagnes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -441,11 +429,11 @@
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Steak haché / Boulettes"> Steak haché / Boulettes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Steak haché (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson"> Poisson <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Poisson pané"> Poisson pané <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poisson pané (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Cordon bleu"> Cordon bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Cordon bleu (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Cordon bleu"> Cordon bleu <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Cordon bleu (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Omelette"> Omelette <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Omelette (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Saucisse"> Saucisse <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Saucisse (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Merguez"> Merguez <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Merguez (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Croustillant fromager bio"> Croustillant fromager bio<span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Croustillant fromager (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="plat_base" value="Croustillant fromager bio"> Croustillant fromager bio<span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Croustillant fromager (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
 
                                         <div class="sub-theme" style="margin-top: 10px; color: #1e3a8a;">Options / Accompagnements Plats</div>
                                         <label class="checkbox-label"><input type="checkbox" name="plat_opt" value="Poulet"> + Poulet</label>
@@ -467,21 +455,21 @@
 
                                     <td>
                                         <div class="sub-theme">Féculents & Légumes</div>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Frites / Potatoes"> Frites / Potatoes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Frites (Fait Maison)" title="Fait Maison"> 🧑‍‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pâtes"> Pâtes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pâtes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Riz"> Riz <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Riz (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Semoule / Boulgour / Épeautre"> Semoule / Boulgour <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Semoule (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Purée"> Purée <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Purée (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Lentilles"> Lentilles <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Lentilles (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Haricots verts"> Haricots verts <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Haricots verts (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Petits pois / Carottes"> Petits pois / Carottes <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Petits pois (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Brocolis / Choux"> Brocolis / Choux <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Brocolis (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Ratatouille / Aubergines"> Ratatouille / Aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Ratatouille (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Épinards"> Épinards <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Épinards (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Endives cuites"> Endives cuites <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Endives cuites (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Tomates provençales"> Tomates provençales <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Tomates provençales (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Pommes de terre persillées"> Pommes de terre persillées <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Pommes de terre persillées (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Gratin d'aubergines"> Gratin d'aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gratin d'aubergines (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Gratin d'aubergines"> Gratin d'aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gratin d'aubergines (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Poêlée de courgettes au curry"> Poêlée courgettes curry <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poêlée courgettes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
                                         <div id="favs_container_accomp" class="local-favs-box" style="display: none;"></div>
@@ -496,7 +484,7 @@
                                     <td>
                                         <div class="sub-theme">Desserts & Laitages</div>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt"> Yaourt <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
-                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt aromatisé"> Yaourt aromatisé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt aromatisé (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
+                                        <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt aromatisé"> Yaourt aromatisé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt aromatisé (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Yaourt bio brassé"> Yaourt bio brassé <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Yaourt bio (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Fromage"> Fromage <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Fromage (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="dessert_lait" value="Emmental"> Emmental <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Emmental (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
@@ -607,7 +595,7 @@
                             </div>
                             <div class="eq-grid">
                                 <div class="eq-card"><span class="eq-card-icon">🥖</span><div class="eq-card-val" id="bilan-eq-pain">0</div><div class="eq-card-lbl">Baguettes de pain jetées</div></div>
-                                <div class="eq-card"><span class="eq-card-icon">🍽️️</span><div class="eq-card-val" id="bilan-eq-repas">0</div><div class="eq-card-lbl">Repas complets perdus</div></div>
+                                <div class="eq-card"><span class="eq-card-icon">🍽️</span><div class="eq-card-val" id="bilan-eq-repas">0</div><div class="eq-card-lbl">Repas complets perdus</div></div>
                                 <div class="eq-card"><span class="eq-card-icon">💶</span><div class="eq-card-val" id="bilan-eq-euros">0.00 €</div><div class="eq-card-lbl">Coût financier estimé</div></div>
                                 <div class="eq-card" style="border-top: 3px solid #0284c7;"><span class="eq-card-icon">🌍</span><div class="eq-card-val" id="bilan-eq-monde">0</div><div class="eq-card-lbl">Rations d'écoliers (base PAM)</div></div>
                             </div>
@@ -743,45 +731,6 @@
         let compteurCapturesAutomatiquesJour = 0;
         let dateDerniereCaptureAuto = "";
         let currentModalOccurrences = [];
-
-        // 🌟 LES FONCTIONS CARBONE ET TRANSPARENCE ICI :
-        let isModeCarboneActif = false;
-
-        function toggleModeCarbone() {
-            isModeCarboneActif = !isModeCarboneActif;
-            const btn = document.getElementById('btn-mode-carbone');
-            if (isModeCarboneActif) {
-                btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : <strong>ACTIF</strong>';
-                btn.style.backgroundColor = '#10b981';
-                btn.style.color = 'white';
-                btn.style.borderColor = '#059669';
-            } else {
-                btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ';
-                btn.style.backgroundColor = '#f1f5f9';
-                btn.style.color = '#475569';
-                btn.style.borderColor = '#cbd5e1';
-            }
-            if (typeof applyCustomDateFilter === 'function') applyCustomDateFilter();
-        }
-
-        function openMethodologyModal() {
-            const modal = document.getElementById('modal-methodology');
-            if (modal) modal.style.display = 'flex';
-        }
-
-        function getFacteurCarbone(alimentName) {
-            let clean = (alimentName || "").toLowerCase();
-            const coeffs = {
-                "bœuf": 22.0, "viande": 15.0, "veau": 13.0, "agneau": 25.0,
-                "porc": 6.5, "saucisse": 6.0, "poulet": 5.5, "poisson": 5.0,
-                "fromage": 7.5, "yaourt": 2.2, "lait": 1.5, "œuf": 2.8,
-                "riz": 2.7, "pâtes": 1.6, "pain": 1.2, "frites": 1.8, "pomme de terre": 0.8
-            };
-            for (let key in coeffs) {
-                if (clean.includes(key)) return coeffs[key];
-            }
-            return 1.2;
-        }
 
         const COEFFICIENTS_INEVITABLES = {
             "salade verte": 0.10, "laitue": 0.10, "mâche": 0.05, "batavia": 0.10, "concombre": 0.15,
@@ -1109,12 +1058,7 @@
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('kpi-total').innerText = `${poidsTotalEvitablePeriode.toFixed(1)} kg`;
             document.getElementById('kpi-money').innerText = `${(poidsTotalEvitablePeriode * 4.50).toFixed(2)} €`;
-            
-            // Si le mode carbone est inactif (comportement par défaut), on affiche 0.0 kg.
-            if (!isModeCarboneActif) {
-                 document.getElementById('kpi-impact').innerText = "0.0 kg";
-            }
-
+            document.getElementById('kpi-impact').innerText = `${(poidsTotalEvitablePeriode * 2.0).toFixed(1)} kg`;
             document.getElementById('biodiff-total').innerText = `Total Évitable : ${evitablesG.toFixed(0)} g (Inévitables : ${inevitablesG.toFixed(0)} g)`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
@@ -1320,6 +1264,49 @@
             }
         }
 
+        // 🌟 DICTIONNAIRE CARBONE ADEME (Agribalyse simplifié - kg CO2eq / kg d'aliment)
+        const COEFFICIENTS_CARBONE_ADEME = {
+            "bœuf": 22.0, "viande": 15.0, "veau": 13.0, "agneau": 25.0, "gardiane": 22.0,
+            "porc": 6.5, "saucisse": 6.0, "merguez": 8.0, "charcuterie": 6.0,
+            "poulet": 5.5, "volaille": 5.5, "dinde": 5.5, "cuisse de poulet": 5.5,
+            "poisson": 5.0, "colin": 4.5, "saumon": 7.5, "thon": 6.0,
+            "fromage": 7.5, "emmental": 8.0, "comté": 8.5, "camembert": 6.0, "yaourt": 2.2, "lait": 1.5, "œuf": 2.8,
+            "riz": 2.7, "pâtes": 1.6, "semoule": 1.5, "blé": 1.4, "pain": 1.2,
+            "frites": 1.8, "pomme de terre": 0.8, "purée": 1.0, "lentilles": 0.9,
+            "haricots verts": 0.8, "petits pois": 1.1, "brocolis": 0.7, "carotte": 0.5, "tomate": 0.8,
+            "salade": 0.5, "laitue": 0.5, "fruit": 0.6, "pomme": 0.4, "banane": 0.8, "compote": 0.7, "pâtisserie": 2.0
+        };
+
+        function getFacteurCarbone(nomAliment) {
+            let clean = (nomAliment || "").toLowerCase();
+            for (let key in COEFFICIENTS_CARBONE_ADEME) {
+                if (clean.includes(key)) return COEFFICIENTS_CARBONE_ADEME[key];
+            }
+            return 1.2;
+        }
+
+        // 🗑️ GESTION DE LA LISTE NOIRE CONTEXTUELLE (ANTI-HALLUCINATION)
+        function getListeNoireMenuActif() {
+            const school = document.getElementById('select-etablissement')?.value || "defaut";
+            const menuActif = localStorage.getItem(`menuActive-${school}`) || "defaut";
+            let key = `listeNoire_${school}_${menuActif}`;
+            return JSON.parse(localStorage.getItem(key) || '[]');
+        }
+
+        function bannirItemHallucine(rawKey, event) {
+            event.stopPropagation();
+            const school = document.getElementById('select-etablissement')?.value || "defaut";
+            const menuActif = localStorage.getItem(`menuActive-${school}`) || "defaut";
+            let key = `listeNoire_${school}_${menuActif}`;
+            
+            let banniList = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!banniList.includes(rawKey)) {
+                banniList.push(rawKey);
+                localStorage.setItem(key, JSON.stringify(banniList));
+            }
+            applyCustomDateFilter();
+        }
+
         // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
         function runGranularExtraction(scansSource) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
@@ -1355,18 +1342,16 @@
                             let restePct = pctMatch ? parseInt(pctMatch[1]) : 0;
                             let tauxMange = Math.max(0, Math.min(100, 100 - restePct));
 
-                            let cleanShortName = getCleanItemShortName(rawItemName);
-
-                            if (cleanShortName && !banniList.includes(cleanShortName)) {
-                                if (!dynamicFoodStats[cleanShortName]) {
-                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0 };
+                            if (rawItemName && !banniList.includes(rawItemName)) {
+                                if (!dynamicFoodStats[rawItemName]) {
+                                    dynamicFoodStats[rawItemName] = { totalRestes: 0, count: 0, rawName: rawItemName, totalTauxMange: 0 };
                                 }
-                                dynamicFoodStats[cleanShortName].totalRestes += restePct;
-                                dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
-                                dynamicFoodStats[cleanShortName].count += 1;
+                                dynamicFoodStats[rawItemName].totalRestes += restePct;
+                                dynamicFoodStats[rawItemName].totalTauxMange += tauxMange;
+                                dynamicFoodStats[rawItemName].count += 1;
 
                                 let masseKg = (150 * (restePct / 100)) / 1000;
-                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
+                                poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(rawItemName);
                             }
                         }
                     });
@@ -1389,8 +1374,8 @@
             });
 
             const kpiImpactElem = document.getElementById('kpi-impact');
-            if (kpiImpactElem && isModeCarboneActif) {
-                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg CO₂`;
+            if (kpiImpactElem) {
+                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg`;
             }
 
             function getThumbFallback(alimentName) {
@@ -1401,7 +1386,6 @@
                 if (text.includes('pain')) return { emoji: "🥖", url: DEFAULT_THUMBNAIL };
                 if (text.includes('tomate') || text.includes('salade')) return { emoji: "🍅", url: DEFAULT_THUMBNAIL };
                 if (text.includes('chou-fleur')) return { emoji: "🥦", url: DEFAULT_THUMBNAIL };
-                if (text.includes('poire') || text.includes('banane') || text.includes('pomme')) return { emoji: "🍐", url: DEFAULT_THUMBNAIL };
                 return { emoji: "🥗", url: DEFAULT_THUMBNAIL };
             }
 
@@ -1428,8 +1412,7 @@
                     emoji: mediaObj.emoji,
                     tauxMange: tauxMange,
                     rejetPct: rejetPct,
-                    occurrences: stats.count,
-                    poidsTotalCarbone: (150 * (rejetPct / 100)) / 1000 * getFacteurCarbone(stats.rawName) * stats.count // Ajout pour le carbone
+                    occurrences: stats.count
                 };
 
                 globalItemsDetailedStats[key] = itemObj;
@@ -1470,16 +1453,7 @@
                 }
 
                 list.forEach(item => {
-                    let cardClass, valText, kgText = "";
-                    let rejetMassKg = (150 * (item.rejetPct / 100)) / 1000 * item.occurrences;
-
-                    // Afficher les KG jetés et/ou l'empreinte carbone si le mode est actif
-                    if (isModeCarboneActif && item.rejetPct > 0) {
-                        kgText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px;">🗑️ ${rejetMassKg.toFixed(2)}kg jetés (⚠️ ${item.poidsTotalCarbone.toFixed(2)} kg CO₂)</div>`;
-                    } else if (item.rejetPct > 0) {
-                        kgText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px;">🗑️ ${rejetMassKg.toFixed(2)}kg jetés</div>`;
-                    }
-
+                    let cardClass, valText;
                     if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
                         valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
@@ -1502,9 +1476,8 @@
                             <div style="flex-grow: 1; padding-right: 8px; overflow: hidden;">
                                 <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
                                 <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
-                                ${kgText}
                             </div>
-                            <button type="button" onclick="bannirItemHallucine('${item.rawKey}', event)" title="Supprimer cette hallucination" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️️</button>
+                            <button type="button" onclick="bannirItemHallucine('${item.rawKey}', event)" title="Supprimer cette hallucination" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️</button>
                         </div>
                     `;
                 });
@@ -1517,7 +1490,6 @@
 
             updateEtApresModule(scansValides);
         }
-
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
@@ -1928,7 +1900,298 @@
                 
             }, 400); // 400ms d'attente pour simuler la prise de photo
         }
-        
+        function switchView(viewId) {
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); 
+            let m = document.getElementById('menu-' + viewId);
+            if(m) m.classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
+            let v = document.getElementById(viewId);
+            if(v) v.classList.add('active');
+            
+            if (viewId === 'view-borne') {
+                initCamera(); 
+                const school = document.getElementById('select-etablissement').value;
+                const menuLocal = localStorage.getItem(`menuActive-${school}`);
+                if (menuLocal) {
+                    const displayMenu = document.getElementById('borne-menu-active');
+                    if (displayMenu) displayMenu.innerText = menuLocal.substring(0, 50) + (menuLocal.length > 50 ? "..." : "");
+                }
+            } else {
+                stopCamera();
+            }
+
+            if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport' || viewId === 'view-borne') {
+                loadLiveData(); 
+            }
+            if (viewId === 'view-cuisinier') renderLocalFavorites();
+        }
+
+        let echecsConnexionConsecutifs = 0;
+
+        function loadLiveData() {
+            const school = document.getElementById('select-etablissement').value;
+            const errBanner = document.getElementById('dashboard-error-banner');
+
+            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
+            .then(response => response.json()).then(data => {
+                echecsConnexionConsecutifs = 0;
+                if(errBanner) errBanner.style.display = "none";
+
+                if (data.error) {
+                    if(errBanner) { errBanner.innerText = `Erreur Serveur : ${data.error}`; errBanner.style.display = "block"; }
+                    clearDashboardToZero(); return;
+                }
+
+                if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
+                    localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
+                    let displayMenu = document.getElementById('borne-menu-active');
+                    if(displayMenu) displayMenu.innerText = data.dernierMenu.substring(0, 50) + "...";
+                }
+
+                if (data.effectifCouverts) {
+                    let parts = String(data.effectifCouverts).split('-');
+                    let s1 = parts[0] ? parseInt(parts[0]) : 0;
+                    let s2 = parts[1] ? parseInt(parts[1]) : 0;
+                    if(s1 > 0 || s2 > 0) {
+                        localStorage.setItem(`totalConvives-${school}`, s1 + s2);
+                        let totalInput = document.getElementById('convives-total');
+                        if(totalInput) totalInput.value = s1 + s2;
+                    }
+                }
+
+                if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
+                globalRawData = data; 
+                
+                let activeBtn = document.querySelector('.btn-period.active') || document.querySelectorAll('.btn-period')[0];
+                if (activeBtn) {
+                    if(activeBtn.innerText.includes('Tout')) setQuickPeriod('all', activeBtn);
+                    else if(activeBtn.innerText.includes('3')) setQuickPeriod('3months', activeBtn);
+                    else if(activeBtn.innerText.includes('Ce')) setQuickPeriod('month', activeBtn);
+                    else if(activeBtn.innerText.includes('7')) setQuickPeriod('7days', activeBtn);
+                    else applyCustomDateFilter();
+                } else {
+                    setQuickPeriod('all', document.querySelectorAll('.btn-period')[0]); 
+                }
+            }).catch(err => {
+                echecsConnexionConsecutifs++;
+                if (echecsConnexionConsecutifs >= 3) {
+                    if(errBanner) { 
+                        errBanner.innerText = "Erreur de connexion persistante à Google Sheets (Vérifiez le réseau)."; 
+                        errBanner.style.display = "block"; 
+                    }
+                }
+            });
+        }
+
+        function clearDashboardToZero() {
+            document.getElementById('kpi-avg').innerText = "0 g";
+            document.getElementById('kpi-total').innerText = "0.0 kg";
+            document.getElementById('kpi-money').innerText = "0.00 €";
+            document.getElementById('kpi-impact').innerText = "0.0 kg";
+            document.getElementById('biodiff-total').innerText = "Total : 0 g";
+            document.getElementById('period-adhesion-grid').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
+            document.getElementById('period-rejets-grid').innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
+            if(document.getElementById('compteur-scans-jour')) document.getElementById('compteur-scans-jour').innerText = "0";
+        }
+
+        function adjustWeight(id, value) {
+            const input = document.getElementById(id);
+            let currentVal = parseFloat(input.value) || 0;
+            input.value = Math.max(0, currentVal + value).toFixed(2);
+        }
+
+        function loadEtablissementsDropdown() {
+            fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getEtablissements`)
+            .then(res => res.json())
+            .then(schools => {
+                const select = document.getElementById('select-etablissement'); select.innerHTML = ""; 
+                schools.forEach(school => { const opt = document.createElement('option'); opt.value = school; opt.innerText = school; select.appendChild(opt); });
+                select.value = localStorage.getItem('schoolActuelle') || schools[0]; changeEtablissement();
+            }).catch(() => clearDashboardToZero());
+        }
+
+        function changeEtablissement() {
+            const school = document.getElementById('select-etablissement').value; 
+            localStorage.setItem('schoolActuelle', school);
+            const reportSchoolElem = document.getElementById('report-school-name');
+            if (reportSchoolElem) reportSchoolElem.innerText = school;
+            loadExpectedMealsForSchool(school); 
+            renderLocalFavorites();
+            loadLiveData();
+        }
+
+        function loadExpectedMealsForSchool(school) {
+            let total = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
+            let totalInput = document.getElementById('convives-total');
+            if(totalInput) totalInput.value = total;
+        }
+
+        function saveExpectedMeals() {
+            const school = document.getElementById('select-etablissement').value;
+            let totalSaisi = parseInt(document.getElementById('convives-total').value) || 450;
+            localStorage.setItem(`totalConvives-${school}`, totalSaisi);
+
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveEffectifs", ecole: school, effectifs_str: totalSaisi.toString() }) 
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) { alert("Effectifs enregistrés avec succès !"); loadLiveData(); }
+                else { alert("Erreur d'enregistrement : " + res.error); }
+            }).catch(() => alert("Erreur réseau lors de la sauvegarde."));
+        }
+
+        function renderBilanEleves(alimKg, fruitsKg, painKg, effectif) {
+            const card = document.getElementById('bilan-eleves-container');
+            const header = document.getElementById('bilan-header-color');
+            const pill = document.getElementById('bilan-score-pill');
+            const val = document.getElementById('bilan-score-val');
+            
+            const totalKg = alimKg + fruitsKg + painKg;
+            if (totalKg <= 0 || !effectif || effectif <= 0) { card.style.display = "none"; return; }
+
+            const gramsPerPupil = Math.round((totalKg * 1000) / effectif);
+            val.innerText = `${gramsPerPupil} g / convive`;
+
+            header.className = "bilan-header-box";
+            if (gramsPerPupil <= 30) { pill.innerText = "🟢 NIVEAU 4 — EXCELLENT"; header.classList.remove("zone-jaune", "zone-orange", "zone-rouge"); }
+            else if (gramsPerPupil <= 70) { header.className = "bilan-header-box zone-jaune"; pill.innerText = "🟡 NIVEAU 3 — SATISFAISANT"; }
+            else if (gramsPerPupil <= 100) { header.className = "bilan-header-box zone-orange"; pill.innerText = "🟠 NIVEAU 2 — FRAGILE"; }
+            else { header.className = "bilan-header-box zone-rouge"; pill.innerText = "🔴 NIVEAU 1 — INSUFFISANT"; }
+
+            document.getElementById('bilan-eq-pain').innerText = `${Math.round((painKg * 1000) / 200)}`;
+            document.getElementById('bilan-eq-repas').innerText = `${Math.round((totalKg * 1000) / 450)}`;
+            document.getElementById('bilan-eq-euros').innerText = `${(totalKg * 2.30).toFixed(2)} €`;
+            document.getElementById('bilan-eq-monde').innerText = `${Math.round((totalKg * 1000) / 200)}`;
+            card.style.display = "block";
+        }
+
+        function saveBagWeights() {
+            const school = document.getElementById('select-etablissement').value;
+            const peseeDate = document.getElementById('input-pesee-date').value || new Date().toISOString().split('T')[0];
+            const alim = parseFloat(document.getElementById('sac-alimentaire').value) || 0;
+            const fruits = parseFloat(document.getElementById('sac-fruits').value) || 0;
+            const pain = parseFloat(document.getElementById('sac-pain').value) || 0;
+            const emb = parseFloat(document.getElementById('sac-emballages').value) || 0;
+            const serv = parseFloat(document.getElementById('sac-serviettes').value) || 0;
+            const effectif = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
+
+            const payload = { action: "logBagWeights", etablissement: school, date_pesee: peseeDate, sac_alimentaire: alim.toFixed(2), sac_fruits: fruits.toFixed(2), sac_pain: pain.toFixed(2), sac_emballages: emb.toFixed(2), sac_serviettes: serv.toFixed(2) };
+            
+            renderBilanEleves(alim * 0.70, fruits, pain, effectif);
+
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
+            }).then(r => r.json()).then(res => {
+                if(res.success) {
+                    alert("✅ Pesées enregistrées pour la date du " + peseeDate + " !");
+                    document.getElementById('sac-alimentaire').value = "0.00"; document.getElementById('sac-fruits').value = "0.00";
+                    document.getElementById('sac-pain').value = "0.00"; document.getElementById('sac-emballages').value = "0.00";
+                    document.getElementById('sac-serviettes').value = "0.00"; loadLiveData(); 
+                } else { alert("❌ Erreur du serveur Google : " + res.error); }
+            }).catch(() => alert("❌ Erreur réseau. Les données n'ont pas pu être envoyées."));
+        }
+
+        function getCurrentCheckedMenu() {
+            let entrees = [];
+            document.querySelectorAll('input[name="entree_base"]:checked').forEach(el => {
+                let text = el.value;
+                let parentLabel = el.closest('label');
+                let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                entrees.push(text);
+            });
+            let entreesOpt = Array.from(document.querySelectorAll('input[name="entree_opt"]:checked')).map(el => el.value);
+            let entreeLibre = document.getElementById('entree_libre').value.trim();
+            
+            let entreeFinal = entrees.length > 0 ? entrees.join(' + ') : "";
+            if (entreesOpt.length > 0 && entreeFinal) entreeFinal += " (" + entreesOpt.join(', ') + ")";
+            if (entreeLibre) entreeFinal = entreeFinal ? entreeFinal + " / " + entreeLibre : entreeLibre;
+            if (!entreeFinal) entreeFinal = "Sans entrée";
+
+            let plats = [];
+            document.querySelectorAll('input[name="plat_base"]:checked').forEach(el => {
+                let text = el.value;
+                let parentLabel = el.closest('label');
+                let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                plats.push(text);
+            });
+            let platsOpt = Array.from(document.querySelectorAll('input[name="plat_opt"]:checked')).map(el => el.value);
+            let platLibre = document.getElementById('plat_libre').value.trim();
+            
+            let platFinal = plats.length > 0 ? plats.join(' + ') : "";
+            if (platsOpt.length > 0 && platFinal) platFinal += " (" + platsOpt.join(', ') + ")";
+            if (platLibre) platFinal = platFinal ? platFinal + " / " + platLibre : platLibre;
+            if (!platFinal) platFinal = "Sans plat";
+
+            let accomps = [];
+            document.querySelectorAll('input[name="accomp_base"]:checked, input[name="accomp_leg"]:checked').forEach(el => {
+                if(el.checked) {
+                    let text = el.value;
+                    let parentLabel = el.closest('label');
+                    let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍‍🍳";
+                    accomps.push(text);
+                }
+            });
+            let accompLibre = document.getElementById('accomp_libre').value.trim();
+            let accompFinal = accomps.length > 0 ? accomps.join(' + ') : "";
+            if (accompLibre) accompFinal = accompFinal ? accompFinal + " / " + accompLibre : accompLibre;
+            if (!accompFinal) accompFinal = "Sans accomp.";
+
+            let desserts = [];
+            document.querySelectorAll('input[name="dessert_lait"]:checked, input[name="dessert_douceur"]:checked').forEach(el => {
+                if(el.checked) {
+                    let text = el.value;
+                    let parentLabel = el.closest('label');
+                    let fmCheckbox = parentLabel ? parentLabel.querySelector('input[name="fait_maison"]') : null;
+                    if(fmCheckbox && fmCheckbox.checked) text += " 🧑‍🍳";
+                    desserts.push(text);
+                }
+            });
+            let dessertLibre = document.getElementById('dessert_libre').value.trim();
+            let dessertFinal = desserts.length > 0 ? desserts.join(' + ') : "";
+            if (dessertLibre) dessertFinal = dessertFinal ? dessertFinal + " / " + dessertLibre : dessertLibre;
+            if (!dessertFinal) dessertFinal = "Sans dessert";
+
+            if (entreeFinal === "Sans entrée" && platFinal === "Sans plat" && accompFinal === "Sans accomp." && dessertFinal === "Sans dessert") return null;
+
+            return `${entreeFinal} | ${platFinal} | ${accompFinal} | ${dessertFinal}`;
+        }
+
+        function saveMenu() {
+            const school = document.getElementById('select-etablissement').value;
+            const menuDate = document.getElementById('input-menu-date').value || new Date().toISOString().split('T')[0];
+            const menuFinal = getCurrentCheckedMenu();
+            if (!menuFinal) { alert("Veuillez cocher au moins un élément ou remplir un champ libre pour activer le menu du jour."); return; }
+            
+            let displayMenu = document.getElementById('borne-menu-active');
+            if(displayMenu) displayMenu.innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
+            localStorage.setItem(`menuActive-${school}`, menuFinal);
+
+            let effectifSaisi = parseInt(document.getElementById('convives-total').value) || 450;
+            localStorage.setItem(`totalConvives-${school}`, effectifSaisi);
+
+            fetch(ADRESSE_SHEET_OFFICIELLE, { 
+                method: "POST", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ action: "logMenu", ecole: school, date_menu: menuDate, effectif: effectifSaisi, menu_complet: menuFinal }) 
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) { 
+                    alert('✅ Menu validé et enregistré pour la date du ' + menuDate + ' !'); 
+                    document.getElementById('entree_libre').value = "";
+                    document.getElementById('plat_libre').value = "";
+                    document.getElementById('accomp_libre').value = "";
+                    document.getElementById('dessert_libre').value = "";
+                    loadLiveData(); 
+                }
+                else { alert('❌ Erreur serveur : ' + res.error); }
+            }).catch(() => alert('❌ Erreur réseau lors de la validation du menu.'));
+        }
+
         function handleMenuFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
