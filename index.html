@@ -2379,28 +2379,55 @@
         }
     </script>
 
-    <!-- 🛑 MODALE DE TRANSPARENCE & AUDIT DES CALCULS -->
+    <!-- 🛡️ MODALE DE TRANSPARENCE & AUDIT DES CALCULS (VERSION EXPERTE DÉPARTEMENT) -->
     <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
-        <div style="background:white; width:90%; max-width:700px; max-height:85vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+        <div style="background:white; width:92%; max-width:800px; max-height:88vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
             <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence : Cheminement de la Donnée</h3>
+                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence & Audit : Voir sous le capot (Méthodes A.B.C.)</h3>
                 <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
             </div>
-            <div style="padding:24px; overflow-y:auto; font-size:13px; color:#334155; line-height:1.6;">
-                <p style="margin-bottom:20px; font-size: 14px;">
-                    Pour garantir l'intégrité des bilans au Conseil Départemental, l'application <strong>A.B.C.</strong> repose sur un algorithme déterministe. <strong>L'Intelligence Artificielle ne génère aucun poids ni chiffre financier.</strong> Son rôle est strictement limité à l'analyse visuelle.
+            <div style="padding:24px; overflow-y:auto; font-size:12.5px; color:#334155; line-height:1.6;">
+                <p style="margin-bottom:16px; font-size: 13.5px; font-weight: 600; color: #1b4332;">
+                    Pour garantir l'intégrité absolue des bilans présentés au Conseil Départemental, l'application <strong>A.B.C.</strong> sépare l'analyse qualitative de l'algorithme de calcul : <strong>L'Intelligence Artificielle ne calcule aucun poids ni coût financier.</strong> Elle agit uniquement comme un capteur optique.
                 </p>
-                <div style="border-left: 4px solid #3b82f6; padding-left: 16px; margin-bottom: 16px; background: #eff6ff; padding: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #1d4ed8; font-size:14px;">1. Lecture Visuelle (IA Gemini)</strong><br>Analyse volumétrique du plateau (ex: "[Pomme : 100% restes]").
+
+                <!-- ÉTAPE 1 -->
+                <div style="border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 14px; background: #eff6ff; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #1d4ed8; font-size:13.5px;">1. Perception Optique & Structuration (IA Gemini)</strong>
+                    <p style="margin-top: 4px; margin-bottom: 0;">
+                        L'IA analyse le cliché du plateau et extrait une matrice textuelle normalisée sous forme de crochets, par exemple : <br>
+                        <code>[Tomates : 90% restes] [Paupiette de Bœuf : 80% restes] [Pain Baguette : 50% restes]</code>.<br>
+                        <em>Aucune conversion en gramme n'est réalisée à cette étape par l'IA.</em>
+                    </p>
                 </div>
-                <div style="border-left: 4px solid #8b5cf6; padding-left: 16px; margin-bottom: 16px; background: #f5f3ff; padding: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #6d28d9; font-size:14px;">2. Conversion Réglementaire (GEMRCN)</strong><br>Croisement avec les portions étalons nationales (Entrée: 100g, Plat: 200g, Dessert: 100g).
+
+                <!-- ÉTAPE 2 -->
+                <div style="border-left: 4px solid #8b5cf6; padding-left: 14px; margin-bottom: 14px; background: #f5f3ff; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #6d28d9; font-size:13.5px;">2. Moteur de Conversion Déterministe (Normes GEMRCN)</strong>
+                    <p style="margin-top: 4px; margin-bottom: 0;">
+                        Le script applique un calcul mathématique fixe croisé avec les grammages moyens par portion (standards de service) :<br>
+                        • <strong>Formule :</strong> $\text{Masse jetée (kg)} = \text{Portion étalon} \times (\text{Pourcentage de restes} / 100)$<br>
+                        • <strong>Portions de référence :</strong> Entrée = 100g | Plat principal = 200g | Garniture = 150g | Pain = 50g | Dessert = 100g.<br>
+                        <em>Exemple pour un plat de paupiette évalué à 80% de restes :</em> $0.200\text{ kg} \times 0.80 = 0.160\text{ kg}$ de perte.
+                    </p>
                 </div>
-                <div style="border-left: 4px solid #10b981; padding-left: 16px; margin-bottom: 16px; background: #f0fdf4; padding: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #047857; font-size:14px;">3. Filtre Carbone & Biodéchets (ADEME)</strong><br>Application des facteurs GES et déduction des inévitables.
+
+                <!-- ÉTAPE 3 -->
+                <div style="border-left: 4px solid #10b981; padding-left: 14px; margin-bottom: 14px; background: #f0fdf4; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #047857; font-size:13.5px;">3. Correction des Inévitables & Facteurs Carbone (ADEME / Agribalyse)</strong>
+                    <p style="margin-top: 4px; margin-bottom: 0;">
+                        • <strong>Déduction des inévitables :</strong> Application d'un coefficient spécifique par type d'aliment pour retirer les parties non consommables (ex : os de volaille, peaux de bananes, trognons, croûtes de pain ou fanes de crudités évalués entre 5% et 35%).<br>
+                        • <strong>Empreinte Carbone ($\text{kg CO}_2\text{eq}$) :</strong> Multiplicateur basé sur les tables Agribalyse de l'ADEME selon la nature de la denrée (ex : Bœuf = 22 kg $\text{CO}_2$/kg, Volaille = 5.5 kg $\text{CO}_2$/kg, Légumes/Fruits = 0.5 à 0.8 kg $\text{CO}_2$/kg).
+                    </p>
                 </div>
-                <div style="border-left: 4px solid #f59e0b; padding-left: 16px; margin-bottom: 16px; background: #fffbeb; padding: 12px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #b45309; font-size:14px;">4. Valorisation Financière</strong><br>Coût unitaire standardisé (4,50 € / kg).
+
+                <!-- ÉTAPE 4 -->
+                <div style="border-left: 4px solid #f59e0b; padding-left: 14px; margin-bottom: 4px; background: #fffbeb; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+                    <strong style="color: #b45309; font-size:13.5px;">4. Valorisation Financière & Indicateurs EGAlim</strong>
+                    <p style="margin-top: 4px; margin-bottom: 0;">
+                        • <strong>Pertes financières :</strong> $\text{Poids évitable (kg)} \times 4.50\text{ €/kg}$ (coût unitaire moyen denrée brute incluant la préparation de cuisine de collectivité).<br>
+                        • <strong>Indicateur global :</strong> Rapprochement avec l'effectif réel des convives pour obtenir le ratio réglementaire en grammes par repas (Seuil d'alerte EGAlim : < 80g / repas).
+                    </p>
                 </div>
             </div>
         </div>
