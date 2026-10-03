@@ -264,18 +264,15 @@
                         </div>
                     </div>
 
-                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-                            <h3 style="color:#1b4332; font-size:14px; font-weight:900; margin:0;">📊 Vue graphique : plébiscite et rejet par aliment</h3>
-                            <div id="graph-metric-btns" style="display:flex; gap:4px;"></div>
-                        </div>
-                        <div id="graph-comp-btns" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;"></div>
-                        <div id="graph-aliments"></div>
-                    </div>
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
-                        <h3 style="color:#1b4332; font-size:14px; font-weight:900; margin:0 0 8px;">🔬 Lectures croisées : état, avis, service, assiette</h3>
+                        <h3 style="color:#1b4332; font-size:14px; font-weight:900; margin:0 0 8px;">🔬 Lectures croisées : aliment, état, avis, service, assiette</h3>
                         <div id="croise-onglets" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;"></div>
+                        <div id="croise-aliment" style="display:none;">
+                            <div id="graph-metric-btns" style="display:flex; gap:4px; margin-bottom:6px;"></div>
+                            <div id="graph-comp-btns" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;"></div>
+                            <div id="graph-aliments"></div>
+                        </div>
                         <div id="lecture-croisee"></div>
                     </div>
 
@@ -2068,8 +2065,8 @@
         }
 
         // ===== LECTURES CROISÉES : par état, par avis, par service (heure du scan), par assiette =====
-        let croiseScans = [], croiseOnglet = "etat";
-        const CROISE_ONGLETS = [["etat", "🥕 Par état"], ["avis", "💬 Par avis"], ["service", "🕐 Par service"], ["assiette", "🍽️ Par assiette"]];
+        let croiseScans = [], croiseOnglet = "aliment";
+        const CROISE_ONGLETS = [["aliment", "📊 Par aliment"], ["etat", "🥕 Par état"], ["avis", "💬 Par avis"], ["service", "🕐 Par service"], ["assiette", "🍽️ Par assiette"]];
         const escC = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/'/g, "&#39;");
         const moy = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
 
@@ -2109,6 +2106,10 @@
             const zone = document.getElementById("lecture-croisee"), bt = document.getElementById("croise-onglets");
             if (!zone || !bt) return;
             bt.innerHTML = CROISE_ONGLETS.map(o => `<button type="button" class="btn-period${croiseOnglet === o[0] ? " active" : ""}" onclick="reglerCroise('${o[0]}')" style="padding:3px 9px; font-size:11px;">${o[1]}</button>`).join("");
+            const ca = document.getElementById("croise-aliment");
+            if (ca) ca.style.display = croiseOnglet === "aliment" ? "block" : "none";
+            zone.style.display = croiseOnglet === "aliment" ? "none" : "block";
+            if (croiseOnglet === "aliment") { renderGraphiqueAliments(); return; }
             const P = plateauxCroises();
             if (!P.length) { zone.innerHTML = videC("Aucun scan au nouveau format sur la période."); return; }
             zone.innerHTML = ({ etat: vueEtat, avis: vueAvis, service: vueService, assiette: vueAssiette })[croiseOnglet](P);
