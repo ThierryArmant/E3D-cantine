@@ -2330,6 +2330,25 @@
             h += `<div style="overflow-x:auto; margin-bottom:10px; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:8px 8px 4px;"><div style="font-size:10.5px; color:#64748b; margin-bottom:4px;">% mangé par ${gran === "jour" ? "jour" : (gran === "semaine" ? "semaine (lundi)" : (gran === "mois" ? "mois" : "année"))}${pts.length < cles.length ? " · 40 dernières périodes" : ""}</div><div style="display:flex; align-items:flex-end; gap:4px; height:110px; min-width:${pts.length * 34}px; border-bottom:1px solid #94a3b8; background:linear-gradient(to top, transparent 74.5%, #cbd5e1 74.5%, #cbd5e1 75%, transparent 75%);">` +
                 pts.map(x => `<div style="flex:1; min-width:28px; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center;" title="${escC(lib(x.k))} : ${x.mange} % mangé, ${x.n} plateau(x)"><div style="font-size:9.5px; color:#334155;">${x.mange}</div><div style="width:70%; max-width:36px; height:${Math.max(2, x.mange)}%; background:${couleurPalier(x.mange)}; opacity:${x.n < 5 ? 0.5 : 1}; border-radius:3px 3px 0 0;"></div></div>`).join("") +
                 `</div><div style="display:flex; gap:4px; min-width:${pts.length * 34}px;">` + pts.map(x => `<div style="flex:1; min-width:28px; text-align:center; font-size:9px; color:#64748b;">${court(x.k)}<br>n=${x.n}</div>`).join("") + `</div><div style="font-size:9.5px; color:#94a3b8; margin-top:2px;">Trait gris = 75 % (plébiscite). Barres pâles : moins de 5 plateaux.</div></div>`;
+            // Histoire écrite de l'aliment, générée à partir des chiffres (aucune interprétation inventée)
+            const tousRestes = [].concat.apply([], jours.map(j => j.restes));
+            const chrono = jours.slice().reverse();
+            const parJour = chrono.map(j => ({ d: j.date, mange: Math.round(100 - m(j.restes)), n: j.restes.length }));
+            const mangeMoy = Math.round(100 - m(tousRestes));
+            const sup = parJour.filter(x => x.n >= 3), meilleur = sup.slice().sort((a, b) => b.mange - a.mange)[0], pire = sup.slice().sort((a, b) => a.mange - b.mange)[0];
+            let histoire = `Observé sur <strong>${tousRestes.length} plateaux</strong> en <strong>${jours.length} jour(s) de service</strong>, du ${dateFR(chrono[0].date)}/${chrono[0].date.substring(2, 4)} au ${dateFR(chrono[chrono.length - 1].date)}/${chrono[chrono.length - 1].date.substring(2, 4)}. Mangé à <strong>${mangeMoy} %</strong> en moyenne.`;
+            if (meilleur && pire && meilleur.d !== pire.d) histoire += ` Meilleur jour : ${dateFR(meilleur.d)} (${meilleur.mange} %), plus mauvais : ${dateFR(pire.d)} (${pire.mange} %).`;
+            if (parJour.length >= 4) {
+                const moitie = Math.floor(parJour.length / 2), pond = l => { const t = l.reduce((a, x) => a + x.n, 0); return l.reduce((a, x) => a + x.mange * x.n, 0) / t; };
+                const ecart = Math.round(pond(parJour.slice(moitie)) - pond(parJour.slice(0, moitie)));
+                histoire += Math.abs(ecart) >= 10 ? ` Tendance : ${ecart > 0 ? "en hausse" : "en baisse"} (${ecart > 0 ? "+" : ""}${ecart} points entre la première et la seconde moitié de la période).` : " Tendance : stable.";
+            }
+            const avisTot = {}; jours.forEach(j => Object.keys(j.avis).forEach(a => avisTot[a] = (avisTot[a] || 0) + j.avis[a]));
+            const avisRens = Object.keys(avisTot).filter(a => a !== "non renseigné").sort((a, b) => avisTot[b] - avisTot[a]);
+            if (avisRens.length) histoire += ` Avis élèves le plus fréquent : « ${avisRens[0]} » (${Math.round(100 * avisTot[avisRens[0]] / tousRestes.length)} % des plateaux).`;
+            if (tousRestes.length < 5) histoire += " ⚠️ Moins de 5 plateaux : à confirmer avec davantage de scans.";
+            h += `<div style="background:#f8fafc; border-left:4px solid #2d6a4f; border-radius:4px; padding:8px 10px; margin:0 0 10px; font-size:11.5px; color:#0f172a;">📝 ${histoire}</div>`;
+            h += `<details style="margin-top:4px;"><summary style="cursor:pointer; font-size:11.5px; font-weight:700; color:#1b4332; margin-bottom:6px;">Détail période par période (${cles.length})</summary>`;
             h += cles.map(k => {
                 const g = groupes[k], restes = [].concat.apply([], g.map(j => j.restes)), mange = Math.round(100 - m(restes));
                 const avis = {}, etats = {}, conc = {};
@@ -2352,7 +2371,7 @@
                     <div style="font-size:10.5px; color:#475569;">💬 ${avisTxt}${etatTxt ? " &nbsp;·&nbsp; 🥕 " + etatTxt : ""}</div>
                     ${concTxt ? `<div style="font-size:10.5px; color:#b45309; background:#fffbeb; border-radius:4px; padding:3px 6px; margin-top:3px;">⚖️ Mangés ce(s) jour(s)-là dans la même catégorie : ${concTxt}</div>` : ""}
                 </div>`;
-            }).join("");
+            }).join("") + `</details>`;
             // Confrontation globale
             const tous = {};
             jours.forEach(j => Object.keys(j.conc).forEach(c => { const t = tous[c] = tous[c] || { nous: [], eux: [], jours: 0 }; t.jours++; t.nous.push.apply(t.nous, j.restes); t.eux.push.apply(t.eux, j.conc[c]); }));
