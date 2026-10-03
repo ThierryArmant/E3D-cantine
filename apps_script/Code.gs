@@ -257,8 +257,8 @@ function doPost(e) {
       responseOutput = handleLogScanImage(data);
     } else if (action === "archiverMenu") {
       responseOutput = handleArchiverMenu(data);
-    } else if (action === "analyserCauseRejet") {
-      return reponseJson({ answer: handleAnalyserCauseRejet(data) });
+    } else if (action === "analyserAliment") {
+      return reponseJson({ answer: handleAnalyserAliment(data) });
     } else if (action === "analyserPlanAction") {
       return reponseJson(gererPlanActionEtApres(data));
     } else if (action === "saveEffectifs") {
@@ -521,47 +521,30 @@ Réponds en JSON strict :
   return { success: true, details: { aliments: retenus, ecartes: ecartes.length } };
 }
 
-function handleAnalyserCauseRejet(data) {
-  const ecole = data.etablissement || data.ecole;
-  const dateRejet = data.date || "Date non spécifiée";
-  const menuJour = data.menu_jour || "Menu non renseigné";
-  const detailsRestes = data.details_restes || {};
-  
-  const promptCausal = `
-Tu es l'expert en ergonomie alimentaire et en analyse comportementale de la restauration collective du Projet A.B.C. (Assiette Bas Carbone). 
-Un pic de gaspillage anormal ou un rejet massif a été détecté pour l'établissement "${ecole}" à la date du ${dateRejet}.
+// Analyse d'un aliment à partir de FAITS mesurés (aucun chiffre inventé : une donnée absente n'est pas un zéro)
+function handleAnalyserAliment(data) {
+  const faits = data.faits || {};
+  if (!faits.aliment || !faits.plateaux) return "Pas assez de données détaillées pour analyser cet aliment.";
+  const prompt = `Tu es analyste de données en restauration scolaire pour le projet A.B.C. Tu reçois uniquement des FAITS mesurés par la borne sur l'aliment « ${faits.aliment} » (établissement : ${data.etablissement || data.ecole || "?"}).
 
-Voici les données factuelles de ce service :
-- MENU DU JOUR : 
-${menuJour}
+FAITS (JSON) :
+${JSON.stringify(faits)}
 
-- DÉTAIL DES RESTES OBSERVÉS (par composant) :
-- Entrée : ${detailsRestes.entree || 0}% de gaspillage
-- Plat / Féculent : ${detailsRestes.plat || 0}% de gaspillage
-- Dessert : ${detailsRestes.dessert || 0}% de gaspillage
-- Pain : ${detailsRestes.pain || 0}% de gaspillage
-
-PROTOCOLE D'ANALYSE CAUSALE MULTI-PARAMÈTRES À APPLIQUER :
-Analyse ce rejet en tenant impérativement compte des 4 axes suivants :
-1. LA QUANTITÉ & L'ORDRE D'INGESTION : Si le dessert est rejeté massivement, est-ce une saturation stomacale due à des portions d'entrée ou de plat trop lourdes ? Si c'est le plat principal, l'entrée a-t-elle coupé l'appétit ou y a-t-il un déséquilibre de volume ?
-2. LA CONCURRENCE ET LES ASSOCIATIONS D'ALIMENTS : Quel autre accompagnement ou plat était en concurrence directe ce jour-là ? (ex: frites vs riz, double féculent). Y avait-il une sauce ou un élément de liaison ("mouillage") pour éviter la sécheresse de l'aliment rejeté (ex: riz sans sauce) ?
-3. L'ASPECT VISUEL ET L'APPÉTENCE : Est-ce que l'intitulé ou la nature du plat suggère un aspect visuel monotone, peu ragoutant ou difficile à manger en collectivité ?
-4. LA PROJECTION ET LA CORRÉLATION HISTORIQUE : Formule une hypothèse claire sur la cause racine de ce rejet et propose une modification concrète pour les prochains cycles de menus.
-
-Structure ta réponse de manière claire, percutante et professionnelle pour le chef cuisinier.
-`;
-
-  const payloadData = { contents: [{ parts: [{ text: promptCausal }] }] };
-  
+RÈGLES STRICTES :
+1. Chaque affirmation s'appuie sur un chiffre des faits et cite le nombre de plateaux (n) concerné.
+2. En dessous de 5 plateaux pour un groupe (état, jour, avis), n'en tire aucune conclusion : écris « trop peu d'observations ».
+3. Une donnée absente n'est pas zéro. Si "poids" vaut null, dis que les poids ne sont pas calibrés et ne chiffre aucun gain en kg, euros ou CO2.
+4. Sépare le constat (dans les faits) de l'hypothèse (à vérifier). N'invente aucune explication psychologique, aucun « effet » : une hypothèse est formulée comme telle, avec la façon de la vérifier avec la borne.
+5. Avis des élèves : « pas aimé » = rejet lié au goût, « pas le temps » = contrainte de temps, « tout fini » = consommé. Compare-les seulement si n est suffisant.
+6. Pas de lettre ni de salutation. Format : **Constat** (3 à 5 puces chiffrées), **Hypothèses à vérifier** (2 maximum), **Actions proposées** (3 maximum, concrètes, avec le gain estimé uniquement si "poids" est renseigné).
+7. 220 mots maximum, en français.`;
   try {
-    const response = appelerGeminiParRequete(payloadData);
+    const response = appelerGeminiParRequete({ contents: [{ parts: [{ text: prompt }] }] });
     const jsonResp = JSON.parse(response.getContentText());
-    if (!jsonResp.candidates || !jsonResp.candidates[0].content) {
-       return "⚠️ L'analyse a été bloquée par l'IA (filtres de sécurité de Google).";
-    }
+    if (!jsonResp.candidates || !jsonResp.candidates[0].content) return "⚠️ L'analyse a été bloquée par l'IA (filtres de sécurité de Google).";
     return jsonResp.candidates[0].content.parts[0].text;
   } catch (e) {
-    return "⚠️ Erreur technique lors de l'analyse causale : " + e.toString();
+    return "⚠️ Erreur technique lors de l'analyse : " + e.toString();
   }
 }
 

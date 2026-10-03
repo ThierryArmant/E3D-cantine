@@ -2059,6 +2059,9 @@
 
             // On utilise la globale currentModalOccurrences définie plus haut dans ton fichier
             currentModalOccurrences = [];
+            modalAiHtml = "";
+            modalFaits = construireFaitsAliment(rawKey);
+            modalPanelHtml = panneauFaitsAliment(modalFaits);
 
             matchingScans.forEach(s => {
                 let dateIso = (typeof normalizeDate === 'function' ? normalizeDate(s.dateRaw) : s.dateRaw) || "";
@@ -2125,7 +2128,7 @@
                 return;
             }
 
-            let htmlList = `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Services analysés (${occurrences.length} correspondances) : Cliquez sur l'IA pour déterminer l'alignement idéal.</div>`;
+            let htmlList = modalPanelHtml + `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Détail des observations (${occurrences.length} scans concernés)</div>`;
             htmlList += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
             
             occurrences.forEach((occ, index) => {
@@ -2145,58 +2148,88 @@
                         <div style="color: #475569; font-size: 10.5px; font-style: italic; margin-bottom: 8px;">
                             💬 Constat visuel / IA : "${occ.obs}"
                         </div>
-                        <div style="text-align: right;">
-                            <button type="button" class="btn" onclick="lancerAnalyseAlignementIA(${index})" style="background-color: #1e3a8a; padding: 6px 12px; font-size: 10.5px; width: auto;">🤖 Analyser l'alignement idéal (IA)</button>
-                        </div>
-                        <div id="ia-alignement-result-${index}" style="display: none; margin-top: 8px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 8px; font-size: 11px; color: #1e3a8a;"></div>
                     </div>`;
             });
             htmlList += `</div>`;
             content.innerHTML = htmlList;
         }
 
-        function lancerAnalyseAlignementIA(index) {
-            const occ = currentModalOccurrences[index];
-            const resultBox = document.getElementById(`ia-alignement-result-${index}`);
-            if (!occ || !resultBox) return;
+        // ===== ANALYSE D'UN ALIMENT SUR TOUTE LA PÉRIODE : des faits mesurés d'abord, l'IA commente ensuite =====
+        let modalFaits = null, modalPanelHtml = "", modalAiHtml = "";
 
-            resultBox.style.display = "block";
-            resultBox.innerHTML = "<em>🤖 Analyse de la concurrence et recherche de l'alignement idéal en cours...</em>";
+        function avisCourt(txt) {
+            const t = String(txt || "").toLowerCase();
+            if (t.indexOf("tout fini") !== -1 || t.indexOf("🟢") !== -1) return "tout fini";
+            if (t.indexOf("temps") !== -1 || t.indexOf("🟠") !== -1) return "pas le temps";
+            if (t.indexOf("aimé") !== -1 || t.indexOf("aime") !== -1 || t.indexOf("🔴") !== -1) return "pas aimé";
+            return "non renseigné";
+        }
 
-            const ecole = document.getElementById('select-etablissement').value;
-            const payload = {
-                action: "analyserCauseRejet",
-                etablissement: ecole,
-                date: occ.date,
-                menu_jour: occ.menu,
-                details_restes: {
-                    entree: occ.obs.toLowerCase().includes("entrée") ? 50 : 0,
-                    plat: occ.taux,
-                    dessert: occ.obs.toLowerCase().includes("dessert") ? 50 : 0,
-                    pain: 20
-                }
+        function construireFaitsAliment(rawKey) {
+            const cle = normaliserNomAliment(rawKey);
+            const obs = [];
+            ((globalRawData && globalRawData.rawGaspillage) || []).forEach(sc => {
+                if (sc.type !== "SCAN_IA_VISION") return;
+                parseScanItems(sc.commentaire).forEach(it => {
+                    const nom = normaliserNomAliment(it.nom);
+                    if (nom === cle || nom.includes(cle) || cle.includes(nom)) {
+                        obs.push({ date: normalizeDate(sc.dateRaw), reste: it.restePct, etat: it.etat, avis: avisCourt(sc.avis_eleve) });
+                    }
+                });
+            });
+            const moy = l => l.length ? Math.round(l.reduce((a, o) => a + o.reste, 0) / l.length) : null;
+            const grouper = fn => {
+                const g = {};
+                obs.forEach(o => { const k = fn(o); (g[k] = g[k] || []).push(o); });
+                return Object.keys(g).map(k => ({ nom: k, n: g[k].length, restePct: moy(g[k]), mangePct: 100 - moy(g[k]) }));
             };
+            const menus = (globalRawData && globalRawData.historiqueMenus) || {};
+            const jours = grouper(o => o.date).map(j => ({ date: j.nom, n: j.n, restePct: j.restePct, menu: menus[j.nom] || "menu non saisi" }))
+                .sort((a, b) => b.restePct - a.restePct);
+            const w = (derniereCalibration && derniereCalibration.items) ? derniereCalibration.items[rawKey] : null;
+            const prix = ((globalRawData && globalRawData.parametres) || {}).prix_kg_eur || 4.5;
+            return {
+                aliment: rawKey, plateaux: obs.length, restePctMoyen: moy(obs), mangePctMoyen: obs.length ? 100 - moy(obs) : null,
+                parEtat: grouper(o => o.etat).sort((a, b) => b.n - a.n),
+                parAvisEleve: grouper(o => o.avis).sort((a, b) => b.n - a.n),
+                jours: jours,
+                poids: w ? { evitableKg: +w.evitKg.toFixed(2), inevitableKg: +w.inevKg.toFixed(2), co2Kg: +w.carboneKg.toFixed(2), perteEuros: +(w.evitKg * prix).toFixed(2) } : null
+            };
+        }
 
-            fetch(ADRESSE_SHEET_OFFICIELLE, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify(payload)
-            })
+        function panneauFaitsAliment(f) {
+            if (f.plateaux === 0) return `<div style="padding:10px; background:#fffbeb; border:1px solid #fcd34d; border-radius:6px; font-size:11.5px;">Aucun plateau scanné au format détaillé pour cet aliment : l'analyse chiffrée apparaîtra avec les prochains scans.</div>`;
+            const ligne = (nom, n, mange) => `<tr><td style="padding:2px 8px 2px 0;">${nom}</td><td style="text-align:right; padding:2px 8px;">${n}</td><td style="text-align:right; padding:2px 0 2px 8px;"><strong>${mange} %</strong>${n < 5 ? ' <span style="color:#b45309;" title="Moins de 5 plateaux : indicatif">⚠️</span>' : ''}</td></tr>`;
+            const tab = (titre, lignes) => `<div style="flex:1; min-width:210px;"><div style="font-weight:700; color:#1b4332; margin-bottom:3px;">${titre}</div><table style="width:100%; font-size:11px; border-collapse:collapse;"><thead><tr style="color:#64748b;"><th style="text-align:left; font-weight:600;"></th><th style="text-align:right; font-weight:600;">Plateaux</th><th style="text-align:right; font-weight:600;">Mangé</th></tr></thead><tbody>${lignes}</tbody></table></div>`;
+            const poids = f.poids ? `${f.poids.evitableKg} kg évitables jetés · ${f.poids.inevitableKg} kg inévitables · ${f.poids.perteEuros} € · ${f.poids.co2Kg} kg CO₂` : "poids non calibré (pas de pesée associée aux scans)";
+            const jours = f.jours.slice(0, 6).map(j => ligne(`${j.date} <span style="color:#64748b;">· ${String(j.menu).substring(0, 60)}</span>`, j.n, j.mangePct === undefined ? 100 - j.restePct : 100 - j.restePct)).join("");
+            return `<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:11.5px;">
+                <div style="margin-bottom:6px;"><strong>${f.plateaux}</strong> plateaux observés · <strong>${f.mangePctMoyen} % mangé</strong> en moyenne${f.plateaux < 5 ? ' <span style="color:#b45309;">· ⚠️ moins de 5 plateaux, conclusions fragiles</span>' : ''}<br><span style="color:#475569;">⚖️ ${poids}</span></div>
+                <div style="display:flex; gap:16px; flex-wrap:wrap;">${tab("Par état de préparation", f.parEtat.map(e => ligne(e.nom, e.n, e.mangePct)).join(""))}${tab("Par avis de l'élève", f.parAvisEleve.map(e => ligne(e.nom, e.n, e.mangePct)).join(""))}</div>
+                <div style="margin-top:8px;">${tab("Jours où il est le moins mangé", jours)}</div>
+                <div style="text-align:right; margin-top:8px;"><button type="button" class="btn" id="btn-ia-aliment" onclick="lancerAnalyseAliment()" style="background-color:#1e3a8a; padding:6px 12px; font-size:11px; width:auto;">🤖 Analyser cet aliment (IA)</button></div>
+                <div id="ia-aliment-result" style="display:${modalAiHtml ? "block" : "none"}; margin-top:8px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; font-size:11.5px; color:#1e3a8a;">${modalAiHtml}</div>
+            </div>`;
+        }
+
+        function lancerAnalyseAliment() {
+            if (!modalFaits) return;
+            const box = document.getElementById('ia-aliment-result');
+            const btn = document.getElementById('btn-ia-aliment');
+            box.style.display = "block";
+            box.innerHTML = "<em>🤖 Analyse en cours à partir des chiffres ci-dessus...</em>";
+            if (btn) btn.disabled = true;
+            fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify({ action: "analyserAliment", etablissement: document.getElementById('select-etablissement').value, faits: modalFaits }) })
             .then(r => r.json())
             .then(res => {
-                if (res.answer) {
-                    resultBox.innerHTML = `<strong>💡 Diagnostic et Alignement Idéal (IA) :</strong><br>` + formatAIResponseToUI(res.answer);
-                } else if (res.error) {
-                    resultBox.innerHTML = `<span style="color: #ef4444;"><strong>Erreur IA :</strong> ${res.error}</span>`;
-                } else {
-                    resultBox.innerHTML = `<span style="color: #ef4444;">Erreur inconnue lors de l'analyse.</span>`;
-                }
+                if (res.answer) { modalAiHtml = formatAIResponseToUI(res.answer); box.innerHTML = modalAiHtml; }
+                else box.innerHTML = `<span style="color:#ef4444;">Erreur IA : ${res.error || "réponse vide"}</span>`;
             })
-            .catch((err) => {
-                resultBox.innerHTML = `<span style="color: #ef4444;">Erreur réseau (vérifiez la connexion) : ${err.message}</span>`;
-            });
+            .catch(err => { box.innerHTML = `<span style="color:#ef4444;">Erreur réseau : ${err.message}</span>`; })
+            .finally(() => { if (btn) btn.disabled = false; });
         }
-        
+
         function filterModalOccurrences() {
             const query = (document.getElementById('modal-filter-input').value || "").toLowerCase().trim();
             if (!query) {
