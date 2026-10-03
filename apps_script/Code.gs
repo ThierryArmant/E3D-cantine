@@ -10,12 +10,13 @@ const URL_REFERENTIEL = "https://raw.githubusercontent.com/ThierryArmant/E3D-can
 
 // Valeurs par défaut des paramètres de chaque établissement (modifiables dans l'onglet "Parametres" de son tableur)
 const PARAMETRES_DEFAUT = [
-  ["portion_entree_g", 100, "Portion de référence d'une entrée (g)"],
-  ["portion_plat_g", 250, "Portion de référence du plat composé (g) - référence officielle collège/lycée : 250 à 300 (arrêté du 30/09/2011)"],
-  ["portion_garniture_g", 150, "Portion de référence d'une garniture / accompagnement (g)"],
-  ["portion_dessert_g", 100, "Portion de référence d'un dessert ou laitage (g)"],
-  ["portion_fruit_g", 100, "Portion de référence d'un fruit (g)"],
-  ["portion_pain_g", 50, "Portion de référence du pain (g)"],
+  // Base : plan alimentaire départemental, grammages de référence collège / adolescents (fichier plan_alimentaire_reference.txt)
+  ["portion_entree_g", 80, "Entrée (g) - référence collège : crudités 60 à 80, salades composées 100 à 120"],
+  ["portion_plat_g", 100, "Plat protidique (g) - référence collège : viande, volaille, poisson cuits 80 à 100 (hors garniture)"],
+  ["portion_garniture_g", 150, "Garniture (g) - référence collège : féculents cuits 150 à 180, légumes cuits 100 à 120"],
+  ["portion_dessert_g", 100, "Dessert ou laitage (g) - référence collège : pâtisserie 80 à 100, compote 100 à 120, yaourt 125"],
+  ["portion_fruit_g", 150, "Fruit frais (g) - référence collège : 150 à 180"],
+  ["portion_pain_g", 50, "Pain (g) - référence collège : 40 à 50 par repas"],
   ["effectif_defaut", 450, "Effectif attendu par défaut (couverts)"],
   ["prix_kg_eur", 4.5, "Coût moyen de la denrée (€/kg)"]
 ];

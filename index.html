@@ -841,8 +841,8 @@
         function getPortionsEtab() {
             const p = (globalRawData && globalRawData.parametres) || {};
             return {
-                entree: p.portion_entree_g || 100, plat: p.portion_plat_g || 250, accompagnement: p.portion_garniture_g || 150,
-                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 100, pain: p.portion_pain_g || 50
+                entree: p.portion_entree_g || 80, plat: p.portion_plat_g || 100, accompagnement: p.portion_garniture_g || 150,
+                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50
             };
         }
 
@@ -1740,7 +1740,7 @@
                 `Pour chaque aliment visible sur le plateau (nom, forme, préparation, composante), l'IA donne uniquement une part de reste et une part mangée, en %. Un contrôle de cohérence écarte tout aliment dont reste + mangé s'éloigne de 100 %, et les photos sans plateau visible sont ignorées.<br>Exemple de ligne enregistrée : <code>[Carottes - râpées - cuites vapeur : 40% restes | accompagnement | confiance haute]</code>`)}
             ${bloc("#6d28d9", "#f5f3ff", "2. Poids par aliment : mesuré, réparti selon les scans",
                 `Les <strong>balances sous les poubelles</strong> donnent le poids réel jeté (alimentaire, fruits, pain). Ce poids est réparti entre les aliments au prorata de leurs restes estimés (restes % × portion de référence).<br>
-                • Portions de référence (modifiables dans l'onglet Parametres) : plat ${por.plat} g (<strong>base officielle</strong> : 250 à 300 g pour un plat composé en collège ou lycée, arrêté du 30 septembre 2011, annexe II) · entrée ${por.entree} g · garniture ${por.accompagnement} g · dessert ${por.dessert} g · fruit ${por.fruit} g · pain ${por.pain} g (<strong>valeurs de travail</strong>, sans chiffre officiel équivalent). Remplacer par les grammages réels de la cuisine dès qu'ils sont connus.<br>
+                • Portions de référence (modifiables dans l'onglet Parametres) : <strong>base officielle</strong>, grammages collège du plan alimentaire départemental (GRCN) : entrée ${por.entree} g (crudités 60 à 80) · plat protidique ${por.plat} g (80 à 100, hors garniture) · garniture ${por.accompagnement} g (féculents 150 à 180, légumes 100 à 120) · dessert ${por.dessert} g (pâtisserie 80 à 100, compote 100 à 120) · fruit ${por.fruit} g (150 à 180) · pain ${por.pain} g (40 à 50). Remplacer par les grammages réels de la cuisine dès qu'ils sont connus.<br>
                 • Le poids d'un aliment = poids de la poubelle × (ses restes de référence ÷ somme des restes de référence des aliments de cette poubelle).<br>
                 • Servi estimé = effectif attendu × part des plateaux scannés où l'aliment apparaît × portion. Effectif par défaut : ${effDef} (les effectifs saisis chaque jour dans le menu priment).<br>
                 • Les <strong>plateaux non scannés</strong> ne sont pas ignorés : leurs déchets sont dans les poubelles pesées, et l'indicateur « écart balance / scans » dit si l'échantillon scanné est représentatif.`)}
