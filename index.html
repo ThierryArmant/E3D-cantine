@@ -277,16 +277,17 @@
                     </div>
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
-                            <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">Filtrer un item :</label>
+                        <div onclick="fermerBloc('corps-analyse-fine')" ondblclick="ouvrirBloc('corps-analyse-fine')" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; cursor: pointer; user-select: none;" title="Double-clic pour ouvrir, clic pour fermer">
+                            <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu <span id="corps-analyse-fine-etat" style="font-size:10.5px; font-weight:600; color:#64748b;">· double-clic pour ouvrir</span></h3>
+                            <div style="display: flex; align-items: center; gap: 6px;" onclick="event.stopPropagation()" ondblclick="event.stopPropagation()">
+                                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">Fiche d'un item :</label>
                                 <select id="select-filter-item" onchange="filtrerAnalyseFineItem()" style="padding: 5px 8px; border-radius: 5px; border: 1px solid #cbd5e1; font-size: 11px; background: white; font-weight: bold;">
-                                    <option value="all">-- Tous les items de la période --</option>
+                                    <option value="all">-- Choisir un item --</option>
                                 </select>
                             </div>
                         </div>
 
+                        <div id="corps-analyse-fine" style="display:none; margin-top:10px;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px;">
                                 <div style="font-size: 11px; font-weight: 800; color: #166534; margin-bottom: 6px; text-transform: uppercase;">🟢 Ce qui a fonctionné (Succès de service)</div>
@@ -298,17 +299,15 @@
                             </div>
                         </div>
 
-                        <div id="box-detail-item-filtré" style="background: #f8fafc; border: 1px dashed #94a3b8; border-radius: 6px; padding: 10px; font-size: 11.5px; color: #334155; display: none; margin-bottom: 12px;">
-                            <strong>📊 Bilan ciblé pour l'item :</strong> <span id="label-item-filtre-titre" style="color: #1b4332; font-weight: bold;">--</span>
-                            <div id="content-item-filtre-stats" style="margin-top: 4px; font-weight: 600;"></div>
                         </div>
 
                         <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border: 2px solid #1b4332; border-radius: 8px; padding: 12px; margin-top: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
-                                <h3 style="color: #1b4332; font-size: 13px; font-weight: 900; margin: 0;">⚡ "ET APRÈS !" — Plan d'action croisé (Cuisine & Élèves)</h3>
+                            <div onclick="fermerBloc('corps-et-apres')" ondblclick="ouvrirBloc('corps-et-apres')" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; cursor: pointer; user-select: none;" title="Double-clic pour ouvrir, clic pour fermer">
+                                <h3 style="color: #1b4332; font-size: 13px; font-weight: 900; margin: 0;">⚡ "ET APRÈS !" — Plan d'action croisé <span id="corps-et-apres-etat" style="font-size:10.5px; font-weight:600; color:#64748b;">· double-clic pour ouvrir</span></h3>
                                 <span style="background: #1b4332; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9.5px; font-weight: bold;">PILOTAGE GIEC & TERRAIN</span>
                             </div>
                             
+                            <div id="corps-et-apres" style="display:none; margin-top:8px;">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <div style="background: white; border-left: 4px solid #047857; padding: 10px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                                     <h4 style="color: #047857; font-size: 11px; font-weight: 800; margin-bottom: 4px;">👨‍🍳 LEVIERS CUISINE (Ajuster l'offre)</h4>
@@ -318,6 +317,7 @@
                                     <h4 style="color: #b45309; font-size: 11px; font-weight: 800; margin-bottom: 4px;">🎓 LEVIERS ÉLÈVES (Éduquer la demande & Climat)</h4>
                                     <div id="et-apres-eleves-content" style="font-size: 11px; color: #334155; line-height: 1.4;">En attente des retours tactiles de la borne...</div>
                                 </div>
+                            </div>
                             </div>
 
                         </div>
@@ -2512,35 +2512,25 @@
                 <div style="margin-top:4px;">${verdict}</div></div>`;
         }
 
+        function ouvrirBloc(id) {
+            const b = document.getElementById(id), e = document.getElementById(id + "-etat");
+            if (b) b.style.display = "block";
+            if (e) e.innerText = "· clic pour fermer";
+        }
+        function fermerBloc(id) {
+            const b = document.getElementById(id), e = document.getElementById(id + "-etat");
+            if (!b || b.style.display === "none") return;
+            b.style.display = "none";
+            if (e) e.innerText = "· double-clic pour ouvrir";
+        }
+
+        // Le menu « Fiche d'un item » ouvre la fiche complète (même fenêtre que le clic sur une étiquette)
         function filtrerAnalyseFineItem() {
             const select = document.getElementById('select-filter-item');
-            const boxDetail = document.getElementById('box-detail-item-filtré');
-            const titleElem = document.getElementById('label-item-filtre-titre');
-            const contentElem = document.getElementById('content-item-filtre-stats');
-            if (!select || !boxDetail) return;
-
-            let selectedKey = select.value;
-            if (selectedKey === "all") {
-                boxDetail.style.display = "none";
-                return;
-            }
-
-            let stats = globalItemsDetailedStats[selectedKey];
-            if (stats) {
-                boxDetail.style.display = "block";
-                titleElem.innerText = stats.label;
-                let appreciation = stats.tauxMange >= 70 ? "🟢 Très apprécié par les élèves" : (stats.rejetPct >= 40 ? "🔴 Gaspillage important / À revoir" : "🟡 Consommation moyenne / Correcte");
-                contentElem.innerHTML = `
-                    - Taux de consommation : <strong>${stats.tauxMange}%</strong><br>
-                    - Taux de rejet : <strong>${stats.rejetPct}%</strong><br>
-                    - Volume d'observation : ${stats.occurrences} plateaux croisés<br>
-                    - Poids jeté : ${stats.poidsEvitKg === null ? '<em>non calibré</em>' : `<strong>${stats.poidsEvitKg.toFixed(2)} kg</strong> évitables · ${stats.poidsInevKg.toFixed(2)} kg inévitables`}<br>
-                    - Bilan qualitatif : ${appreciation}
-                    ${renderEtatsItem(stats)}
-                `;
-            } else {
-                boxDetail.style.display = "none";
-            }
+            if (!select || select.value === "all") return;
+            const cle = select.value;
+            select.value = "all";
+            openItemDetail(cle);
         }
 
         async function getAvailableCameras() {
