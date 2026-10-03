@@ -2316,14 +2316,20 @@
             const btn = (g, l) => `<button type="button" class="btn-period${gran === g ? " active" : ""}" onclick="reglerGranFiche('${g}')" style="padding:3px 10px; font-size:11px;">${l}</button>`;
             let h = modalPanelHtml;
             const jours = (modalHist ? modalHist.jours : []).filter(j => !q || j.date.includes(q) || dateFR(j.date).includes(q) || j.menu.toLowerCase().includes(q) || Object.keys(j.conc).join(" ").toLowerCase().includes(q));
-            h += `<div style="display:flex; gap:6px; align-items:center; margin:4px 0 8px;"><strong style="font-size:12px; color:#1b4332;">📈 Historique</strong>${btn("jour", "Par jour")}${btn("semaine", "Par semaine")}${btn("mois", "Par mois")}</div>`;
+            h += `<div style="display:flex; gap:6px; align-items:center; margin:4px 0 8px;"><strong style="font-size:12px; color:#1b4332;">📈 Historique</strong>${btn("jour", "Par jour")}${btn("semaine", "Par semaine")}${btn("mois", "Par mois")}${btn("annee", "Par année")}</div>`;
             if (!jours.length) { content.innerHTML = h + `<p style="color:#64748b; font-style:italic; text-align:center; padding:16px;">${modalHist && modalHist.jours.length ? "Aucun jour ne correspond à ce filtre." : "Aucun scan détaillé pour cet aliment."}</p>`; return; }
             // Regroupement
-            const cleDe = j => gran === "jour" ? j.date : (gran === "semaine" ? lundiDe(j.date) : j.date.substring(0, 7));
-            const lib = k => gran === "jour" ? dateFR(k) + "/" + k.substring(2, 4) : (gran === "semaine" ? "sem. du " + dateFR(k) : MOIS_COURTS[+k.substring(5, 7) - 1] + " " + k.substring(0, 4));
+            const cleDe = j => gran === "jour" ? j.date : (gran === "semaine" ? lundiDe(j.date) : (gran === "mois" ? j.date.substring(0, 7) : j.date.substring(0, 4)));
+            const lib = k => gran === "jour" ? dateFR(k) + "/" + k.substring(2, 4) : (gran === "semaine" ? "sem. du " + dateFR(k) : (gran === "mois" ? MOIS_COURTS[+k.substring(5, 7) - 1] + " " + k.substring(0, 4) : "Année " + k));
             const groupes = {};
             jours.forEach(j => { (groupes[cleDe(j)] = groupes[cleDe(j)] || []).push(j); });
             const cles = Object.keys(groupes).sort().reverse();
+            // Graphique chronologique : % mangé par période (plus ancien à gauche)
+            const pts = cles.slice().reverse().slice(-40).map(k => { const r = [].concat.apply([], groupes[k].map(j => j.restes)); return { k: k, mange: Math.round(100 - m(r)), n: r.length }; });
+            const court = k => gran === "jour" ? dateFR(k) : (gran === "semaine" ? dateFR(k) : (gran === "mois" ? MOIS_COURTS[+k.substring(5, 7) - 1] : k));
+            h += `<div style="overflow-x:auto; margin-bottom:10px; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:8px 8px 4px;"><div style="font-size:10.5px; color:#64748b; margin-bottom:4px;">% mangé par ${gran === "jour" ? "jour" : (gran === "semaine" ? "semaine (lundi)" : (gran === "mois" ? "mois" : "année"))}${pts.length < cles.length ? " · 40 dernières périodes" : ""}</div><div style="display:flex; align-items:flex-end; gap:4px; height:110px; min-width:${pts.length * 34}px; border-bottom:1px solid #94a3b8; background:linear-gradient(to top, transparent 74.5%, #cbd5e1 74.5%, #cbd5e1 75%, transparent 75%);">` +
+                pts.map(x => `<div style="flex:1; min-width:28px; height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center;" title="${escC(lib(x.k))} : ${x.mange} % mangé, ${x.n} plateau(x)"><div style="font-size:9.5px; color:#334155;">${x.mange}</div><div style="width:70%; max-width:36px; height:${Math.max(2, x.mange)}%; background:${couleurPalier(x.mange)}; opacity:${x.n < 5 ? 0.5 : 1}; border-radius:3px 3px 0 0;"></div></div>`).join("") +
+                `</div><div style="display:flex; gap:4px; min-width:${pts.length * 34}px;">` + pts.map(x => `<div style="flex:1; min-width:28px; text-align:center; font-size:9px; color:#64748b;">${court(x.k)}<br>n=${x.n}</div>`).join("") + `</div><div style="font-size:9.5px; color:#94a3b8; margin-top:2px;">Trait gris = 75 % (plébiscite). Barres pâles : moins de 5 plateaux.</div></div>`;
             h += cles.map(k => {
                 const g = groupes[k], restes = [].concat.apply([], g.map(j => j.restes)), mange = Math.round(100 - m(restes));
                 const avis = {}, etats = {}, conc = {};
