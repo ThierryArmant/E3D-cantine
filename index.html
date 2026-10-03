@@ -392,6 +392,16 @@
                         </div>
                     </div>
 
+                    <div id="import-menu-box" style="background:#f0fdf4; border:1.5px dashed #2d6a4f; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+                        <h3 style="margin:0 0 4px; font-size:14px; color:#1b4332; font-weight:800;">📥 Importer le tableau de menus du cuisinier</h3>
+                        <p style="font-size:11.5px; color:#475569; margin:0 0 8px;">Déposez le fichier du chef tel quel (CSV ou Excel, colonnes : Semaine, Jour, Entrée, Plat, Accompagnement, Dessert, Fruit). Les propositions séparées par « / » ou « ou » sont découpées, les dates sont calculées, et vous relisez avant d'enregistrer.</p>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <input type="file" id="import-menu-file" accept=".csv,.txt,.xlsx" style="font-size:11px;" onchange="importerMenuTableau(event)">
+                            <label style="font-size:11px; font-weight:bold; color:#1b4332;">Année du premier jour : <input type="number" id="import-menu-annee" style="width:70px; padding:3px 6px;"></label>
+                        </div>
+                        <div id="import-menu-apercu" style="margin-top:10px;"></div>
+                    </div>
+
                     <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour</h3>
                     <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les éléments principaux. Les options (sauces, fromages, suppléments) sont regroupées dans la zone dédiée en bas de chaque colonne.</p>
                     
@@ -2768,6 +2778,195 @@
             if (entreeFinal === "Sans entrée" && platFinal === "Sans plat" && accompFinal === "Sans accomp." && dessertFinal === "Sans dessert") return null;
 
             return `${entreeFinal} | ${platFinal} | ${accompFinal} | ${dessertFinal}`;
+        }
+
+        // ===== IMPORT DU TABLEAU DE MENUS DU CUISINIER =====
+        const MOIS_FR = { janvier: 1, fevrier: 2, mars: 3, avril: 4, mai: 5, juin: 6, juillet: 7, aout: 8, septembre: 9, octobre: 10, novembre: 11, decembre: 12 };
+        const JOURS_FR = { lundi: 1, mardi: 2, mercredi: 3, jeudi: 4, vendredi: 5, samedi: 6, dimanche: 0 };
+        function sansAccents(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim(); }
+
+        // Lecture d'un CSV (séparateur ; ou , détecté, guillemets et retours à la ligne dans les cellules gérés)
+        function parserCsv(texte) {
+            const premiere = texte.split(/\r?\n/)[0] || "";
+            const sep = (premiere.split(";").length >= premiere.split(",").length) ? ";" : ",";
+            const lignes = []; let ligne = [], cell = "", entre = false;
+            for (let i = 0; i < texte.length; i++) {
+                const c = texte[i];
+                if (entre) {
+                    if (c === '"' && texte[i + 1] === '"') { cell += '"'; i++; }
+                    else if (c === '"') entre = false;
+                    else cell += c;
+                } else if (c === '"') entre = true;
+                else if (c === sep) { ligne.push(cell); cell = ""; }
+                else if (c === "\n" || c === "\r") {
+                    if (c === "\r" && texte[i + 1] === "\n") i++;
+                    ligne.push(cell); cell = ""; lignes.push(ligne); ligne = [];
+                } else cell += c;
+            }
+            if (cell !== "" || ligne.length) { ligne.push(cell); lignes.push(ligne); }
+            return lignes.filter(l => l.some(x => String(x).trim() !== ""));
+        }
+
+        // Découpe une cellule en propositions : « / » et « ou » hors parenthèses
+        function decouperPropositions(cellule) {
+            const txt = String(cellule || "").replace(/\s+/g, " ").trim();
+            if (!txt) return [];
+            const morceaux = []; let prof = 0, cur = "";
+            for (let i = 0; i < txt.length; i++) {
+                const c = txt[i];
+                if (c === "(") prof++;
+                if (c === ")") prof = Math.max(0, prof - 1);
+                if (c === "/" && prof === 0) { morceaux.push(cur); cur = ""; } else cur += c;
+            }
+            morceaux.push(cur);
+            const res = [];
+            morceaux.forEach(m => {
+                // « ou » hors parenthèses
+                const parts = []; let p = 0, buf = "";
+                const mots = m.split(" ");
+                mots.forEach((mot, idx) => {
+                    const ouvre = (mot.match(/\(/g) || []).length, ferme = (mot.match(/\)/g) || []).length;
+                    if (p === 0 && mot.toLowerCase() === "ou" && idx > 0 && idx < mots.length - 1) { parts.push(buf.trim()); buf = ""; }
+                    else buf += (buf ? " " : "") + mot;
+                    p = Math.max(0, p + ouvre - ferme);
+                });
+                parts.push(buf.trim());
+                parts.forEach(x => { if (x) res.push(x); });
+            });
+            return res;
+        }
+
+        // Une proposition suspecte (parenthèse non fermée, un seul mot) est signalée pour relecture
+        function propositionSuspecte(prop) {
+            const ouvre = (prop.match(/\(/g) || []).length, ferme = (prop.match(/\)/g) || []).length;
+            const sansParen = prop.replace(/\(.*?\)/g, "").trim();
+            return ouvre !== ferme || sansParen.split(/\s+/).filter(Boolean).length < 2 && !/^[A-ZÉÈÀ]/.test(sansParen);
+        }
+
+        // Date réelle d'un jour à partir de « Semaine du 31 août au 04 septembre » + « Mardi »
+        function calculerDateMenu(semaine, jour, annee) {
+            const m = sansAccents(semaine).match(/du\s+(\d{1,2})\s*(?:er)?\s*([a-z]+)?\s+au\s+(\d{1,2})\s*(?:er)?\s+([a-z]+)/);
+            const jIdx = JOURS_FR[sansAccents(jour)];
+            if (!m || jIdx === undefined) return "";
+            const d1 = parseInt(m[1], 10), mFin = MOIS_FR[m[4]];
+            let mDeb = m[2] ? MOIS_FR[m[2]] : mFin;
+            if (!mDeb || !mFin) return "";
+            let debut = new Date(annee, mDeb - 1, d1);
+            const delta = (jIdx - debut.getDay() + 7) % 7;
+            debut.setDate(debut.getDate() + delta);
+            const z = n => String(n).padStart(2, "0");
+            return `${debut.getFullYear()}-${z(debut.getMonth() + 1)}-${z(debut.getDate())}`;
+        }
+
+        async function lireFichierMenu(fichier) {
+            if (/\.xlsx$/i.test(fichier.name)) {
+                if (typeof XLSX === "undefined") {
+                    await new Promise((ok, ko) => {
+                        const s = document.createElement("script");
+                        s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+                        s.onload = ok; s.onerror = () => ko(new Error("Bibliothèque Excel indisponible : enregistrez le fichier en CSV et réessayez."));
+                        document.head.appendChild(s);
+                    });
+                }
+                const wb = XLSX.read(await fichier.arrayBuffer(), { type: "array" });
+                return XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "" });
+            }
+            const buf = await fichier.arrayBuffer();
+            let texte = new TextDecoder("utf-8").decode(buf);
+            if (texte.indexOf("�") !== -1) texte = new TextDecoder("windows-1252").decode(buf);
+            return parserCsv(texte.replace(/^﻿/, ""));
+        }
+
+        let importMenuJours = [];
+
+        async function importerMenuTableau(event) {
+            const fichier = event.target.files[0];
+            const zone = document.getElementById('import-menu-apercu');
+            if (!fichier || !zone) return;
+            const champAnnee = document.getElementById('import-menu-annee');
+            if (!champAnnee.value) champAnnee.value = new Date().getFullYear();
+            zone.innerHTML = "<em>Lecture du fichier...</em>";
+            try {
+                const lignes = await lireFichierMenu(fichier);
+                const entetes = (lignes[0] || []).map(sansAccents);
+                const col = nom => entetes.findIndex(h => h.startsWith(nom));
+                const iSem = col("semaine"), iJour = col("jour"), iEnt = col("entree"), iPlat = col("plat"), iAcc = col("accompagnement"),
+                      iDes = col("dessert"), iFruit = col("fruit"), iDate = col("date");
+                if (iJour < 0 || iPlat < 0 || iEnt < 0) { zone.innerHTML = "<span style='color:#b91c1c;'>Colonnes non reconnues : il faut au minimum Jour, Entrée et Plat.</span>"; return; }
+                const annee = parseInt(champAnnee.value, 10);
+                importMenuJours = [];
+                lignes.slice(1).forEach(l => {
+                    const g = i => i >= 0 ? String(l[i] === undefined ? "" : l[i]).trim() : "";
+                    let date = iDate >= 0 ? normalizeDate(g(iDate)) : "";
+                    if (!date) date = calculerDateMenu(g(iSem), g(iJour), annee);
+                    const fruit = g(iFruit);
+                    const j = {
+                        date: date, jour: g(iJour), semaine: g(iSem),
+                        entrees: decouperPropositions(g(iEnt)), plats: decouperPropositions(g(iPlat)),
+                        accomps: decouperPropositions(g(iAcc)), desserts: decouperPropositions(g(iDes)).concat(decouperPropositions(fruit))
+                    };
+                    j.importer = j.plats.length > 0 && !!j.date;
+                    importMenuJours.push(j);
+                });
+                afficherApercuImport();
+            } catch (e) {
+                zone.innerHTML = `<span style='color:#b91c1c;'>Lecture impossible : ${e.message}</span>`;
+            }
+        }
+
+        function afficherApercuImport() {
+            const zone = document.getElementById('import-menu-apercu');
+            const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+            const cellule = (i, cle, valeurs) => {
+                const suspect = valeurs.some(propositionSuspecte);
+                return `<td style="padding:4px; vertical-align:top;"><textarea rows="${Math.max(2, valeurs.length)}" style="width:100%; min-width:130px; font-size:11px; padding:3px; ${suspect ? 'border:2px solid #f59e0b; background:#fffbeb;' : 'border:1px solid #cbd5e1;'}" onchange="majImportCellule(${i}, '${cle}', this.value)">${esc(valeurs.join("\n"))}</textarea>${suspect ? '<div style="font-size:10px; color:#b45309;">⚠️ à vérifier</div>' : ''}</td>`;
+            };
+            let html = `<div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:11.5px;"><thead><tr style="background:#dcfce7; text-align:left;"><th style="padding:4px;">Importer</th><th style="padding:4px;">Date</th><th>Entrées</th><th>Plats</th><th>Accompagnements</th><th>Desserts / fruit</th></tr></thead><tbody>`;
+            importMenuJours.forEach((j, i) => {
+                const vide = j.plats.length === 0;
+                html += `<tr style="border-top:1px solid #e2e8f0; ${vide ? 'opacity:0.55;' : ''}">
+                    <td style="padding:4px; text-align:center;"><input type="checkbox" ${j.importer ? "checked" : ""} onchange="importMenuJours[${i}].importer=this.checked; majBoutonImport()"></td>
+                    <td style="padding:4px; white-space:nowrap;"><strong>${esc(j.jour)}</strong><br><input type="date" value="${j.date}" style="font-size:11px;" onchange="importMenuJours[${i}].date=this.value; majBoutonImport()">${j.date ? "" : '<div style="font-size:10px; color:#b91c1c;">date à saisir</div>'}${vide ? '<div style="font-size:10px; color:#64748b;">pas de plat : non importé</div>' : ''}</td>
+                    ${cellule(i, "entrees", j.entrees)}${cellule(i, "plats", j.plats)}${cellule(i, "accomps", j.accomps)}${cellule(i, "desserts", j.desserts)}</tr>`;
+            });
+            html += `</tbody></table></div>
+                <p style="font-size:11px; color:#475569; margin:6px 0;">Une proposition par ligne dans chaque case. Corrigez ce qui est surligné, cochez les jours à enregistrer. Un menu déjà enregistré à la même date est remplacé.</p>
+                <button type="button" id="import-menu-bouton" class="btn" onclick="enregistrerMenusImportes()" style="background:#047857; width:auto; padding:8px 14px; font-size:12px; font-weight:800;"></button>
+                <span id="import-menu-etat" style="font-size:11.5px; margin-left:10px;"></span>`;
+            zone.innerHTML = html;
+            majBoutonImport();
+        }
+
+        function majImportCellule(i, cle, texte) { importMenuJours[i][cle] = texte.split("\n").map(x => x.trim()).filter(Boolean); majBoutonImport(); }
+        function majBoutonImport() {
+            const b = document.getElementById('import-menu-bouton'); if (!b) return;
+            const n = importMenuJours.filter(j => j.importer && j.date && j.plats.length).length;
+            b.innerText = `💾 Enregistrer ${n} jour(s)`; b.disabled = n === 0;
+        }
+
+        function menuCompletDepuisJour(j) {
+            const part = (liste, vide) => liste.length ? liste.join(" + ") : vide;
+            return `${part(j.entrees, "Sans entrée")} | ${part(j.plats, "Sans plat")} | ${part(j.accomps, "Sans accomp.")} | ${part(j.desserts, "Sans dessert")}`;
+        }
+
+        async function enregistrerMenusImportes() {
+            const school = document.getElementById('select-etablissement').value;
+            const effectif = parseInt(document.getElementById('convives-total').value) || 450;
+            const etat = document.getElementById('import-menu-etat');
+            const aFaire = importMenuJours.filter(j => j.importer && j.date && j.plats.length);
+            let ok = 0, echecs = [];
+            for (let k = 0; k < aFaire.length; k++) {
+                const j = aFaire[k];
+                etat.innerText = `Enregistrement ${k + 1} / ${aFaire.length}...`;
+                try {
+                    const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" },
+                        body: JSON.stringify({ action: "logMenu", ecole: school, date_menu: j.date, effectif: effectif, menu_complet: menuCompletDepuisJour(j) }) });
+                    const res = await r.json();
+                    if (res.success) ok++; else echecs.push(`${j.date} (${res.error || "erreur"})`);
+                } catch (e) { echecs.push(`${j.date} (réseau)`); }
+            }
+            etat.innerHTML = `<strong style="color:#047857;">✅ ${ok} jour(s) enregistré(s)</strong>` + (echecs.length ? ` <span style="color:#b91c1c;">· échecs : ${echecs.join(", ")}</span>` : "");
+            loadLiveData();
         }
 
         function saveMenu() {
