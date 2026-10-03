@@ -173,6 +173,7 @@
 
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Éco-Délégués (Menu)</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
+            <li class="menu-item" id="menu-audit" onclick="openMethodologyModal()">🛡️ Audit des calculs</li>
         </ul>
 
         <div class="dev-badge-card">
@@ -231,16 +232,6 @@
                                 <canvas id="chart-timeline"></canvas>
                             </div>
                         </div>
-                    </div>
-                    <!-- 🛑 BOUTONS CARBONE ET TRANSPARENCE 🛑 -->
-                    <div style="display: flex; justify-content: flex-end; margin-top: 12px; margin-bottom: 6px; padding-right: 5px; gap: 10px;">
-                        <button type="button" class="btn-period" onclick="openMethodologyModal()" style="background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🛡️</span> Transparence & Audit des calculs
-                        </button>
-
-                        <button id="btn-mode-carbone" type="button" class="btn-period" onclick="toggleModeCarbone()" style="background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 11px; display: flex; align-items: center; gap: 6px; border-radius: 20px; padding: 4px 12px; cursor: pointer;">
-                            <span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ
-                        </button>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
@@ -1156,14 +1147,19 @@
                 const brut = {};
                 (scansParJour[d] || []).forEach(s => {
                     const items = parseScanItems(s.commentaire);
-                    const detail = items.filter(it => it.composant);
+                    const detail = items.map(it => Object.assign({}, it, { composant: it.composant || devinerComposant(it.nom) }));
+                    if (items.some(it => !it.composant)) res.scansComposantDevine = (res.scansComposantDevine || 0) + 1;
                     if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
                     jour.scansDetail++;
                     detail.forEach(it => {
                         const portion = portionPour(it, portions);
                         const bin = it.composant === "pain" ? "pain" : (estFruit(it.nom) ? "fruits" : "alim");
-                        const o = brut[it.nom] = brut[it.nom] || { nom: it.nom, bin: bin, count: 0, resteG: 0, portionG: 0 };
+                        const o = brut[it.nom] = brut[it.nom] || { nom: it.nom, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0 };
                         o.count++; o.resteG += portion * it.restePct / 100; o.portionG += portion;
+                        // Estimation sans pesée : portion de référence × reste, inévitable déduit par la bibliothèque
+                        const resteG1 = portion * it.restePct / 100, coef1 = coefInevitable(it.nom);
+                        const evit1 = (resteG1 - Math.min(resteG1, portion * (coef1 || 0))) / 1000;
+                        o.estEvitKg += evit1; o.estCarbKg += evit1 * facteurCarboneEtat(it.nom, it.etat);
                         o.etats = o.etats || {};
                         const et = o.etats[it.etat] = o.etats[it.etat] || { count: 0, resteG: 0 };
                         et.count++; et.resteG += portion * it.restePct / 100;
@@ -1194,7 +1190,8 @@
                         jour.items[o.nom] = { totalKg: totalKg, evitKg: evitKg, inevKg: inevKg, carboneKg: carbKg, etats: etats };
                         jour.evitableKg += evitKg; jour.inevitableKg += inevKg; jour.carboneKg += carbKg;
                         jour.predictedKg += o.resteG / n * E / 1000;
-                        const g = res.items[o.nom] = res.items[o.nom] || { totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0, etats: {} };
+                        const g = res.items[o.nom] = res.items[o.nom] || { totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0, etats: {}, estEvitKg: 0, estCarbKg: 0, pese: false };
+                        g.estEvitKg += o.estEvitKg; g.estCarbKg += o.estCarbKg; if (bins[o.bin] > 0) g.pese = true;
                         g.totalKg += totalKg; g.evitKg += evitKg; g.inevKg += inevKg; g.carboneKg += carbKg;
                         Object.keys(etats).forEach(nomEtat => {
                             const ge = g.etats[nomEtat] = g.etats[nomEtat] || { count: 0, totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0 };
@@ -1906,6 +1903,9 @@
                         const w = (cal && cal.items && cal.items[key] && cal.items[key].etats) ? cal.items[key].etats[nomEtat] : null;
                         return { etat: nomEtat, count: se.count, tauxMange: Math.round(100 - se.totalRestes / se.count), evitKg: w ? w.evitKg : null };
                     }),
+                    pese: !!(cal && cal.items && cal.items[key] && cal.items[key].pese),
+                    estEvitKg: (cal && cal.items && cal.items[key]) ? cal.items[key].estEvitKg : null,
+                    estCarbKg: (cal && cal.items && cal.items[key]) ? cal.items[key].estCarbKg : null,
                     poidsEvitKg: (cal && cal.items && cal.items[key]) ? cal.items[key].evitKg : null,
                     poidsInevKg: (cal && cal.items && cal.items[key]) ? cal.items[key].inevKg : null,
                     poidsTotalCarbone: (cal && cal.items && cal.items[key]) ? cal.items[key].carboneKg : null
@@ -1951,14 +1951,16 @@
                 list.forEach(item => {
                     let cardClass, valText, extraText = "";
 
-                    // Poids calés sur les balances (évitable / inévitable), CO₂ en mode carbone
+                    // Poids jeté et équivalent CO₂e : calés sur les balances si pesée, sinon estimés sur portions de référence
                     if (item.poidsEvitKg === null) {
-                        extraText = `<div style="font-size: 8.5px; color: #64748b; margin-top: 2px;" title="Pas de scan détaillé avec pesée pour cet aliment sur la période">⚖️ poids non calibré</div>`;
-                    } else {
+                        extraText = `<div style="font-size: 8.5px; color: #64748b; margin-top: 2px;" title="Aucun scan exploitable pour cet aliment sur la période">⚖️ poids indisponible</div>`;
+                    } else if (item.pese) {
                         let t = `⚖️ ${item.poidsEvitKg.toFixed(2)} kg évitables jetés`;
-                        if (item.poidsInevKg > 0.004) t += ` · ${item.poidsInevKg.toFixed(2)} kg inévitables`;
-                        if (typeof isModeCarboneActif !== 'undefined' && isModeCarboneActif) t += ` (⚠️ ${item.poidsTotalCarbone.toFixed(2)} kg CO₂)`;
-                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;">${t}</div>`;
+                        if (item.poidsInevKg > 0.004) t += ` · ${item.poidsInevKg.toFixed(2)} kg inév.`;
+                        t += ` · 🌍 ${item.poidsTotalCarbone.toFixed(2)} kg CO₂e`;
+                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;" title="Poids réel calé sur les pesées des bacs ; CO₂e = poids évitable × facteur Agribalyse 3.2">${t}</div>`;
+                    } else {
+                        extraText = `<div style="font-size: 8.5px; color: #92400e; margin-top: 2px; font-weight: bold;" title="Pas de pesée des bacs pour cette période : estimation sur les portions de référence × reste observé, sur les plateaux scannés uniquement">⚖️ ≈ ${item.estEvitKg.toFixed(2)} kg évitables (estimé) · 🌍 ≈ ${item.estCarbKg.toFixed(2)} kg CO₂e</div>`;
                     }
 
                     if (theme === 'vert') {
@@ -2034,10 +2036,10 @@
                 items.sort((a, b) => b.tauxMange - a.tauxMange);
                 lignes = items.map(it => ({ it: it, largeur: it.tauxMange, texte: `${it.tauxMange} % mangé`, couleur: couleurPalier(it.tauxMange) }));
             } else {
-                items = items.filter(it => it.poidsEvitKg !== null).sort((a, b) => b.poidsEvitKg - a.poidsEvitKg);
+                items = items.filter(it => it.poidsEvitKg !== null).map(it => Object.assign({}, it, { kgAff: it.pese ? it.poidsEvitKg : it.estEvitKg })).sort((a, b) => b.kgAff - a.kgAff);
                 if (items.length === 0) { zone.innerHTML = "<p style='font-size:11.5px; color:#64748b; text-align:center; padding:12px;'>Poids non calibrés : il faut des scans au nouveau format et des pesées pour la période.</p>"; return; }
-                const max = Math.max.apply(null, items.map(it => it.poidsEvitKg)) || 1;
-                lignes = items.map(it => ({ it: it, largeur: 100 * it.poidsEvitKg / max, texte: `${it.poidsEvitKg.toFixed(2)} kg`, couleur: couleurPalier(it.tauxMange) }));
+                const max = Math.max.apply(null, items.map(it => it.kgAff)) || 1;
+                lignes = items.map(it => ({ it: it, largeur: 100 * it.kgAff / max, texte: `${it.pese ? "" : "≈ "}${it.kgAff.toFixed(2)} kg`, couleur: couleurPalier(it.tauxMange) }));
             }
             const repere = graphMetric === "mange"
                 ? `<div style="display:flex; gap:8px; height:14px; margin-bottom:2px; font-size:9.5px; color:#64748b;"><div style="width:142px; flex-shrink:0;"></div><div style="flex:1; position:relative;"><span style="position:absolute; left:45%;">45</span><span style="position:absolute; left:60%;">60</span><span style="position:absolute; left:75%;">75</span></div><div style="width:118px; flex-shrink:0;"></div></div>` : "";
@@ -2413,7 +2415,7 @@
                 parEtat: grouper(o => o.etat).sort((a, b) => b.n - a.n),
                 parAvisEleve: grouper(o => o.avis).sort((a, b) => b.n - a.n),
                 jours: jours,
-                poids: w ? { evitableKg: +w.evitKg.toFixed(2), inevitableKg: +w.inevKg.toFixed(2), co2Kg: +w.carboneKg.toFixed(2), perteEuros: +(w.evitKg * prix).toFixed(2) } : null
+                poids: w ? (w.pese ? { evitableKg: +w.evitKg.toFixed(2), inevitableKg: +w.inevKg.toFixed(2), co2Kg: +w.carboneKg.toFixed(2), perteEuros: +(w.evitKg * prix).toFixed(2) } : { estime: true, evitableKg: +w.estEvitKg.toFixed(2), inevitableKg: null, co2Kg: +w.estCarbKg.toFixed(2), perteEuros: +(w.estEvitKg * prix).toFixed(2) }) : null
             };
         }
 
@@ -2421,7 +2423,7 @@
             if (f.plateaux === 0) return `<div style="padding:10px; background:#fffbeb; border:1px solid #fcd34d; border-radius:6px; font-size:11.5px;">Aucun plateau scanné au format détaillé pour cet aliment : l'analyse chiffrée apparaîtra avec les prochains scans.</div>`;
             const ligne = (nom, n, mange) => `<tr><td style="padding:2px 8px 2px 0;">${nom}</td><td style="text-align:right; padding:2px 8px;">${n}</td><td style="text-align:right; padding:2px 0 2px 8px;"><strong>${mange} %</strong>${n < 5 ? ' <span style="color:#b45309;" title="Moins de 5 plateaux : indicatif">⚠️</span>' : ''}</td></tr>`;
             const tab = (titre, lignes) => `<div style="flex:1; min-width:210px;"><div style="font-weight:700; color:#1b4332; margin-bottom:3px;">${titre}</div><table style="width:100%; font-size:11px; border-collapse:collapse;"><thead><tr style="color:#64748b;"><th style="text-align:left; font-weight:600;"></th><th style="text-align:right; font-weight:600;">Plateaux</th><th style="text-align:right; font-weight:600;">Mangé</th></tr></thead><tbody>${lignes}</tbody></table></div>`;
-            const poids = f.poids ? `${f.poids.evitableKg} kg évitables jetés · ${f.poids.inevitableKg} kg inévitables · ${f.poids.perteEuros} € · ${f.poids.co2Kg} kg CO₂` : "poids non calibré (pas de pesée associée aux scans)";
+            const poids = f.poids ? (f.poids.estime ? `≈ ${f.poids.evitableKg} kg évitables jetés (estimé sur portions de référence, pas de pesée) · ≈ ${f.poids.perteEuros} € · ≈ ${f.poids.co2Kg} kg CO₂e` : `${f.poids.evitableKg} kg évitables jetés · ${f.poids.inevitableKg} kg inévitables · ${f.poids.perteEuros} € · ${f.poids.co2Kg} kg CO₂e`) : "poids indisponible";
             const jours = f.jours.slice(0, 6).map(j => ligne(`${j.date} <span style="color:#64748b;">· ${String(j.menu).substring(0, 60)}</span>`, j.n, j.mangePct === undefined ? 100 - j.restePct : 100 - j.restePct)).join("");
             return `<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:11.5px;">
                 <div style="margin-bottom:6px;"><strong>${f.plateaux}</strong> plateaux observés · <strong>${f.mangePctMoyen} % mangé</strong> en moyenne${f.plateaux < 5 ? ' <span style="color:#b45309;">· ⚠️ moins de 5 plateaux, conclusions fragiles</span>' : ''}<br><span style="color:#475569;">⚖️ ${poids}</span></div>
@@ -3470,7 +3472,7 @@
     <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
         <div style="background:white; width:92%; max-width:800px; max-height:88vh; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
             <div style="background:#1e293b; padding:15px 20px; display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence & Audit : Voir sous le capot (Méthodes A.B.C.)</h3>
+                <h3 style="margin:0; color:white; font-size:16px;">🛡️ Audit des calculs : voir sous le capot</h3>
                 <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
             </div>
             <div id="methodology-body" style="padding:24px; overflow-y:auto; font-size:12.5px; color:#334155; line-height:1.6;"></div>
@@ -3479,35 +3481,6 @@
 
     <!-- SCRIPT DE FORÇAGE DES BOUTONS INTERACTIFS -->
     <script>
-        window.isModeCarboneActif = false;
-
-        window.toggleModeCarbone = function() {
-            window.isModeCarboneActif = !window.isModeCarboneActif;
-            
-            if (typeof isModeCarboneActif !== 'undefined') {
-                isModeCarboneActif = window.isModeCarboneActif;
-            }
-
-            const btn = document.getElementById('btn-mode-carbone');
-            if (btn) {
-                if (window.isModeCarboneActif) {
-                    btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : <strong>ACTIF</strong>';
-                    btn.style.backgroundColor = '#10b981';
-                    btn.style.color = 'white';
-                    btn.style.borderColor = '#059669';
-                } else {
-                    btn.innerHTML = '<span style="font-size: 14px;">🌍</span> Mode Impact Carbone (ADEME) : DÉSACTIVÉ';
-                    btn.style.backgroundColor = '#f1f5f9';
-                    btn.style.color = '#475569';
-                    btn.style.borderColor = '#cbd5e1';
-                }
-            }
-            
-            if (typeof applyCustomDateFilter === 'function') {
-                applyCustomDateFilter();
-            }
-        };
-
         window.openMethodologyModal = function() {
             const modal = document.getElementById('modal-methodology');
             const body = document.getElementById('methodology-body');
