@@ -11,7 +11,7 @@ const URL_REFERENTIEL = "https://raw.githubusercontent.com/ThierryArmant/E3D-can
 // Valeurs par défaut des paramètres de chaque établissement (modifiables dans l'onglet "Parametres" de son tableur)
 const PARAMETRES_DEFAUT = [
   ["portion_entree_g", 100, "Portion de référence d'une entrée (g)"],
-  ["portion_plat_g", 200, "Portion de référence du plat protidique (g)"],
+  ["portion_plat_g", 250, "Portion de référence du plat composé (g) - référence officielle collège/lycée : 250 à 300 (arrêté du 30/09/2011)"],
   ["portion_garniture_g", 150, "Portion de référence d'une garniture / accompagnement (g)"],
   ["portion_dessert_g", 100, "Portion de référence d'un dessert ou laitage (g)"],
   ["portion_fruit_g", 100, "Portion de référence d'un fruit (g)"],
