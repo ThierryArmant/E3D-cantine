@@ -388,17 +388,8 @@
                         </div>
                     </div>
 
-                    <div id="import-menu-box" style="background:#f0fdf4; border:1.5px dashed #2d6a4f; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
-                        <h3 style="margin:0 0 4px; font-size:14px; color:#1b4332; font-weight:800;">📥 Importer le tableau de menus du cuisinier</h3>
-                        <p style="font-size:11.5px; color:#475569; margin:0 0 8px;">Déposez le fichier du chef tel quel (CSV ou Excel, colonnes : Semaine, Jour, Entrée, Plat, Accompagnement, Dessert, Fruit). Les propositions séparées par « / » ou « ou » sont découpées, les dates sont calculées, et vous relisez avant d'enregistrer.</p>
-                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                            <input type="file" id="import-menu-file" accept=".csv,.txt,.xlsx" style="font-size:11px;" onchange="importerMenuTableau(event)">
-                            <label style="font-size:11px; font-weight:bold; color:#1b4332;">Année du premier jour : <input type="number" id="import-menu-annee" style="width:70px; padding:3px 6px;"></label>
-                        </div>
-                        <div id="import-menu-apercu" style="margin-top:10px;"></div>
-                    </div>
 
-                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800;">🍽️ Composition du Menu du Jour</h3>
+                    <h3 style="margin-bottom: 12px; font-size: 14px; color: #1b4332; font-weight: 800; display:flex; align-items:center; gap:8px;">🍽️ Composition du Menu du Jour <button type="button" onclick="ouvrirParametres()" title="Paramètres de l'établissement : portions, effectif, prix" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:15px; line-height:1;">⚙️</button></h3>
                     <p style="font-size: 11.5px; color: #64748b; margin-bottom: 12px; font-style: italic;">Cochez les éléments principaux. Les options (sauces, fromages, suppléments) sont regroupées dans la zone dédiée en bas de chaque colonne.</p>
                     
                     <div class="table-responsive">
@@ -664,6 +655,16 @@
                         <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 8px 16px; font-size: 12px; background: #1b4332;">🖨️ Imprimer / Exporter le rapport officiel</button>
                     </div>
 
+                    <div id="import-menu-box" style="background:#f0fdf4; border:1.5px dashed #2d6a4f; border-radius:8px; padding:12px 14px; margin-bottom:16px;">
+                        <h3 style="margin:0 0 4px; font-size:14px; color:#1b4332; font-weight:800;">📥 Importer le tableau de menus du cuisinier</h3>
+                        <p style="font-size:11.5px; color:#475569; margin:0 0 8px;">Déposez le fichier du chef tel quel (CSV ou Excel, colonnes : Semaine, Jour, Entrée, Plat, Accompagnement, Dessert, Fruit). Les propositions séparées par « / » ou « ou » sont découpées, les dates sont calculées, et vous relisez avant d'enregistrer.</p>
+                        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                            <input type="file" id="import-menu-file" accept=".csv,.txt,.xlsx" style="font-size:11px;" onchange="importerMenuTableau(event)">
+                            <label style="font-size:11px; font-weight:bold; color:#1b4332;">Année du premier jour : <input type="number" id="import-menu-annee" style="width:70px; padding:3px 6px;"></label>
+                        </div>
+                        <div id="import-menu-apercu" style="margin-top:10px;"></div>
+                    </div>
+
                     <div style="margin-bottom: 16px; padding: 14px; background: white; border: 1.5px solid #86efac; border-radius: 8px;">
                         <h4 style="font-size: 13.5px; color: #065f46; font-weight: 900; margin-bottom: 8px;">✅ Contrôle automatique des fréquences sur les 20 derniers repas</h4>
                         <div id="controle-frequences" style="font-size:12px; color:#334155;"></div>
@@ -745,6 +746,23 @@
 
             <div id="modal-item-content" style="font-size: 11.5px; color: #334155; line-height: 1.5; overflow-y: auto; flex-grow: 1; padding-right: 4px;">
                 Analyse des menus et des services associés en cours...
+            </div>
+        </div>
+    </div>
+
+    <!-- ⚙️ PARAMÈTRES DE L'ÉTABLISSEMENT -->
+    <div id="modal-parametres" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.6); z-index:9998; align-items:center; justify-content:center;">
+        <div style="background:white; width:92%; max-width:520px; max-height:88vh; overflow-y:auto; border-radius:12px; padding:18px 20px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.25); border-top:5px solid #2d6a4f;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <h3 style="margin:0; font-size:15px; color:#1b4332; font-weight:900;">⚙️ Paramètres de l'établissement</h3>
+                <button type="button" onclick="document.getElementById('modal-parametres').style.display='none'" style="background:#ef4444; color:white; border:none; border-radius:4px; width:26px; height:26px; font-weight:bold; cursor:pointer;">✕</button>
+            </div>
+            <p style="font-size:11.5px; color:#64748b; margin:0 0 10px;">Ces valeurs servent aux calculs de poids, d'écarts et de pertes de <strong id="param-ecole">cet établissement</strong>. Par défaut : grammages officiels collège du plan alimentaire.</p>
+            <div id="param-champs"></div>
+            <div style="display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap;">
+                <button type="button" id="param-save" class="btn" onclick="enregistrerParametres()" style="width:auto; padding:7px 14px; font-size:12px; background:#047857;">💾 Enregistrer</button>
+                <button type="button" class="btn" onclick="remplirParametres(true)" style="width:auto; padding:7px 14px; font-size:12px; background:#64748b;">↺ Valeurs officielles</button>
+                <span id="param-etat" style="font-size:11.5px;"></span>
             </div>
         </div>
     </div>
@@ -1773,7 +1791,7 @@
                 `Pour chaque aliment visible sur le plateau (nom, forme, préparation, composante), l'IA donne uniquement une part de reste et une part mangée, en %. Un contrôle de cohérence écarte tout aliment dont reste + mangé s'éloigne de 100 %, et les photos sans plateau visible sont ignorées.<br>Exemple de ligne enregistrée : <code>[Carottes - râpées - cuites vapeur : 40% restes | accompagnement | confiance haute]</code>`)}
             ${bloc("#6d28d9", "#f5f3ff", "2. Poids par aliment : mesuré, réparti selon les scans",
                 `Les <strong>balances sous les poubelles</strong> donnent le poids réel jeté (alimentaire, fruits, pain). Ce poids est réparti entre les aliments au prorata de leurs restes estimés (restes % × portion de référence).<br>
-                • Portions de référence (modifiables dans l'onglet Parametres) : <strong>base officielle</strong>, grammages collège du plan alimentaire départemental (GRCN) : entrée ${por.entree} g (crudités 60 à 80) · plat protidique ${por.plat} g (80 à 100, hors garniture) · garniture ${por.accompagnement} g (féculents 150 à 180, légumes 100 à 120) · dessert ${por.dessert} g (pâtisserie 80 à 100, compote 100 à 120) · fruit ${por.fruit} g (150 à 180) · pain ${por.pain} g (40 à 50). Remplacer par les grammages réels de la cuisine dès qu'ils sont connus.<br>
+                • Portions de référence (modifiables par la roue crantée ⚙️ de la page Éco-Délégués) : <strong>base officielle</strong>, grammages collège du plan alimentaire départemental (GRCN) : entrée ${por.entree} g (crudités 60 à 80) · plat protidique ${por.plat} g (80 à 100, hors garniture) · garniture ${por.accompagnement} g (féculents 150 à 180, légumes 100 à 120) · dessert ${por.dessert} g (pâtisserie 80 à 100, compote 100 à 120) · fruit ${por.fruit} g (150 à 180) · pain ${por.pain} g (40 à 50). Remplacer par les grammages réels de la cuisine dès qu'ils sont connus.<br>
                 • Le poids d'un aliment = poids de la poubelle × (ses restes de référence ÷ somme des restes de référence des aliments de cette poubelle).<br>
                 • Servi estimé = effectif attendu × part des plateaux scannés où l'aliment apparaît × portion. Effectif par défaut : ${effDef} (les effectifs saisis chaque jour dans le menu priment).<br>
                 • Les <strong>plateaux non scannés</strong> ne sont pas ignorés : leurs déchets sont dans les poubelles pesées, et l'indicateur « écart balance / scans » dit si l'échantillon scanné est représentatif.`)}
@@ -2238,6 +2256,49 @@
                 st.style.color = taux >= 75 ? "#047857" : (taux >= 60 ? "#4d7c0f" : (taux >= 45 ? "#c2410c" : "#b91c1c"));
                 tx.innerText = `${n} observation(s). ` + (pire.tauxMange < 60 ? `Point faible : ${pire.label} (${pire.tauxMange} % mangé).` : `Bonne adhésion, point le plus bas : ${pire.label} (${pire.tauxMange} % mangé).`);
             });
+        }
+
+        // ===== PARAMÈTRES DE L'ÉTABLISSEMENT (roue crantée) =====
+        const PARAMS_CHAMPS = [
+            ["portion_entree_g", "Entrée (g)", 80, "grammes", 10, 500], ["portion_plat_g", "Plat protidique (g)", 100, "grammes", 10, 500],
+            ["portion_garniture_g", "Garniture (g)", 150, "grammes", 10, 500], ["portion_dessert_g", "Dessert ou laitage (g)", 100, "grammes", 10, 500],
+            ["portion_fruit_g", "Fruit frais (g)", 150, "grammes", 10, 500], ["portion_pain_g", "Pain (g)", 50, "grammes", 5, 300],
+            ["effectif_defaut", "Effectif attendu par défaut (couverts)", 450, "couverts", 1, 5000], ["prix_kg_eur", "Coût moyen de la denrée (€/kg)", 4.5, "€/kg", 0.1, 100]
+        ];
+        function ouvrirParametres() {
+            const ecole = document.getElementById('select-etablissement').value;
+            document.getElementById('param-ecole').innerText = ecole;
+            document.getElementById('param-etat').innerText = "";
+            remplirParametres(false);
+            document.getElementById('modal-parametres').style.display = "flex";
+        }
+        function remplirParametres(officiel) {
+            const cur = (globalRawData && globalRawData.parametres) || {};
+            document.getElementById('param-champs').innerHTML = PARAMS_CHAMPS.map(c => {
+                const v = officiel ? c[2] : (cur[c[0]] !== undefined ? cur[c[0]] : c[2]);
+                return `<label style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:#1e293b; margin:6px 0;">${c[1]}<input type="number" step="${c[0] === "prix_kg_eur" ? "0.1" : "1"}" min="${c[4]}" max="${c[5]}" id="param-${c[0]}" value="${v}" style="width:90px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; text-align:right;"></label>`;
+            }).join("");
+        }
+        async function enregistrerParametres() {
+            const etat = document.getElementById('param-etat'), btn = document.getElementById('param-save');
+            const params = {};
+            for (const c of PARAMS_CHAMPS) {
+                const v = parseFloat(String(document.getElementById('param-' + c[0]).value).replace(",", "."));
+                if (isNaN(v) || v < c[4] || v > c[5]) { etat.innerHTML = `<span style="color:#b91c1c;">${c[1]} : valeur entre ${c[4]} et ${c[5]}.</span>`; return; }
+                params[c[0]] = v;
+            }
+            const ecole = document.getElementById('select-etablissement').value;
+            btn.disabled = true; etat.innerText = "Enregistrement...";
+            try {
+                const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveParametres", ecole: ecole, parametres: params }) });
+                const res = await r.json();
+                if (!res.success) throw new Error(res.error || "refusé par le script");
+                if (globalRawData) globalRawData.parametres = Object.assign({}, globalRawData.parametres || {}, params);
+                etat.innerHTML = '<span style="color:#047857; font-weight:700;">✅ Enregistré dans le tableur</span>';
+                if (typeof applyCustomDateFilter === 'function') applyCustomDateFilter();
+            } catch (e) {
+                etat.innerHTML = `<span style="color:#b91c1c;">Échec : ${String(e.message).replace(/</g, "&lt;")}${/Failed to fetch|NetworkError/i.test(e.message) ? " (réseau)" : ""}. Si le message parle d'une action inconnue, le script Google doit être mis à jour.</span>`;
+            } finally { btn.disabled = false; }
         }
 
         // ===== FICHE ALIMENT : historique de l'aliment (jours, semaines, mois), confrontation aux concurrents du même service =====

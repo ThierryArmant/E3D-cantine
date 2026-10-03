@@ -263,6 +263,8 @@ function doPost(e) {
       return reponseJson(gererPlanActionEtApres(data));
     } else if (action === "saveEffectifs") {
       responseOutput = handleSaveEffectifs(data);
+    } else if (action === "saveParametres") {
+      responseOutput = handleSaveParametres(data);
     }
     return reponseJson(responseOutput);
   } catch (error) {
@@ -355,6 +357,26 @@ function handleSaveEffectifs(data) {
   if (!(n > 0)) throw new Error("Effectif invalide.");
   setParametre(sheets, "effectif_defaut", n);
   return { success: true, effectif: n };
+}
+
+// Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
+const PARAMETRES_MODIFIABLES = {
+  portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
+  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100]
+};
+function handleSaveParametres(data) {
+  const sheets = getSheetsABC(data.ecole || data.etablissement);
+  const demandes = data.parametres || {};
+  const aEcrire = {};
+  Object.keys(demandes).forEach(function (cle) {
+    const borne = PARAMETRES_MODIFIABLES[cle];
+    if (!borne) throw new Error("Paramètre non modifiable : " + cle);
+    const v = parseFloat(String(demandes[cle]).replace(",", "."));
+    if (isNaN(v) || v < borne[0] || v > borne[1]) throw new Error("Valeur hors limites pour " + cle);
+    aEcrire[cle] = v;
+  });
+  Object.keys(aEcrire).forEach(function (cle) { setParametre(sheets, cle, aEcrire[cle]); });
+  return { success: true, enregistres: aEcrire };
 }
 
 // Un seul menu par date : on remplace la ligne du jour au lieu d'en ajouter une (plus de doublons).
