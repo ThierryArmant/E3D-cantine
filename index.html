@@ -758,8 +758,8 @@
             </div>
             
             <div style="margin-bottom: 12px; display: flex; gap: 8px; align-items: center; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer la concurrence :</label>
-                <input type="text" id="modal-filter-input" placeholder="Filtrer par ingrédient alternatif..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                <label style="font-size: 11px; font-weight: bold; color: #1b4332;">🔍 Filtrer l'historique :</label>
+                <input type="text" id="modal-filter-input" placeholder="Une date, un mot du menu, un concurrent..." oninput="filterModalOccurrences()" style="flex: 1; padding: 5px 8px; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 4px;">
             </div>
 
             <div id="modal-item-content" style="font-size: 11.5px; color: #334155; line-height: 1.5; overflow-y: auto; flex-grow: 1; padding-right: 4px;">
@@ -2250,123 +2250,116 @@
             });
         }
 
+        // ===== FICHE ALIMENT : historique de l'aliment (jours, semaines, mois), confrontation aux concurrents du même service =====
+        let modalGran = "jour", modalHist = null;
+
+        function lundiDe(iso) {
+            const d = new Date(iso + "T12:00:00");
+            if (isNaN(d)) return iso;
+            d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+            return d.toISOString().substring(0, 10);
+        }
+        const dateFR = iso => { const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m ? `${m[3]}/${m[2]}` : iso; };
+        const MOIS_COURTS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
         function openItemDetail(rawKey) {
             const modal = document.getElementById('modal-item-detail');
             const title = document.getElementById('modal-item-title');
             const content = document.getElementById('modal-item-content');
             const filterInput = document.getElementById('modal-filter-input');
             if (!modal || !title || !content) return;
-
-            title.innerText = `🔍 Analyse des menus & concurrence : ${rawKey}`;
-            content.innerHTML = "<em>Recherche des menus éco-délégués et des alternatives associées...</em>";
+            title.innerText = `🔍 Fiche : ${rawKey}`;
             if (filterInput) filterInput.value = "";
             modal.style.display = "flex";
-
-            let matchingScans = [];
-            if (globalRawData && globalRawData.rawGaspillage) {
-                matchingScans = globalRawData.rawGaspillage.filter(s => {
-                    let com = (s.commentaire || "").toLowerCase();
-                    let keyLower = rawKey.toLowerCase();
-                    return com.includes(keyLower) || (keyLower === "poisson" && com.includes("colin")) || (keyLower === "poulet" && com.includes("tex-mex"));
-                });
-            }
-
-            // On utilise la globale currentModalOccurrences définie plus haut dans ton fichier
-            currentModalOccurrences = [];
+            modalGran = "jour";
             modalAiHtml = "";
             modalFaits = construireFaitsAliment(rawKey);
             modalPanelHtml = panneauFaitsAliment(modalFaits);
 
-            matchingScans.forEach(s => {
-                let dateIso = (typeof normalizeDate === 'function' ? normalizeDate(s.dateRaw) : s.dateRaw) || "";
-                let commentaire = s.commentaire || "";
-                
-                // --- CORRECTION BUG > 100% : LECTURE DE LA CHAÎNE IA ---
-                let tauxExact = 0;
-                let blocks = commentaire.split(/\[([^\]]+)\]/g);
-                blocks.forEach(b => {
-                    if (b.toLowerCase().includes(rawKey.toLowerCase()) && b.includes('%')) {
-                        let pctMatch = b.match(/(\d+)%/);
-                        if (pctMatch) {
-                            tauxExact = parseInt(pctMatch[1], 10);
-                        }
-                    }
-                });
-
-                
-                let tauxFinal = Math.min(100, Math.max(0, tauxExact));
-                // --------------------------------------------------------
-                
-                let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
-                let alternativesMemeCategorie = [];
-
-                if (globalRawData) {
-                    const menuTexte = (globalRawData.historiqueMenus || {})[dateIso];
-                    if (menuTexte) {
-                        menuCompletDuJour = menuTexte;
-                        
-                        let parts = menuCompletDuJour.split('|').map(p => p.trim());
-                        let entrees = parts[0] || "";
-                        let plats = parts[1] || "";
-                        let accomps = parts[2] || "";
-                        let desserts = parts[3] || "";
-
-                        let keyLower = rawKey.toLowerCase();
-                        if (entrees.toLowerCase().includes(keyLower)) alternativesMemeCategorie = entrees.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
-                        else if (plats.toLowerCase().includes(keyLower)) alternativesMemeCategorie = plats.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
-                        else if (accomps.toLowerCase().includes(keyLower)) alternativesMemeCategorie = accomps.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
-                        else if (desserts.toLowerCase().includes(keyLower)) alternativesMemeCategorie = desserts.split('+').map(e => e.trim()).filter(e => !e.toLowerCase().includes(keyLower));
-                    }
-                }
-
-                currentModalOccurrences.push({
-                    date: dateIso || "Date inconnue",
-                    taux: tauxFinal,
-                    menu: menuCompletDuJour,
-                    alternatives: alternativesMemeCategorie.length > 0 ? alternativesMemeCategorie.join(', ') : "Aucune",
-                    obs: s.commentaire
+            // Tous les aliments lus, par jour : sert à retrouver les concurrents du même jour et de la même composante
+            const cle = normaliserNomAliment(rawKey);
+            const jourItems = {}, obs = [];
+            ((globalRawData && globalRawData.rawGaspillage) || []).forEach(sc => {
+                if (sc.type !== "SCAN_IA_VISION") return;
+                const d = normalizeDate(sc.dateRaw);
+                parseScanItems(sc.commentaire).forEach(it => {
+                    const comp = it.composant || devinerComposant(it.nom), nom = normaliserNomAliment(it.nom);
+                    (jourItems[d] = jourItems[d] || []).push({ nom: it.nom, cle: nom, comp: comp, reste: it.restePct });
+                    if (nom === cle || nom.includes(cle) || cle.includes(nom)) obs.push({ date: d, reste: it.restePct, etat: it.etat, avis: avisCourt(sc.avis_eleve), comp: comp });
                 });
             });
-
-            if (typeof renderModalOccurrencesList === 'function') {
-                renderModalOccurrencesList(currentModalOccurrences);
-            }
+            const compDom = (() => { const c = {}; obs.forEach(o => c[o.comp] = (c[o.comp] || 0) + 1); return Object.keys(c).sort((a, b) => c[b] - c[a])[0]; })();
+            const menus = (globalRawData && globalRawData.historiqueMenus) || {};
+            const jours = {};
+            obs.forEach(o => {
+                const j = jours[o.date] = jours[o.date] || { date: o.date, restes: [], avis: {}, etats: {}, menu: menus[o.date] || "", conc: {} };
+                j.restes.push(o.reste);
+                j.avis[o.avis] = (j.avis[o.avis] || 0) + 1;
+                j.etats[o.etat] = (j.etats[o.etat] || 0) + 1;
+            });
+            Object.keys(jours).forEach(d => {
+                (jourItems[d] || []).forEach(x => {
+                    if (x.comp !== compDom || x.cle === cle || x.cle.includes(cle) || cle.includes(x.cle)) return;
+                    (jours[d].conc[x.nom] = jours[d].conc[x.nom] || []).push(x.reste);
+                });
+            });
+            modalHist = { jours: Object.keys(jours).sort().reverse().map(d => jours[d]), comp: compDom };
+            renderModalOccurrencesList();
         }
 
-        function renderModalOccurrencesList(occurrences) {
+        function renderModalOccurrencesList() {
             const content = document.getElementById('modal-item-content');
             if (!content) return;
-
-            if (occurrences.length === 0) {
-                content.innerHTML = `<p style="color: #64748b; font-style: italic; text-align: center; padding: 20px;">Aucune correspondance trouvée pour ce filtre.</p>`;
-                return;
+            const q = ((document.getElementById('modal-filter-input') || {}).value || "").toLowerCase().trim();
+            const m = a => a.reduce((x, y) => x + y, 0) / a.length;
+            const gran = modalGran;
+            const btn = (g, l) => `<button type="button" class="btn-period${gran === g ? " active" : ""}" onclick="reglerGranFiche('${g}')" style="padding:3px 10px; font-size:11px;">${l}</button>`;
+            let h = modalPanelHtml;
+            const jours = (modalHist ? modalHist.jours : []).filter(j => !q || j.date.includes(q) || dateFR(j.date).includes(q) || j.menu.toLowerCase().includes(q) || Object.keys(j.conc).join(" ").toLowerCase().includes(q));
+            h += `<div style="display:flex; gap:6px; align-items:center; margin:4px 0 8px;"><strong style="font-size:12px; color:#1b4332;">📈 Historique</strong>${btn("jour", "Par jour")}${btn("semaine", "Par semaine")}${btn("mois", "Par mois")}</div>`;
+            if (!jours.length) { content.innerHTML = h + `<p style="color:#64748b; font-style:italic; text-align:center; padding:16px;">${modalHist && modalHist.jours.length ? "Aucun jour ne correspond à ce filtre." : "Aucun scan détaillé pour cet aliment."}</p>`; return; }
+            // Regroupement
+            const cleDe = j => gran === "jour" ? j.date : (gran === "semaine" ? lundiDe(j.date) : j.date.substring(0, 7));
+            const lib = k => gran === "jour" ? dateFR(k) + "/" + k.substring(2, 4) : (gran === "semaine" ? "sem. du " + dateFR(k) : MOIS_COURTS[+k.substring(5, 7) - 1] + " " + k.substring(0, 4));
+            const groupes = {};
+            jours.forEach(j => { (groupes[cleDe(j)] = groupes[cleDe(j)] || []).push(j); });
+            const cles = Object.keys(groupes).sort().reverse();
+            h += cles.map(k => {
+                const g = groupes[k], restes = [].concat.apply([], g.map(j => j.restes)), mange = Math.round(100 - m(restes));
+                const avis = {}, etats = {}, conc = {};
+                g.forEach(j => {
+                    Object.keys(j.avis).forEach(a => avis[a] = (avis[a] || 0) + j.avis[a]);
+                    Object.keys(j.etats).forEach(e => etats[e] = (etats[e] || 0) + j.etats[e]);
+                    Object.keys(j.conc).forEach(c => (conc[c] = conc[c] || []).push.apply(conc[c], j.conc[c]));
+                });
+                const n = restes.length;
+                const ic = { "tout fini": "🟢", "pas le temps": "🟠", "pas aimé": "🔴", "non renseigné": "⚪" };
+                const avisTxt = Object.keys(avis).map(a => `${ic[a] || ""} ${avis[a]}`).join(" · ");
+                const etatTxt = Object.keys(etats).sort((a, b) => etats[b] - etats[a]).slice(0, 3).map(e => `${escC(e)} (${etats[e]})`).join(", ");
+                const concTxt = Object.keys(conc).map(c => `${escC(c)} ${Math.round(100 - m(conc[c]))} % <span style="color:#94a3b8;">(n=${conc[c].length})</span>`).join(" · ");
+                const menuTxt = gran === "jour" ? (g[0].menu ? escC(g[0].menu) : "<em>menu non saisi</em>") : `${g.length} jour(s) de service`;
+                return `<div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 10px; margin-bottom:6px;">
+                    <div style="display:flex; align-items:center; gap:8px;"><strong style="width:92px; flex-shrink:0; color:#1b4332; font-size:11.5px;">${lib(k)}</strong>
+                    <div style="flex:1; height:13px; background:#f1f5f9; border-radius:3px;"><div style="height:100%; width:${Math.max(1, mange)}%; background:${couleurPalier(mange)}; border-radius:3px;"></div></div>
+                    <div style="width:110px; flex-shrink:0; font-size:11px;"><strong>${mange} % mangé</strong> · ${n}${n < 5 ? " ⚠️" : ""}</div></div>
+                    <div style="font-size:10.5px; color:#475569; margin-top:3px;">🍽️ ${menuTxt}</div>
+                    <div style="font-size:10.5px; color:#475569;">💬 ${avisTxt}${etatTxt ? " &nbsp;·&nbsp; 🥕 " + etatTxt : ""}</div>
+                    ${concTxt ? `<div style="font-size:10.5px; color:#b45309; background:#fffbeb; border-radius:4px; padding:3px 6px; margin-top:3px;">⚖️ Mangés ce(s) jour(s)-là dans la même catégorie : ${concTxt}</div>` : ""}
+                </div>`;
+            }).join("");
+            // Confrontation globale
+            const tous = {};
+            jours.forEach(j => Object.keys(j.conc).forEach(c => { const t = tous[c] = tous[c] || { nous: [], eux: [], jours: 0 }; t.jours++; t.nous.push.apply(t.nous, j.restes); t.eux.push.apply(t.eux, j.conc[c]); }));
+            const lignes = Object.keys(tous).filter(c => tous[c].jours >= 2).sort((a, b) => tous[b].jours - tous[a].jours).slice(0, 8);
+            if (lignes.length) {
+                h += `<div style="font-weight:700; color:#1b4332; margin:10px 0 4px; font-size:12px;">⚖️ Confrontation sur les jours en commun (au moins 2)</div><table style="width:100%; font-size:11px; border-collapse:collapse;"><tr style="color:#64748b; text-align:left;"><th>Face à</th><th>Jours</th><th>Cet aliment</th><th>Concurrent</th></tr>` +
+                    lignes.map(c => { const t = tous[c], a = Math.round(100 - m(t.nous)), b = Math.round(100 - m(t.eux)); return `<tr style="border-top:1px solid #e2e8f0;"><td>${escC(c)}</td><td>${t.jours}</td><td><strong style="color:${a >= b ? "#047857" : "#b91c1c"};">${a} %</strong></td><td>${b} %</td></tr>`; }).join("") +
+                    `</table><p style="font-size:10.5px; color:#64748b;">« Concurrent » = autre aliment de la même catégorie lu le même jour, sur d'autres plateaux. Ce n'est pas un choix individuel de l'élève : la comparaison est indicative.</p>`;
             }
-
-            let htmlList = modalPanelHtml + `<div style="font-size: 11px; color: #64748b; margin-bottom: 8px; font-style: italic;">Détail des observations (${occurrences.length} scans concernés)</div>`;
-            htmlList += `<div style="display: flex; flex-direction: column; gap: 10px;">`;
-            
-            occurrences.forEach((occ, index) => {
-                let badgeColor = occ.taux >= 40 ? "#ef4444" : "#10b981";
-                htmlList += `
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <strong style="color: #1b4332; font-size: 11.5px;">📅 ${occ.date}</strong>
-                            <span style="background:${badgeColor}; color:white; padding:2px 6px; border-radius:3px; font-size:10px; font-weight:bold;">Taux de rejet : ${occ.taux}%</span>
-                        </div>
-                        <div style="font-size: 11px; color: #0f172a; background: #ffffff; padding: 6px 8px; border-radius: 4px; border: 1px dashed #cbd5e1; margin-bottom: 6px;">
-                            <strong>🍽️ Menu éco-délégué du jour :</strong><br>${occ.menu}
-                        </div>
-                        <div style="font-size: 10.5px; color: #b45309; background: #fffbeb; padding: 5px 8px; border-radius: 4px; margin-bottom: 6px;">
-                            <strong>⚖️ Alternatives en concurrence :</strong> ${occ.alternatives}
-                        </div>
-                        <div style="color: #475569; font-size: 10.5px; font-style: italic; margin-bottom: 8px;">
-                            💬 Constat visuel / IA : "${occ.obs}"
-                        </div>
-                    </div>`;
-            });
-            htmlList += `</div>`;
-            content.innerHTML = htmlList;
+            content.innerHTML = h;
         }
+
+        function reglerGranFiche(g) { modalGran = g; renderModalOccurrencesList(); }
 
         // ===== ANALYSE D'UN ALIMENT SUR TOUTE LA PÉRIODE : des faits mesurés d'abord, l'IA commente ensuite =====
         let modalFaits = null, modalPanelHtml = "", modalAiHtml = "";
@@ -2420,7 +2413,6 @@
             return `<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:11.5px;">
                 <div style="margin-bottom:6px;"><strong>${f.plateaux}</strong> plateaux observés · <strong>${f.mangePctMoyen} % mangé</strong> en moyenne${f.plateaux < 5 ? ' <span style="color:#b45309;">· ⚠️ moins de 5 plateaux, conclusions fragiles</span>' : ''}<br><span style="color:#475569;">⚖️ ${poids}</span></div>
                 <div style="display:flex; gap:16px; flex-wrap:wrap;">${tab("Par état de préparation", f.parEtat.map(e => ligne(e.nom, e.n, e.mangePct)).join(""))}${tab("Par avis de l'élève", f.parAvisEleve.map(e => ligne(e.nom, e.n, e.mangePct)).join(""))}</div>
-                <div style="margin-top:8px;">${tab("Jours où il est le moins mangé", jours)}</div>
                 <div style="text-align:right; margin-top:8px;"><button type="button" class="btn" id="btn-ia-aliment" onclick="lancerAnalyseAliment()" style="background-color:#1e3a8a; padding:6px 12px; font-size:11px; width:auto;">🤖 Analyser cet aliment (IA)</button></div>
                 <div id="ia-aliment-result" style="display:${modalAiHtml ? "block" : "none"}; margin-top:8px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; font-size:11.5px; color:#1e3a8a;">${modalAiHtml}</div>
             </div>`;
@@ -2444,18 +2436,7 @@
             .finally(() => { if (btn) btn.disabled = false; });
         }
 
-        function filterModalOccurrences() {
-            const query = (document.getElementById('modal-filter-input').value || "").toLowerCase().trim();
-            if (!query) {
-                renderModalOccurrencesList(currentModalOccurrences);
-                return;
-            }
-
-            let filtered = currentModalOccurrences.filter(occ => {
-                return occ.menu.toLowerCase().includes(query) || occ.alternatives.toLowerCase().includes(query) || occ.obs.toLowerCase().includes(query) || occ.date.includes(query);
-            });
-            renderModalOccurrencesList(filtered);
-        }
+        function filterModalOccurrences() { renderModalOccurrencesList(); }
 
         function closeItemModal() {
             const modal = document.getElementById('modal-item-detail');
