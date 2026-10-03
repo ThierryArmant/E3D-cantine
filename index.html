@@ -265,6 +265,15 @@
                     </div>
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                            <h3 style="color:#1b4332; font-size:14px; font-weight:900; margin:0;">📊 Vue graphique : plébiscite et rejet par aliment</h3>
+                            <div id="graph-metric-btns" style="display:flex; gap:4px;"></div>
+                        </div>
+                        <div id="graph-comp-btns" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;"></div>
+                        <div id="graph-aliments"></div>
+                    </div>
+
+                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                             <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
                             <div style="display: flex; align-items: center; gap: 6px;">
@@ -2000,11 +2009,54 @@
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
             renderConformite(globalItemsDetailedStats);
+            renderGraphiqueAliments();
             filtrerAnalyseFineItem();
 
             if (typeof updateEtApresModule === "function") {
                 updateEtApresModule(scansValides);
             }
+        }
+
+        // ===== VUE GRAPHIQUE : barres par aliment, filtrées par composante (entrée, plat, garniture, dessert, pain) =====
+        let graphComp = "all", graphMetric = "mange";
+        const GRAPH_COMPOSANTES = [["all", "Tout"], ["entree", "Entrées"], ["plat", "Plats"], ["accompagnement", "Garnitures"], ["dessert", "Desserts"], ["pain", "Pain"]];
+
+        function composanteDominante(item) {
+            const c = item.composants || {};
+            return Object.keys(c).sort((a, b) => c[b] - c[a])[0] || "plat";
+        }
+        function couleurPalier(taux) { return taux >= 75 ? "#059669" : (taux >= 60 ? "#65a30d" : (taux >= 45 ? "#ea580c" : "#dc2626")); }
+        function reglerGraphique(comp, metrique) { if (comp) graphComp = comp; if (metrique) graphMetric = metrique; renderGraphiqueAliments(); }
+
+        function renderGraphiqueAliments() {
+            const zone = document.getElementById('graph-aliments');
+            if (!zone) return;
+            const btn = (actif, label, onclick) => `<button type="button" class="btn-period${actif ? " active" : ""}" onclick="${onclick}" style="padding:3px 9px; font-size:11px;">${label}</button>`;
+            document.getElementById('graph-comp-btns').innerHTML = GRAPH_COMPOSANTES.map(c => btn(graphComp === c[0], c[1], `reglerGraphique('${c[0]}')`)).join("");
+            document.getElementById('graph-metric-btns').innerHTML = btn(graphMetric === "mange", "% mangé", "reglerGraphique(null,'mange')") + btn(graphMetric === "kg", "kg évitables jetés", "reglerGraphique(null,'kg')");
+            let items = Object.keys(globalItemsDetailedStats).map(k => globalItemsDetailedStats[k]).filter(it => graphComp === "all" || composanteDominante(it) === graphComp);
+            if (items.length === 0) { zone.innerHTML = "<p style='font-size:11.5px; color:#64748b; text-align:center; padding:12px;'>Aucun aliment pour cette sélection.</p>"; return; }
+            const echapper = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/'/g, "&#39;");
+            let lignes;
+            if (graphMetric === "mange") {
+                items.sort((a, b) => b.tauxMange - a.tauxMange);
+                lignes = items.map(it => ({ it: it, largeur: it.tauxMange, texte: `${it.tauxMange} % mangé`, couleur: couleurPalier(it.tauxMange) }));
+            } else {
+                items = items.filter(it => it.poidsEvitKg !== null).sort((a, b) => b.poidsEvitKg - a.poidsEvitKg);
+                if (items.length === 0) { zone.innerHTML = "<p style='font-size:11.5px; color:#64748b; text-align:center; padding:12px;'>Poids non calibrés : il faut des scans au nouveau format et des pesées pour la période.</p>"; return; }
+                const max = Math.max.apply(null, items.map(it => it.poidsEvitKg)) || 1;
+                lignes = items.map(it => ({ it: it, largeur: 100 * it.poidsEvitKg / max, texte: `${it.poidsEvitKg.toFixed(2)} kg`, couleur: couleurPalier(it.tauxMange) }));
+            }
+            const repere = graphMetric === "mange"
+                ? `<div style="display:flex; gap:8px; height:14px; margin-bottom:2px; font-size:9.5px; color:#64748b;"><div style="width:142px; flex-shrink:0;"></div><div style="flex:1; position:relative;"><span style="position:absolute; left:45%;">45</span><span style="position:absolute; left:60%;">60</span><span style="position:absolute; left:75%;">75</span></div><div style="width:118px; flex-shrink:0;"></div></div>` : "";
+            const fond = graphMetric === "mange"
+                ? "background-image:linear-gradient(to right,#fee2e2 0,#fee2e2 45%,#ffedd5 45%,#ffedd5 60%,#ecfccb 60%,#ecfccb 75%,#d1fae5 75%,#d1fae5 100%);" : "background:#f1f5f9;";
+            zone.innerHTML = repere + lignes.map(l => `
+                <div onclick="openItemDetail('${echapper(l.it.rawKey)}')" title="Cliquer pour analyser ${echapper(l.it.label)}" style="display:flex; align-items:center; gap:8px; margin:3px 0; cursor:pointer; ${l.it.occurrences < 5 ? "opacity:0.6;" : ""}">
+                    <div style="width:142px; flex-shrink:0; font-size:11px; font-weight:600; color:#1e293b; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${echapper(l.it.label)}</div>
+                    <div style="flex:1; height:16px; border-radius:3px; ${fond}"><div style="height:100%; width:${Math.max(1, Math.min(100, l.largeur))}%; background:${l.couleur}; border-radius:3px;"></div></div>
+                    <div style="width:118px; flex-shrink:0; font-size:10.5px; color:#334155;"><strong>${l.texte}</strong> · ${l.it.occurrences}${l.it.occurrences < 5 ? " ⚠️" : ""}</div>
+                </div>`).join("") + `<p style="font-size:10.5px; color:#64748b; margin:8px 0 0;">Couleur = palier d'adhésion (vert &gt; 75 %, vert clair 60 à 74 %, orange 45 à 59 %, rouge &lt; 45 %). Nombre après le chiffre = plateaux observés ; ⚠️ = moins de 5, indicatif. Cliquez sur une barre pour le détail.</p>`;
         }
 
         // Tableau « 6 composantes » du rapport : adhésion réelle mesurée par la borne, par composante
@@ -2647,6 +2699,7 @@
                 if (st) { st.innerText = "-- %"; st.style.color = ""; }
                 if (tx) tx.innerText = "En attente de données";
             });
+            const gra = document.getElementById('graph-aliments'); if (gra) gra.innerHTML = "";
             const bilan = document.getElementById('bilan-eleves-container'); if (bilan) bilan.style.display = "none";
             if (typeof chartTimeline !== 'undefined' && chartTimeline) { chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update(); }
         }
