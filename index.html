@@ -274,6 +274,12 @@
                     </div>
 
                     <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
+                        <h3 style="color:#1b4332; font-size:14px; font-weight:900; margin:0 0 8px;">🔬 Lectures croisées : état, avis, service, assiette</h3>
+                        <div id="croise-onglets" style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;"></div>
+                        <div id="lecture-croisee"></div>
+                    </div>
+
+                    <div class="dashboard-col" style="background: rgba(255, 255, 255, 0.96) !important; border: 1.5px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 10px;">
                             <h3 style="color: #1b4332; font-size: 14px; font-weight: 900; margin: 0;">🔬 Analyse Fine du Menu & Comparatif d'Items</h3>
                             <div style="display: flex; align-items: center; gap: 6px;">
@@ -2009,6 +2015,8 @@
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
             renderConformite(globalItemsDetailedStats);
+            croiseScans = scansValides;
+            renderLecturesCroisees();
             renderGraphiqueAliments();
             filtrerAnalyseFineItem();
 
@@ -2057,6 +2065,160 @@
                     <div style="flex:1; height:16px; border-radius:3px; ${fond}"><div style="height:100%; width:${Math.max(1, Math.min(100, l.largeur))}%; background:${l.couleur}; border-radius:3px;"></div></div>
                     <div style="width:118px; flex-shrink:0; font-size:10.5px; color:#334155;"><strong>${l.texte}</strong> · ${l.it.occurrences}${l.it.occurrences < 5 ? " ⚠️" : ""}</div>
                 </div>`).join("") + `<p style="font-size:10.5px; color:#64748b; margin:8px 0 0;">Couleur = palier d'adhésion (vert &gt; 75 %, vert clair 60 à 74 %, orange 45 à 59 %, rouge &lt; 45 %). Nombre après le chiffre = plateaux observés ; ⚠️ = moins de 5, indicatif. Cliquez sur une barre pour le détail.</p>`;
+        }
+
+        // ===== LECTURES CROISÉES : par état, par avis, par service (heure du scan), par assiette =====
+        let croiseScans = [], croiseOnglet = "etat";
+        const CROISE_ONGLETS = [["etat", "🥕 Par état"], ["avis", "💬 Par avis"], ["service", "🕐 Par service"], ["assiette", "🍽️ Par assiette"]];
+        const escC = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/'/g, "&#39;");
+        const moy = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+
+        // Heure locale (Paris) du scan, en minutes depuis minuit ; null si l'horodatage n'a pas d'heure
+        function heureScanMin(s) {
+            const raw = s.heure || s.date;
+            if (!raw) return null;
+            if (typeof raw === "string" && /^\d{1,2}:\d{2}$/.test(raw)) { const p = raw.split(":"); return +p[0] * 60 + +p[1]; }
+            if (typeof raw === "string" && !/\d{2}:\d{2}/.test(raw)) return null;
+            const d = new Date(raw);
+            if (isNaN(d)) return null;
+            const p = new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(d);
+            return +p.find(x => x.type === "hour").value * 60 + +p.find(x => x.type === "minute").value;
+        }
+        const hhmm = m => String(Math.floor(m / 60)).padStart(2, "0") + "h" + String(m % 60).padStart(2, "0");
+
+        // Un plateau = un scan avec au moins un aliment lu
+        function plateauxCroises() {
+            const out = [];
+            croiseScans.forEach(s => {
+                const items = parseScanItems(s.commentaire).map(it => Object.assign({}, it, { comp: it.composant || devinerComposant(it.nom) }));
+                if (!items.length) return;
+                out.push({ scan: s, date: normalizeDate(s.dateRaw), min: heureScanMin(s), avis: avisCourt(s.avis_eleve), items: items, mange: moy(items.map(i => 100 - i.restePct)) });
+            });
+            return out;
+        }
+        function barreC(label, pct, texte, n, couleur) {
+            return `<div style="display:flex; align-items:center; gap:8px; margin:3px 0; ${n < 5 ? "opacity:0.6;" : ""}"><div style="width:170px; flex-shrink:0; font-size:11px; font-weight:600; color:#1e293b; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${escC(label)}">${escC(label)}</div><div style="flex:1; height:15px; border-radius:3px; background:#f1f5f9;"><div style="height:100%; width:${Math.max(1, Math.min(100, pct))}%; background:${couleur}; border-radius:3px;"></div></div><div style="width:120px; flex-shrink:0; font-size:10.5px; color:#334155;"><strong>${texte}</strong> · ${n}${n < 5 ? " ⚠️" : ""}</div></div>`;
+        }
+        const noteC = t => `<p style="font-size:10.5px; color:#64748b; margin:8px 0 0;">${t}</p>`;
+        const videC = t => `<p style="font-size:11.5px; color:#64748b; text-align:center; padding:12px;">${t}</p>`;
+        const titreC = t => `<div style="font-size:12px; font-weight:800; color:#1b4332; margin:10px 0 4px;">${t}</div>`;
+
+        function reglerCroise(o) { croiseOnglet = o; renderLecturesCroisees(); }
+
+        function renderLecturesCroisees() {
+            const zone = document.getElementById("lecture-croisee"), bt = document.getElementById("croise-onglets");
+            if (!zone || !bt) return;
+            bt.innerHTML = CROISE_ONGLETS.map(o => `<button type="button" class="btn-period${croiseOnglet === o[0] ? " active" : ""}" onclick="reglerCroise('${o[0]}')" style="padding:3px 9px; font-size:11px;">${o[1]}</button>`).join("");
+            const P = plateauxCroises();
+            if (!P.length) { zone.innerHTML = videC("Aucun scan au nouveau format sur la période."); return; }
+            zone.innerHTML = ({ etat: vueEtat, avis: vueAvis, service: vueService, assiette: vueAssiette })[croiseOnglet](P);
+        }
+
+        function vueEtat(P) {
+            const obs = [];
+            P.forEach(p => p.items.forEach(it => obs.push(it)));
+            const parEtat = {}, parAliment = {};
+            obs.forEach(it => {
+                if (it.etat === "non précisé") return;
+                const e = it.etat.toLowerCase();
+                (parEtat[e] = parEtat[e] || []).push(100 - it.restePct);
+                const a = parAliment[it.nom] = parAliment[it.nom] || {};
+                (a[e] = a[e] || []).push(100 - it.restePct);
+            });
+            const liste = Object.keys(parEtat).map(e => ({ e: e, m: moy(parEtat[e]), n: parEtat[e].length })).sort((a, b) => b.m - a.m);
+            if (!liste.length) return videC("Aucun état de préparation renseigné dans les scans.");
+            let h = titreC("Tous aliments confondus : % mangé selon l'état de l'aliment dans l'assiette") + liste.map(l => barreC(l.e, l.m, Math.round(l.m) + " % mangé", l.n, couleurPalier(l.m))).join("");
+            // Même aliment, états différents : la seule comparaison sans biais de composition
+            const ecarts = [];
+            Object.keys(parAliment).forEach(nom => {
+                const es = Object.keys(parAliment[nom]).filter(e => parAliment[nom][e].length >= 3).map(e => ({ e: e, m: moy(parAliment[nom][e]), n: parAliment[nom][e].length })).sort((a, b) => b.m - a.m);
+                if (es.length >= 2) ecarts.push({ nom: nom, haut: es[0], bas: es[es.length - 1] });
+            });
+            ecarts.sort((a, b) => (b.haut.m - b.bas.m) - (a.haut.m - a.bas.m));
+            h += titreC("Un même aliment, deux états : la comparaison qui compte");
+            h += ecarts.length ? ecarts.map(x => `<div style="font-size:11.5px; margin:3px 0;"><strong>${escC(x.nom)}</strong> : mieux mangé <em>${escC(x.haut.e)}</em> (${Math.round(x.haut.m)} %, n=${x.haut.n}), le plus laissé <em>${escC(x.bas.e)}</em> (${Math.round(x.bas.m)} %, n=${x.bas.n}), écart ${Math.round(x.haut.m - x.bas.m)} points</div>`).join("") : videC("Pas encore assez de scans : il faut au moins 3 plateaux dans deux états différents du même aliment.");
+            return h + noteC("Le premier classement compare des aliments différents (une crudité n'est pas un gratin) : il montre des tendances, pas des causes. Seule la comparaison d'un même aliment dans deux états est un vrai test. Les états sont écrits par l'IA ; des formulations proches (« cuites vapeur », « cuites à la vapeur ») peuvent être séparées. n = observations ; ⚠️ = moins de 5.");
+        }
+
+        function vueAvis(P) {
+            const ordre = [["tout fini", "🟢 « J'ai tout fini »", "#059669"], ["pas le temps", "🟠 « Pas eu le temps »", "#ea580c"], ["pas aimé", "🔴 « Je n'ai pas aimé »", "#dc2626"], ["non renseigné", "⚪ Pas d'avis", "#94a3b8"]];
+            const total = P.length;
+            let h = titreC("Ce que les élèves déclarent, et ce que la borne mesure") + ordre.map(o => {
+                const l = P.filter(p => p.avis === o[0]);
+                if (!l.length) return "";
+                return barreC(o[1], 100 * l.length / total, Math.round(100 * l.length / total) + " % des plateaux", l.length, o[2]) + `<div style="margin:-1px 0 4px 178px; font-size:10.5px; color:#475569;">reste mesuré : ${Math.round(100 - moy(l.map(p => p.mange)))} % en moyenne</div>`;
+            }).join("");
+            const parAliment = {};
+            P.forEach(p => { const vus = {}; p.items.forEach(it => { if (vus[it.nom]) return; vus[it.nom] = 1; const a = parAliment[it.nom] = parAliment[it.nom] || { n: 0, nonAime: 0, temps: 0 }; a.n++; if (p.avis === "pas aimé") a.nonAime++; if (p.avis === "pas le temps") a.temps++; }); });
+            const top = (cle) => Object.keys(parAliment).filter(k => parAliment[k].n >= 3 && parAliment[k][cle] > 0).map(k => ({ k: k, n: parAliment[k].n, v: parAliment[k][cle] })).sort((a, b) => b.v / b.n - a.v / a.n).slice(0, 6);
+            const bloc = (cle, titre, couleur) => { const t = top(cle); return t.length ? titreC(titre) + t.map(x => barreC(x.k, 100 * x.v / x.n, Math.round(100 * x.v / x.n) + " % des plateaux", x.n, couleur)).join("") : ""; };
+            h += bloc("nonAime", "Aliments présents dans les plateaux « je n'ai pas aimé »", "#dc2626");
+            h += bloc("temps", "Aliments présents dans les plateaux « pas eu le temps »", "#ea580c");
+            return h + noteC("L'avis est donné par l'élève pour tout son plateau, pas pour un aliment : un aliment apparaît ici s'il figurait sur le plateau, il n'en est pas forcément la cause. Un écart entre l'avis déclaré et le reste mesuré est lui-même une information.");
+        }
+
+        // Services : séries de plateaux séparées par un vide d'au moins 30 minutes sans aucun scan (tous jours confondus)
+        function decouperServices(P) {
+            const avecHeure = P.filter(p => p.min !== null);
+            if (!avecHeure.length) return null;
+            const creneaux = {};
+            avecHeure.forEach(p => { creneaux[Math.floor(p.min / 15)] = 1; });
+            const cles = Object.keys(creneaux).map(Number).sort((a, b) => a - b);
+            const services = []; let debut = cles[0], prec = cles[0];
+            for (let i = 1; i <= cles.length; i++) {
+                if (i === cles.length || cles[i] - prec > 2) { services.push([debut * 15, prec * 15 + 14]); if (i < cles.length) debut = cles[i]; }
+                if (i < cles.length) prec = cles[i];
+            }
+            return { avecHeure: avecHeure, services: services };
+        }
+        function vueService(P) {
+            const d = decouperServices(P);
+            if (!d) return videC("Les scans de cette période n'ont pas d'heure exploitable.");
+            const { avecHeure, services } = d;
+            let h = titreC("Affluence et adhésion par quart d'heure");
+            const parCren = {}; avecHeure.forEach(p => { const c = Math.floor(p.min / 15); (parCren[c] = parCren[c] || []).push(p); });
+            const maxN = Math.max.apply(null, Object.keys(parCren).map(c => parCren[c].length));
+            const debutC = Math.min.apply(null, Object.keys(parCren).map(Number)), finC = Math.max.apply(null, Object.keys(parCren).map(Number));
+            for (let c = debutC; c <= finC; c++) {
+                const l = parCren[c] || [];
+                const m = l.length ? moy(l.map(p => p.mange)) : null;
+                h += `<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><div style="width:60px; font-size:11px; text-align:right; color:#1e293b;">${hhmm(c * 15)}</div><div style="flex:1; height:13px; background:#f1f5f9; border-radius:3px;"><div style="height:100%; width:${100 * l.length / maxN}%; background:${m === null ? "#cbd5e1" : couleurPalier(m)}; border-radius:3px;"></div></div><div style="width:150px; font-size:10.5px; color:#334155;">${l.length ? `<strong>${l.length}</strong> plateaux · ${Math.round(m)} % mangé` : "—"}</div></div>`;
+            }
+            h += titreC(services.length > 1 ? `${services.length} services repérés (vide d'au moins 30 min entre deux séries de scans)` : "Un seul service repéré");
+            h += `<table style="width:100%; border-collapse:collapse; font-size:11px;"><tr style="text-align:left; color:#64748b;"><th>Service</th><th>Plateaux</th><th>% mangé</th><th>Entrée</th><th>Plat</th><th>« Pas le temps »</th><th>« Pas aimé »</th></tr>` + services.map((sv, i) => {
+                const l = avecHeure.filter(p => p.min >= sv[0] && p.min <= sv[1]);
+                const comp = c => { const v = []; l.forEach(p => p.items.filter(it => it.comp === c).forEach(it => v.push(100 - it.restePct))); return v.length >= 3 ? Math.round(moy(v)) + " %" : "—"; };
+                const part = a => Math.round(100 * l.filter(p => p.avis === a).length / l.length) + " %";
+                return `<tr style="border-top:1px solid #e2e8f0;"><td><strong>S${i + 1}</strong> ${hhmm(sv[0])}–${hhmm(sv[1] + 1)}</td><td>${l.length}</td><td>${Math.round(moy(l.map(p => p.mange)))} %</td><td>${comp("entree")}</td><td>${comp("plat")}</td><td>${part("pas le temps")}</td><td>${part("pas aimé")}</td></tr>`;
+            }).join("") + `</table>`;
+            const sans = P.length - avecHeure.length;
+            return h + noteC(`Les services sont déduits de l'heure des scans, pas d'un planning saisi : si un service est très court ou deux services s'enchaînent sans pause, ils peuvent être fusionnés. Heure = heure de dépôt du plateau à la borne (Paris).${sans ? ` ${sans} plateau(x) sans heure exploitable ignoré(s).` : ""}`);
+        }
+
+        function vueAssiette(P) {
+            const lignes = [];
+            P.forEach(p => {
+                const e = p.items.filter(i => i.comp === "entree").map(i => i.restePct);
+                const pl = p.items.filter(i => i.comp === "plat" || i.comp === "accompagnement");
+                if (!e.length || !pl.length) return;
+                const platPrincipal = (p.items.find(i => i.comp === "plat") || pl[0]).nom;
+                lignes.push({ p: p, eReste: moy(e), plReste: moy(pl.map(i => i.restePct)), plat: platPrincipal });
+            });
+            if (!lignes.length) return videC("Il faut des plateaux où l'entrée ET le plat sont lus : aucun pour l'instant.");
+            const delaisse = l => l.eReste >= 50 && l.plReste <= 25, inverse = l => l.plReste >= 50 && l.eReste <= 25;
+            const nD = lignes.filter(delaisse).length, nI = lignes.filter(inverse).length, nT = lignes.length;
+            const nEL = lignes.filter(l => l.eReste >= 50).length;
+            let h = titreC(`${nT} plateaux avec entrée et plat visibles`) +
+                barreC("Entrée laissée, plat mangé", 100 * nD / nT, Math.round(100 * nD / nT) + " %", nD, "#ea580c") +
+                barreC("Plat laissé, entrée mangée", 100 * nI / nT, Math.round(100 * nI / nT) + " %", nI, "#7c3aed") +
+                barreC("Entrée en grande partie laissée", 100 * nEL / nT, Math.round(100 * nEL / nT) + " %", nEL, "#dc2626");
+            h += noteC("« Laissée » = au moins 50 % de reste ; « mangé » = au plus 25 % de reste. Seule une entrée prise puis laissée apparaît : une entrée non prise n'est pas visible sur le plateau.");
+            const parPlat = {};
+            lignes.forEach(l => { const a = parPlat[l.plat] = parPlat[l.plat] || { n: 0, d: 0, e: [] }; a.n++; if (delaisse(l)) a.d++; a.e.push(100 - l.eReste); });
+            const top = Object.keys(parPlat).filter(k => parPlat[k].n >= 3).map(k => ({ k: k, n: parPlat[k].n, v: 100 * parPlat[k].d / parPlat[k].n, e: moy(parPlat[k].e) })).sort((a, b) => b.v - a.v).slice(0, 10);
+            h += titreC("Selon le plat du jour : part des plateaux où l'entrée est sacrifiée au profit du plat");
+            h += top.length ? top.map(x => barreC(x.k, x.v, Math.round(x.v) + " % · entrée mangée à " + Math.round(x.e) + " %", x.n, x.v >= 30 ? "#dc2626" : (x.v >= 15 ? "#ea580c" : "#65a30d"))).join("") : videC("Pas encore 3 plateaux pour un même plat.");
+            return h + noteC("Un plat très attractif qui fait délaisser l'entrée est un signal à discuter avec le chef (ordre de service, taille de l'entrée, choix de l'entrée), mais 3 à 5 plateaux ne prouvent rien : regardez les plats avec n élevé.");
         }
 
         // Tableau « 6 composantes » du rapport : adhésion réelle mesurée par la borne, par composante
@@ -2684,6 +2846,8 @@
             globalRawData = null;
             derniereCalibration = null;
             globalItemsDetailedStats = {};
+            croiseScans = [];
+            if (typeof renderLecturesCroisees === 'function') renderLecturesCroisees();
             const vide = "<p style='color:#64748b; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
             ['period-adhesion-grid', 'period-bonnevoie-grid', 'period-acceptable-grid', 'period-rejets-grid'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.innerHTML = vide;
