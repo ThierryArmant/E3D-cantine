@@ -320,13 +320,6 @@
                                 </div>
                             </div>
 
-                            <div style="background: #ffffff; border: 2px dashed #047857; border-radius: 8px; padding: 12px; margin-top: 10px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                                    <h4 style="color: #047857; font-size: 11.5px; font-weight: 800; margin: 0;">🎨 IDÉE D'AFFICHAGE DU JOUR (Générée par l'IA)</h4>
-                                    <button type="button" class="btn" onclick="window.print()" style="width: auto; padding: 4px 10px; font-size: 10.5px; background: #047857;">🖨️ Imprimer ce message</button>
-                                </div>
-                                <div id="et-apres-affiche-content" style="font-size: 11px; color: #334155; line-height: 1.4; background: #f0fdf4; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0;">En attente des votes de la borne pour concevoir l'affiche...</div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -1396,13 +1389,11 @@
       async function updateEtApresModule(scansValides) {
             const boxCuisine = document.getElementById('et-apres-cuisine-content');
             const boxEleves = document.getElementById('et-apres-eleves-content');
-            const boxAffiche = document.getElementById('et-apres-affiche-content');
             if (!boxCuisine || !boxEleves) return;
 
             if (!scansValides || scansValides.length === 0) {
                 boxCuisine.innerHTML = "Aucun signal enregistré sur cette période.";
                 boxEleves.innerHTML = "Aucun signal enregistré sur cette période.";
-                if (boxAffiche) boxAffiche.innerHTML = "Aucune donnée pour générer une affiche.";
                 return;
             }
 
@@ -1415,20 +1406,12 @@
                     const cachedPlan = JSON.parse(localStorage.getItem(cacheKey));
                     boxCuisine.innerHTML = cachedPlan.cuisine;
                     boxEleves.innerHTML = cachedPlan.eleves;
-                    if (boxAffiche && cachedPlan.affiche) {
-                        boxAffiche.innerHTML = `
-                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${cachedPlan.affiche.titre}</div>
-                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${cachedPlan.affiche.slogan} »</div>
-                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${cachedPlan.affiche.action}</div>
-                        `;
-                    }
                     return; 
                 } catch(e) {}
             }
 
             boxCuisine.innerHTML = "<em>🤖 Analyse culinaire en cours...</em>";
             boxEleves.innerHTML = "<em>🤖 Analyse GES et pédagogie en cours...</em>";
-            if (boxAffiche) boxAffiche.innerHTML = "<em>🎨 Création de l'affiche par l'IA...</em>";
 
             let detailsRecueillis = [];
             scansValides.forEach(s => {
@@ -1485,14 +1468,6 @@
                     // Affichage des données (même si la sauvegarde a échoué)
                     boxCuisine.innerHTML = planToUse.cuisine;
                     boxEleves.innerHTML = planToUse.eleves;
-                    
-                    if (boxAffiche && planToUse.affiche) {
-                        boxAffiche.innerHTML = `
-                            <div style="font-weight: bold; color: #065f46; font-size: 12px; margin-bottom: 3px;">📌 ${planToUse.affiche.titre}</div>
-                            <div style="font-style: italic; color: #166534; margin-bottom: 5px;">« ${planToUse.affiche.slogan} »</div>
-                            <div style="font-size: 10.5px; color: #1e293b;"><strong>Geste attendu :</strong> ${planToUse.affiche.action}</div>
-                        `;
-                    }
                 } else {
                     boxCuisine.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
                     boxEleves.innerHTML = "<span style='color:#ef4444;'>Erreur de format de la réponse IA.</span>";
