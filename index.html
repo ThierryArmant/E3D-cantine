@@ -1985,6 +1985,7 @@
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
             renderConformite(globalItemsDetailedStats);
+            filtrerAnalyseFineItem();
 
             if (typeof updateEtApresModule === "function") {
                 updateEtApresModule(scansValides);
@@ -2511,6 +2512,8 @@
 
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
+                // Réponse d'un établissement qu'on a quitté entre-temps : on l'ignore
+                if (document.getElementById('select-etablissement').value !== school) return;
                 echecsConnexionConsecutifs = 0;
                 if(errBanner) errBanner.style.display = "none";
 
@@ -2571,6 +2574,31 @@
             document.getElementById('period-adhesion-grid').innerHTML = "<p style='color:#065f46; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
             document.getElementById('period-rejets-grid').innerHTML = "<p style='color:#991b1b; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
             if(document.getElementById('compteur-scans-jour')) document.getElementById('compteur-scans-jour').innerText = "0";
+            reinitialiserAffichageEtablissement();
+        }
+
+        // Efface tout ce qui vient de l'établissement précédent (données, cartes, analyse fine, bandeau, rapport)
+        function reinitialiserAffichageEtablissement() {
+            globalRawData = null;
+            derniereCalibration = null;
+            globalItemsDetailedStats = {};
+            const vide = "<p style='color:#64748b; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
+            ['period-adhesion-grid', 'period-bonnevoie-grid', 'period-acceptable-grid', 'period-rejets-grid'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.innerHTML = vide;
+            });
+            const sel = document.getElementById('select-filter-item');
+            if (sel) sel.innerHTML = '<option value="all">-- Tous les items du menu --</option>';
+            const box = document.getElementById('box-detail-item-filtré'); if (box) box.style.display = "none";
+            const ban = document.getElementById('bandeau-couverture'); if (ban) ban.innerHTML = "";
+            const vert = document.getElementById('analyse-fine-vert'); if (vert) vert.innerHTML = "En attente de données...";
+            const rouge = document.getElementById('analyse-fine-rouge'); if (rouge) rouge.innerHTML = "En attente de données...";
+            ['crudites', 'poisson', 'frits', 'laitiers', 'desserts', 'pain'].forEach(g => {
+                const st = document.getElementById('rep-stat-' + g), tx = document.getElementById('rep-text-' + g);
+                if (st) { st.innerText = "-- %"; st.style.color = ""; }
+                if (tx) tx.innerText = "En attente de données";
+            });
+            const bilan = document.getElementById('bilan-eleves-container'); if (bilan) bilan.style.display = "none";
+            if (typeof chartTimeline !== 'undefined' && chartTimeline) { chartTimeline.data.datasets[0].data = [0, 0]; chartTimeline.update(); }
         }
 
         function adjustWeight(id, value) {
@@ -2592,6 +2620,7 @@
         function changeEtablissement() {
             const school = document.getElementById('select-etablissement').value; 
             localStorage.setItem('schoolActuelle', school);
+            reinitialiserAffichageEtablissement();
             const reportSchoolElem = document.getElementById('report-school-name');
             if (reportSchoolElem) reportSchoolElem.innerText = school;
             loadExpectedMealsForSchool(school); 
