@@ -1147,8 +1147,7 @@
                 const brut = {};
                 (scansParJour[d] || []).forEach(s => {
                     const items = parseScanItems(s.commentaire);
-                    const detail = items.map(it => Object.assign({}, it, { composant: it.composant || devinerComposant(it.nom) }));
-                    if (items.some(it => !it.composant)) res.scansComposantDevine = (res.scansComposantDevine || 0) + 1;
+                    const detail = items.filter(it => it.composant);
                     if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
                     jour.scansDetail++;
                     detail.forEach(it => {
