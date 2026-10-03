@@ -50,4 +50,4 @@ Le dispositif de capture est le fruit d'une réalisation pratique et concrète m
 5. L'onglet `Parametres` de chaque tableur règle les portions de référence (g), l'effectif par défaut et le prix au kg utilisés par le calcul.
 
 ## 🧮 Méthode de calcul (résumé)
-L'IA ne donne que des pourcentages de restes par aliment. Les poids viennent des balances sous les poubelles, répartis entre aliments selon ces restes et des portions de référence ; la bibliothèque d'inévitables sépare évitable et inévitable ; les facteurs carbone sont des ordres de grandeur ADEME. Le détail, avec les valeurs réellement utilisées, est affiché dans le bouton « Transparence & Audit des calculs ».
+L'IA ne donne que des pourcentages de restes par aliment. Les poids viennent des balances sous les poubelles, répartis entre aliments selon ces restes et des portions de référence ; la bibliothèque d'inévitables sépare évitable et inévitable ; les facteurs carbone viennent d'Agribalyse 3.2 (ADEME/INRAE, août 2025), chacun relié à sa ligne source dans le code. Le détail, avec les valeurs réellement utilisées, est affiché dans le bouton « Transparence & Audit des calculs ».
