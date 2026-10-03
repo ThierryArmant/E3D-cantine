@@ -39,3 +39,15 @@ Le dispositif de capture est le fruit d'une réalisation pratique et concrète m
 
 ---
 *Développé pour le Collège Jean Giono (Vaucluse)*
+
+---
+
+## ⚙️ Déploiement du script serveur (`apps_script/Code.gs`)
+1. Coller `Code.gs` dans le projet Apps Script lié à l'application web.
+2. **Clé Gemini** : exécuter une fois `configurerCle()` après avoir collé la clé dans la variable `MA_CLE`, puis effacer la clé du code. Elle est stockée dans les propriétés du script, jamais dans le dépôt.
+3. **Annuaire des établissements** : exécuter `creerAnnuaireCentral()` (crée le tableur « Annuaire » : Etablissement | ID | Actif). Pour ajouter un établissement : `creerEtablissement("Nom")` crée son tableur avec les 4 onglets et ses paramètres.
+4. **Publier une nouvelle version** du déploiement (même URL).
+5. L'onglet `Parametres` de chaque tableur règle les portions de référence (g), l'effectif par défaut et le prix au kg utilisés par le calcul.
+
+## 🧮 Méthode de calcul (résumé)
+L'IA ne donne que des pourcentages de restes par aliment. Les poids viennent des balances sous les poubelles, répartis entre aliments selon ces restes et des portions de référence ; la bibliothèque d'inévitables sépare évitable et inévitable ; les facteurs carbone sont des ordres de grandeur ADEME. Le détail, avec les valeurs réellement utilisées, est affiché dans le bouton « Transparence & Audit des calculs ».

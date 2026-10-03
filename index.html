@@ -135,6 +135,19 @@
         .ia-diag-box { color: #334155; margin-bottom: 3px; font-weight: 600; }
         .ia-challenge-box { color: #b45309; font-weight: 700; background: #fffbeb; padding: 4px 8px; border-radius: 4px; border-left: 3px solid #f59e0b; }
 
+        /* ===== BORNE ÉLÈVE : TEXTE LISIBLE + PLATEAU VISIBLE (ajout) ===== */
+        #view-borne #instruction-text { font-size: clamp(18px, min(3.2vh, 2.8vw), 34px) !important; padding: 1.2vh 10px !important; line-height: 1.15; }
+        #view-borne div[style*="width: 240px"] { width: clamp(190px, 22vw, 300px) !important; flex-shrink: 0 !important; gap: 1vh !important; padding: 1vh !important; }
+        #view-borne div[style*="width: 240px"] > div:nth-child(1) { font-size: clamp(14px, min(2.4vh, 1.9vw), 22px) !important; margin-bottom: 0 !important; }
+        #view-borne div[style*="width: 240px"] > div:nth-child(2) { display: none !important; }
+        #view-borne [id^="push-btn-"] { font-size: clamp(16px, min(2.8vh, 2.2vw), 28px) !important; line-height: 1.1; padding: 0.5vh !important; min-height: 0; }
+        #view-borne [id^="push-btn-"] span:first-child { font-size: clamp(24px, min(5vh, 4vw), 48px) !important; line-height: 1; }
+        #view-borne [id^="push-btn-"] span:last-child { font-size: clamp(16px, min(2.8vh, 2.2vw), 28px) !important; }
+        #view-borne #borne-menu-active { font-size: clamp(13px, min(2vh, 1.6vw), 20px) !important; }
+        /* Aperçu : montre TOUTE l'image envoyée à l'IA (contain) au lieu d'un recadrage (cover) */
+        #view-borne #camera-feed { object-fit: contain !important; background: #0f172a; }
+        #view-borne div[style*="min-height: 360px"] { min-height: 50vh !important; }
+
         @media print {
             body { background: white; height: auto; overflow: visible; }
             .sidebar, .top-bar, .btn { display: none !important; }
@@ -202,12 +215,13 @@
                         </div>
                     </div>
 
+                    <div id="bandeau-couverture" style="margin-top:12px; display:flex; flex-wrap:wrap; gap:6px 18px; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; font-size:12px; color:#334155;"></div>
                     <div class="dashboard-top-split" style="margin-top: 12px;">
                         <div class="kpi-grid-2x2">
                             <div class="kpi-card kpi-blue"><div class="kpi-left"><div class="kpi-val" id="kpi-avg">0 g</div><div class="kpi-lbl">Moyenne / convive</div></div><div class="kpi-right">Total restes / Effectif total</div></div>
                             <div class="kpi-card kpi-green"><div class="kpi-left"><div class="kpi-val" id="kpi-total">0.0 kg</div><div class="kpi-lbl">Quantité évitable</div></div><div class="kpi-right">Hors os et inévitables</div></div>
-                            <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right">Base 4,50 € / kg</div></div>
-                            <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteur GES (2 kg CO₂/kg)</div></div>
+                            <div class="kpi-card kpi-yellow"><div class="kpi-left"><div class="kpi-val" id="kpi-money">0.00 €</div><div class="kpi-lbl">Pertes financières</div></div><div class="kpi-right" id="kpi-money-lbl">Poids évitable × prix au kg</div></div>
+                            <div class="kpi-card kpi-red"><div class="kpi-left"><div class="kpi-val" id="kpi-impact">0.0 kg</div><div class="kpi-lbl">Émissions CO₂</div></div><div class="kpi-right">Facteurs ADEME par aliment (estimation)</div></div>
                         </div>
 
                         <div class="dashboard-col" style="display: flex; flex-direction: column; justify-content: space-between;">
@@ -481,6 +495,7 @@
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Gratin d'aubergines"> Gratin d'aubergines <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Gratin d'aubergines (Fait Maison)" title="Fait Maison"> 🧑‍‍🍳</span></label>
                                         <label class="checkbox-label"><input type="checkbox" name="accomp_leg" value="Poêlée de courgettes au curry"> Poêlée courgettes curry <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="Poêlée courgettes (Fait Maison)" title="Fait Maison"> 🧑‍🍳</span></label>
 
+                                        <label class="checkbox-label"><input type="checkbox" name="accomp_base" value="Pain"> Pain</label>
                                         <div id="favs_container_accomp" class="local-favs-box" style="display: none;"></div>
 
                                         <div class="sub-theme" style="margin-top: 8px; color: #ef4444;">Autre Accomp.</div>
@@ -771,16 +786,87 @@
             "orange": 0.30, "clémentine": 0.25, "mandarine": 0.25, "kiwi": 0.10, "pêche": 0.15,
             "abricot": 0.10, "prune": 0.10, "fraise": 0.05, "compote": 0.00, "crème dessert": 0.00,
             "île flottante": 0.00, "flan": 0.00, "pâtisserie": 0.00, "gâteau au chocolat": 0.00,
-            "tarte aux pommes": 0.10, "glace": 0.00, "pain": 0.00
+            "tarte aux pommes": 0.10, "glace": 0.00, "pain": 0.00,
+            "pommes de terre": 0.05, "pomme de terre": 0.05, "pommes noisettes": 0.00, "pommes dauphines": 0.00, "pommes duchesse": 0.00,
+            "croquettes": 0.00, "gnocchis": 0.00, "chou-fleur": 0.15, "brocoli": 0.10
         };
         
+        // ===== OUTILS COMMUNS : lecture des scans, bibliothèque d'inévitables, portions =====
+        const COMPOSANTS_SCAN = ["entree", "plat", "accompagnement", "dessert", "pain"];
+        let derniereCalibration = null;
+
+        function normaliserNomAliment(txt) { return String(txt || "").toLowerCase().replace(/[’‘]/g, "'").trim(); }
+
+        // Nom court d'un aliment : "Tomates - En dés - Mozzarella" devient "Tomates"
+        function getCleanItemShortName(raw) { return String(raw || "").split(" - ")[0].trim(); }
+
+        function estFruit(nom) {
+            const n = normaliserNomAliment(nom);
+            if (/pommes? de terre|noisette|dauphine|duchesse|croquette|rissol/.test(n)) return false;
+            return /pomme|poire|banane|fruit|raisin|orange|clémentine|mandarine|kiwi|pêche|abricot|prune|fraise|melon|pastèque/.test(n);
+        }
+
+        function devinerComposant(nom) {
+            const n = normaliserNomAliment(nom);
+            if (/pain|baguette/.test(n)) return "pain";
+            if (estFruit(n) || /tiramisu|flan|gâteau|gateau|pâtisserie|patisserie|yaourt|fromage|compote|crème|creme|île flottante|glace|laitage|brie|camembert|emmental|tomme|ortolan/.test(n)) return "dessert";
+            if (/salade|tomate|taboulé|taboule|carotte|concombre|betterave|radis|crudit|charcuterie|quiche|œuf|oeuf|piémontaise|pâté|avocat/.test(n)) return "entree";
+            if (/frites|potatoes|pâtes|pates|riz|semoule|boulgour|purée|puree|lentilles|haricots|brocoli|chou|épinards|epinards|ratatouille|aubergine|courgette|pommes de terre|noisette|dauphine|duchesse|croquette|gnocchi|petits pois|gratin|légume|legume/.test(n)) return "accompagnement";
+            return "plat";
+        }
+
+        // Lecture des crochets écrits par le script : [Aliment - forme - préparation : 40% restes | composant | confiance haute]
+        // (ancien format accepté : [Aliment : 40% restes], sans composant)
+        function parseScanItems(commentaire) {
+            const items = [];
+            (String(commentaire || "").match(/\[([^\]]+)\]/g) || []).forEach(m => {
+                const content = m.replace(/[\[\]]/g, "");
+                const idx = content.lastIndexOf(":");
+                if (idx < 0) return;
+                const pct = content.slice(idx + 1).match(/(\d+)\s*%/);
+                if (!pct) return;
+                const parts = content.slice(idx + 1).split("|").map(s => s.trim());
+                const conf = (parts[2] || "").match(/confiance\s+(\w+)/i);
+                items.push({
+                    nom: getCleanItemShortName(content.slice(0, idx)),
+                    restePct: Math.min(100, Math.max(0, parseInt(pct[1], 10))),
+                    composant: COMPOSANTS_SCAN.includes(parts[1]) ? parts[1] : null,
+                    confiance: conf ? conf[1].toLowerCase() : null
+                });
+            });
+            return items;
+        }
+
+        // Portions de référence de l'établissement (onglet "Parametres" du tableur), valeurs par défaut sinon.
+        function getPortionsEtab() {
+            const p = (globalRawData && globalRawData.parametres) || {};
+            return {
+                entree: p.portion_entree_g || 100, plat: p.portion_plat_g || 200, accompagnement: p.portion_garniture_g || 150,
+                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 100, pain: p.portion_pain_g || 50
+            };
+        }
+
+        function portionPour(item, portions) {
+            if (item.composant === "dessert" && estFruit(item.nom)) return portions.fruit;
+            return portions[item.composant] || portions.plat;
+        }
+
+        // Coefficient d'inévitable d'un aliment = clé la plus longue de la bibliothèque contenue dans son nom (null si inconnu)
+        function coefInevitable(nom) {
+            const clean = normaliserNomAliment(nom);
+            let meilleure = null;
+            for (const key in COEFFICIENTS_INEVITABLES) {
+                if (clean.includes(key) && (meilleure === null || key.length > meilleure.length)) meilleure = key;
+            }
+            return meilleure === null ? null : COEFFICIENTS_INEVITABLES[meilleure];
+        }
+
+        // Règle de repli (journée sans scan détaillé) : moyenne des coefficients des aliments reconnus du menu
         function getTauxInevitablesPourTexte(texte) {
             if (!texte) return 0.0;
-            let clean = texte.toLowerCase().trim();
-            for (let key in COEFFICIENTS_INEVITABLES) {
-                if (clean.includes(key)) return COEFFICIENTS_INEVITABLES[key];
-            }
-            return 0.0;
+            const noms = String(texte).split(/[|+\/,]/).map(s => s.replace(/\(.*?\)/g, "").trim()).filter(Boolean);
+            const coefs = noms.map(coefInevitable).filter(c => c !== null);
+            return coefs.length ? coefs.reduce((a, b) => a + b, 0) / coefs.length : 0.0;
         }
 
         function initSystemVoices() {
@@ -1011,63 +1097,133 @@
             applyCalculationsForDateRange(startDate, endDate);
         }
 
+        // ===== CALIBRAGE : poids des poubelles (mesuré) réparti entre aliments selon les scans (estimé) =====
+        function calculerCalibrage(startDate, endDate) {
+            const res = { jours: {}, items: {}, scansDetail: 0, scansLegacy: 0, scansSansDetail: 0, attendusJoursScannes: 0,
+                          predictedKg: 0, measuredKg: 0, sansCoef: {}, joursCalibres: 0 };
+            if (!globalRawData || !globalRawData.sacsHistory) return res;
+            const sh = globalRawData.sacsHistory;
+            const portions = getPortionsEtab();
+            const params = globalRawData.parametres || {};
+            const effDefaut = params.effectif_defaut || 450;
+            const effectifs = globalRawData.historiqueEffectifs || {};
+
+            const binsParJour = {};
+            for (let i = 0; i < sh.datesRaw.length; i++) {
+                const d = normalizeDate(sh.datesRaw[i]);
+                if (!d || d < startDate || d > endDate) continue;
+                const b = binsParJour[d] = binsParJour[d] || { alim: 0, fruits: 0, pain: 0 };
+                b.alim += sh.alimentaire[i] || 0; b.fruits += sh.fruits[i] || 0; b.pain += sh.pain[i] || 0;
+            }
+            const scansParJour = {};
+            (globalRawData.rawGaspillage || []).forEach(s => {
+                if (s.type !== "SCAN_IA_VISION") return;
+                const d = normalizeDate(s.dateRaw);
+                if (!d || d < startDate || d > endDate) return;
+                (scansParJour[d] = scansParJour[d] || []).push(s);
+            });
+
+            const dates = Array.from(new Set(Object.keys(binsParJour).concat(Object.keys(scansParJour)))).sort();
+            dates.forEach(d => {
+                const E = effectifs[d] || effDefaut;
+                const bins = binsParJour[d] || { alim: 0, fruits: 0, pain: 0 };
+                const jour = { date: d, attendus: E, bins: bins, scansDetail: 0, items: {}, utilisable: false,
+                               evitableKg: 0, inevitableKg: 0, carboneKg: 0, nonAlloue: { alim: 0, fruits: 0, pain: 0 }, predictedKg: 0 };
+                const brut = {};
+                (scansParJour[d] || []).forEach(s => {
+                    const items = parseScanItems(s.commentaire);
+                    const detail = items.filter(it => it.composant);
+                    if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
+                    jour.scansDetail++;
+                    detail.forEach(it => {
+                        const portion = portionPour(it, portions);
+                        const bin = it.composant === "pain" ? "pain" : (estFruit(it.nom) ? "fruits" : "alim");
+                        const o = brut[it.nom] = brut[it.nom] || { nom: it.nom, bin: bin, count: 0, resteG: 0, portionG: 0 };
+                        o.count++; o.resteG += portion * it.restePct / 100; o.portionG += portion;
+                    });
+                });
+                const n = jour.scansDetail;
+                if (n > 0) {
+                    res.scansDetail += n;
+                    const liste = Object.keys(brut).map(k => brut[k]);
+                    const totaux = { alim: 0, fruits: 0, pain: 0 };
+                    liste.forEach(o => { totaux[o.bin] += o.resteG; });
+                    liste.forEach(o => {
+                        const coef = coefInevitable(o.nom);
+                        if (coef === null) res.sansCoef[o.nom] = true;
+                        const servisKg = E * (o.count / n) * (o.portionG / o.count) / 1000;
+                        const totalKg = (totaux[o.bin] > 0 && bins[o.bin] > 0) ? bins[o.bin] * o.resteG / totaux[o.bin] : 0;
+                        const inevKg = Math.min(totalKg, servisKg * (coef || 0));
+                        const evitKg = totalKg - inevKg;
+                        const carbKg = evitKg * getFacteurCarbone(o.nom);
+                        jour.items[o.nom] = { totalKg: totalKg, evitKg: evitKg, inevKg: inevKg, carboneKg: carbKg };
+                        jour.evitableKg += evitKg; jour.inevitableKg += inevKg; jour.carboneKg += carbKg;
+                        jour.predictedKg += o.resteG / n * E / 1000;
+                        const g = res.items[o.nom] = res.items[o.nom] || { totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0 };
+                        g.totalKg += totalKg; g.evitKg += evitKg; g.inevKg += inevKg; g.carboneKg += carbKg;
+                    });
+                    ["alim", "fruits", "pain"].forEach(b => { if (bins[b] > 0 && totaux[b] <= 0) jour.nonAlloue[b] = bins[b]; });
+                    jour.utilisable = (bins.alim + bins.fruits + bins.pain) > 0;
+                    if (jour.utilisable) {
+                        res.joursCalibres++;
+                        res.attendusJoursScannes += E;
+                        res.predictedKg += jour.predictedKg; res.measuredKg += jour.evitableKg + jour.inevitableKg;
+                    }
+                }
+                res.jours[d] = jour;
+            });
+            return res;
+        }
+
         function applyCalculationsForDateRange(startDate, endDate) {
             if (!globalRawData || !globalRawData.sacsHistory) return;
-
             const sh = globalRawData.sacsHistory;
             const school = document.getElementById('select-etablissement').value;
-            const effectif = parseInt(document.getElementById('convives-total').value) || parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
-            
-            let totalAlimBrutKg = 0, totalFruitsKg = 0, totalPainKg = 0;
-            let poidsTotalEvitablePeriode = 0;
-            let poidsTotalInevitablesPeriode = 0;
-            let nbJours = 0;
+            const params = globalRawData.parametres || {};
+            const effectifSaisi = parseInt(document.getElementById('convives-total').value) || parseInt(localStorage.getItem(`totalConvives-${school}`)) || params.effectif_defaut || 450;
+            const effectifs = globalRawData.historiqueEffectifs || {};
+            const prixKg = params.prix_kg_eur || 4.5;
+            const cal = calculerCalibrage(startDate, endDate);
+            derniereCalibration = cal;
+
+            let totalFruitsKg = 0, totalPainKg = 0;
+            let poidsTotalEvitablePeriode = 0, poidsTotalInevitablesPeriode = 0, carboneKg = 0, couverts = 0, nbJours = 0;
+            const menuFallback = localStorage.getItem(`menuActive-${school}`) || "";
 
             for (let i = 0; i < sh.datesRaw.length; i++) {
                 let d = normalizeDate(sh.datesRaw[i]);
-                if (d >= startDate && d <= endDate) {
-                    nbJours++;
-                    let alimJour = (sh.alimentaire[i] || 0);
-                    let fruitsJour = (sh.fruits[i] || 0);
-                    let painJour = (sh.pain[i] || 0);
+                if (d < startDate || d > endDate) continue;
+                nbJours++;
+                const alimJour = sh.alimentaire[i] || 0, fruitsJour = sh.fruits[i] || 0, painJour = sh.pain[i] || 0;
+                totalFruitsKg += fruitsJour; totalPainKg += painJour;
+                couverts += effectifs[d] || params.effectif_defaut || effectifSaisi;
 
-                    totalAlimBrutKg += alimJour;
-                    totalFruitsKg += fruitsJour;
-                    totalPainKg += painJour;
+                // Menu enregistré ce jour-là (par date), sinon dernier menu actif
+                const menuDuJour = (globalRawData.historiqueMenus || {})[d] || menuFallback;
+                const tauxJour = menuDuJour ? getTauxInevitablesPourTexte(menuDuJour) : 0.15;
 
-                    let menuDuJourExact = "";
-                    if (globalRawData.rawGaspillage) {
-                        let menuRow = globalRawData.rawGaspillage.find(m => normalizeDate(m.dateRaw) === d && m.type === "CONFIGURATION_MENU");
-                        if (menuRow && menuRow.commentaire) {
-                            menuDuJourExact = menuRow.commentaire;
-                        }
-                    }
-
-                    let tauxJour = 0.15; 
-                    if (menuDuJourExact) {
-                        tauxJour = getTauxInevitablesPourTexte(menuDuJourExact);
-                    } else {
-                        let fallbackMenu = localStorage.getItem(`menuActive-${school}`) || "";
-                        tauxJour = getTauxInevitablesPourTexte(fallbackMenu) > 0 ? getTauxInevitablesPourTexte(fallbackMenu) : 0.15;
-                    }
-
-                    let inevitablesJourAlim = alimJour * tauxJour;
-                    let evitableJourAlim = alimJour - inevitablesJourAlim;
-
-                    poidsTotalEvitablePeriode += (evitableJourAlim + painJour);
-                    poidsTotalInevitablesPeriode += (inevitablesJourAlim + fruitsJour);
+                const jc = cal.jours[d];
+                let ev, inev, carb;
+                if (jc && jc.utilisable) {
+                    const repliEv = jc.nonAlloue.alim * (1 - tauxJour) + jc.nonAlloue.pain;
+                    const repliInev = jc.nonAlloue.alim * tauxJour + jc.nonAlloue.fruits;
+                    ev = jc.evitableKg + repliEv; inev = jc.inevitableKg + repliInev;
+                    carb = jc.carboneKg + repliEv * 2.0;
+                } else {
+                    ev = alimJour * (1 - tauxJour) + painJour; inev = alimJour * tauxJour + fruitsJour;
+                    carb = ev * 2.0;
                 }
+                poidsTotalEvitablePeriode += ev; poidsTotalInevitablesPeriode += inev; carboneKg += carb;
             }
 
-            let evitablesG = poidsTotalEvitablePeriode * 1000;
-            let inevitablesG = poidsTotalInevitablesPeriode * 1000;
-
-            let avgGrams = (nbJours > 0 && effectif > 0) ? (evitablesG / (effectif * nbJours)) : 0;
+            const evitablesG = poidsTotalEvitablePeriode * 1000;
+            const inevitablesG = poidsTotalInevitablesPeriode * 1000;
+            const avgGrams = couverts > 0 ? evitablesG / couverts : 0;
 
             document.getElementById('kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('kpi-total').innerText = `${poidsTotalEvitablePeriode.toFixed(1)} kg`;
-            document.getElementById('kpi-money').innerText = `${(poidsTotalEvitablePeriode * 4.50).toFixed(2)} €`;
-            document.getElementById('kpi-impact').innerText = `${(poidsTotalEvitablePeriode * 2.0).toFixed(1)} kg`;
+            document.getElementById('kpi-money').innerText = `${(poidsTotalEvitablePeriode * prixKg).toFixed(2)} €`;
+            document.getElementById('kpi-impact').innerText = `${carboneKg.toFixed(1)} kg CO₂`;
             document.getElementById('biodiff-total').innerText = `Total Évitable : ${evitablesG.toFixed(0)} g (Inévitables : ${inevitablesG.toFixed(0)} g)`;
 
             chartTimeline.data.datasets[0].data = [evitablesG, inevitablesG];
@@ -1085,26 +1241,53 @@
             let totalScansToday = 0;
             const todayIsoStr = new Date().toISOString().split('T')[0];
             if (globalRawData.rawGaspillage) {
-                totalScansToday = globalRawData.rawGaspillage.filter(s => normalizeDate(s.dateRaw) === todayIsoStr).length;
+                totalScansToday = globalRawData.rawGaspillage.filter(s => normalizeDate(s.dateRaw) === todayIsoStr && s.type === "SCAN_IA_VISION").length;
             }
             let compteurScanElem = document.getElementById('compteur-scans-jour');
-            if (compteurScanElem) compteurScanElem.innerText = totalScansToday;
+            if (compteurScanElem) compteurScanElem.innerText = `${totalScansToday} / ${effectifs[todayIsoStr] || params.effectif_defaut || effectifSaisi}`;
 
             document.getElementById('report-school-name').innerText = school;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
             document.getElementById('rep-kpi-total').innerText = `${poidsTotalEvitablePeriode.toFixed(1)} kg`;
-            document.getElementById('rep-kpi-money').innerText = `${(poidsTotalEvitablePeriode * 4.50).toFixed(2)} €`;
+            document.getElementById('rep-kpi-money').innerText = `${(poidsTotalEvitablePeriode * prixKg).toFixed(2)} €`;
 
-            runGranularExtraction(filteredScans);
-            
+            majBandeauCouverture(cal, nbJours);
+            runGranularExtraction(filteredScans, cal);
+
             let menuActifActuel = localStorage.getItem(`menuActive-${school}`) || "";
             updateHistoryMode('day', getTauxInevitablesPourTexte(menuActifActuel));
 
             if (nbJours > 0) {
-                renderBilanEleves(poidsTotalEvitablePeriode/nbJours, totalFruitsKg/nbJours, totalPainKg/nbJours, effectif);
+                renderBilanEleves(poidsTotalEvitablePeriode / nbJours, totalFruitsKg / nbJours, totalPainKg / nbJours, effectifSaisi);
             } else {
                 document.getElementById('bilan-eleves-container').style.display = "none";
             }
+        }
+
+        // Bandeau « scannés vs attendus » et indicateur d'écart balance / scans
+        function majBandeauCouverture(cal, nbJoursPesee) {
+            const box = document.getElementById('bandeau-couverture');
+            if (!box) return;
+            const couv = cal.attendusJoursScannes > 0 ? 100 * cal.scansDetail / cal.attendusJoursScannes : null;
+            let html = "";
+            if (cal.scansDetail === 0) {
+                html += `<span>📊 <strong>Aucun scan détaillé</strong> sur la période : les poids par aliment apparaîtront dès les premiers scans au nouveau format.</span>`;
+            } else {
+                const coul = couv === null ? "#475569" : (couv >= 30 ? "#047857" : (couv >= 10 ? "#b45309" : "#b91c1c"));
+                html += `<span>📊 Plateaux scannés (détail par aliment) : <strong>${cal.scansDetail}</strong>` +
+                        (couv !== null ? ` / <strong>${cal.attendusJoursScannes}</strong> attendus · couverture <strong style="color:${coul};">${couv.toFixed(0)} %</strong>` : "") + `</span>`;
+                const ratio = cal.predictedKg > 0 ? cal.measuredKg / cal.predictedKg : null;
+                if (ratio !== null) {
+                    const ok = ratio >= 0.7 && ratio <= 1.4;
+                    html += `<span title="Poids réellement pesé dans les poubelles (alimentaire, fruits, pain affectés aux aliments scannés) divisé par ce que l'échantillon scanné, extrapolé aux attendus, laisse prévoir. Proche de 1 : l'échantillon est représentatif. Loin de 1 : les plateaux non scannés jettent plus ou moins que ceux qui scannent.">⚖️ Écart balance / scans : <strong style="color:${ok ? "#047857" : "#b91c1c"};">× ${ratio.toFixed(2)}</strong>${ok ? "" : " ⚠️ échantillon peu représentatif"}</span>`;
+                } else {
+                    html += `<span>⚖️ Écart balance / scans : <em>pas de pesée correspondante</em></span>`;
+                }
+            }
+            if (nbJoursPesee === 0) html += `<span>⚠️ Aucune pesée de poubelles sur la période.</span>`;
+            const sansDetail = cal.scansLegacy + cal.scansSansDetail;
+            if (sansDetail > 0) html += `<span style="color:#64748b;">ℹ️ ${sansDetail} ancien(s) scan(s) sans détail par aliment : non utilisés pour les poids.</span>`;
+            box.innerHTML = html;
         }
 
         function updateHistoryMode(mode, tauxInévitableOverride = 0.30) {
@@ -1283,15 +1466,67 @@
             "riz": 2.7, "pâtes": 1.6, "semoule": 1.5, "blé": 1.4, "pain": 1.2,
             "frites": 1.8, "pomme de terre": 0.8, "purée": 1.0, "lentilles": 0.9,
             "haricots verts": 0.8, "petits pois": 1.1, "brocolis": 0.7, "carotte": 0.5, "tomate": 0.8,
+            "pommes noisettes": 0.8, "pommes dauphines": 0.8, "pommes duchesse": 0.8, "croquettes": 0.8, "chou-fleur": 0.5,
             "salade": 0.5, "laitue": 0.5, "fruit": 0.6, "pomme": 0.4, "banane": 0.8, "compote": 0.7, "pâtisserie": 2.0
         };
 
         function getFacteurCarbone(nomAliment) {
-            let clean = (nomAliment || "").toLowerCase();
-            for (let key in COEFFICIENTS_CARBONE_ADEME) {
-                if (clean.includes(key)) return COEFFICIENTS_CARBONE_ADEME[key];
+            const clean = (nomAliment || "").toLowerCase();
+            let meilleure = null;
+            for (const key in COEFFICIENTS_CARBONE_ADEME) {
+                if (clean.includes(key) && (meilleure === null || key.length > meilleure.length)) meilleure = key;
             }
-            return 1.2;
+            return meilleure === null ? 1.2 : COEFFICIENTS_CARBONE_ADEME[meilleure];
+        }
+
+        // ===== AUDIT : texte généré à partir des constantes et paramètres réellement utilisés =====
+        function construireAudit() {
+            const p = (globalRawData && globalRawData.parametres) || {};
+            const por = getPortionsEtab();
+            const prix = p.prix_kg_eur || 4.5;
+            const effDef = p.effectif_defaut || 450;
+            const cal = derniereCalibration;
+            const nbCoef = Object.keys(COEFFICIENTS_INEVITABLES).length;
+            const nbCarb = Object.keys(COEFFICIENTS_CARBONE_ADEME).length;
+            const sansCoef = cal ? Object.keys(cal.sansCoef) : [];
+            const bloc = (couleur, fond, titre, corps) => `<div style="border-left:4px solid ${couleur}; background:${fond}; padding:10px 14px; margin-bottom:12px; border-radius:0 8px 8px 0;"><strong style="color:${couleur}; font-size:13.5px;">${titre}</strong><div style="margin-top:4px;">${corps}</div></div>`;
+
+            let etat = "<em>Aucune donnée chargée.</em>";
+            if (cal) {
+                const couv = cal.attendusJoursScannes > 0 ? (100 * cal.scansDetail / cal.attendusJoursScannes).toFixed(0) + " %" : "n/a";
+                const ratio = cal.predictedKg > 0 ? "× " + (cal.measuredKg / cal.predictedKg).toFixed(2) : "n/a";
+                etat = `Sur la période affichée : <strong>${cal.scansDetail}</strong> plateaux scannés avec détail par aliment sur <strong>${cal.attendusJoursScannes}</strong> convives attendus (couverture ${couv}), <strong>${cal.joursCalibres}</strong> jour(s) avec pesée et scans, écart balance / scans ${ratio}. ` +
+                       `<strong>${cal.scansLegacy + cal.scansSansDetail}</strong> ancien(s) scan(s) sans détail par aliment n'entrent pas dans les poids.`;
+            }
+
+            return `
+            <p style="margin-bottom:14px; font-size:13.5px; font-weight:600; color:#1b4332;">
+                L'application A.B.C. sépare ce qui est <strong>mesuré</strong> (balances, effectifs saisis), ce qui est <strong>estimé</strong> (restes vus par l'IA) et ce qui relève de <strong>valeurs de référence</strong> (portions, coefficients). L'IA ne calcule aucun poids ni aucun coût : c'est un capteur optique.
+            </p>
+            ${bloc("#1d4ed8", "#eff6ff", "1. Perception optique (IA Gemini) : estimé",
+                `Pour chaque aliment visible sur le plateau (nom, forme, préparation, composante), l'IA donne uniquement une part de reste et une part mangée, en %. Un contrôle de cohérence écarte tout aliment dont reste + mangé s'éloigne de 100 %, et les photos sans plateau visible sont ignorées.<br>Exemple de ligne enregistrée : <code>[Carottes - râpées - cuites vapeur : 40% restes | accompagnement | confiance haute]</code>`)}
+            ${bloc("#6d28d9", "#f5f3ff", "2. Poids par aliment : mesuré, réparti selon les scans",
+                `Les <strong>balances sous les poubelles</strong> donnent le poids réel jeté (alimentaire, fruits, pain). Ce poids est réparti entre les aliments au prorata de leurs restes estimés (restes % × portion de référence).<br>
+                • Portions de référence de l'établissement (modifiables dans l'onglet Parametres) : entrée ${por.entree} g · plat ${por.plat} g · garniture ${por.accompagnement} g · dessert ${por.dessert} g · fruit ${por.fruit} g · pain ${por.pain} g.<br>
+                • Le poids d'un aliment = poids de la poubelle × (ses restes de référence ÷ somme des restes de référence des aliments de cette poubelle).<br>
+                • Servi estimé = effectif attendu × part des plateaux scannés où l'aliment apparaît × portion. Effectif par défaut : ${effDef} (les effectifs saisis chaque jour dans le menu priment).<br>
+                • Les <strong>plateaux non scannés</strong> ne sont pas ignorés : leurs déchets sont dans les poubelles pesées, et l'indicateur « écart balance / scans » dit si l'échantillon scanné est représentatif.`)}
+            ${bloc("#047857", "#f0fdf4", "3. Déchets inévitables : valeurs de travail de l'établissement",
+                `Pour chaque aliment : inévitable = min(poids jeté ; servi estimé × coefficient). Évitable = poids jeté − inévitable. La bibliothèque contient <strong>${nbCoef}</strong> entrées (os, peaux, trognons, croûtes…), recherchées par le nom le plus long reconnu dans l'aliment.<br>
+                ⚠️ Ces coefficients sont des <strong>valeurs de travail</strong> propres à l'établissement, pas une table officielle ; leurs sources restent à documenter.<br>
+                ${sansCoef.length ? `Aliments vus sans coefficient (comptés 0 % inévitable, donc entièrement évitables) : <em>${sansCoef.join(", ")}</em>.` : "Tous les aliments scannés sur la période ont un coefficient."}`)}
+            ${bloc("#0e7490", "#ecfeff", "4. Empreinte carbone : ordres de grandeur ADEME",
+                `Évitable (kg) × facteur de l'aliment (kg CO₂eq/kg). Le tableau intégré (<strong>${nbCarb}</strong> entrées) reprend des ordres de grandeur inspirés d'Agribalyse (ADEME), <strong>sans extraction officielle ligne à ligne</strong> ; facteur par défaut 1,2 pour un aliment inconnu. À lire comme une estimation, pas comme un bilan certifié.`)}
+            ${bloc("#b45309", "#fffbeb", "5. Valorisation financière et ratio par convive",
+                `Pertes financières = poids évitable × <strong>${Number(prix).toFixed(2)} €/kg</strong> (paramètre prix_kg_eur de l'établissement ; coût moyen de denrée, hors main-d'œuvre). Grammes par convive = poids évitable ÷ convives attendus des jours pesés.`)}
+            ${bloc("#475569", "#f8fafc", "État des données",
+                etat)}
+            <div style="background:#fef2f2; border:1px solid #fecaca; padding:10px 14px; border-radius:8px;">
+                <strong style="color:#b91c1c;">Limites à connaître</strong><br>
+                • Les % de restes sont une estimation visuelle de l'IA, jamais une pesée.<br>
+                • Une journée sans pesée ou sans scan détaillé retombe sur une règle simple (inévitable = taux moyen du menu) et n'a pas de poids par aliment.<br>
+                • Les poids par aliment valent ce que vaut l'échantillon scanné : surveiller l'indicateur de couverture et d'écart.
+            </div>`;
         }
 
         // 🗑️ GESTION DE LA LISTE NOIRE CONTEXTUELLE (ANTI-HALLUCINATION)
@@ -1317,7 +1552,7 @@
         }
 
         // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
-        function runGranularExtraction(scansSource) {
+        function runGranularExtraction(scansSource, cal) {
             const containerAdhesion = document.getElementById('period-adhesion-grid');
             const containerRejets = document.getElementById('period-rejets-grid');
             const selectFilter = document.getElementById('select-filter-item');
@@ -1333,77 +1568,20 @@
 
             let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
-            let poidsTotalCarbonePeriodeKg = 0;
 
+            // Taux de restes par aliment : lus dans les crochets écrits par le script (aucun poids ici)
             scansValides.forEach(scan => {
-                let commentaire = scan.commentaire || "";
-                
-                // Extraction stricte via regex des données Gemini (ex: [Pomme: 100% restes])
-                let matches = commentaire.match(/\[([^\]]+)\]/g);
-                if (matches && matches.length > 0) {
-                    matches.forEach(m => {
-                        let content = m.replace(/[\[\]]/g, '');
-                        if (content.includes(':')) {
-                            let parts = content.split(':');
-                            let rawItemName = parts[0].trim();
-                            let restPart = parts[1].trim();
-                            
-                            let pctMatch = restPart.match(/(\d+)%/);
-                            let restePct = pctMatch ? parseInt(pctMatch[1], 10) : 0;
-                            // SÉCURITÉ : Plafond à 100% strict
-                            restePct = Math.min(100, Math.max(0, restePct));
-                            let tauxMange = 100 - restePct;
-
-                            // Fonction supposée existante ou fallback
-                            let cleanShortName = typeof getCleanItemShortName === 'function' ? getCleanItemShortName(rawItemName) : rawItemName;
-
-                            if (cleanShortName && !banniList.includes(cleanShortName)) {
-                                if (!dynamicFoodStats[cleanShortName]) {
-                                    dynamicFoodStats[cleanShortName] = { totalRestes: 0, count: 0, rawName: cleanShortName, totalTauxMange: 0, poidsJeteKg: 0 };
-                                }
-                                dynamicFoodStats[cleanShortName].totalRestes += restePct;
-                                dynamicFoodStats[cleanShortName].totalTauxMange += tauxMange;
-                                dynamicFoodStats[cleanShortName].count += 1;
-
-                                // Base de calcul : 1 portion = 150g (0.15kg)
-                                let masseKg = 0.15 * (restePct / 100);
-                                dynamicFoodStats[cleanShortName].poidsJeteKg += masseKg;
-                                
-                                if(typeof getFacteurCarbone === 'function') {
-                                    poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(cleanShortName);
-                                }
-                            }
-                        }
-                    });
-                } else {
-                    // Fallback (Anciens Scans numériques)
-                    let grammesPlat = parseFloat(scan.plat) || 0;
-                    if (grammesPlat > 0) {
-                        let name = "Plat principal";
-                        if (!dynamicFoodStats[name]) {
-                            dynamicFoodStats[name] = { totalRestes: 0, count: 0, rawName: name, totalTauxMange: 0, poidsJeteKg: 0 };
-                        }
-                        let pctReste = Math.min(100, Math.max(0, Math.round((grammesPlat / 200) * 100)));
-                        let tauxMange = 100 - pctReste;
-                        dynamicFoodStats[name].totalRestes += pctReste;
-                        dynamicFoodStats[name].totalTauxMange += tauxMange;
-                        dynamicFoodStats[name].count += 1;
-                        let masseKg = grammesPlat / 1000;
-                        dynamicFoodStats[name].poidsJeteKg += masseKg;
-                        if(typeof getFacteurCarbone === 'function') {
-                            poidsTotalCarbonePeriodeKg += masseKg * getFacteurCarbone(name);
-                        }
-                    }
-                }
+                parseScanItems(scan.commentaire).forEach(it => {
+                    const nom = it.nom;
+                    if (!nom || banniList.includes(nom)) return;
+                    const st = dynamicFoodStats[nom] = dynamicFoodStats[nom] || { totalRestes: 0, totalTauxMange: 0, count: 0, rawName: nom, composants: {} };
+                    st.totalRestes += it.restePct;
+                    st.totalTauxMange += 100 - it.restePct;
+                    st.count += 1;
+                    const comp = it.composant || devinerComposant(nom);
+                    st.composants[comp] = (st.composants[comp] || 0) + 1;
+                });
             });
-
-            // Mise à jour du KPI global Impact Carbone
-            const kpiImpactElem = document.getElementById('kpi-impact');
-            if (kpiImpactElem && typeof isModeCarboneActif !== 'undefined' && isModeCarboneActif) {
-                kpiImpactElem.innerText = `${poidsTotalCarbonePeriodeKg.toFixed(1)} kg CO₂`;
-            } else if (kpiImpactElem) {
-                kpiImpactElem.innerText = "0.0 kg";
-            }
 
             // Fallback pour les vignettes
             function getThumbFallback(alimentName) {
@@ -1441,8 +1619,10 @@
                     tauxMange: tauxMange,
                     rejetPct: rejetPct,
                     occurrences: stats.count,
-                    poidsJeteKg: stats.poidsJeteKg,
-                    poidsTotalCarbone: typeof getFacteurCarbone === 'function' ? stats.poidsJeteKg * getFacteurCarbone(stats.rawName) : 0
+                    composants: stats.composants,
+                    poidsEvitKg: (cal && cal.items && cal.items[key]) ? cal.items[key].evitKg : null,
+                    poidsInevKg: (cal && cal.items && cal.items[key]) ? cal.items[key].inevKg : null,
+                    poidsTotalCarbone: (cal && cal.items && cal.items[key]) ? cal.items[key].carboneKg : null
                 };
 
                 globalItemsDetailedStats[key] = itemObj;
@@ -1485,11 +1665,14 @@
                 list.forEach(item => {
                     let cardClass, valText, extraText = "";
 
-                    // AJOUT CHIRURGICAL : Poids en Kg et CO2 sur les étiquettes
-                    if (typeof isModeCarboneActif !== 'undefined' && isModeCarboneActif && item.rejetPct > 0) {
-                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;">⚖️ ${item.poidsJeteKg.toFixed(2)} kg jetés (⚠️ ${item.poidsTotalCarbone.toFixed(2)} kg CO₂)</div>`;
-                    } else if (item.rejetPct > 0) {
-                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;">⚖️ ${item.poidsJeteKg.toFixed(2)} kg jetés</div>`;
+                    // Poids calés sur les balances (évitable / inévitable), CO₂ en mode carbone
+                    if (item.poidsEvitKg === null) {
+                        extraText = `<div style="font-size: 8.5px; color: #64748b; margin-top: 2px;" title="Pas de scan détaillé avec pesée pour cet aliment sur la période">⚖️ poids non calibré</div>`;
+                    } else {
+                        let t = `⚖️ ${item.poidsEvitKg.toFixed(2)} kg évitables jetés`;
+                        if (item.poidsInevKg > 0.004) t += ` · ${item.poidsInevKg.toFixed(2)} kg inévitables`;
+                        if (typeof isModeCarboneActif !== 'undefined' && isModeCarboneActif) t += ` (⚠️ ${item.poidsTotalCarbone.toFixed(2)} kg CO₂)`;
+                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;">${t}</div>`;
                     }
 
                     if (theme === 'vert') {
@@ -1527,9 +1710,40 @@
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
 
+            renderConformite(globalItemsDetailedStats);
+
             if (typeof updateEtApresModule === "function") {
                 updateEtApresModule(scansValides);
             }
+        }
+
+        // Tableau « 6 composantes » du rapport : adhésion réelle mesurée par la borne, par composante
+        function renderConformite(stats) {
+            const LAITIER = /yaourt|fromage|petit suisse|laitage|kiri|camembert|brie|emmental|comté|tomme|crème dessert|flan/i;
+            const groupes = { crudites: [], poisson: [], frits: [], laitiers: [], desserts: [], pain: [] };
+            Object.keys(stats).forEach(k => {
+                const it = stats[k];
+                const comp = Object.keys(it.composants).sort((a, b) => it.composants[b] - it.composants[a])[0];
+                let g = null;
+                if (comp === "entree") g = "crudites";
+                else if (comp === "plat") g = "poisson";
+                else if (comp === "accompagnement") g = "frits";
+                else if (comp === "pain") g = "pain";
+                else if (comp === "dessert") g = LAITIER.test(k) ? "laitiers" : "desserts";
+                if (g) groupes[g].push(it);
+            });
+            Object.keys(groupes).forEach(g => {
+                const st = document.getElementById("rep-stat-" + g), tx = document.getElementById("rep-text-" + g);
+                if (!st || !tx) return;
+                const l = groupes[g];
+                if (!l.length) { st.innerText = "-- %"; tx.innerText = "Aucun plateau scanné sur cette composante."; return; }
+                const n = l.reduce((a, i) => a + i.occurrences, 0);
+                const taux = Math.round(l.reduce((a, i) => a + i.tauxMange * i.occurrences, 0) / n);
+                const pire = l.slice().sort((a, b) => a.tauxMange - b.tauxMange)[0];
+                st.innerText = taux + " %";
+                st.style.color = taux >= 75 ? "#047857" : (taux >= 60 ? "#4d7c0f" : (taux >= 45 ? "#c2410c" : "#b91c1c"));
+                tx.innerText = `${n} observation(s). ` + (pire.tauxMange < 60 ? `Point faible : ${pire.label} (${pire.tauxMange} % mangé).` : `Bonne adhésion, point le plus bas : ${pire.label} (${pire.tauxMange} % mangé).`);
+            });
         }
 
         function openItemDetail(rawKey) {
@@ -1572,11 +1786,6 @@
                     }
                 });
 
-                if (tauxExact === 0 && !commentaire.includes('[')) {
-                    if (s.plat > 0) tauxExact = Math.round((s.plat / 200) * 100);
-                    else if (s.entree > 0) tauxExact = Math.round((s.entree / 100) * 100);
-                    else if (s.dessert > 0) tauxExact = Math.round((s.dessert / 100) * 100);
-                }
                 
                 let tauxFinal = Math.min(100, Math.max(0, tauxExact));
                 // --------------------------------------------------------
@@ -1584,10 +1793,10 @@
                 let menuCompletDuJour = "Menu non configuré par les éco-délégués ce jour-là";
                 let alternativesMemeCategorie = [];
 
-                if (globalRawData && globalRawData.rawGaspillage) {
-                    let menuRow = globalRawData.rawGaspillage.find(m => (typeof normalizeDate === 'function' ? normalizeDate(m.dateRaw) : m.dateRaw) === dateIso && m.type === "CONFIGURATION_MENU");
-                    if (menuRow && menuRow.commentaire) {
-                        menuCompletDuJour = menuRow.commentaire;
+                if (globalRawData) {
+                    const menuTexte = (globalRawData.historiqueMenus || {})[dateIso];
+                    if (menuTexte) {
+                        menuCompletDuJour = menuTexte;
                         
                         let parts = menuCompletDuJour.split('|').map(p => p.trim());
                         let entrees = parts[0] || "";
@@ -1779,6 +1988,7 @@
                     - Taux de consommation : <strong>${stats.tauxMange}%</strong><br>
                     - Taux de rejet : <strong>${stats.rejetPct}%</strong><br>
                     - Volume d'observation : ${stats.occurrences} plateaux croisés<br>
+                    - Poids jeté : ${stats.poidsEvitKg === null ? '<em>non calibré</em>' : `<strong>${stats.poidsEvitKg.toFixed(2)} kg</strong> évitables · ${stats.poidsInevKg.toFixed(2)} kg inévitables`}<br>
                     - Bilan qualitatif : ${appreciation}
                 `;
             } else {
@@ -1823,7 +2033,7 @@
             try {
                 if (localStream) stopCamera();
                 
-                let videoConstraints = { width: { ideal: 640 }, height: { ideal: 480 } };
+                let videoConstraints = { width: { ideal: 1280 }, height: { ideal: 720 } };
                 
                 if (selectedDeviceId) {
                     videoConstraints.deviceId = { exact: selectedDeviceId };
@@ -1891,12 +2101,22 @@
             ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
             
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            return canvas.toDataURL('image/jpeg', 0.7); 
+            return canvas.toDataURL('image/jpeg', 0.85); 
         }
 
         // 🌟 LA NOUVELLE FONCTION MAGIQUE "FIRE AND FORGET" LIÉE AUX 3 BOUTONS
+        let dernierScanTs = 0;
         function setPushAvis(type, elem) {
             if (isScanningProcess) return; // Empêche le double-clic
+            const imageCapturee = getBase64FromLiveVideo();
+            // Pas de caméra réelle : on refuse plutôt que d'envoyer une image simulée à l'IA
+            if (imageCapturee.indexOf("image_active_simulee") !== -1) {
+                const b = document.getElementById('instruction-text');
+                if (b) { b.innerText = "📷 CAMÉRA NON DISPONIBLE"; setTimeout(() => { b.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; }, 2500); }
+                return;
+            }
+            if (Date.now() - dernierScanTs < 3000) return; // anti-rebond entre deux élèves
+            dernierScanTs = Date.now();
             isScanningProcess = true;
 
             // 1. Animation des boutons
@@ -1931,7 +2151,7 @@
                 etablissement: document.getElementById('select-etablissement') ? document.getElementById('select-etablissement').value : "Établissement", 
                 menu_jour: document.getElementById('borne-menu-active') ? document.getElementById('borne-menu-active').innerText : "--", 
                 avis_eleve: choixAvisCourant,
-                image_base64: getBase64FromLiveVideo() 
+                image_base64: imageCapturee 
             };
 
             // 5. Envoi au Google Sheets (L'IA fera son traitement en arrière-plan pendant 8 sec, sans nous bloquer)
@@ -2015,15 +2235,17 @@
                     if(displayMenu) displayMenu.innerText = data.dernierMenu.substring(0, 50) + "...";
                 }
 
-                if (data.effectifCouverts) {
-                    let parts = String(data.effectifCouverts).split('-');
-                    let s1 = parts[0] ? parseInt(parts[0]) : 0;
-                    let s2 = parts[1] ? parseInt(parts[1]) : 0;
-                    if(s1 > 0 || s2 > 0) {
-                        localStorage.setItem(`totalConvives-${school}`, s1 + s2);
+                {
+                    // Effectif du jour : celui saisi avec le menu du jour, sinon l'effectif par défaut de l'établissement
+                    const todayIso = new Date().toISOString().split('T')[0];
+                    const eff = ((data.historiqueEffectifs || {})[todayIso]) || (data.parametres && data.parametres.effectif_defaut) || parseInt(String(data.effectifCouverts || "").split('-').reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0)) || 0;
+                    if (eff > 0) {
+                        localStorage.setItem(`totalConvives-${school}`, eff);
                         let totalInput = document.getElementById('convives-total');
-                        if(totalInput) totalInput.value = s1 + s2;
+                        if (totalInput && document.activeElement !== totalInput) totalInput.value = eff;
                     }
+                    const lbl = document.getElementById('kpi-money-lbl');
+                    if (lbl && data.parametres && data.parametres.prix_kg_eur) lbl.innerText = `Poids évitable × ${Number(data.parametres.prix_kg_eur).toFixed(2).replace('.', ',')} €/kg`;
                 }
 
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
@@ -2145,7 +2367,9 @@
 
             const payload = { action: "logBagWeights", etablissement: school, date_pesee: peseeDate, sac_alimentaire: alim.toFixed(2), sac_fruits: fruits.toFixed(2), sac_pain: pain.toFixed(2), sac_emballages: emb.toFixed(2), sac_serviettes: serv.toFixed(2) };
             
-            renderBilanEleves(alim * 0.70, fruits, pain, effectif);
+            const menuAct = localStorage.getItem(`menuActive-${school}`) || "";
+            const tauxInev = menuAct ? getTauxInevitablesPourTexte(menuAct) : 0.30;
+            renderBilanEleves(alim * (1 - tauxInev), fruits, pain, effectif);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
@@ -2386,50 +2610,7 @@
                 <h3 style="margin:0; color:white; font-size:16px;">🛡️ Transparence & Audit : Voir sous le capot (Méthodes A.B.C.)</h3>
                 <button onclick="document.getElementById('modal-methodology').style.display='none'" style="background:none; border:none; color:#cbd5e1; font-size:20px; cursor:pointer;">&times;</button>
             </div>
-            <div style="padding:24px; overflow-y:auto; font-size:12.5px; color:#334155; line-height:1.6;">
-                <p style="margin-bottom:16px; font-size: 13.5px; font-weight: 600; color: #1b4332;">
-                    Pour garantir l'intégrité absolue des bilans présentés au Conseil Départemental, l'application <strong>A.B.C.</strong> sépare l'analyse qualitative de l'algorithme de calcul : <strong>L'Intelligence Artificielle ne calcule aucun poids ni coût financier.</strong> Elle agit uniquement comme un capteur optique.
-                </p>
-
-                <!-- ÉTAPE 1 -->
-                <div style="border-left: 4px solid #3b82f6; padding-left: 14px; margin-bottom: 14px; background: #eff6ff; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #1d4ed8; font-size:13.5px;">1. Perception Optique & Structuration (IA Gemini)</strong>
-                    <p style="margin-top: 4px; margin-bottom: 0;">
-                        L'IA analyse le cliché du plateau et extrait une matrice textuelle normalisée sous forme de crochets, par exemple : <br>
-                        <code>[Tomates : 90% restes] [Paupiette de Bœuf : 80% restes] [Pain Baguette : 50% restes]</code>.<br>
-                        <em>Aucune conversion en gramme n'est réalisée à cette étape par l'IA.</em>
-                    </p>
-                </div>
-
-                <!-- ÉTAPE 2 -->
-                <div style="border-left: 4px solid #8b5cf6; padding-left: 14px; margin-bottom: 14px; background: #f5f3ff; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #6d28d9; font-size:13.5px;">2. Moteur de Conversion Déterministe (Normes GEMRCN)</strong>
-                    <p style="margin-top: 4px; margin-bottom: 0;">
-                        Le script applique un calcul mathématique fixe croisé avec les grammages moyens par portion (standards de service) :<br>
-                        • <strong>Formule :</strong> $\text{Masse jetée (kg)} = \text{Portion étalon} \times (\text{Pourcentage de restes} / 100)$<br>
-                        • <strong>Portions de référence :</strong> Entrée = 100g | Plat principal = 200g | Garniture = 150g | Pain = 50g | Dessert = 100g.<br>
-                        <em>Exemple pour un plat de paupiette évalué à 80% de restes :</em> $0.200\text{ kg} \times 0.80 = 0.160\text{ kg}$ de perte.
-                    </p>
-                </div>
-
-                <!-- ÉTAPE 3 -->
-                <div style="border-left: 4px solid #10b981; padding-left: 14px; margin-bottom: 14px; background: #f0fdf4; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #047857; font-size:13.5px;">3. Correction des Inévitables & Facteurs Carbone (ADEME / Agribalyse)</strong>
-                    <p style="margin-top: 4px; margin-bottom: 0;">
-                        • <strong>Déduction des inévitables :</strong> Application d'un coefficient spécifique par type d'aliment pour retirer les parties non consommables (ex : os de volaille, peaux de bananes, trognons, croûtes de pain ou fanes de crudités évalués entre 5% et 35%).<br>
-                        • <strong>Empreinte Carbone ($\text{kg CO}_2\text{eq}$) :</strong> Multiplicateur basé sur les tables Agribalyse de l'ADEME selon la nature de la denrée (ex : Bœuf = 22 kg $\text{CO}_2$/kg, Volaille = 5.5 kg $\text{CO}_2$/kg, Légumes/Fruits = 0.5 à 0.8 kg $\text{CO}_2$/kg).
-                    </p>
-                </div>
-
-                <!-- ÉTAPE 4 -->
-                <div style="border-left: 4px solid #f59e0b; padding-left: 14px; margin-bottom: 4px; background: #fffbeb; padding: 10px 14px; border-radius: 0 8px 8px 0;">
-                    <strong style="color: #b45309; font-size:13.5px;">4. Valorisation Financière & Indicateurs EGAlim</strong>
-                    <p style="margin-top: 4px; margin-bottom: 0;">
-                        • <strong>Pertes financières :</strong> $\text{Poids évitable (kg)} \times 4.50\text{ €/kg}$ (coût unitaire moyen denrée brute incluant la préparation de cuisine de collectivité).<br>
-                        • <strong>Indicateur global :</strong> Rapprochement avec l'effectif réel des convives pour obtenir le ratio réglementaire en grammes par repas (Seuil d'alerte EGAlim : < 80g / repas).
-                    </p>
-                </div>
-            </div>
+            <div id="methodology-body" style="padding:24px; overflow-y:auto; font-size:12.5px; color:#334155; line-height:1.6;"></div>
         </div>
     </div>
 
@@ -2466,6 +2647,8 @@
 
         window.openMethodologyModal = function() {
             const modal = document.getElementById('modal-methodology');
+            const body = document.getElementById('methodology-body');
+            if (body && typeof construireAudit === 'function') body.innerHTML = construireAudit();
             if (modal) {
                 modal.style.display = 'flex';
             }
