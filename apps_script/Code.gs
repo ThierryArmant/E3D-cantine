@@ -42,6 +42,37 @@ function configurerCle() {
   PropertiesService.getScriptProperties().setProperty("GEMINI_KEY", MA_CLE);
 }
 
+// ▶️ DIAGNOSTIC : à exécuter depuis l'éditeur (menu « Exécuter » > diagnostic) puis ouvrir « Journal d'exécution ».
+// Il dit en clair si la clé IA est présente, si le modèle répond, et si les tableurs sont accessibles.
+function diagnostic() {
+  const lignes = [];
+  const k = PropertiesService.getScriptProperties().getProperty("GEMINI_KEY");
+  lignes.push(k ? "✅ Clé GEMINI_KEY présente (" + k.length + " caractères)" : "❌ Clé GEMINI_KEY ABSENTE : exécute configurerCle() une fois (ou ajoute la propriété du script).");
+  if (k) {
+    try {
+      const rep = appelerGeminiParRequete({ contents: [{ parts: [{ text: "Réponds uniquement par le mot OK." }] }] });
+      const txt = JSON.parse(rep.getContentText()).candidates[0].content.parts[0].text;
+      lignes.push("✅ Le modèle " + NOM_MODELE_GEMINI + " répond : " + String(txt).trim().slice(0, 40));
+    } catch (e) {
+      lignes.push("❌ Appel au modèle " + NOM_MODELE_GEMINI + " en échec : " + String(e.message).slice(0, 300));
+    }
+  }
+  try {
+    const ann = getAnnuaire();
+    const noms = Object.keys(ann || {});
+    lignes.push("✅ Annuaire lu : " + noms.length + " établissement(s) : " + noms.join(", "));
+    noms.slice(0, 5).forEach(function (n) {
+      try { getSheetsABC(n); lignes.push("   ✅ Tableur « " + n + " » accessible"); }
+      catch (e) { lignes.push("   ❌ Tableur « " + n + " » : " + String(e.message).slice(0, 200)); }
+    });
+  } catch (e) {
+    lignes.push("❌ Annuaire : " + String(e.message).slice(0, 300));
+  }
+  const bilan = lignes.join("\n");
+  console.log(bilan);
+  return bilan;
+}
+
 // ==========================================================================
 // ANNUAIRE DES ÉTABLISSEMENTS
 // ==========================================================================
