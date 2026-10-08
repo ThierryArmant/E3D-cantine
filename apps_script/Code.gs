@@ -453,14 +453,36 @@ function portionReference(composant, aliment, p) {
   return p.portion_plat_g;
 }
 
+// Heure d'origine du scan (envoyée par la borne) si elle est plausible, sinon maintenant.
+function horodatageScan(brut) {
+  const d = brut ? new Date(brut) : null;
+  const maintenant = new Date();
+  if (!d || isNaN(d) || d > new Date(maintenant.getTime() + 5 * 60000) || d < new Date(maintenant.getTime() - 7 * 86400000)) return maintenant;
+  return d;
+}
+
+// Cherche l'identifiant du scan (colonne L) parmi les 300 dernières lignes de l'onglet.
+function scanDejaEnregistre(feuille, idScan) {
+  const derniere = feuille.getLastRow();
+  if (derniere < 2 || feuille.getLastColumn() < 12) return false;
+  const debut = Math.max(2, derniere - 299);
+  const ids = feuille.getRange(debut, 12, derniere - debut + 1, 1).getValues();
+  for (let i = 0; i < ids.length; i++) if (String(ids[i][0]) === idScan) return true;
+  return false;
+}
+
 function handleLogScanImage(data) {
   const sheets = getSheetsABC(data.etablissement || data.ecole);
   if (!data.image_base64) throw new Error("Flux visuel manquant.");
   const avisEleve = data.avis_eleve || "Non renseigné";
   const params = getParametres(sheets);
+  const quand = horodatageScan(data.horodatage);
+  const idScan = data.scan_id ? String(data.scan_id).slice(0, 40) : "";
+  // Renvoi automatique de la borne : si ce scan est déjà enregistré, on ne le compte pas deux fois.
+  if (idScan && scanDejaEnregistre(sheets.gaspillage, idScan)) return { success: true, doublon: true };
 
   if (data.image_base64 === "empty") {
-    sheets.gaspillage.appendRow([new Date(), "SCAN_IA_VISION", "Plateau Nettoyé (0% Restes)", 0, 0, 0, 0, 0, 0, avisEleve]);
+    sheets.gaspillage.appendRow([quand, "SCAN_IA_VISION", "Plateau Nettoyé (0% Restes)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan]);
     return { success: true };
   }
   const cleanBase64 = data.image_base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
@@ -468,7 +490,7 @@ function handleLogScanImage(data) {
   if (cleanBase64 === "image_active_simulee") return { success: true, ignore: true, raison: "Caméra indisponible" };
 
   // Le menu du jour vient du tableur (complet), pas du texte tronqué envoyé par la borne.
-  const menuJour = getMenuDuJour(sheets, dateIso(new Date())) || data.menu_jour || "Non spécifié";
+  const menuJour = getMenuDuJour(sheets, dateIso(quand)) || data.menu_jour || "Non spécifié";
 
   const promptVision = `Tu es un capteur optique pour la restauration scolaire (Projet A.B.C.). Tu ne calcules AUCUN poids : tu estimes seulement, visuellement, la part de chaque aliment qui RESTE sur le plateau.
 La photo est prise de dessus, à la fin du repas, juste avant que l'élève vide son plateau.
@@ -502,7 +524,11 @@ Réponds en JSON strict :
   const result = JSON.parse(jsonResp.candidates[0].content.parts[0].text.replace(/```json/gi, "").replace(/```/g, "").trim());
 
   // Plateau absent : on n'enregistre rien (évite de fausser les statistiques).
-  if (result.plateau_visible === false) return { success: true, ignore: true, raison: "Aucun plateau visible" };
+  // On garde une trace (type SCAN_ECHEC, hors statistiques) pour que ces photos ne disparaissent pas sans bruit.
+  if (result.plateau_visible === false) {
+    sheets.gaspillage.appendRow([quand, "SCAN_ECHEC", "Aucun plateau visible sur la photo (cadrage, lumière ou plateau déjà débarrassé)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan]);
+    return { success: true, ignore: true, raison: "Aucun plateau visible" };
+  }
 
   // Validation : on écarte les aliments incohérents (reste + mangé ≠ 100) ou de composant inconnu.
   const retenus = [], ecartes = [];
@@ -536,9 +562,9 @@ Réponds en JSON strict :
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
 
   sheets.gaspillage.appendRow([
-    new Date(), "SCAN_IA_VISION", note,
+    quand, "SCAN_IA_VISION", note,
     moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-    poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length })
+    poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length }), idScan
   ]);
   return { success: true, details: { aliments: retenus, ecartes: ecartes.length } };
 }

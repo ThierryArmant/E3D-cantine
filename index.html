@@ -327,6 +327,7 @@
                             <div id="instruction-text" class="instruction-banner state-searching" style="margin-bottom: 8px;">
                                 🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS
                             </div>
+                            <div id="scan-statut" onclick="scanForcerEnvoi()" title="Cliquer pour relancer l'envoi des scans en attente" style="font-size:11px; color:#475569; background:rgba(255,255,255,0.9); border:1px solid #cbd5e1; border-radius:6px; padding:4px 10px; margin-bottom:8px; cursor:pointer;">📤 Aucun scan envoyé depuis l'ouverture de la page</div>
 
                             <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                                 <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 180px;">
@@ -1340,6 +1341,8 @@
                 }
             }
             if (nbJoursPesee === 0) html += `<span>⚠️ Aucune pesée de poubelles sur la période.</span>`;
+            const nbEchec = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => x.type === "SCAN_ECHEC").length;
+            if (nbEchec > 0) html += `<span style="color:#b45309;" title="Photos sans plateau visible : elles ne comptent pas dans les statistiques. Voir l'onglet Suivi_Gaspillage (type SCAN_ECHEC).">👁️ ${nbEchec} scan(s) sans plateau visible (écartés des statistiques)</span>`;
             const sansDetail = cal.scansLegacy + cal.scansSansDetail;
             if (sansDetail > 0) html += `<span style="color:#64748b;">ℹ️ ${sansDetail} ancien(s) scan(s) sans détail par aliment : non utilisés pour les poids.</span>`;
             box.innerHTML = html;
@@ -2704,7 +2707,84 @@
             return canvas.toDataURL('image/jpeg', 0.85); 
         }
 
-        // 🌟 LA NOUVELLE FONCTION MAGIQUE "FIRE AND FORGET" LIÉE AUX 3 BOUTONS
+        // ===== FILE D'ATTENTE DES SCANS : une photo n'est jamais perdue en silence =====
+        // Chaque scan est gardé dans le navigateur (IndexedDB) jusqu'à ce que le script Google confirme l'enregistrement ;
+        // en cas d'erreur (clé IA, quota, réseau) il est renvoyé automatiquement et l'erreur s'affiche sur la borne.
+        const SCAN_Q = { items: [], enVol: 0, ok: 0, nonVisible: 0, camera: 0, derniereErreur: "", db: null };
+        function scanDbOuvrir() {
+            return new Promise(res => {
+                try {
+                    const r = indexedDB.open("abc-scans", 1);
+                    r.onupgradeneeded = () => r.result.createObjectStore("q", { keyPath: "id" });
+                    r.onsuccess = () => res(r.result);
+                    r.onerror = () => res(null);
+                } catch (e) { res(null); }
+            });
+        }
+        function scanDbOp(mode, fn) { return new Promise(res => { if (!SCAN_Q.db) return res(null); try { const t = SCAN_Q.db.transaction("q", mode), r = fn(t.objectStore("q")); t.oncomplete = () => res(r && r.result !== undefined ? r.result : true); t.onerror = () => res(null); } catch (e) { res(null); } }); }
+        function scanEnfiler(payload) {
+            payload.scan_id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+            payload.horodatage = new Date().toISOString();
+            const it = { id: payload.scan_id, payload: payload, essais: 0, prochain: 0, enVol: false };
+            SCAN_Q.items.push(it);
+            scanDbOp("readwrite", st => st.put({ id: it.id, payload: it.payload, essais: 0 }));
+            scanMajPuce();
+            scanPomper();
+        }
+        function scanPomper() {
+            while (SCAN_Q.enVol < 3) {
+                const it = SCAN_Q.items.find(x => !x.enVol && x.prochain <= Date.now());
+                if (!it) break;
+                scanEnvoyer(it);
+            }
+        }
+        async function scanEnvoyer(it) {
+            it.enVol = true; SCAN_Q.enVol++;
+            try {
+                const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 90000);
+                const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(it.payload), signal: ctrl.signal });
+                clearTimeout(t);
+                const res = await r.json();
+                if (res && res.success) {
+                    SCAN_Q.items = SCAN_Q.items.filter(x => x !== it);
+                    scanDbOp("readwrite", st => st.delete(it.id));
+                    if (res.ignore) SCAN_Q.nonVisible++; else SCAN_Q.ok++;
+                    SCAN_Q.derniereErreur = "";
+                } else {
+                    throw new Error((res && res.error) ? String(res.error) : "réponse vide du script");
+                }
+            } catch (e) {
+                it.essais++;
+                it.prochain = Date.now() + Math.min(300000, 5000 * Math.pow(2, Math.min(it.essais, 6)));
+                SCAN_Q.derniereErreur = String(e && e.message ? e.message : e).replace(/\s+/g, " ").slice(0, 170);
+            } finally {
+                it.enVol = false; SCAN_Q.enVol--;
+                scanMajPuce();
+                setTimeout(scanPomper, 500);
+            }
+        }
+        function scanForcerEnvoi() { SCAN_Q.items.forEach(x => { x.prochain = 0; }); scanPomper(); }
+        function scanMajPuce() {
+            const el = document.getElementById("scan-statut");
+            if (!el) return;
+            const att = SCAN_Q.items.length;
+            let h = `📤 <strong>${SCAN_Q.ok}</strong> enregistré(s)`;
+            if (att) h += ` · ⏳ <strong>${att}</strong> en attente`;
+            if (SCAN_Q.nonVisible) h += ` · 👁️ ${SCAN_Q.nonVisible} sans plateau visible`;
+            if (SCAN_Q.camera) h += ` · 📷 ${SCAN_Q.camera} refusé(s) (caméra)`;
+            if (SCAN_Q.derniereErreur) h += `<br><span style="color:#b91c1c; font-weight:700;">⚠️ ${SCAN_Q.derniereErreur.replace(/</g, "&lt;")}</span> <span style="color:#64748b;">(nouvel essai automatique, clic = relancer)</span>`;
+            el.style.borderColor = SCAN_Q.derniereErreur ? "#ef4444" : "#cbd5e1";
+            el.innerHTML = h;
+        }
+        (async function scanReprise() {
+            SCAN_Q.db = await scanDbOuvrir();
+            const reste = await scanDbOp("readonly", st => st.getAll());
+            if (Array.isArray(reste)) reste.forEach(x => { if (!SCAN_Q.items.some(y => y.id === x.id)) SCAN_Q.items.push({ id: x.id, payload: x.payload, essais: x.essais || 0, prochain: 0, enVol: false }); });
+            scanMajPuce(); scanPomper();
+            setInterval(scanPomper, 20000);
+        })();
+
+        // 🌟 LES 3 BOUTONS : l'élève clique, le scan part en file d'attente
         let dernierScanTs = 0;
         function setPushAvis(type, elem) {
             if (isScanningProcess) return; // Empêche le double-clic
@@ -2712,7 +2792,7 @@
             // Pas de caméra réelle : on refuse plutôt que d'envoyer une image simulée à l'IA
             if (imageCapturee.indexOf("image_active_simulee") !== -1) {
                 const b = document.getElementById('instruction-text');
-                if (b) { b.innerText = "📷 CAMÉRA NON DISPONIBLE"; setTimeout(() => { b.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; }, 2500); }
+                SCAN_Q.camera++; scanMajPuce(); if (b) { b.innerText = "📷 CAMÉRA NON DISPONIBLE"; setTimeout(() => { b.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; }, 2500); }
                 return;
             }
             if (Date.now() - dernierScanTs < 3000) return; // anti-rebond entre deux élèves
@@ -2754,13 +2834,8 @@
                 image_base64: imageCapturee 
             };
 
-            // 5. Envoi au Google Sheets (L'IA fera son traitement en arrière-plan pendant 8 sec, sans nous bloquer)
-            fetch(ADRESSE_SHEET_OFFICIELLE, { 
-                method: "POST", 
-                mode: "no-cors", // 👈 AJOUT DU BOUCLIER ANTI-ERREUR RÉSEAU
-                headers: { "Content-Type": "text/plain" }, 
-                body: JSON.stringify(payload) 
-            }).catch(err => console.log("Envoi silencieux :", err));
+            // 5. Mise en file d'attente : l'élève n'attend pas, mais la photo n'est supprimée qu'après confirmation du serveur
+            scanEnfiler(payload);
 
             // 6. LIBÉRATION IMMÉDIATE (1 SECONDE)
             setTimeout(() => {
