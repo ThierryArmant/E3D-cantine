@@ -583,7 +583,7 @@ RÈGLES STRICTES :
 2. En dessous de 5 plateaux pour un groupe (état, jour, avis), n'en tire aucune conclusion : écris « trop peu d'observations ».
 3. Une donnée absente n'est pas zéro. Si "poids" vaut null, dis que les poids ne sont pas calibrés et ne chiffre aucun gain en kg, euros ou CO2.
 4. Sépare le constat (dans les faits) de l'hypothèse (à vérifier). N'invente aucune explication psychologique, aucun « effet » : une hypothèse est formulée comme telle, avec la façon de la vérifier avec la borne.
-5. Avis des élèves : « pas aimé » = rejet lié au goût, « pas le temps » = contrainte de temps, « tout fini » = consommé. Compare-les seulement si n est suffisant.
+5. Avis des élèves : « pas aimé » = rejet lié au goût, « pas le temps » = contrainte de temps, « plus faim » = satiété (portion ou repas trop copieux, pas un rejet du goût), « tout fini » = consommé. Compare-les seulement si n est suffisant.
 6. Pas de lettre ni de salutation. Format : **Constat** (3 à 5 puces chiffrées), **Hypothèses à vérifier** (2 maximum), **Actions proposées** (3 maximum, concrètes, avec le gain estimé uniquement si "poids" est renseigné).
 7. 220 mots maximum, en français.`;
   try {

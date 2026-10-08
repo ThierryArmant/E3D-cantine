@@ -361,6 +361,10 @@
                                 <span style="font-size: 26px;">🟢</span>
                                 <span>J'ai tout fini</span>
                             </button>
+                            <button type="button" id="push-btn-jaune" onclick="setPushAvis('jaune', this)" style="flex: 1; background: linear-gradient(145deg, #facc15, #ca8a04); color: white; border: 3px solid #fef08a; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(202,138,4,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size: 26px;">🟡</span>
+                                <span>J'ai plus faim</span>
+                            </button>
                             <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span style="font-size: 26px;">🟠</span>
                                 <span>Pas le temps</span>
@@ -2152,7 +2156,7 @@
         }
 
         function vueAvis(P) {
-            const ordre = [["tout fini", "🟢 « J'ai tout fini »", "#059669"], ["pas le temps", "🟠 « Pas eu le temps »", "#ea580c"], ["pas aimé", "🔴 « Je n'ai pas aimé »", "#dc2626"], ["non renseigné", "⚪ Pas d'avis", "#94a3b8"]];
+            const ordre = [["tout fini", "🟢 « J'ai tout fini »", "#059669"], ["plus faim", "🟡 « J'ai plus faim »", "#ca8a04"], ["pas le temps", "🟠 « Pas eu le temps »", "#ea580c"], ["pas aimé", "🔴 « Je n'ai pas aimé »", "#dc2626"], ["non renseigné", "⚪ Pas d'avis", "#94a3b8"]];
             const total = P.length;
             let h = titreC("Ce que les élèves déclarent, et ce que la borne mesure") + ordre.map(o => {
                 const l = P.filter(p => p.avis === o[0]);
@@ -2160,12 +2164,13 @@
                 return barreC(o[1], 100 * l.length / total, Math.round(100 * l.length / total) + " % des plateaux", l.length, o[2]) + `<div style="margin:-1px 0 4px 178px; font-size:10.5px; color:#475569;">reste mesuré : ${Math.round(100 - moy(l.map(p => p.mange)))} % en moyenne</div>`;
             }).join("");
             const parAliment = {};
-            P.forEach(p => { const vus = {}; p.items.forEach(it => { if (vus[it.nom]) return; vus[it.nom] = 1; const a = parAliment[it.nom] = parAliment[it.nom] || { n: 0, nonAime: 0, temps: 0 }; a.n++; if (p.avis === "pas aimé") a.nonAime++; if (p.avis === "pas le temps") a.temps++; }); });
+            P.forEach(p => { const vus = {}; p.items.forEach(it => { if (vus[it.nom]) return; vus[it.nom] = 1; const a = parAliment[it.nom] = parAliment[it.nom] || { n: 0, nonAime: 0, temps: 0, faim: 0 }; a.n++; if (p.avis === "pas aimé") a.nonAime++; if (p.avis === "pas le temps") a.temps++; if (p.avis === "plus faim") a.faim++; }); });
             const top = (cle) => Object.keys(parAliment).filter(k => parAliment[k].n >= 3 && parAliment[k][cle] > 0).map(k => ({ k: k, n: parAliment[k].n, v: parAliment[k][cle] })).sort((a, b) => b.v / b.n - a.v / a.n).slice(0, 6);
             const bloc = (cle, titre, couleur) => { const t = top(cle); return t.length ? titreC(titre) + t.map(x => barreC(x.k, 100 * x.v / x.n, Math.round(100 * x.v / x.n) + " % des plateaux", x.n, couleur)).join("") : ""; };
             h += bloc("nonAime", "Aliments présents dans les plateaux « je n'ai pas aimé »", "#dc2626");
             h += bloc("temps", "Aliments présents dans les plateaux « pas eu le temps »", "#ea580c");
-            return h + noteC("L'avis est donné par l'élève pour tout son plateau, pas pour un aliment : un aliment apparaît ici s'il figurait sur le plateau, il n'en est pas forcément la cause. Un écart entre l'avis déclaré et le reste mesuré est lui-même une information.");
+            h += bloc("faim", "Aliments présents dans les plateaux « j'ai plus faim »", "#ca8a04");
+            return h + noteC("L'avis est donné par l'élève pour tout son plateau, pas pour un aliment : un aliment apparaît ici s'il figurait sur le plateau, il n'en est pas forcément la cause. « Plus faim » est de la satiété (portion ou repas trop copieux), pas un rejet du goût : à lire à part de « pas aimé ». Un écart entre l'avis déclaré et le reste mesuré est lui-même une information.");
         }
 
         // Services : séries de plateaux séparées par un vide d'au moins 30 minutes sans aucun scan (tous jours confondus)
@@ -2196,11 +2201,11 @@
                 h += `<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><div style="width:60px; font-size:11px; text-align:right; color:#1e293b;">${hhmm(c * 15)}</div><div style="flex:1; height:13px; background:#f1f5f9; border-radius:3px;"><div style="height:100%; width:${100 * l.length / maxN}%; background:${m === null ? "#cbd5e1" : couleurPalier(m)}; border-radius:3px;"></div></div><div style="width:150px; font-size:10.5px; color:#334155;">${l.length ? `<strong>${l.length}</strong> plateaux · ${Math.round(m)} % mangé` : "—"}</div></div>`;
             }
             h += titreC(services.length > 1 ? `${services.length} services repérés (vide d'au moins 30 min entre deux séries de scans)` : "Un seul service repéré");
-            h += `<table style="width:100%; border-collapse:collapse; font-size:11px;"><tr style="text-align:left; color:#64748b;"><th>Service</th><th>Plateaux</th><th>% mangé</th><th>Entrée</th><th>Plat</th><th>« Pas le temps »</th><th>« Pas aimé »</th></tr>` + services.map((sv, i) => {
+            h += `<table style="width:100%; border-collapse:collapse; font-size:11px;"><tr style="text-align:left; color:#64748b;"><th>Service</th><th>Plateaux</th><th>% mangé</th><th>Entrée</th><th>Plat</th><th>« Plus faim »</th><th>« Pas le temps »</th><th>« Pas aimé »</th></tr>` + services.map((sv, i) => {
                 const l = avecHeure.filter(p => p.min >= sv[0] && p.min <= sv[1]);
                 const comp = c => { const v = []; l.forEach(p => p.items.filter(it => it.comp === c).forEach(it => v.push(100 - it.restePct))); return v.length >= 3 ? Math.round(moy(v)) + " %" : "—"; };
                 const part = a => Math.round(100 * l.filter(p => p.avis === a).length / l.length) + " %";
-                return `<tr style="border-top:1px solid #e2e8f0;"><td><strong>S${i + 1}</strong> ${hhmm(sv[0])}–${hhmm(sv[1] + 1)}</td><td>${l.length}</td><td>${Math.round(moy(l.map(p => p.mange)))} %</td><td>${comp("entree")}</td><td>${comp("plat")}</td><td>${part("pas le temps")}</td><td>${part("pas aimé")}</td></tr>`;
+                return `<tr style="border-top:1px solid #e2e8f0;"><td><strong>S${i + 1}</strong> ${hhmm(sv[0])}–${hhmm(sv[1] + 1)}</td><td>${l.length}</td><td>${Math.round(moy(l.map(p => p.mange)))} %</td><td>${comp("entree")}</td><td>${comp("plat")}</td><td>${part("plus faim")}</td><td>${part("pas le temps")}</td><td>${part("pas aimé")}</td></tr>`;
             }).join("") + `</table>`;
             const sans = P.length - avecHeure.length;
             return h + noteC(`Les services sont déduits de l'heure des scans, pas d'un planning saisi : si un service est très court ou deux services s'enchaînent sans pause, ils peuvent être fusionnés. Heure = heure de dépôt du plateau à la borne (Paris).${sans ? ` ${sans} plateau(x) sans heure exploitable ignoré(s).` : ""}`);
@@ -2412,7 +2417,7 @@
                     Object.keys(j.conc).forEach(c => (conc[c] = conc[c] || []).push.apply(conc[c], j.conc[c]));
                 });
                 const n = restes.length;
-                const ic = { "tout fini": "🟢", "pas le temps": "🟠", "pas aimé": "🔴", "non renseigné": "⚪" };
+                const ic = { "tout fini": "🟢", "plus faim": "🟡", "pas le temps": "🟠", "pas aimé": "🔴", "non renseigné": "⚪" };
                 const avisTxt = Object.keys(avis).map(a => `${ic[a] || ""} ${avis[a]}`).join(" · ");
                 const etatTxt = Object.keys(etats).sort((a, b) => etats[b] - etats[a]).slice(0, 3).map(e => `${escC(e)} (${etats[e]})`).join(", ");
                 const concTxt = Object.keys(conc).map(c => `${escC(c)} ${Math.round(100 - m(conc[c]))} % <span style="color:#94a3b8;">(n=${conc[c].length})</span>`).join(" · ");
@@ -2445,6 +2450,7 @@
 
         function avisCourt(txt) {
             const t = String(txt || "").toLowerCase();
+            if (t.indexOf("plus faim") !== -1 || t.indexOf("🟡") !== -1) return "plus faim";
             if (t.indexOf("tout fini") !== -1 || t.indexOf("🟢") !== -1) return "tout fini";
             if (t.indexOf("temps") !== -1 || t.indexOf("🟠") !== -1) return "pas le temps";
             if (t.indexOf("aimé") !== -1 || t.indexOf("aime") !== -1 || t.indexOf("🔴") !== -1) return "pas aimé";
@@ -2801,7 +2807,7 @@
             isScanningProcess = true;
 
             // 1. Animation des boutons
-            ['vert', 'orange', 'rouge'].forEach(t => {
+            ['vert', 'jaune', 'orange', 'rouge'].forEach(t => {
                 let b = document.getElementById(`push-btn-${t}`);
                 if (b) {
                     b.style.transform = "scale(1)";
@@ -2816,6 +2822,7 @@
 
             // 2. Récupération de l'avis
             if (type === 'vert') choixAvisCourant = "🟢 J'ai tout fini";
+            else if (type === 'jaune') choixAvisCourant = "🟡 J'ai plus faim";
             else if (type === 'orange') choixAvisCourant = "🟠 Pas le temps";
             else if (type === 'rouge') choixAvisCourant = "🔴 J'ai pas aimé";
 
@@ -2824,7 +2831,7 @@
             banner.innerText = "📸 SCAN EN COURS..."; 
             banner.className = "instruction-banner state-detected";
             
-            prononcerMessage(type === 'vert' ? "Tout fini, merci" : (type === 'orange' ? "Pas le temps, merci" : "Pas aimé, merci"));
+            prononcerMessage(type === 'vert' ? "Tout fini, merci" : (type === 'jaune' ? "Plus faim, merci" : (type === 'orange' ? "Pas le temps, merci" : "Pas aimé, merci")));
 
             // 4. Capture et préparation silencieuse
             const payload = { 
@@ -2850,7 +2857,7 @@
                     banner.className = "instruction-banner state-searching"; 
                     choixAvisCourant = "Non renseigné";
                     
-                    ['vert', 'orange', 'rouge'].forEach(t => {
+                    ['vert', 'jaune', 'orange', 'rouge'].forEach(t => {
                         let b = document.getElementById(`push-btn-${t}`);
                         if (b) {
                             b.style.transform = "scale(1)";
