@@ -2778,6 +2778,7 @@
         }
         (async function scanReprise() {
             SCAN_Q.db = await scanDbOuvrir();
+            try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {} // demande au navigateur de ne pas purger ces données quand la mémoire manque
             const reste = await scanDbOp("readonly", st => st.getAll());
             if (Array.isArray(reste)) reste.forEach(x => { if (!SCAN_Q.items.some(y => y.id === x.id)) SCAN_Q.items.push({ id: x.id, payload: x.payload, essais: x.essais || 0, prochain: 0, enVol: false }); });
             scanMajPuce(); scanPomper();
