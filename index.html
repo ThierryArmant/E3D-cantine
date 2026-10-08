@@ -817,7 +817,7 @@
             "yaourt": 0.00, "yaourt nature": 0.00, "yaourt aux fruits": 0.00, "fromage blanc": 0.00,
             "petit suisse": 0.00, "fromage": 0.00, "comté": 0.00, "camembert": 0.00, "portion de kiri": 0.00,
             "fruit": 0.20, "fruit de saison": 0.20, "pomme": 0.15, "poire": 0.15, "banane": 0.35,
-            "orange": 0.30, "clémentine": 0.25, "mandarine": 0.25, "kiwi": 0.10, "pêche": 0.15,
+            "orange": 0.30, "clémentine": 0.25, "mandarine": 0.25, "kiwi": 0.10, "pêche": 0.15, "raisin": 0.00,
             "abricot": 0.10, "prune": 0.10, "fraise": 0.05, "compote": 0.00, "crème dessert": 0.00,
             "île flottante": 0.00, "flan": 0.00, "pâtisserie": 0.00, "gâteau au chocolat": 0.00,
             "tarte aux pommes": 0.10, "glace": 0.00, "pain": 0.00,
@@ -1195,8 +1195,18 @@
                     const totaux = { alim: 0, fruits: 0, pain: 0 };
                     liste.forEach(o => { totaux[o.bin] += o.resteG; });
                     liste.forEach(o => {
-                        const coef = coefInevitable(o.nom);
+                        let coef = coefInevitable(o.nom);
                         if (coef === null) res.sansCoef[o.nom] = true;
+                        else if (o.count > 0) {
+                            // L'état change l'inévitable : une purée / un mixé / une compote n'a plus ni peau ni épluchure dans l'assiette
+                            let somme = 0, nbEtats = 0;
+                            Object.keys(o.etats).forEach(nomEtat => {
+                                const transforme = /purée|puree|écras|mixé|mouliné|velouté|compote|coulis/.test(normaliserNomAliment(nomEtat));
+                                somme += (transforme ? 0 : coef) * o.etats[nomEtat].count;
+                                nbEtats += o.etats[nomEtat].count;
+                            });
+                            if (nbEtats > 0) coef = somme / nbEtats;
+                        }
                         const servisKg = E * (o.count / n) * (o.portionG / o.count) / 1000;
                         const totalKg = (totaux[o.bin] > 0 && bins[o.bin] > 0) ? bins[o.bin] * o.resteG / totaux[o.bin] : 0;
                         const inevKg = Math.min(totalKg, servisKg * (coef || 0));
@@ -1620,6 +1630,7 @@
             "lasagnes bolognaise": 6.1,
             "couscous": 3.85,
             "hachis parmentier": 12.0,
+            "hachis parmentier végétarien": 1.2, // pas de ligne Agribalyse dédiée : valeur de travail (la ligne viande, 12,0, ne convient pas)
             "taboulé": 1.2,
             "steak végétarien": 2.17,
             "cordon bleu": 5.44
