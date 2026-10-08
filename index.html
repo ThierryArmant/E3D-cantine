@@ -2674,7 +2674,14 @@
                     videoConstraints.facingMode = { ideal: "environment" };
                 }
                 
-                localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints, audio: false });
+                } catch (e1) {
+                    if (e1 && (e1.name === "OverconstrainedError" || e1.name === "NotReadableError")) {
+                        const simple = selectedDeviceId ? { deviceId: { exact: selectedDeviceId } } : true;
+                        localStream = await navigator.mediaDevices.getUserMedia({ video: simple, audio: false });
+                    } else throw e1;
+                }
                 video.srcObject = localStream;
                 resetBorneUI();
                 
@@ -2682,7 +2689,8 @@
                 
             } catch (err) { 
                 console.error("Erreur de caméra :", err);
-                document.getElementById('instruction-text').innerText = "🤖 MODE TEST / CAMERA DÉSACTIVÉE"; 
+                const causes = { NotAllowedError: "autorisation refusée (cadenas de la barre d'adresse)", NotFoundError: "aucune caméra détectée", NotReadableError: "caméra déjà utilisée par une autre application ou un autre onglet", OverconstrainedError: "réglage de caméra refusé", SecurityError: "page non sécurisée (il faut https)" };
+                document.getElementById('instruction-text').innerText = "🤖 CAMÉRA INDISPONIBLE : " + (causes[err && err.name] || (err && (err.name || err.message)) || "erreur inconnue"); 
             }
         }
 
