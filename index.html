@@ -329,6 +329,18 @@
                             </div>
                             <div id="scan-statut" onclick="scanForcerEnvoi()" title="Cliquer pour relancer l'envoi des scans en attente" style="font-size:11px; color:#475569; background:rgba(255,255,255,0.9); border:1px solid #cbd5e1; border-radius:6px; padding:4px 10px; margin-bottom:8px; cursor:pointer;">📤 Aucun scan envoyé depuis l'ouverture de la page</div>
 
+                            <div id="zoom-barre" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.9); padding:6px 12px; border-radius:6px; margin-bottom:8px; flex-wrap:wrap;" title="Le cadrage réglé ici est exactement ce qui est envoyé à l'IA">
+                                <label style="font-size:11px; font-weight:bold; color:#1b4332;">🔍 Zoom plateau :</label>
+                                <input type="range" id="zoom-niveau" min="100" max="300" value="100" oninput="zoomMaj()" style="width:90px;">
+                                <span id="zoom-val" style="font-size:11px; color:#1b4332; min-width:34px;">×1,0</span>
+                                <label style="font-size:10px; font-weight:bold; color:#1b4332;">↔</label>
+                                <input type="range" id="zoom-x" min="0" max="100" value="50" oninput="zoomMaj()" style="width:70px;">
+                                <label style="font-size:10px; font-weight:bold; color:#1b4332;">↕</label>
+                                <input type="range" id="zoom-y" min="0" max="100" value="50" oninput="zoomMaj()" style="width:70px;">
+                                <button type="button" class="btn-period" onclick="zoomRaz()" style="font-size:10.5px; padding:4px 8px;">↺ Plein champ</button>
+                                <span style="font-size:10px; color:#64748b;">Cadre le plateau : l'IA ne reçoit que cette zone.</span>
+                            </div>
+
                             <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.9); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                                 <div style="display: flex; align-items: center; gap: 6px; flex: 1; min-width: 180px;">
                                     <label style="font-size: 11px; font-weight: bold; color: #1b4332;">📷 Source :</label>
@@ -348,6 +360,7 @@
 
                             <div style="position: relative; flex-grow: 1; min-height: 360px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 10px;">
                                 <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                                <canvas id="camera-zoom" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#0f172a;"></canvas>
                                 <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
                             </div>
                         </div>
@@ -2653,7 +2666,7 @@
             try {
                 if (localStream) stopCamera();
                 
-                let videoConstraints = { width: { ideal: 1280 }, height: { ideal: 720 } };
+                let videoConstraints = { width: { ideal: 1920 }, height: { ideal: 1080 } };
                 
                 if (selectedDeviceId) {
                     videoConstraints.deviceId = { exact: selectedDeviceId };
@@ -2704,15 +2717,63 @@
             if (video) {
                 video.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
             }
+            const cz = document.getElementById('camera-zoom'); if (cz) cz.style.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
         }
+
+        // ===== ZOOM NUMÉRIQUE : l'IA ne reçoit que la zone du plateau =====
+        function zoomRegion(video) {
+            const z = (parseInt((document.getElementById('zoom-niveau') || {}).value, 10) || 100) / 100;
+            const px = (parseInt((document.getElementById('zoom-x') || {}).value, 10) || 50) / 100;
+            const py = (parseInt((document.getElementById('zoom-y') || {}).value, 10) || 50) / 100;
+            const vw = video.videoWidth || 640, vh = video.videoHeight || 480;
+            const cw = vw / z, ch = vh / z;
+            return { sx: (vw - cw) * px, sy: (vh - ch) * py, sw: cw, sh: ch };
+        }
+        let zoomBoucle = null;
+        function zoomDessiner() {
+            const video = document.getElementById('camera-feed'), cv = document.getElementById('camera-zoom');
+            if (!video || !cv || video.readyState < 2) return;
+            const r = zoomRegion(video);
+            const w = Math.round(r.sw), h = Math.round(r.sh);
+            if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+            cv.getContext('2d').drawImage(video, r.sx, r.sy, r.sw, r.sh, 0, 0, w, h);
+        }
+        function zoomMaj() {
+            const z = (parseInt(document.getElementById('zoom-niveau').value, 10) || 100) / 100;
+            document.getElementById('zoom-val').innerText = '×' + z.toFixed(1).replace('.', ',');
+            const cv = document.getElementById('camera-zoom');
+            if (z > 1) {
+                cv.style.display = 'block';
+                if (!zoomBoucle) zoomBoucle = setInterval(zoomDessiner, 66);
+                zoomDessiner();
+            } else {
+                cv.style.display = 'none';
+                if (zoomBoucle) { clearInterval(zoomBoucle); zoomBoucle = null; }
+            }
+            try { localStorage.setItem('abc-zoom', JSON.stringify({ z: document.getElementById('zoom-niveau').value, x: document.getElementById('zoom-x').value, y: document.getElementById('zoom-y').value })); } catch (e) {}
+        }
+        function zoomRaz() {
+            document.getElementById('zoom-niveau').value = 100; document.getElementById('zoom-x').value = 50; document.getElementById('zoom-y').value = 50;
+            zoomMaj();
+        }
+        (function zoomRestaurer() {
+            try {
+                const s = JSON.parse(localStorage.getItem('abc-zoom') || 'null');
+                if (!s) return;
+                const ok = () => document.getElementById('zoom-niveau');
+                const go = () => { if (!ok()) return setTimeout(go, 200); ok().value = s.z; document.getElementById('zoom-x').value = s.x; document.getElementById('zoom-y').value = s.y; zoomMaj(); };
+                go();
+            } catch (e) {}
+        })();
 
         function getBase64FromLiveVideo() {
             const video = document.getElementById('camera-feed');
             if (!video || !localStream || video.readyState < 2) return "data:image/jpeg;base64,image_active_simulee"; 
             
+            const r = zoomRegion(video);
             const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 640; 
-            canvas.height = video.videoHeight || 480;
+            canvas.width = Math.round(r.sw); 
+            canvas.height = Math.round(r.sh);
             const ctx = canvas.getContext('2d'); 
             
             const brightness = document.getElementById('cam-brightness') ? document.getElementById('cam-brightness').value : 100;
@@ -2720,7 +2781,7 @@
             
             ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
             
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(video, r.sx, r.sy, r.sw, r.sh, 0, 0, canvas.width, canvas.height);
             return canvas.toDataURL('image/jpeg', 0.85); 
         }
 
