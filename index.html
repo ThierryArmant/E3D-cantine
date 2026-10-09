@@ -358,7 +358,7 @@
                                 </div>
                             </div>
 
-                            <div style="position: relative; flex-grow: 1; min-height: 360px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 10px;">
+                            <div id="abc-zone-plateau" style="position: relative; flex-grow: 1; min-height: 360px; background: #1e293b; border-radius: 10px; overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 10px;">
                                 <video id="camera-feed" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
                                 <canvas id="camera-zoom" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#0f172a;"></canvas>
                                 <div class="progress-container" id="bar-container"><div class="progress-bar" id="action-progress"></div></div>
@@ -2873,17 +2873,19 @@
 
         // Signal de confirmation : affichage seul, sans toucher aux réglages de la borne.
         function afficherFlashMerci() {
+            const zone = document.getElementById('abc-zone-plateau');
+            if (!zone) return;
             let flash = document.getElementById('abc-flash-merci');
             if (!flash) {
                 flash = document.createElement('div');
                 flash.id = 'abc-flash-merci';
-                flash.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#07823b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;font-family:inherit;';
-                flash.innerHTML = '<div style="font-size:clamp(100px,24vw,230px);font-weight:900;line-height:1">✓</div><div style="font-size:clamp(45px,10vw,105px);font-weight:900;line-height:1">MERCI !</div>';
-                document.body.appendChild(flash);
+                flash.style.cssText = 'position:absolute;inset:0;z-index:50;background:#07823b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;font-family:inherit;';
+                flash.innerHTML = '<div style="font-size:clamp(90px,15vw,180px);font-weight:900;line-height:1">✓</div><div style="font-size:clamp(36px,6vw,70px);font-weight:900;line-height:1">MERCI !</div>';
+                zone.appendChild(flash);
             }
             flash.style.display = 'flex';
             clearTimeout(flash._timer);
-            flash._timer = setTimeout(() => { flash.style.display = 'none'; }, 300);
+            flash._timer = setTimeout(() => { flash.style.display = 'none'; }, 500);
         }
 
         // 🌟 LES 3 BOUTONS : l'élève clique, le scan part en file d'attente
