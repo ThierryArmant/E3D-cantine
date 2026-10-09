@@ -2928,7 +2928,7 @@
             banner.innerText = "📸 SCAN EN COURS..."; 
             banner.className = "instruction-banner state-detected";
             
-            prononcerMessage(type === 'vert' ? "Tout fini, merci" : (type === 'jaune' ? "Plus faim, merci" : (type === 'orange' ? "Pas le temps, merci" : "Pas aimé, merci")));
+            // Retour sonore désactivé : le signal visuel suffit en cantine.
 
             // 4. Capture et préparation silencieuse
             const payload = { 
