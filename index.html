@@ -2871,6 +2871,21 @@
             setInterval(scanPomper, 20000);
         })();
 
+        // Signal de confirmation : affichage seul, sans toucher aux réglages de la borne.
+        function afficherFlashMerci() {
+            let flash = document.getElementById('abc-flash-merci');
+            if (!flash) {
+                flash = document.createElement('div');
+                flash.id = 'abc-flash-merci';
+                flash.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:#07823b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;font-family:inherit;';
+                flash.innerHTML = '<div style="font-size:clamp(100px,24vw,230px);font-weight:900;line-height:1">✓</div><div style="font-size:clamp(45px,10vw,105px);font-weight:900;line-height:1">MERCI !</div>';
+                document.body.appendChild(flash);
+            }
+            flash.style.display = 'flex';
+            clearTimeout(flash._timer);
+            flash._timer = setTimeout(() => { flash.style.display = 'none'; }, 300);
+        }
+
         // 🌟 LES 3 BOUTONS : l'élève clique, le scan part en file d'attente
         let dernierScanTs = 0;
         function setPushAvis(type, elem) {
@@ -2927,8 +2942,9 @@
 
             // 6. LIBÉRATION IMMÉDIATE (1 SECONDE)
             setTimeout(() => {
-                banner.innerText = "🟢 MERCI ! AU SUIVANT 👉"; 
-                banner.className = "instruction-banner state-success";
+                afficherFlashMerci();
+                banner.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS";
+                banner.className = "instruction-banner state-searching";
                 
                 // Réinitialisation de la borne pour l'élève suivant
                 setTimeout(() => {
