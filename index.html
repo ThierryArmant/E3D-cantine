@@ -2879,8 +2879,7 @@
             if (!flash) {
                 flash = document.createElement('div');
                 flash.id = 'abc-flash-merci';
-                flash.style.cssText = 'position:absolute;inset:0;z-index:50;background:#07823b;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;font-family:inherit;';
-                flash.innerHTML = '<div style="font-size:clamp(90px,15vw,180px);font-weight:900;line-height:1">✓</div><div style="font-size:clamp(36px,6vw,70px);font-weight:900;line-height:1">MERCI !</div>';
+                flash.style.cssText = 'position:absolute;inset:0;z-index:50;background:#07823b url("abc-terre-merci.jpg") center center / contain no-repeat;pointer-events:none;';
                 zone.appendChild(flash);
             }
             flash.style.display = 'flex';
