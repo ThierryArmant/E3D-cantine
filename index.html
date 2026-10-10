@@ -43,6 +43,8 @@
         .project-spirit-overlay { display:none; position:fixed; inset:0; background:rgba(4,19,15,.8); z-index:10001; align-items:center; justify-content:center; padding:16px; }
         .project-spirit-dialog { width:min(560px,100%); max-height:85vh; overflow-y:auto; position:relative; background:linear-gradient(155deg,#184a34,#06271e); border:2px solid #cba85e; border-radius:15px; color:#f3e9d4; box-shadow:0 20px 60px #0009; padding:24px; line-height:1.6; }
         .project-spirit-dialog h2 { color:#f1cc7a; margin:0 30px 12px 0; font-size:22px; text-shadow:1px 2px 2px #000; }
+        .project-spirit-signature { display:inline-block; margin-left:10px; font-family:Georgia,serif; font-style:italic; font-size:14px; font-weight:400; color:#e6c27b; white-space:nowrap; vertical-align:baseline; }
+        .project-spirit-rights { border-top:1px solid rgba(203,168,94,.45); margin-top:17px; padding-top:12px; font-size:11px !important; opacity:.88; }
         .project-spirit-dialog h3 { color:#f1cc7a; font-size:15px; margin:15px 0 5px; }
         .project-spirit-dialog p { font-size:13px; margin:0 0 10px; }
         .project-spirit-close { position:absolute; top:12px; right:14px; color:#f7dda1; background:transparent; border:0; font-size:26px; cursor:pointer; }
@@ -3749,17 +3751,16 @@
     <div id="modal-project-spirit" class="project-spirit-overlay" role="presentation" onclick="if(event.target===this)this.style.display='none'">
         <div class="project-spirit-dialog" role="dialog" aria-modal="true" aria-labelledby="project-spirit-title">
             <button type="button" class="project-spirit-close" aria-label="Fermer" onclick="document.getElementById('modal-project-spirit').style.display='none'">&times;</button>
-            <h2 id="project-spirit-title">🌿 L'esprit du projet A.B.C.</h2>
+            <h2 id="project-spirit-title">🌿 L'esprit du projet A.B.C.<span class="project-spirit-signature">by Thierry Armant</span></h2>
             <h3>Pourquoi A.B.C. ?</h3>
             <p>A.B.C. – Assiette Bas Carbone est un projet pédagogique né d'un besoin concret en restauration scolaire : mieux mesurer, comprendre et réduire le gaspillage alimentaire.</p>
             <p>Face au coût des solutions commerciales spécialisées, l'objectif a été de développer un outil accessible aux établissements scolaires avec des moyens simples.</p>
             <h3>Une démarche éducative</h3>
-            <p><strong>Conçu et développé par Thierry Armant</strong>, A.B.C. – Assiette Bas Carbone est un projet pédagogique que je porte dans le cadre d'une démarche éducative et environnementale plus large, menée au sein du <strong>réseau Haut Vaucluse</strong>.</p>
+            <p>A.B.C. – Assiette Bas Carbone est un outil pédagogique que je porte dans le cadre d'une démarche éducative et environnementale plus large, menée au sein du <strong>réseau Haut Vaucluse</strong>.</p>
             <p>Cet outil vise à réduire notre empreinte carbone alimentaire par la sensibilisation de nos élèves au gaspillage alimentaire et à accompagner les équipes éducatives et de restauration dans l'évolution de leurs pratiques, grâce à l'observation et à l'analyse fine des données.</p>
-            <p>Il s'inscrit dans une dynamique collective de développement durable, tout en conservant une conception et un développement propres.</p>
             <h3>Un engagement de gratuité</h3>
             <p><strong>A.B.C. a vocation à rester gratuit pour les établissements scolaires.</strong> Le projet s'inscrit dans une démarche environnementale, éducative et non lucrative.</p>
-            <p style="font-size:11px;opacity:.8;">La publication du code sur GitHub ne constitue pas une autorisation générale d'exploitation commerciale. Les conditions précises de réutilisation restent à définir.</p>
+            <p class="project-spirit-rights">A.B.C. – Assiette Bas Carbone est un outil conçu et développé par Thierry Armant. Sa vocation est pédagogique, environnementale et non lucrative. Toute exploitation commerciale nécessite l'autorisation préalable de son auteur, sous réserve des droits éventuellement accordés par une licence applicable.</p>
         </div>
     </div>
 
