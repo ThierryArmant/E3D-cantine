@@ -2501,14 +2501,18 @@
         function construireFaitsAliment(rawKey) {
             const cle = normaliserNomAliment(rawKey);
             const obs = [];
+            let scansAvecAliment = 0;
             ((globalRawData && globalRawData.rawGaspillage) || []).forEach(sc => {
                 if (sc.type !== "SCAN_IA_VISION") return;
+                let presentDansScan = false;
                 parseScanItems(sc.commentaire).forEach(it => {
                     const nom = normaliserNomAliment(it.nom);
                     if (nom === cle || nom.includes(cle) || cle.includes(nom)) {
+                        presentDansScan = true;
                         obs.push({ date: normalizeDate(sc.dateRaw), reste: it.restePct, etat: it.etat, avis: avisCourt(sc.avis_eleve) });
                     }
                 });
+                if (presentDansScan) scansAvecAliment++;
             });
             const moy = l => l.length ? Math.round(l.reduce((a, o) => a + o.reste, 0) / l.length) : null;
             const grouper = fn => {
@@ -2522,7 +2526,7 @@
             const w = (derniereCalibration && derniereCalibration.items) ? derniereCalibration.items[rawKey] : null;
             const prix = ((globalRawData && globalRawData.parametres) || {}).prix_kg_eur || 4.5;
             return {
-                aliment: rawKey, plateaux: obs.length, restePctMoyen: moy(obs), mangePctMoyen: obs.length ? 100 - moy(obs) : null,
+                aliment: rawKey, plateaux: obs.length, scansAvecAliment: scansAvecAliment, restePctMoyen: moy(obs), mangePctMoyen: obs.length ? 100 - moy(obs) : null,
                 parEtat: grouper(o => o.etat).sort((a, b) => b.n - a.n),
                 parAvisEleve: grouper(o => o.avis).sort((a, b) => b.n - a.n),
                 jours: jours,
@@ -2532,12 +2536,12 @@
 
         function panneauFaitsAliment(f) {
             if (f.plateaux === 0) return `<div style="padding:10px; background:#fffbeb; border:1px solid #fcd34d; border-radius:6px; font-size:11.5px;">Aucun plateau scanné au format détaillé pour cet aliment : l'analyse chiffrée apparaîtra avec les prochains scans.</div>`;
-            const ligne = (nom, n, mange) => `<tr><td style="padding:2px 8px 2px 0;">${nom}</td><td style="text-align:right; padding:2px 8px;">${n}</td><td style="text-align:right; padding:2px 0 2px 8px;"><strong>${mange} %</strong>${n < 5 ? ' <span style="color:#b45309;" title="Moins de 5 plateaux : indicatif">⚠️</span>' : ''}</td></tr>`;
-            const tab = (titre, lignes) => `<div style="flex:1; min-width:210px;"><div style="font-weight:700; color:#1b4332; margin-bottom:3px;">${titre}</div><table style="width:100%; font-size:11px; border-collapse:collapse;"><thead><tr style="color:#64748b;"><th style="text-align:left; font-weight:600;"></th><th style="text-align:right; font-weight:600;">Plateaux</th><th style="text-align:right; font-weight:600;">Mangé</th></tr></thead><tbody>${lignes}</tbody></table></div>`;
+            const ligne = (nom, n, mange) => `<tr><td style="padding:2px 8px 2px 0;">${nom}</td><td style="text-align:right; padding:2px 8px;">${n}</td><td style="text-align:right; padding:2px 0 2px 8px;"><strong>${mange} %</strong>${n < 5 ? ' <span style="color:#b45309;" title="Moins de 5 portions : indicatif">⚠️</span>' : ''}</td></tr>`;
+            const tab = (titre, lignes) => `<div style="flex:1; min-width:210px;"><div style="font-weight:700; color:#1b4332; margin-bottom:3px;">${titre}</div><table style="width:100%; font-size:11px; border-collapse:collapse;"><thead><tr style="color:#64748b;"><th style="text-align:left; font-weight:600;"></th><th style="text-align:right; font-weight:600;">Portions</th><th style="text-align:right; font-weight:600;">Mangé</th></tr></thead><tbody>${lignes}</tbody></table></div>`;
             const poids = f.poids ? (f.poids.estime ? `≈ ${f.poids.evitableKg} kg évitables jetés (estimé sur portions de référence, pas de pesée) · ≈ ${f.poids.perteEuros} € · ≈ ${f.poids.co2Kg} kg CO₂e` : `${f.poids.evitableKg} kg évitables jetés · ${f.poids.inevitableKg} kg inévitables · ${f.poids.perteEuros} € · ${f.poids.co2Kg} kg CO₂e`) : "poids indisponible";
             const jours = f.jours.slice(0, 6).map(j => ligne(`${j.date} <span style="color:#64748b;">· ${String(j.menu).substring(0, 60)}</span>`, j.n, j.mangePct === undefined ? 100 - j.restePct : 100 - j.restePct)).join("");
             return `<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:11.5px;">
-                <div style="margin-bottom:6px;"><strong>${f.plateaux}</strong> plateaux observés · <strong>${f.mangePctMoyen} % mangé</strong> en moyenne${f.plateaux < 5 ? ' <span style="color:#b45309;">· ⚠️ moins de 5 plateaux, conclusions fragiles</span>' : ''}<br><span style="color:#475569;">⚖️ ${poids}</span></div>
+                <div style="margin-bottom:6px;"><strong>${f.plateaux}</strong> portions observées sur <strong>${f.scansAvecAliment}</strong> scans · <strong>${f.mangePctMoyen} % mangé</strong> en moyenne${f.plateaux < 5 ? ' <span style="color:#b45309;">· ⚠️ moins de 5 portions, conclusions fragiles</span>' : ''}<br><span style="color:#475569;">⚖️ ${poids}</span></div>
                 <div style="display:flex; gap:16px; flex-wrap:wrap;">${tab("Par état de préparation", f.parEtat.map(e => ligne(e.nom, e.n, e.mangePct)).join(""))}${tab("Par avis de l'élève", f.parAvisEleve.map(e => ligne(e.nom, e.n, e.mangePct)).join(""))}</div>
                 <div style="text-align:right; margin-top:8px;"><button type="button" class="btn" id="btn-ia-aliment" onclick="lancerAnalyseAliment()" style="background-color:#1e3a8a; padding:6px 12px; font-size:11px; width:auto;">🤖 Analyser cet aliment (IA)</button></div>
                 <div id="ia-aliment-result" style="display:${modalAiHtml ? "block" : "none"}; margin-top:8px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:8px 10px; font-size:11.5px; color:#1e3a8a;">${modalAiHtml}</div>
