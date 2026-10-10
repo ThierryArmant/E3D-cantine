@@ -74,6 +74,23 @@
         .gourmet-dish-card.bonne-voie { border-left: 5px solid #84cc16; }
         .gourmet-dish-card.acceptable { border-left: 5px solid #f97316; }
         .gourmet-dish-card.alerte { border-left: 5px solid #dc2626; }
+        /* Cartes de lecture rapide : densité accrue sans supprimer les données */
+        #period-adhesion-grid .gourmet-dish-card,
+        #period-bonnevoie-grid .gourmet-dish-card,
+        #period-acceptable-grid .gourmet-dish-card,
+        #period-rejets-grid .gourmet-dish-card { gap: 5px; min-height: 48px; }
+        #period-adhesion-grid .dish-thumb-photo,
+        #period-bonnevoie-grid .dish-thumb-photo,
+        #period-acceptable-grid .dish-thumb-photo,
+        #period-rejets-grid .dish-thumb-photo { width: 30px; height: 30px; margin: 2px 2px 2px 4px; }
+        #period-adhesion-grid .gourmet-dish-card > div,
+        #period-bonnevoie-grid .gourmet-dish-card > div,
+        #period-acceptable-grid .gourmet-dish-card > div,
+        #period-rejets-grid .gourmet-dish-card > div { padding-bottom: 1px !important; line-height: 1.12; }
+        #period-adhesion-grid .gourmet-dish-card .text-truncate,
+        #period-bonnevoie-grid .gourmet-dish-card .text-truncate,
+        #period-acceptable-grid .gourmet-dish-card .text-truncate,
+        #period-rejets-grid .gourmet-dish-card .text-truncate { margin-bottom: 0; }
         .dish-thumb-photo { width: 40px; height: 40px; border-radius: 4px; margin: 4px 4px 4px 6px; flex-shrink: 0; object-fit: cover; border: 1px solid #e2e8f0; background-color: #f1f5f9; color: transparent; }
         
         .text-truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; font-weight: 900; color: #0f172a; margin-bottom: 2px; width: 100%; display: block; }
