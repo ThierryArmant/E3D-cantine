@@ -51,3 +51,19 @@ Le dispositif de capture est le fruit d'une réalisation pratique et concrète m
 
 ## 🧮 Méthode de calcul (résumé)
 L'IA ne donne que des pourcentages de restes par aliment. Les poids viennent des balances sous les poubelles, répartis entre aliments selon ces restes et des portions de référence ; la bibliothèque d'inévitables sépare évitable et inévitable ; les facteurs carbone viennent d'Agribalyse 3.2 (ADEME/INRAE, août 2025), chacun relié à sa ligne source dans le code. Le détail, avec les valeurs réellement utilisées, est affiché dans le bouton « Transparence & Audit des calculs ».
+
+---
+
+## 🌱 Philosophie du projet et conditions de réutilisation
+
+**A.B.C. – Assiette Bas Carbone** est un projet pédagogique développé pour aider les établissements scolaires à mesurer, comprendre et réduire le gaspillage alimentaire.
+
+Ce projet est né d'un besoin concret rencontré en restauration scolaire et de la volonté de proposer une solution accessible aux établissements ne disposant pas des moyens financiers nécessaires à l'acquisition d'équipements commerciaux spécialisés.
+
+**A.B.C. a vocation à rester gratuit pour les établissements scolaires.**
+
+Son développement s'inscrit dans une démarche éducative, environnementale et non lucrative. L'objectif est de favoriser le partage des connaissances, l'amélioration des pratiques et la sensibilisation des élèves au gaspillage alimentaire.
+
+Le code et les éléments originaux du projet sont susceptibles d'être protégés par le droit d'auteur. Leur publication sur GitHub ne constitue pas une autorisation générale d'exploitation commerciale.
+
+Les conditions précises de réutilisation, de modification et de redistribution du code restent à définir dans une licence adaptée, après vérification de la titularité des droits.
