@@ -28,10 +28,19 @@
         .menu-item { padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; font-weight: 600; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
         
-        .dev-badge-card { margin: 12px; padding: 12px 10px; background: linear-gradient(145deg, #123524 0%, #1b4332 50%, #0d281c 100%); border: 1.5px solid rgba(212, 175, 55, 0.5); border-radius: 8px; text-align: center; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); flex-shrink: 0; }
-        .dev-badge-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #f9f295; margin-bottom: 3px; }
-        .dev-badge-name { font-size: 13px; font-weight: 900; color: #f7efb2; margin-bottom: 3px; }
-        .dev-badge-email { font-size: 9px; font-weight: 700; color: #d8f3dc; text-decoration: underline; opacity: 0.9; }
+        .dev-badge-card { margin: 12px 8px; padding: 13px 8px; background: radial-gradient(circle at 18% 5%, rgba(116,157,65,.28),transparent 48%),linear-gradient(145deg,#15482f 0%,#062c20 75%); border: 1.5px solid #c9a44f; border-radius: 11px; text-align: center; box-shadow: inset 0 1px 2px rgba(255,245,184,.25), 0 6px 16px rgba(0,0,0,.38); flex-shrink: 0; }
+        .dev-badge-title { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #f2d78a; margin-bottom: 6px; text-shadow: 0 1px 2px #000; }
+        .dev-badge-name { font-size: 19px; font-weight: 900; color: #e8bf68; margin-bottom: 5px; text-shadow: 0 1px 0 #fff0b4, 1px 2px 2px #052218, 2px 3px 3px #000; }
+        .dev-badge-subtitle { color:#f4e9ca; font-size:10px; line-height:1.4; margin-bottom:10px; }
+        .dev-badge-actions { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+        .dev-badge-action { color:#f7d98c; background:rgba(4,35,25,.65); border:1px solid #ba9950; border-radius:7px; padding:7px 8px; font-size:10px; font-weight:700; text-decoration:none; cursor:pointer; }
+        .dev-badge-action:hover,.dev-badge-action:focus-visible { background:#28563b; color:white; }
+        .project-spirit-overlay { display:none; position:fixed; inset:0; background:rgba(4,19,15,.8); z-index:10001; align-items:center; justify-content:center; padding:16px; }
+        .project-spirit-dialog { width:min(560px,100%); max-height:85vh; overflow-y:auto; position:relative; background:linear-gradient(155deg,#184a34,#06271e); border:2px solid #cba85e; border-radius:15px; color:#f3e9d4; box-shadow:0 20px 60px #0009; padding:24px; line-height:1.6; }
+        .project-spirit-dialog h2 { color:#f1cc7a; margin:0 30px 12px 0; font-size:22px; text-shadow:1px 2px 2px #000; }
+        .project-spirit-dialog h3 { color:#f1cc7a; font-size:15px; margin:15px 0 5px; }
+        .project-spirit-dialog p { font-size:13px; margin:0 0 10px; }
+        .project-spirit-close { position:absolute; top:12px; right:14px; color:#f7dda1; background:transparent; border:0; font-size:26px; cursor:pointer; }
         
         .main-container { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
         
@@ -195,9 +204,13 @@
         </ul>
 
         <div class="dev-badge-card">
-            <div class="dev-badge-title">Architecture & Conception</div>
+            <div class="dev-badge-title">Architecture &amp; conception</div>
             <div class="dev-badge-name">Thierry Armant</div>
-            <div class="dev-badge-email">thierry.armant@ac-aix-marseille.fr</div>
+            <div class="dev-badge-subtitle">Projet pédagogique A.B.C. – Assiette Bas Carbone</div>
+            <div class="dev-badge-actions">
+                <a class="dev-badge-action" href="mailto:thierry.armant@ac-aix-marseille.fr">✉ Me contacter</a>
+                <button class="dev-badge-action" type="button" onclick="document.getElementById('modal-project-spirit').style.display='flex'">🌿 L'esprit du projet</button>
+            </div>
         </div>
     </div>
 
@@ -3730,6 +3743,22 @@
             });
         }
     </script>
+
+    <!-- Présentation pédagogique d'A.B.C., indépendante du parcours de scan -->
+    <div id="modal-project-spirit" class="project-spirit-overlay" role="presentation" onclick="if(event.target===this)this.style.display='none'">
+        <div class="project-spirit-dialog" role="dialog" aria-modal="true" aria-labelledby="project-spirit-title">
+            <button type="button" class="project-spirit-close" aria-label="Fermer" onclick="document.getElementById('modal-project-spirit').style.display='none'">&times;</button>
+            <h2 id="project-spirit-title">🌿 L'esprit du projet A.B.C.</h2>
+            <h3>Pourquoi A.B.C. ?</h3>
+            <p>A.B.C. – Assiette Bas Carbone est un projet pédagogique né d'un besoin concret en restauration scolaire : mieux mesurer, comprendre et réduire le gaspillage alimentaire.</p>
+            <p>Face au coût des solutions commerciales spécialisées, l'objectif a été de développer un outil accessible aux établissements scolaires avec des moyens simples.</p>
+            <h3>Une démarche éducative</h3>
+            <p>Conçu et développé à l'initiative de Thierry Armant, A.B.C. vise à sensibiliser les élèves et à accompagner les équipes dans l'amélioration des pratiques, en s'appuyant sur l'observation et l'analyse des données.</p>
+            <h3>Un engagement de gratuité</h3>
+            <p><strong>A.B.C. a vocation à rester gratuit pour les établissements scolaires.</strong> Le projet s'inscrit dans une démarche environnementale, éducative et non lucrative.</p>
+            <p style="font-size:11px;opacity:.8;">La publication du code sur GitHub ne constitue pas une autorisation générale d'exploitation commerciale. Les conditions précises de réutilisation restent à définir.</p>
+        </div>
+    </div>
 
     <!-- 🛡️ MODALE DE TRANSPARENCE & AUDIT DES CALCULS (VERSION EXPERTE DÉPARTEMENT) -->
     <div id="modal-methodology" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.75); z-index:9999; justify-content:center; align-items:center;">
