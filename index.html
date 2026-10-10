@@ -22,6 +22,8 @@
         }
         .sidebar-brand { padding: 0 15px 5px 15px; font-size: 20px; font-weight: 800; color: #52b788; display: flex; align-items: center; gap: 8px; }
         .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
+        .sidebar-abc-banner { margin: 0 8px 8px; border: 1px solid rgba(212,175,55,.65); border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #103b2a; box-shadow: 0 3px 12px rgba(0,0,0,.28); }
+        .sidebar-abc-banner img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: center top; }
         .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; overflow-y: auto; }
         .menu-item { padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; font-weight: 600; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
@@ -178,8 +180,7 @@
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-brand">🌱 Projet A.B.C.</div>
-        <div class="sidebar-subtitle">Assiette Bas Carbone</div>
+        <div class="sidebar-abc-banner"><img src="wide_cinematic_header_banner_graphic_in_a_polishe.png" alt="A.B.C. – Assiette Bas Carbone, planète verte et lettres dorées"></div>
 
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
