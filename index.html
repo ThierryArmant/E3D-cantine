@@ -1886,7 +1886,7 @@
         // 🌟 LECTURE DIRECTE DE TES COLONNES REELLES DU TABLEUR
         // Mini-historique d'un aliment : une barre par jour de service (10 derniers), couleur = palier
         function miniHistorique(serie) {
-            if (!serie || serie.length < 2) return `<div style="font-size:8.5px; color:#94a3b8; margin-top:3px;">${serie && serie.length ? "1 seul jour observé" : ""}</div>`;
+            if (!serie || serie.length < 2) return "";
             const l = serie.slice(-10);
             const barres = l.map(x => `<div title="${x.d.substring(8, 10)}/${x.d.substring(5, 7)} : ${x.mange} % mangé (${x.n} plateau${x.n > 1 ? "x" : ""})" style="flex:1; max-width:9px; height:${Math.max(2, Math.round(x.mange * 0.18))}px; background:${couleurPalier(x.mange)}; opacity:${x.n < 3 ? 0.45 : 1}; border-radius:1px 1px 0 0;"></div>`).join("");
             return `<div style="display:flex; align-items:flex-end; gap:2px; height:18px; margin-top:3px;" title="Évolution du % mangé, jour par jour">${barres}<span style="font-size:8.5px; color:#64748b; margin-left:4px; white-space:nowrap;">${serie.length} j</span></div>`;
