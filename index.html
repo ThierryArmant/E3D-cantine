@@ -24,6 +24,11 @@
         .sidebar-subtitle { padding: 0 15px 15px 15px; font-size: 10px; color: #b7e4c7; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #2d6a4f; }
         .sidebar-abc-banner { margin: 0 8px 8px; border: 1px solid rgba(212,175,55,.65); border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #103b2a; box-shadow: 0 3px 12px rgba(0,0,0,.28); }
         .sidebar-abc-banner img { display: block; width: 100%; height: auto; }
+        .sidebar-abc-banner { position: relative; }
+        .sidebar-abc-link { position: absolute; top: 73%; height: 19%; display: block; border-radius: 6px; }
+        .sidebar-abc-link:focus-visible { outline: 2px solid #fff; outline-offset: -2px; background: rgba(255,255,255,.12); }
+        .sidebar-abc-contact { left: 19%; width: 31%; }
+        .sidebar-abc-spirit { left: 51%; width: 33%; }
         .sidebar-menu { list-style: none; margin-top: 10px; flex-grow: 1; overflow-y: auto; }
         .menu-item { padding: 11px 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s; font-size: 13px; font-weight: 600; }
         .menu-item:hover, .menu-item.active { background-color: #2d6a4f; color: #fff; }
@@ -189,7 +194,11 @@
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-abc-banner"><img src="Banni%C3%A8re%20%C3%A9cologique%20A.B.C.%20au%20globe%20lumineux.png" alt="A.B.C. – Assiette Bas Carbone, planète verte et lettres dorées"></div>
+        <div class="sidebar-abc-banner">
+            <img src="A.B.C.%20_%20Assiette%20Bas%20Carbone.png" alt="A.B.C. – Assiette Bas Carbone, by Thierry Armant, avec planète et feuilles">
+            <a class="sidebar-abc-link sidebar-abc-contact" href="mailto:thierry.armant@ac-aix-marseille.fr" aria-label="Me contacter" title="Me contacter"></a>
+            <button class="sidebar-abc-link sidebar-abc-spirit" type="button" aria-label="L'esprit du projet" title="L'esprit du projet" onclick="document.getElementById('modal-project-spirit').style.display='flex'" style="border:0;background:transparent;cursor:pointer;padding:0;"></button>
+        </div>
 
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
@@ -203,15 +212,7 @@
             <li class="menu-item" id="menu-audit" onclick="openMethodologyModal()">🛡️ Audit des calculs</li>
         </ul>
 
-        <div class="dev-badge-card">
-            <div class="dev-badge-title">Architecture &amp; conception</div>
-            <div class="dev-badge-name">Thierry Armant</div>
-            <div class="dev-badge-subtitle">Projet pédagogique A.B.C. – Assiette Bas Carbone</div>
-            <div class="dev-badge-actions">
-                <a class="dev-badge-action" href="mailto:thierry.armant@ac-aix-marseille.fr">✉ Me contacter</a>
-                <button class="dev-badge-action" type="button" onclick="document.getElementById('modal-project-spirit').style.display='flex'">🌿 L'esprit du projet</button>
-            </div>
-        </div>
+
     </div>
 
     <div class="main-container">
