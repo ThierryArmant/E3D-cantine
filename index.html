@@ -191,9 +191,22 @@
             .report-paper { border: none; box-shadow: none; padding: 0; max-width: 100%; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
-    </style>
+    
+        .info-tip { display:inline-block; width:15px; height:15px; line-height:15px; text-align:center; border-radius:50%; background:#e2e8f0; color:#334155; font-size:10px; font-weight:800; cursor:help; margin-left:3px; vertical-align:middle; }
+        #tip-flottant { position:fixed; z-index:100000; max-width:340px; background:#0f172a; color:#f1f5f9; padding:9px 12px; border-radius:8px; font-size:12px; line-height:1.45; box-shadow:0 8px 24px rgba(0,0,0,.35); pointer-events:none; display:none; white-space:pre-line; }
+        #precision-table th, #precision-bins th { text-align:right; padding:6px 8px; background:#f1f5f9; color:#334155; font-size:11px; border-bottom:2px solid #cbd5e1; }
+        #precision-table th:first-child, #precision-bins th:first-child { text-align:left; }
+        #precision-table td, #precision-bins td { text-align:right; padding:6px 8px; border-bottom:1px solid #e2e8f0; }
+        #precision-table td:first-child, #precision-bins td:first-child { text-align:left; font-weight:700; }
+        #precision-table tr.jour-ligne { cursor:pointer; }
+        #precision-table tr.jour-ligne:hover { background:#f0fdf4; }
+        .prec-kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; }
+        .prec-kpi .v { font-size:20px; font-weight:900; color:#1b4332; }
+        .prec-kpi .l { font-size:11px; color:#64748b; }
+</style>
 </head>
 <body>
+<div id="tip-flottant"></div>
 
     <div class="sidebar">
         <div class="sidebar-abc-banner">
@@ -211,6 +224,7 @@
 
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Éco-Délégués (Menu)</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
+            <li class="menu-item" id="menu-view-precision" onclick="switchView('view-precision')" style="font-size:12px; opacity:.7;">🔬 Précision scan / balance</li>
             <li class="menu-item" id="menu-audit" onclick="openMethodologyModal()">🛡️ Audit des calculs</li>
         </ul>
 
@@ -692,6 +706,38 @@
                                 <p style="color:#64748b; font-size:12px; grid-column:1/-1; text-align:center; padding:15px;">Chargement de l'historique...</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PÔLE 6 : PRÉCISION SCAN / BALANCE (page discrète) -->
+            <div id="view-precision" class="view-section">
+                <div style="background:#fff; border-radius:12px; padding:22px 26px; box-shadow:0 2px 10px rgba(0,0,0,.06); max-width:1100px;">
+                    <h2 style="color:#1b4332; font-size:18px; font-weight:900; margin:0;">🔬 Précision du scan par rapport à la balance</h2>
+                    <p style="font-size:12.5px; color:#475569; margin:6px 0 14px;">Pour chaque jour où l'on a <strong>à la fois des scans et des pesées</strong>, on compare le gaspillage que l'IA estime à partir des photos au poids réellement pesé. Passe la souris (ou touche) les <span class="info-tip" data-tip="Les petites bulles ⓘ expliquent chaque donnée.">ⓘ</span> et les lignes pour voir le détail et le menu du jour.</p>
+                    <div id="precision-alerte"></div>
+                    <div id="precision-kpis" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; margin-bottom:16px;"></div>
+                    <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start;">
+                        <div style="flex:1 1 420px; min-width:300px;">
+                            <h3 style="font-size:13px; color:#1b4332; margin:0 0 6px;">Jour par jour <span class="info-tip" data-tip="Estimé IA = reste moyen des plateaux scannés (portion de référence × % de reste vu par l'IA) multiplié par le nombre de convives attendus. Pesé = somme des trois poubelles (alimentaire, fruits, pain). Les emballages et serviettes ne sont pas comptés.">ⓘ</span></h3>
+                            <div style="overflow-x:auto;"><table id="precision-table" style="width:100%; border-collapse:collapse; font-size:12px;"></table></div>
+                        </div>
+                        <div style="flex:1 1 320px; min-width:280px;">
+                            <h3 style="font-size:13px; color:#1b4332; margin:0 0 6px;">Estimé par l'IA contre pesé <span class="info-tip" data-tip="Chaque point est un jour. Plus les points sont proches de la ligne en pointillés, plus l'IA est juste. Au-dessus : l'IA surestime. En dessous : elle sous-estime.">ⓘ</span></h3>
+                            <div style="position:relative; height:280px;"><canvas id="chart-precision"></canvas></div>
+                        </div>
+                    </div>
+                    <h3 style="font-size:13px; color:#1b4332; margin:18px 0 6px;">Par famille de poubelle <span class="info-tip" data-tip="Les pesées distinguent trois familles. Alimentaire = entrées, plats, accompagnements, desserts non fruits. Fruits. Pain.">ⓘ</span></h3>
+                    <div style="overflow-x:auto;"><table id="precision-bins" style="width:100%; max-width:640px; border-collapse:collapse; font-size:12px;"></table></div>
+                    <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                        <button type="button" class="btn-period" onclick="exporterPrecisionCSV()" style="font-size:12px; padding:6px 12px;">⬇ Exporter en CSV (Excel)</button>
+                    </div>
+                    <div style="margin-top:16px; background:#f8fafc; border-left:4px solid #94a3b8; padding:10px 14px; font-size:12px; color:#475569; border-radius:0 8px 8px 0; line-height:1.55;">
+                        <strong>Comment lire ces chiffres, en toute honnêteté</strong><br>
+                        • L'estimé n'est <strong>pas réglé</strong> sur la balance : il utilise seulement les portions de référence de l'établissement et le % de reste vu par l'IA. L'écart est donc une vraie mesure d'erreur, pas un ajustement.<br>
+                        • Quelques jours ne suffisent pas à conclure : voir l'alerte en haut sur le nombre de jours.<br>
+                        • Les poubelles ne séparent que 3 familles. Les sauces, soupes et aliments cachés sous d'autres sont plus difficiles à estimer pour l'IA.<br>
+                        • Le nombre de convives attendus pèse directement sur l'estimé : un jour sans effectif saisi utilise la valeur par défaut et est signalé ⚠️.
                     </div>
                 </div>
             </div>
@@ -1213,7 +1259,7 @@
                 const E = effectifs[d] || effDefaut;
                 const bins = binsParJour[d] || { alim: 0, fruits: 0, pain: 0 };
                 const jour = { date: d, attendus: E, bins: bins, scansDetail: 0, items: {}, utilisable: false,
-                               evitableKg: 0, inevitableKg: 0, carboneKg: 0, nonAlloue: { alim: 0, fruits: 0, pain: 0 }, predictedKg: 0 };
+                               evitableKg: 0, inevitableKg: 0, carboneKg: 0, nonAlloue: { alim: 0, fruits: 0, pain: 0 }, predictedKg: 0, predictedBins: { alim: 0, fruits: 0, pain: 0 } };
                 const brut = {};
                 (scansParJour[d] || []).forEach(s => {
                     const items = parseScanItems(s.commentaire);
@@ -1270,6 +1316,7 @@
                         jour.items[o.nom] = { totalKg: totalKg, evitKg: evitKg, inevKg: inevKg, carboneKg: carbKg, etats: etats };
                         jour.evitableKg += evitKg; jour.inevitableKg += inevKg; jour.carboneKg += carbKg;
                         jour.predictedKg += o.resteG / n * E / 1000;
+                        jour.predictedBins[o.bin] += o.resteG / n * E / 1000;
                         const g = res.items[o.nom] = res.items[o.nom] || { totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0, etats: {}, estEvitKg: 0, estCarbKg: 0, pese: false };
                         g.estEvitKg += o.estEvitKg; g.estCarbKg += o.estCarbKg; if (bins[o.bin] > 0) g.pese = true;
                         g.totalKg += totalKg; g.evitKg += evitKg; g.inevKg += inevKg; g.carboneKg += carbKg;
@@ -3004,6 +3051,139 @@
                 
             }, 400); // 400ms d'attente pour simuler la prise de photo
         }
+
+        // ===== PAGE DISCRÈTE : PRÉCISION SCAN / BALANCE =====
+        const BIN_NOMS = { alim: "Alimentaire", fruits: "Fruits", pain: "Pain" };
+        let chartPrecision = null, precisionLignes = [];
+        function f1(x) { return (x === null || x === undefined || !isFinite(x)) ? "–" : x.toFixed(1).replace(".", ","); }
+        function f2(x) { return (x === null || x === undefined || !isFinite(x)) ? "–" : x.toFixed(2).replace(".", ","); }
+        function pct1(x) { return (x === null || !isFinite(x)) ? "–" : (x > 0 ? "+" : "") + x.toFixed(0) + " %"; }
+        function ecartTexte(est, mes) { return mes > 0 ? pct1(100 * (est - mes) / mes) : "–"; }
+
+        function calculerPrecision() {
+            const cal = calculerCalibrage("2000-01-01", "2099-12-31");
+            const effectifs = (globalRawData && globalRawData.historiqueEffectifs) || {};
+            const menus = (globalRawData && globalRawData.historiqueMenus) || {};
+            const lignes = Object.keys(cal.jours).sort().map(d => cal.jours[d]).filter(j => j.utilisable && j.scansDetail > 0).map(j => {
+                const mes = j.bins.alim + j.bins.fruits + j.bins.pain;
+                const est = j.predictedKg;
+                return { date: j.date, attendus: j.attendus, effectifSaisi: !!effectifs[j.date], scans: j.scansDetail, couv: 100 * j.scansDetail / j.attendus,
+                         est: est, mes: mes, ecart: est - mes, ecartPct: mes > 0 ? 100 * (est - mes) / mes : null,
+                         bins: j.bins, estBins: j.predictedBins, menu: menus[j.date] || "", items: j.items };
+            });
+            const n = lignes.length;
+            const sEst = lignes.reduce((a, l) => a + l.est, 0), sMes = lignes.reduce((a, l) => a + l.mes, 0);
+            const mape = n ? lignes.reduce((a, l) => a + Math.abs(l.ecartPct || 0), 0) / n : null;
+            const mae = n ? lignes.reduce((a, l) => a + Math.abs(l.ecart), 0) / n : null;
+            let r = null;
+            if (n >= 3) {
+                const mx = sEst / n, my = sMes / n;
+                let sxy = 0, sxx = 0, syy = 0;
+                lignes.forEach(l => { sxy += (l.est - mx) * (l.mes - my); sxx += (l.est - mx) ** 2; syy += (l.mes - my) ** 2; });
+                r = (sxx > 0 && syy > 0) ? sxy / Math.sqrt(sxx * syy) : null;
+            }
+            const parBin = {};
+            ["alim", "fruits", "pain"].forEach(b => {
+                const e = lignes.reduce((a, l) => a + l.estBins[b], 0), m = lignes.reduce((a, l) => a + l.bins[b], 0);
+                parBin[b] = { est: e, mes: m };
+            });
+            return { n: n, lignes: lignes, plateaux: lignes.reduce((a, l) => a + l.scans, 0), sEst: sEst, sMes: sMes,
+                     biaisPct: sMes > 0 ? 100 * (sEst - sMes) / sMes : null, mape: mape, mae: mae, r: r, parBin: parBin };
+        }
+
+        function renderPrecision() {
+            const P = calculerPrecision();
+            precisionLignes = P.lignes;
+            const alerte = document.getElementById("precision-alerte");
+            if (P.n === 0) {
+                alerte.innerHTML = '<div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12.5px; margin-bottom:12px;">Aucun jour ne contient à la fois des scans détaillés et une pesée pour cet établissement. Dès qu\'un jour aura les deux, il apparaîtra ici.</div>';
+                ["precision-kpis", "precision-table", "precision-bins"].forEach(id => { document.getElementById(id).innerHTML = ""; });
+                if (chartPrecision) { chartPrecision.destroy(); chartPrecision = null; }
+                return;
+            }
+            const seuil = 15;
+            alerte.innerHTML = P.n < seuil
+                ? `<div style="background:#fef3c7; border-left:4px solid #f59e0b; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12.5px; margin-bottom:12px;">⚠️ <strong>${P.n} jour(s) seulement.</strong> Ces chiffres sont indicatifs : il faut environ ${seuil} à 20 jours, avec des menus variés, avant de parler de précision.</div>`
+                : `<div style="background:#dcfce7; border-left:4px solid #22c55e; padding:10px 14px; border-radius:0 8px 8px 0; font-size:12.5px; margin-bottom:12px;">✅ ${P.n} jours comparables : l'échantillon commence à être exploitable.</div>`;
+            const kpi = (v, l, tip) => `<div class="prec-kpi"><div class="v">${v}</div><div class="l">${l}<span class="info-tip" data-tip="${tip.replace(/"/g, "&quot;")}">ⓘ</span></div></div>`;
+            document.getElementById("precision-kpis").innerHTML =
+                kpi(P.n, "jours comparables", "Jours où on dispose à la fois de scans détaillés et d'une pesée des poubelles.") +
+                kpi(P.plateaux, "plateaux scannés", "Nombre de plateaux scannés avec détail par aliment sur ces jours.") +
+                kpi(pct1(P.biaisPct), "biais global", "(Total estimé par l'IA − total pesé) ÷ total pesé. Positif : l'IA surestime en moyenne. Négatif : elle sous-estime.") +
+                kpi(f1(P.mape).replace("–", "–") + (P.mape === null ? "" : " %"), "erreur moyenne par jour", "Moyenne, jour par jour, de l'écart en valeur absolue ÷ poids pesé. C'est l'erreur typique à attendre sur une journée.") +
+                kpi(f2(P.mae) + " kg", "écart moyen par jour", "Moyenne de la différence absolue entre estimé et pesé, en kg, par jour.") +
+                kpi(P.r === null ? "–" : f2(P.r), "corrélation", "De −1 à 1. Proche de 1 : l'IA classe bien les jours entre eux (jours chargés, jours légers) même si le niveau absolu est décalé. Nécessite au moins 3 jours.");
+            let t = '<tr><th>Jour</th><th>Scans</th><th>Estimé IA</th><th>Pesé</th><th>Écart</th><th>%</th></tr>';
+            P.lignes.forEach((l, i) => {
+                const couleur = l.ecartPct === null ? "#64748b" : (Math.abs(l.ecartPct) <= 15 ? "#15803d" : (Math.abs(l.ecartPct) <= 30 ? "#b45309" : "#b91c1c"));
+                t += `<tr class="jour-ligne" data-i="${i}" onclick="precisionDetail(${i})" data-tip="${precisionTipJour(l).replace(/"/g, "&quot;")}"><td>${dateFR(l.date)}${l.effectifSaisi ? "" : ' <span title="Effectif non saisi : valeur par défaut">⚠️</span>'}</td><td>${l.scans}/${l.attendus}</td><td>${f1(l.est)} kg</td><td>${f1(l.mes)} kg</td><td>${(l.ecart > 0 ? "+" : "") + f1(l.ecart)} kg</td><td style="font-weight:800; color:${couleur};">${pct1(l.ecartPct)}</td></tr><tr id="precision-detail-${i}" style="display:none;"><td colspan="6" style="background:#f8fafc; text-align:left !important; font-weight:400 !important;">${precisionDetailHtml(l)}</td></tr>`;
+            });
+            document.getElementById("precision-table").innerHTML = t;
+            let tb = '<tr><th>Famille</th><th>Estimé IA</th><th>Pesé</th><th>Écart</th><th>%</th></tr>';
+            ["alim", "fruits", "pain"].forEach(b => {
+                const e = P.parBin[b].est, m = P.parBin[b].mes;
+                tb += `<tr><td>${BIN_NOMS[b]}</td><td>${f1(e)} kg</td><td>${f1(m)} kg</td><td>${(e - m > 0 ? "+" : "") + f1(e - m)} kg</td><td style="font-weight:800;">${ecartTexte(e, m)}</td></tr>`;
+            });
+            document.getElementById("precision-bins").innerHTML = tb;
+            if (typeof Chart !== "undefined") {
+                if (chartPrecision) chartPrecision.destroy();
+                const mx = Math.max.apply(null, P.lignes.map(l => Math.max(l.est, l.mes)).concat([1])) * 1.1;
+                chartPrecision = new Chart(document.getElementById("chart-precision"), {
+                    type: "scatter",
+                    data: { datasets: [
+                        { label: "Jours", data: P.lignes.map(l => ({ x: +l.mes.toFixed(2), y: +l.est.toFixed(2) })), backgroundColor: "#2d6a4f", pointRadius: 6 },
+                        { label: "Estimation parfaite", data: [{ x: 0, y: 0 }, { x: mx, y: mx }], type: "line", borderColor: "#94a3b8", borderDash: [6, 4], pointRadius: 0, borderWidth: 1.5 }
+                    ] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: "bottom" }, datalabels: { display: false } },
+                        scales: { x: { title: { display: true, text: "Pesé (kg)" }, min: 0, max: mx }, y: { title: { display: true, text: "Estimé par l'IA (kg)" }, min: 0, max: mx } } }
+                });
+            }
+        }
+
+        function precisionTipJour(l) {
+            return "Menu du " + dateFR(l.date) + " :\n" + (l.menu ? l.menu.replace(/\s*\|\s*/g, "\n• ").replace(/^/, "• ") : "(menu non enregistré)") +
+                   "\n\nEstimé = reste moyen des " + l.scans + " plateaux scannés × " + l.attendus + " convives attendus." +
+                   "\nClique la ligne pour le détail par famille et par aliment.";
+        }
+        function precisionDetailHtml(l) {
+            let h = '<div style="padding:6px 4px; font-size:12px;"><strong>Par famille</strong><table style="width:100%; border-collapse:collapse; margin:4px 0 8px;">';
+            ["alim", "fruits", "pain"].forEach(b => {
+                h += `<tr><td style="padding:3px 6px;">${BIN_NOMS[b]}</td><td style="text-align:right; padding:3px 6px;">estimé ${f2(l.estBins[b])} kg</td><td style="text-align:right; padding:3px 6px;">pesé ${f2(l.bins[b])} kg</td><td style="text-align:right; padding:3px 6px; font-weight:700;">${ecartTexte(l.estBins[b], l.bins[b])}</td></tr>`;
+            });
+            h += "</table><strong>Poids pesé réparti par aliment</strong> <span class=\"info-tip\" data-tip=\"Le poids de chaque poubelle est réparti entre les aliments en proportion de ce que l'IA a vu comme restes sur les photos.\">ⓘ</span><br>";
+            h += Object.keys(l.items).sort((a, b) => l.items[b].totalKg - l.items[a].totalKg).map(k => `${k} : ${f2(l.items[k].totalKg)} kg`).join(" · ");
+            if (!l.effectifSaisi) h += `<br><span style="color:#b45309;">⚠️ Effectif non saisi ce jour-là : ${l.attendus} convives par défaut. Cela fausse directement l'estimé.</span>`;
+            return h + "</div>";
+        }
+        function precisionDetail(i) {
+            const r = document.getElementById("precision-detail-" + i);
+            if (r) r.style.display = r.style.display === "none" ? "table-row" : "none";
+        }
+        function exporterPrecisionCSV() {
+            const lignes = [["Date", "Convives attendus", "Effectif saisi", "Plateaux scannés", "Estimé IA (kg)", "Pesé (kg)", "Écart (kg)", "Écart (%)", "Estimé alimentaire", "Pesé alimentaire", "Estimé fruits", "Pesé fruits", "Estimé pain", "Pesé pain", "Menu"]];
+            precisionLignes.forEach(l => lignes.push([l.date, l.attendus, l.effectifSaisi ? "oui" : "non", l.scans, l.est.toFixed(2), l.mes.toFixed(2), l.ecart.toFixed(2), l.ecartPct === null ? "" : l.ecartPct.toFixed(1),
+                l.estBins.alim.toFixed(2), l.bins.alim, l.estBins.fruits.toFixed(2), l.bins.fruits, l.estBins.pain.toFixed(2), l.bins.pain, l.menu]));
+            const csv = "\ufeff" + lignes.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(";")).join("\n");
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+            a.download = "precision_scan_balance.csv"; document.body.appendChild(a); a.click(); a.remove();
+        }
+        // Bulles flottantes : toute zone portant data-tip affiche son explication au survol ou au toucher
+        (function () {
+            const tip = document.getElementById("tip-flottant");
+            function montrer(el, e) {
+                tip.textContent = el.getAttribute("data-tip"); tip.style.display = "block";
+                const w = tip.offsetWidth, hh = tip.offsetHeight;
+                let x = e.clientX + 14, y = e.clientY + 14;
+                if (x + w > window.innerWidth - 8) x = Math.max(8, e.clientX - w - 14);
+                if (y + hh > window.innerHeight - 8) y = Math.max(8, e.clientY - hh - 14);
+                tip.style.left = x + "px"; tip.style.top = y + "px";
+            }
+            document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) montrer(el, e); else tip.style.display = "none"; });
+            document.addEventListener("mousemove", e => { if (tip.style.display === "block") { const el = e.target.closest && e.target.closest("[data-tip]"); if (el) montrer(el, e); } });
+            document.addEventListener("click", e => { const el = e.target.closest && e.target.closest(".info-tip[data-tip]"); if (el) montrer(el, e); else tip.style.display = "none"; });
+        })();
+
         function switchView(viewId) {
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); 
             let m = document.getElementById('menu-' + viewId);
@@ -3028,6 +3208,7 @@
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport' || viewId === 'view-borne') {
                 loadLiveData(); 
             }
+            if (viewId === 'view-precision') { try { renderPrecision(); } catch (e) { console.error(e); } }
             if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
 
