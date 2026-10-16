@@ -528,7 +528,12 @@ La photo est prise de dessus, à la fin du repas, juste avant que l'élève vide
 MENU DU JOUR (options possibles ; sépare les aliments par "+", les rubriques par "|" : entrée | plat | accompagnement | dessert) : "${menuJour}".
 
 RÈGLES
-- Inventorie CHAQUE aliment visible. Utilise en priorité les noms du menu. Si tu vois un aliment qui n'est pas au menu, nomme-le prudemment et mets une confiance "faible". N'invente rien : si tu ne reconnais pas, dis-le.
+- Inventorie CHAQUE aliment visible séparément, même s'il n'est pas au menu. Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu'un plat a été servi.
+- Identifie pour CHAQUE aliment sa forme, sa préparation visible, son état après consommation et les pourcentages restant/mangé. Conserve les distinctions de préparation (ex. carottes râpées ou cuites) et les aliments distincts sur un même plateau.
+- La couleur, la présence ou le nom d'une sauce ne permettent JAMAIS à eux seuls d'identifier poulet, poisson ou une recette. Ne déduis pas « poisson au curry » d'une sauce jaune ni « poisson » de sa présence au menu.
+- Si l'aliment principal est masqué ou impossible à distinguer, emploie une désignation visuelle générique (ex. « aliment en sauce non identifiable ») et une confiance « faible » ; n'invente pas une espèce ou une recette.
+- Ne décris pas deux fois la même portion physique sous des noms différents. Plusieurs portions réellement distinctes doivent rester distinctes.
+- Si tu vois un aliment hors menu, décris-le prudemment selon ce qui est visible et indique une confiance adaptée aux indices visuels.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
