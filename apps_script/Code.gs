@@ -478,14 +478,15 @@ function actualiserComparaisonPesees(sheets) {
   const sacs = sheets.sacs.getDataRange().getValues();
   for (let i=1; i<sacs.length; i++) {
     const d=jour(sacs[i][0]); if (!d) continue;
-    if (!jours[d]) jours[d]={reel:[0,0,0,0,0], virtuel:0, scans:0};
+    if (!jours[d]) jours[d]={reel:[0,0,0,0,0], virtuel:0, scans:0,aPesee:false};
+    jours[d].aPesee=true;
     for (let j=0;j<5;j++) jours[d].reel[j]+=Number(sacs[i][j+1])||0;
   }
   const scans = sheets.gaspillage.getDataRange().getValues();
   const vus = {};
   for (let i=1;i<scans.length;i++) {
     if (scans[i][1]!=="SCAN_IA_VISION") continue;
-    const d=jour(scans[i][0]); if (!jours[d]) continue;
+    const d=jour(scans[i][0]); if (!jours[d]) jours[d]={reel:[0,0,0,0,0],virtuel:0,scans:0,aPesee:false};
     const id=String(scans[i][11]||"");
     if (id && vus[d+"|"+id]) continue;
     if (id) vus[d+"|"+id]=true;
@@ -497,15 +498,15 @@ function actualiserComparaisonPesees(sheets) {
     const o=jours[d];
     for (let j=0;j<5;j++) {
       // Le poids IA total comprend plusieurs catégories : il ne correspond à aucun sac isolé.
-      lignes.push([d,categories[j],o.reel[j], "", "", "",o.scans,
+      lignes.push([d,categories[j],o.aPesee ? o.reel[j] : "", "", "", "",o.scans,
         j===0 ? "Non comparable directement : IA total multi-catégories ; séparer les aliments et vérifier la couverture des plateaux." :
         "Non estimable de façon fiable avec les données actuelles ; ne pas assimiler une absence d'estimation à zéro."]);
     }
     const totalReel=o.reel.reduce(function(a,b){return a+b;},0);
-    lignes.push([d,"TOTAL exploratoire (périmètres différents)",totalReel,
+    lignes.push([d,"TOTAL exploratoire (périmètres différents)",o.aPesee ? totalReel : "",
       Math.round(o.virtuel*1000)/1000,
-      Math.round((o.virtuel-totalReel)*1000)/1000,
-      totalReel>0 ? Math.round(Math.abs(o.virtuel-totalReel)/totalReel*10000)/100 : "",
+      o.aPesee ? Math.round((o.virtuel-totalReel)*1000)/1000 : "",
+      o.aPesee && totalReel>0 ? Math.round(Math.abs(o.virtuel-totalReel)/totalReel*10000)/100 : "",
       o.scans,"INDICATEUR NON VALIDÉ : sacs et scans ne couvrent pas nécessairement les mêmes déchets ; ne pas interpréter comme taux d'erreur IA."]);
   });
   feuille.clearContents();
