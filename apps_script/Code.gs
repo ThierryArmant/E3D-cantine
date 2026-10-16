@@ -450,7 +450,8 @@ function handleLogBagWeights(data) {
   if (data.date_pesee) {
     let parts = data.date_pesee.split("-");
     if (parts.length === 3) {
-      datePesee = new Date(parts[0], parts[1] - 1, parts[2]);
+      // Midi dans le fuseau du script : évite le passage au jour précédent à l’affichage.
+      datePesee = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
     }
   }
 
