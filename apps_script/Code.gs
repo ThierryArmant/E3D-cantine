@@ -284,6 +284,8 @@ function doPost(e) {
       return reponseJson({ answer: handleAnalyzeDailyMenu(data) });
     } else if (action === "analyzeMenuWithStats") {
       return reponseJson({ answer: handleAnalyzeMenuWithStats(data) });
+    } else if (action === "actualiserComparaisonPesees") {
+      responseOutput = actualiserComparaisonPesees(getSheetsABC(data.etablissement || data.ecole));
     } else if (action === "logScanImage") {
       responseOutput = handleLogScanImage(data);
     } else if (action === "archiverMenu") {
@@ -460,8 +462,58 @@ function handleLogBagWeights(data) {
     parseFloat(data.sac_emballages) || 0, 
     parseFloat(data.sac_serviettes) || 0
   ]);
-  
+  actualiserComparaisonPesees(sheets);
   return { success: true };
+}
+
+// Comparaison expérimentale des estimations visuelles et des pesées de sacs.
+// Les catégories non comparables ne reçoivent jamais un faux poids virtuel.
+function actualiserComparaisonPesees(sheets) {
+  const ss = sheets.sacs.getParent();
+  let feuille = ss.getSheetByName("Comparaison_Pesees_IA");
+  if (!feuille) feuille = ss.insertSheet("Comparaison_Pesees_IA");
+  const entete = ["Date", "Catégorie", "Pesée réelle (kg)", "Estimation IA (kg)", "Écart signé (kg)", "Erreur absolue (%)", "Scans analysés", "Statut / limites"];
+  const jours = {};
+  function jour(d) { return dateIso(d); }
+  const sacs = sheets.sacs.getDataRange().getValues();
+  for (let i=1; i<sacs.length; i++) {
+    const d=jour(sacs[i][0]); if (!d) continue;
+    if (!jours[d]) jours[d]={reel:[0,0,0,0,0], virtuel:0, scans:0};
+    for (let j=0;j<5;j++) jours[d].reel[j]+=Number(sacs[i][j+1])||0;
+  }
+  const scans = sheets.gaspillage.getDataRange().getValues();
+  const vus = {};
+  for (let i=1;i<scans.length;i++) {
+    if (scans[i][1]!=="SCAN_IA_VISION") continue;
+    const d=jour(scans[i][0]); if (!jours[d]) continue;
+    const id=String(scans[i][11]||"");
+    if (id && vus[d+"|"+id]) continue;
+    if (id) vus[d+"|"+id]=true;
+    jours[d].scans++;
+    jours[d].virtuel+=(Number(scans[i][7])||0)/1000;
+  }
+  const lignes=[entete], categories=["Alimentaire","Fruits","Pain","Emballages","Serviettes"];
+  Object.keys(jours).sort().forEach(function(d) {
+    const o=jours[d];
+    for (let j=0;j<5;j++) {
+      // Le poids IA total comprend plusieurs catégories : il ne correspond à aucun sac isolé.
+      lignes.push([d,categories[j],o.reel[j], "", "", "",o.scans,
+        j===0 ? "Non comparable directement : IA total multi-catégories ; séparer les aliments et vérifier la couverture des plateaux." :
+        "Non estimable de façon fiable avec les données actuelles ; ne pas assimiler une absence d'estimation à zéro."]);
+    }
+    const totalReel=o.reel.reduce(function(a,b){return a+b;},0);
+    lignes.push([d,"TOTAL exploratoire (périmètres différents)",totalReel,
+      Math.round(o.virtuel*1000)/1000,
+      Math.round((o.virtuel-totalReel)*1000)/1000,
+      totalReel>0 ? Math.round(Math.abs(o.virtuel-totalReel)/totalReel*10000)/100 : "",
+      o.scans,"INDICATEUR NON VALIDÉ : sacs et scans ne couvrent pas nécessairement les mêmes déchets ; ne pas interpréter comme taux d'erreur IA."]);
+  });
+  feuille.clearContents();
+  feuille.getRange(1,1,lignes.length,entete.length).setValues(lignes);
+  feuille.setFrozenRows(1);
+  feuille.getRange(1,1,1,entete.length).setFontWeight("bold");
+  if (lignes.length>1) feuille.getRange(2,3,lignes.length-1,4).setNumberFormat("0.000");
+  return {success:true,jours:Object.keys(jours).length,lignes:lignes.length-1};
 }
 
 // ==========================================================================
