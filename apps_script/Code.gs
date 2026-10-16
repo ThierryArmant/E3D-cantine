@@ -502,6 +502,19 @@ function scanDejaEnregistre(feuille, idScan) {
   return false;
 }
 
+
+// Écriture atomique : le verrou ne couvre pas l'appel Gemini.
+function enregistrerScanUnique(feuille, ligne, idScan) {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) throw new Error('Enregistrement occupé : réessayer le scan.');
+  try {
+    if (idScan && scanDejaEnregistre(feuille, idScan)) return false;
+    feuille.appendRow(ligne);
+    SpreadsheetApp.flush();
+    return true;
+  } finally { lock.releaseLock(); }
+}
+
 function handleLogScanImage(data) {
   const sheets = getSheetsABC(data.etablissement || data.ecole);
   if (!data.image_base64) throw new Error("Flux visuel manquant.");
@@ -513,7 +526,7 @@ function handleLogScanImage(data) {
   if (idScan && scanDejaEnregistre(sheets.gaspillage, idScan)) return { success: true, doublon: true };
 
   if (data.image_base64 === "empty") {
-    sheets.gaspillage.appendRow([quand, "SCAN_IA_VISION", "Plateau Nettoyé (0% Restes)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan]);
+    if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_IA_VISION", "Plateau Nettoyé (0% Restes)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan], idScan)) return { success: true, doublon: true };
     return { success: true };
   }
   const cleanBase64 = data.image_base64.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
@@ -536,6 +549,7 @@ RÈGLES
 - Si tu vois un aliment hors menu, décris-le prudemment selon ce qui est visible et indique une confiance adaptée aux indices visuels.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste.
+- Ne déduis pas le nom d'un aliment entièrement consommé de son emballage, d'os, de traces ou du menu : sans indice visuel distinctif, l'identification reste inconnue.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
 - N'utilise ni deux-points, ni crochets, ni barre verticale dans les champs texte.
@@ -562,7 +576,7 @@ Réponds en JSON strict :
   // Plateau absent : on n'enregistre rien (évite de fausser les statistiques).
   // On garde une trace (type SCAN_ECHEC, hors statistiques) pour que ces photos ne disparaissent pas sans bruit.
   if (result.plateau_visible === false) {
-    sheets.gaspillage.appendRow([quand, "SCAN_ECHEC", "Aucun plateau visible sur la photo (cadrage, lumière ou plateau déjà débarrassé)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan]);
+    if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_ECHEC", "Aucun plateau visible sur la photo (cadrage, lumière ou plateau déjà débarrassé)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan], idScan)) return { success: true, doublon: true };
     return { success: true, ignore: true, raison: "Aucun plateau visible" };
   }
 
@@ -597,11 +611,12 @@ Réponds en JSON strict :
   }
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
 
-  sheets.gaspillage.appendRow([
+  const enregistre = enregistrerScanUnique(sheets.gaspillage, [
     quand, "SCAN_IA_VISION", note,
     moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
     poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length }), idScan
-  ]);
+  ], idScan);
+  if (!enregistre) return { success: true, doublon: true };
   return { success: true, details: { aliments: retenus, ecartes: ecartes.length } };
 }
 
