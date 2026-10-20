@@ -189,3 +189,17 @@ body.abc-borne-plein{overflow:hidden!important}
 #abc-borne-modes button[aria-pressed=true]{background:#1b4332;color:white;font-weight:700}
 #view-borne.abc-borne-classique .borne-container{max-width:1050px!important;width:100%;margin:0 auto}
 #view-borne:is(.abc-borne-immersive,:fullscreen)>#abc-borne-modes{width:100%;position:relative}
+
+/* Le choix de présentation reste indépendant de l’entrée en plein écran. */
+#view-borne.abc-borne-adaptatif .borne-container{max-width:none!important}
+#view-borne.abc-borne-classique .borne-container{max-width:1050px!important;padding:15px}
+#view-borne.abc-borne-classique .abc-borne-main{display:flex!important;gap:15px!important;min-height:560px}
+#view-borne.abc-borne-classique .abc-borne-camera{flex:1;min-width:0;justify-content:space-between!important}
+#view-borne.abc-borne-classique .abc-borne-avis{display:flex!important;flex-direction:column!important;flex:0 0 240px;width:240px!important;padding:14px!important;gap:10px!important}
+#view-borne.abc-borne-classique #abc-zone-plateau{min-height:360px!important}
+#view-borne.abc-borne-classique #instruction-text{font-size:16px!important;padding:12px!important}
+#view-borne.abc-borne-classique .abc-borne-avis button{font-size:20px!important}
+@media(max-width:600px){
+ #view-borne.abc-borne-classique .abc-borne-avis{flex-basis:135px;width:135px!important;padding:7px!important}
+ #view-borne.abc-borne-classique .abc-borne-main{gap:7px!important}
+}
