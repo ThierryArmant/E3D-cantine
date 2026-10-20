@@ -182,3 +182,10 @@ body.abc-borne-plein{overflow:hidden!important}
  #view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-camera{min-height:300px}
  #view-borne:is(.abc-borne-immersive,:fullscreen) #abc-zone-plateau{min-height:100px!important}
 }
+
+/* Deux présentations, toutes deux avec les réglages de la borne. */
+#abc-borne-modes{display:flex;flex-wrap:wrap;gap:6px;flex:none;justify-content:flex-end;margin-bottom:6px}
+#abc-borne-modes button{min-height:40px;padding:6px 12px;border:1px solid #2d6a4f;border-radius:6px;background:#fff;color:#1b4332;font-size:14px;cursor:pointer}
+#abc-borne-modes button[aria-pressed=true]{background:#1b4332;color:white;font-weight:700}
+#view-borne.abc-borne-classique .borne-container{max-width:1050px!important;width:100%;margin:0 auto}
+#view-borne:is(.abc-borne-immersive,:fullscreen)>#abc-borne-modes{width:100%;position:relative}
