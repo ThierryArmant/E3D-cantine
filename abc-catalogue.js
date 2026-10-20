@@ -864,9 +864,10 @@ function abcInstallerRetoucheMenu() {
 
 function abcAfficherPeseesCorrigeables() {
     const select=document.getElementById('abc-pesee-selection');if(!select)return;
+    const date=document.getElementById('input-menu-date')?.value||abcJour();
     const precedent=select.value;select.replaceChildren(abcEl('option','— Choisir une pesée à corriger —'));select.firstChild.value='';
-    (ABC_CATALOGUE.pesees||[]).forEach(x=>{const o=abcEl('option',x.date+' · ligne '+x.ligne+' · alimentaire '+x.alimentaire+' kg · fruits '+x.fruits+' kg · pain '+x.pain+' kg');o.value=String(x.ligne);select.append(o);});
-    if((ABC_CATALOGUE.pesees||[]).some(x=>String(x.ligne)===precedent))select.value=precedent;
+    (ABC_CATALOGUE.pesees||[]).filter(x=>x.date===date).forEach(x=>{const o=abcEl('option',x.date+' · ligne '+x.ligne+' · alimentaire '+x.alimentaire+' kg · fruits '+x.fruits+' kg · pain '+x.pain+' kg');o.value=String(x.ligne);select.append(o);});
+    if((ABC_CATALOGUE.pesees||[]).some(x=>x.date===date&&String(x.ligne)===precedent))select.value=precedent;
     abcChargerPesee();
 }
 function abcChargerPesee() {
