@@ -1054,7 +1054,8 @@ function feuillePhotosABC(sheets) {
   if(!sh){sh=ss.insertSheet('Photos_Service');sh.appendRow(['Date','Rubrique','ID Photo','ID Drive','Actif','Créée le']);}return sh;
 }
 function photosJourABC(sheets,date) {
-  return feuillePhotosABC(sheets).getDataRange().getValues().slice(1).filter(r=>dateIso(r[0])===date&&r[4]!==false&&String(r[4])!=='false').map(r=>({date:date,rubrique:String(r[1]),id:String(r[2]),driveId:String(r[3])}));
+  const sh=sheets.menus.getParent().getSheetByName('Photos_Service');if(!sh)return [];
+  return sh.getDataRange().getValues().slice(1).filter(r=>dateIso(r[0])===date&&r[4]!==false&&String(r[4])!=='false').map(r=>({date:date,rubrique:String(r[1]),id:String(r[2]),driveId:String(r[3])}));
 }
 function datePhotosABC(date){if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))throw Error('Date du service invalide.');return String(date);}
 function sousDossierPhotosABC(parent,nom){const it=parent.getFoldersByName(nom);return it.hasNext()?it.next():parent.createFolder(nom);}
@@ -1082,7 +1083,8 @@ function signaturePhotosABC(photos){return photos.map(p=>p.id).sort().join('|');
 function referencePhotoJourABC(sheets,date){
   const photos=photosJourABC(sheets,date);if(!photos.length)return '';
   const signature=signaturePhotosABC(photos),menu=getMenuDuJour(sheets,date);
-  const rows=feuilleReferencesPhotosABC(sheets).getDataRange().getValues();
+  const sh=sheets.menus.getParent().getSheetByName('References_Service');if(!sh)return '';
+  const rows=sh.getDataRange().getValues();
   for(let i=rows.length-1;i>0;i--)if(dateIso(rows[i][0])===date&&rows[i][1]===signature&&rows[i][2]===menu)return String(rows[i][3]||'');return '';
 }
 function handleAnalyserPhotosServiceABC(data){
