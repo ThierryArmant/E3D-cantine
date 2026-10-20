@@ -1077,7 +1077,7 @@ function handlePhotoServiceABC(data) {
   const lock=LockService.getScriptLock();lock.waitLock(30000);
   try {
     const toutes=photosJourABC(sheets,date);if(toutes.some(p=>p.id===id))return {success:true,photosVersion:1,photos:toutes};
-    if(toutes.filter(p=>p.rubrique===rubrique).length>=6)throw Error('Six photos maximum par rubrique et par service.');
+    // Le nombre de références ne bloque pas l’envoi des photos déjà sauvegardées sur les appareils.
     const root=DriveApp.getFolderById(PropertiesService.getScriptProperties().getProperty('PHOTOS_SERVICE_FOLDER_ID')||ABC_PHOTOS_DOSSIER);
     const ecole=sousDossierPhotosABC(root,String(data.ecole).replace(/[\/\\]/g,'-'));
     const jour=sousDossierPhotosABC(ecole,date);
