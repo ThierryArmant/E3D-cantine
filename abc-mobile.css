@@ -1,0 +1,51 @@
+/* Interface téléphone et parcours photo dédié. */
+.main-container{min-width:0}
+.abc-navigation-mobile{display:none}
+.abc-photo-header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:16px;background:#1b4332;color:white;border-radius:12px;margin-bottom:14px}
+.abc-photo-header h1{font-size:22px;margin:0 0 6px}
+.abc-mode-photos .sidebar,.abc-mode-photos .top-bar{display:none!important}
+body.abc-mode-photos{display:block;height:auto;min-height:100dvh;overflow:auto;background:#edf5ef}
+.abc-mode-photos .main-container,.abc-mode-photos .content-area{overflow:visible;height:auto}
+.abc-mode-photos .content-area{padding:12px}
+.abc-mode-photos #view-photos-service{max-width:760px;margin:0 auto}
+.abc-mode-photos #abc-photos-service{margin:0!important;background:white!important;border:0!important}
+.abc-mode-photos #abc-photos-service>details{display:none}
+.abc-mode-photos #abc-photos-service>h3{display:none}
+.abc-mode-photos #abc-photos-service button{min-height:48px;font-size:16px;padding:12px 16px;cursor:pointer;margin:5px 0}
+.abc-mode-photos #abc-photos-service h4{font-size:20px;margin:8px 0}
+.abc-mode-photos #abc-photos-service>div:not(#abc-photos-qr){gap:16px!important}
+.abc-mode-photos #abc-photos-service>div>div{padding:14px;border:1px solid #cbd5e1;border-radius:12px}
+.abc-mode-photos #abc-photos-service p{font-size:16px;line-height:1.5;margin:8px 0}
+@media(max-width:760px){
+ body{display:block;height:auto;min-height:100dvh;overflow:auto;background:#edf5ef}
+ .sidebar{display:none;position:fixed;inset:0 auto 0 0;width:min(320px,90vw);height:100dvh;z-index:100020;overflow:auto}
+ body.abc-navigation-ouverte .sidebar{display:flex}
+ .main-container{width:100%;height:auto;min-height:100dvh;overflow:visible}
+ .top-bar{height:auto;min-height:64px;padding:10px;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:200;backdrop-filter:none}
+ .top-bar>div{max-width:100%;flex-wrap:wrap;gap:6px}
+ #select-etablissement{max-width:100%;font-size:15px!important;min-height:44px}
+ .abc-navigation-mobile{display:inline-flex;align-items:center;justify-content:center;border:1px solid #2d6a4f;border-radius:8px;background:white;color:#1b4332;min-height:44px;padding:8px 14px;font-size:16px;cursor:pointer}
+ .content-area{padding:10px;overflow:visible}
+ .view-section{max-width:100%;min-width:0}
+ .view-section h2{font-size:23px}.view-section h3{font-size:19px}
+ .btn,button,input,select{touch-action:manipulation}
+ .view-section button,.view-section input:not([type=checkbox]):not([type=range]),.view-section select{min-height:44px;font-size:16px!important;max-width:100%}
+ .view-section input[type=checkbox]{width:22px;height:22px;flex-shrink:0}
+ .checkbox-label{min-height:44px;font-size:16px;gap:8px}
+ .menu-table{display:block;min-width:0!important;width:100%;table-layout:auto}
+ .menu-table thead{display:none}.menu-table tbody,.menu-table tr{display:block;width:100%}
+ .menu-table tr:first-child:has(th){display:none}
+ .menu-table td{display:block;width:100%;padding:12px;margin:0 0 14px;border-radius:10px;border:1px solid #cbd5e1}
+ .menu-table td::before{display:block;font-size:19px;font-weight:750;color:#1b4332;padding:4px 0 10px}
+ .menu-table td:nth-child(1)::before{content:'🥗 Entrées'}.menu-table td:nth-child(2)::before{content:'🍗 Plats principaux'}.menu-table td:nth-child(3)::before{content:'🥔 Accompagnements'}.menu-table td:nth-child(4)::before{content:'🍰 Desserts et laitages'}
+ .menu-table .sub-theme{font-size:15px;margin:10px 0}
+ [style*="grid-template-columns: 1fr 1fr"]{grid-template-columns:1fr!important}
+ #abc-photos-service>div{grid-template-columns:1fr!important}
+ #abc-photos-service button{width:100%!important;min-height:48px;margin:5px 0}
+ #abc-correction-menu-items>div{flex-wrap:wrap}
+ #abc-correction-menu-items span{flex:1;min-width:160px}
+ #view-saisie-dechets .btn{white-space:normal}
+ .abc-photo-header{border-radius:0;margin:-12px -12px 12px}
+ .abc-photo-header button{min-height:44px;padding:8px;font-size:15px}
+ #abc-menu-help-panel{left:10px!important;right:10px!important;width:auto!important;max-width:calc(100vw - 20px)!important}
+}
