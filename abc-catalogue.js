@@ -824,6 +824,26 @@ function abcReprendreMenu(force=false) {
     }
     abcAfficherCatalogue();abcAfficherCorrectionsJour();
 }
+async function abcRechargerMenuCorrection(bouton) {
+    const dateSaisie=document.getElementById('abc-date-correction')?.value;
+    const dateMenu=document.getElementById('input-menu-date');
+    if(dateSaisie)dateMenu.value=dateSaisie;
+    const date=dateMenu.value,school=abcEcole();
+    const resume=document.getElementById('abc-correction-menu-summary');
+    if(!date||!school){resume.textContent='Choisissez un établissement et une date complète.';return;}
+    bouton.disabled=true;resume.textContent='Chargement du menu du '+date+' pour '+school+'…';
+    try {
+        const reponse=await fetch(ADRESSE_SHEET_OFFICIELLE+'?action=getDashboard&ecole='+encodeURIComponent(school));
+        const data=await reponse.json();
+        if(school!==abcEcole()||date!==dateMenu.value)return;
+        if(data.error||data.ecole!==school)throw new Error(data.error||'Établissement non confirmé par le serveur.');
+        abcAccepterCatalogue(data,school);
+        abcReprendreMenu(true);abcActualiserCorrections();
+        if(!(ABC_CATALOGUE.menus||{})[date])resume.textContent='Aucun menu enregistré pour le '+date+' dans '+school+'. Vérifiez la date du menu.';
+        else resume.textContent='Menu du '+date+' chargé. Utilisez « − Retirer » à côté de chaque élément, puis validez.';
+    } catch(e) {if(school===abcEcole()&&date===dateMenu.value)resume.textContent='Chargement impossible : '+e.message+' Cliquez sur Reprendre pour réessayer.';}
+    finally {bouton.disabled=false;}
+}
 function abcAfficherCorrectionsJour() {
     const select=document.getElementById('abc-correction-item');if(!select)return;
     const date=document.getElementById('input-menu-date')?.value||abcJour();const precedent=select.value;
@@ -907,7 +927,7 @@ function abcAfficherMenuCorrection() {
     liste.replaceChildren();const ids=abcSelection().filter(id=>!id.endsWith(':maison'));
     ids.forEach(id=>{const x=ABC_CATALOGUE.items.find(x=>x.id===id);if(!x||!x.actif)return;
         const ligne=abcEl('div');ligne.style.cssText='display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #e2e8f0;';
-        const moins=abcEl('button','− Retirer');moins.type='button';moins.style.cssText='min-height:38px;padding:6px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff1f2;color:#991b1b;';
+        const moins=abcEl('button','− Retirer');moins.type='button';moins.style.cssText='cursor:pointer;min-height:38px;padding:6px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff1f2;color:#991b1b;';
         moins.addEventListener('click',()=>{const selection=abcSelection().filter(v=>v!==id&&v!==id+':maison');localStorage.setItem(abcSelectionKey(),JSON.stringify(selection));abcAfficherCatalogue();abcAfficherMenuCorrection();});
         ligne.append(moins,abcEl('span',x.libelle+' · '+ABC_RUBRIQUES[x.rubrique]+(x.nature==='option'?' · option':'')));liste.append(ligne);
     });
@@ -923,8 +943,8 @@ function abcInstallerOngletCorrection() {
     fond.append(abcEl('h2','✏️ Corrections du service'));
     const label=abcEl('label','Date à corriger : ');const date=abcEl('input');date.type='date';date.id='abc-date-correction';date.value=document.getElementById('input-menu-date').value;date.style.cssText='padding:8px;margin:8px;';label.append(date);fond.append(label);
     date.addEventListener('change',()=>{document.getElementById('input-menu-date').value=date.value;abcReprendreMenu(false);abcAfficherMenuCorrection();});
-    const resume=abcEl('p');resume.id='abc-correction-menu-summary';fond.append(resume);
-    const reprendre=abcEl('button','↩ Reprendre le menu enregistré','btn btn-outline');reprendre.type='button';reprendre.style.width='auto';reprendre.addEventListener('click',()=>{abcReprendreMenu(true);abcAfficherMenuCorrection();});fond.append(reprendre);
+    const resume=abcEl('p');resume.id='abc-correction-menu-summary';resume.setAttribute('role','status');resume.setAttribute('aria-live','polite');fond.append(resume);
+    const reprendre=abcEl('button','↩ Reprendre le menu enregistré','btn btn-outline');reprendre.type='button';reprendre.style.width='auto';reprendre.style.cursor='pointer';reprendre.addEventListener('click',()=>abcRechargerMenuCorrection(reprendre));fond.append(reprendre);
     fond.append(abcEl('h3','Menu : ajouter ou retirer un élément'));
     const liste=abcEl('div');liste.id='abc-correction-menu-items';fond.append(liste);
     const ajouter=abcEl('div');ajouter.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;';
