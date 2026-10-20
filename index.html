@@ -3246,6 +3246,30 @@
             if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
 
+        // État de chargement distinct d'un résultat nul.
+        function afficherChargementEtablissementABC(school) {
+            let bandeau = document.getElementById('dashboard-loading-status');
+            if (!bandeau) {
+                bandeau = document.createElement('div');
+                bandeau.id = 'dashboard-loading-status';
+                bandeau.setAttribute('role', 'status');
+                bandeau.setAttribute('aria-live', 'polite');
+                bandeau.style.cssText = 'background:#eff6ff;color:#1e3a8a;padding:12px;border-radius:6px;margin:10px 20px;font-size:14px;';
+                const barre = document.querySelector('.top-bar');
+                barre.insertAdjacentElement('afterend', bandeau);
+            }
+            bandeau.textContent = 'Chargement des données de ' + school + '…';
+            bandeau.style.display = 'block';
+            ['kpi-avg', 'kpi-total', 'kpi-money', 'kpi-impact', 'rep-kpi-avg', 'rep-kpi-total', 'rep-kpi-money', 'biodiff-total', 'compteur-scans-jour'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.innerText = '—';
+            });
+        }
+
+        function terminerChargementEtablissementABC(message) {
+            const bandeau = document.getElementById('dashboard-loading-status');
+            if (bandeau) { bandeau.textContent = message || ''; bandeau.style.display = message ? 'block' : 'none'; }
+        }
+
         let echecsConnexionConsecutifs = 0;
         let requeteDashboardABC = 0;
 
@@ -3260,9 +3284,11 @@
                 if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
                 if (!data || data.ecole !== school) {
                     clearDashboardToZero();
+                    terminerChargementEtablissementABC('Données indisponibles pour ' + school + '.');
                     if (errBanner) { errBanner.innerText = 'Données reçues pour un autre établissement : affichage bloqué.'; errBanner.style.display = 'block'; }
                     return;
                 }
+                terminerChargementEtablissementABC();
                 echecsConnexionConsecutifs = 0;
                 if(errBanner) errBanner.style.display = "none";
 
@@ -3308,6 +3334,7 @@
             }).catch(err => {
                 if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
                 clearDashboardToZero();
+                terminerChargementEtablissementABC('Chargement impossible pour ' + school + '. Nouvelle tentative automatique.');
                 echecsConnexionConsecutifs++;
                 if (echecsConnexionConsecutifs >= 3) {
                     if(errBanner) { 
@@ -3384,6 +3411,7 @@
             const school = document.getElementById('select-etablissement').value; 
             localStorage.setItem('schoolActuelle', school);
             reinitialiserAffichageEtablissement();
+            afficherChargementEtablissementABC(school);
             menusHistorique = {};
             const ctrl = document.getElementById('controle-frequences'); if (ctrl) ctrl.innerHTML = "";
             const reportSchoolElem = document.getElementById('report-school-name');
