@@ -3247,15 +3247,22 @@
         }
 
         let echecsConnexionConsecutifs = 0;
+        let requeteDashboardABC = 0;
 
         function loadLiveData() {
             const school = document.getElementById('select-etablissement').value;
             const errBanner = document.getElementById('dashboard-error-banner');
+            const requete = ++requeteDashboardABC;
 
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
                 // Réponse d'un établissement qu'on a quitté entre-temps : on l'ignore
-                if (document.getElementById('select-etablissement').value !== school) return;
+                if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
+                if (!data || data.ecole !== school) {
+                    clearDashboardToZero();
+                    if (errBanner) { errBanner.innerText = 'Données reçues pour un autre établissement : affichage bloqué.'; errBanner.style.display = 'block'; }
+                    return;
+                }
                 echecsConnexionConsecutifs = 0;
                 if(errBanner) errBanner.style.display = "none";
 
@@ -3299,6 +3306,8 @@
                     setQuickPeriod('all', document.querySelectorAll('.btn-period')[0]); 
                 }
             }).catch(err => {
+                if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
+                clearDashboardToZero();
                 echecsConnexionConsecutifs++;
                 if (echecsConnexionConsecutifs >= 3) {
                     if(errBanner) { 
@@ -3323,6 +3332,13 @@
 
         // Efface tout ce qui vient de l'établissement précédent (données, cartes, analyse fine, bandeau, rapport)
         function reinitialiserAffichageEtablissement() {
+            const compteurs = { 'kpi-avg': '0 g', 'kpi-total': '0.0 kg', 'kpi-money': '0.00 €', 'kpi-impact': '0.0 kg',
+                'rep-kpi-avg': '0 g', 'rep-kpi-total': '0.0 kg', 'rep-kpi-money': '0.00 €',
+                'biodiff-total': 'Total : 0 kg', 'compteur-scans-jour': '0' };
+            Object.keys(compteurs).forEach(id => { const el = document.getElementById(id); if (el) el.innerText = compteurs[id]; });
+            const menuBorne = document.getElementById('borne-menu-active');
+            if (menuBorne) menuBorne.innerText = 'Menu non chargé';
+            precisionLignes = [];
             globalRawData = null;
             derniereCalibration = null;
             globalItemsDetailedStats = {};
