@@ -203,3 +203,11 @@ body.abc-borne-plein{overflow:hidden!important}
  #view-borne.abc-borne-classique .abc-borne-avis{flex-basis:135px;width:135px!important;padding:7px!important}
  #view-borne.abc-borne-classique .abc-borne-main{gap:7px!important}
 }
+
+/* Fond noir de la borne dans les deux présentations. */
+#view-borne{background:#000!important}
+#view-borne .borne-container{background:#000!important;border-color:#222;box-shadow:none}
+#view-borne:is(.abc-borne-immersive,:fullscreen){background:#000!important}
+#view-borne:fullscreen::backdrop{background:#000}
+#view-borne .borne-container>div:last-child:not(.abc-borne-main){color:#e2e8f0!important}
+#view-borne #borne-menu-active{color:#d1fae5!important}
