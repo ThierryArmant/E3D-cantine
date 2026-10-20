@@ -3332,6 +3332,13 @@
         let echecsConnexionConsecutifs = 0;
         let requeteDashboardABC = 0;
 
+        // Ces copies locales sont facultatives : un quota plein ne doit jamais
+        // empêcher de lire Google Sheets ou d’y enregistrer un menu.
+        function memoriserOptionABC(cle, valeur) {
+            try {localStorage.setItem(cle, valeur);return true;}
+            catch(e) {console.warn('Copie locale indisponible', cle, e.message);return false;}
+        }
+
         function loadLiveData() {
             const school = document.getElementById('select-etablissement').value;
             const errBanner = document.getElementById('dashboard-error-banner');
@@ -3359,7 +3366,7 @@
                 }
 
                 if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
-                    localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
+                    memoriserOptionABC(`menuActive-${school}`, data.dernierMenu);
                     let displayMenu = document.getElementById('borne-menu-active');
                     if(displayMenu) { const menuExact = (data.historiqueMenus || {})[typeof abcJour === 'function' ? abcJour() : new Date().toISOString().split('T')[0]]; displayMenu.innerText = menuExact || 'Menu du jour non renseigné'; }
                 }
@@ -3369,7 +3376,7 @@
                     const todayIso = new Date().toISOString().split('T')[0];
                     const eff = ((data.historiqueEffectifs || {})[todayIso]) || (data.parametres && data.parametres.effectif_defaut) || parseInt(String(data.effectifCouverts || "").split('-').reduce((a, b) => (parseInt(a) || 0) + (parseInt(b) || 0), 0)) || 0;
                     if (eff > 0) {
-                        localStorage.setItem(`totalConvives-${school}`, eff);
+                        memoriserOptionABC(`totalConvives-${school}`, eff);
                         let totalInput = document.getElementById('convives-total');
                         if (totalInput && document.activeElement !== totalInput) totalInput.value = eff;
                     }
@@ -3475,7 +3482,7 @@
 
         function changeEtablissement() {
             const school = document.getElementById('select-etablissement').value; 
-            localStorage.setItem('schoolActuelle', school);
+            memoriserOptionABC('schoolActuelle', school);
             reinitialiserAffichageEtablissement();
             afficherChargementEtablissementABC(school);
             if (typeof abcChangerCatalogue === 'function') abcChangerCatalogue();
@@ -3497,7 +3504,7 @@
         function saveExpectedMeals() {
             const school = document.getElementById('select-etablissement').value;
             let totalSaisi = parseInt(document.getElementById('convives-total').value) || 450;
-            localStorage.setItem(`totalConvives-${school}`, totalSaisi);
+            memoriserOptionABC(`totalConvives-${school}`, totalSaisi);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveEffectifs", ecole: school, effectifs_str: totalSaisi.toString() }) 
@@ -3929,10 +3936,10 @@
             
             let displayMenu = document.getElementById('borne-menu-active');
             if(displayMenu) displayMenu.innerText = menuFinal.substring(0, 50) + (menuFinal.length > 50 ? "..." : ""); 
-            localStorage.setItem(`menuActive-${school}`, menuFinal);
+            memoriserOptionABC(`menuActive-${school}`, menuFinal);
 
             let effectifSaisi = parseInt(document.getElementById('convives-total').value) || 450;
-            localStorage.setItem(`totalConvives-${school}`, effectifSaisi);
+            memoriserOptionABC(`totalConvives-${school}`, effectifSaisi);
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" },
@@ -4112,6 +4119,6 @@
             }
         };
     </script>
-<script src="abc-catalogue.js?v=20261020-4"></script>
+<script src="abc-catalogue.js?v=20261020-5"></script>
 </body>
 </html>
