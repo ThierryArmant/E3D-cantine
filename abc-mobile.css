@@ -16,7 +16,7 @@ body.abc-mode-photos{display:block;height:auto;min-height:100dvh;overflow:auto;b
 .abc-mode-photos #abc-photos-service>div:not(#abc-photos-qr){gap:16px!important}
 .abc-mode-photos #abc-photos-service>div>div{padding:14px;border:1px solid #cbd5e1;border-radius:12px}
 .abc-mode-photos #abc-photos-service p{font-size:16px;line-height:1.5;margin:8px 0}
-@media(max-width:760px){
+@media(max-width:1024px){
  body{display:block;height:auto;min-height:100dvh;overflow:auto;background:#edf5ef}
  .sidebar{display:none;position:fixed;inset:0 auto 0 0;width:min(320px,90vw);height:100dvh;z-index:100020;overflow:auto}
  body.abc-navigation-ouverte .sidebar{display:flex}
