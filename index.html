@@ -420,21 +420,25 @@
                             <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
                             <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Un clic envoie ton scan directement !</div>
 
-                            <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
-                                <span style="font-size: 26px;">🟢</span>
-                                <span>J'ai tout fini</span>
+                            <button type="button" id="push-btn-vert" onclick="setPushAvis('vert', this)" aria-label="J’ai tout fini" style="flex: 1; background: linear-gradient(145deg, #22c55e, #15803d); color: white; border: 3px solid #86efac; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(22,163,74,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size:0.85em;line-height:1.1;">J’ai</span>
+                                <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🟢</span>
+                                <span style="line-height:1.15;">tout fini</span>
                             </button>
-                            <button type="button" id="push-btn-jaune" onclick="setPushAvis('jaune', this)" style="flex: 1; background: linear-gradient(145deg, #facc15, #ca8a04); color: white; border: 3px solid #fef08a; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(202,138,4,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
-                                <span style="font-size: 26px;">🟡</span>
-                                <span>J'ai plus faim</span>
+                            <button type="button" id="push-btn-jaune" onclick="setPushAvis('jaune', this)" aria-label="J’ai plus faim" style="flex: 1; background: linear-gradient(145deg, #facc15, #ca8a04); color: white; border: 3px solid #fef08a; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(202,138,4,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size:0.85em;line-height:1.1;">J’ai</span>
+                                <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🟡</span>
+                                <span style="line-height:1.15;">plus faim</span>
                             </button>
-                            <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
-                                <span style="font-size: 26px;">🟠</span>
-                                <span>Pas le temps</span>
+                            <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" aria-label="J’ai pas le temps" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size:0.85em;line-height:1.1;">J’ai</span>
+                                <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🟠</span>
+                                <span style="line-height:1.15;">pas le temps</span>
                             </button>
-                            <button type="button" id="push-btn-rouge" onclick="setPushAvis('rouge', this)" style="flex: 1; background: linear-gradient(145deg, #ef4444, #b91c1c); color: white; border: 3px solid #fca5a5; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(220,38,38,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
-                                <span style="font-size: 26px;">🔴</span>
-                                <span>J'ai pas aimé</span>
+                            <button type="button" id="push-btn-rouge" onclick="setPushAvis('rouge', this)" aria-label="J’ai pas aimé" style="flex: 1; background: linear-gradient(145deg, #ef4444, #b91c1c); color: white; border: 3px solid #fca5a5; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(220,38,38,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                                <span style="font-size:0.85em;line-height:1.1;">J’ai</span>
+                                <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🔴</span>
+                                <span style="line-height:1.15;">pas aimé</span>
                             </button>
                         </div>
                     </div>
