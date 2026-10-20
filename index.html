@@ -3241,16 +3241,16 @@
                 kpi(f1(P.mape).replace("–", "–") + (P.mape === null ? "" : " %"), "erreur moyenne par jour", "Moyenne, jour par jour, de l'écart en valeur absolue ÷ poids pesé. C'est l'erreur typique à attendre sur une journée.") +
                 kpi(f2(P.mae) + " kg", "écart moyen par jour", "Moyenne de la différence absolue entre estimé et pesé, en kg, par jour.") +
                 kpi(P.r === null ? "–" : f2(P.r), "corrélation", "De −1 à 1. Proche de 1 : l'IA classe bien les jours entre eux (jours chargés, jours légers) même si le niveau absolu est décalé. Nécessite au moins 3 jours.");
-            let t = '<tr><th>Jour</th><th>Scans</th><th>Estimé IA</th><th>Pesé</th><th>Écart</th><th>%</th></tr>';
+            let t = '<tr><th>Jour</th><th>Scans</th><th style="background:#dbeafe;color:#1e3a5f;">Estimé IA</th><th style="background:#dcfce7;color:#14532d;">Pesé</th><th>Écart</th><th>%</th></tr>';
             P.lignes.forEach((l, i) => {
                 const couleur = l.ecartPct === null ? "#64748b" : (Math.abs(l.ecartPct) <= 15 ? "#15803d" : (Math.abs(l.ecartPct) <= 30 ? "#b45309" : "#b91c1c"));
-                t += `<tr class="jour-ligne" data-i="${i}" onclick="precisionDetail(${i})" data-tip="${precisionTipJour(l).replace(/"/g, "&quot;")}"><td>${dateFR(l.date)}${l.effectifSaisi ? "" : ' <span title="Effectif non saisi : valeur par défaut">⚠️</span>'}</td><td>${l.scans}/${l.attendus}</td><td>${f1(l.est)} kg</td><td>${f1(l.mes)} kg</td><td>${(l.ecart > 0 ? "+" : "") + f1(l.ecart)} kg</td><td style="font-weight:800; color:${couleur};">${pct1(l.ecartPct)}</td></tr><tr id="precision-detail-${i}" style="display:none;"><td colspan="6" style="background:#f8fafc; text-align:left !important; font-weight:400 !important;">${precisionDetailHtml(l)}</td></tr>`;
+                t += `<tr class="jour-ligne" data-i="${i}" onclick="precisionDetail(${i})" data-tip="${precisionTipJour(l).replace(/"/g, "&quot;")}"><td>${dateFR(l.date)}${l.effectifSaisi ? "" : ' <span title="Effectif non saisi : valeur par défaut">⚠️</span>'}</td><td>${l.scans}/${l.attendus}</td><td style="background:#dbeafe;color:#1e3a5f;font-weight:800;">${f1(l.est)} kg</td><td style="background:#dcfce7;color:#14532d;font-weight:800;">${f1(l.mes)} kg</td><td>${(l.ecart > 0 ? "+" : "") + f1(l.ecart)} kg</td><td style="font-weight:800; color:${couleur};">${pct1(l.ecartPct)}</td></tr><tr id="precision-detail-${i}" style="display:none;"><td colspan="6" style="background:#f8fafc; text-align:left !important; font-weight:400 !important;">${precisionDetailHtml(l)}</td></tr>`;
             });
             document.getElementById("precision-table").innerHTML = t;
-            let tb = '<tr><th>Famille</th><th>Estimé IA</th><th>Pesé</th><th>Écart</th><th>%</th></tr>';
+            let tb = '<tr><th>Famille</th><th style="background:#dbeafe;color:#1e3a5f;">Estimé IA</th><th style="background:#dcfce7;color:#14532d;">Pesé</th><th>Écart</th><th>%</th></tr>';
             ["alim", "fruits", "pain"].forEach(b => {
                 const e = P.parBin[b].est, m = P.parBin[b].mes;
-                tb += `<tr><td>${BIN_NOMS[b]}</td><td>${f1(e)} kg</td><td>${f1(m)} kg</td><td>${(e - m > 0 ? "+" : "") + f1(e - m)} kg</td><td style="font-weight:800;">${ecartTexte(e, m)}</td></tr>`;
+                tb += `<tr><td>${BIN_NOMS[b]}</td><td style="background:#dbeafe;color:#1e3a5f;font-weight:800;">${f1(e)} kg</td><td style="background:#dcfce7;color:#14532d;font-weight:800;">${f1(m)} kg</td><td>${(e - m > 0 ? "+" : "") + f1(e - m)} kg</td><td style="font-weight:800;">${ecartTexte(e, m)}</td></tr>`;
             });
             document.getElementById("precision-bins").innerHTML = tb;
             if (typeof Chart !== "undefined") {
