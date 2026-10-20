@@ -600,10 +600,23 @@ function abcJour() { return new Intl.DateTimeFormat('fr-CA', {timeZone:'Europe/P
 function abcEl(tag, texte, classe) { const e = document.createElement(tag); if (texte !== undefined) e.textContent = texte; if (classe) e.className = classe; return e; }
 function abcMessage(texte) { const e=document.getElementById('abc-catalogue-status'); if(e) e.textContent=texte; }
 function abcSelectionKey() { return 'abc-menu-v2-' + abcEcole() + '-' + (document.getElementById('input-menu-date')?.value || abcJour()); }
-function abcSelection() { try { return JSON.parse(localStorage.getItem(abcSelectionKey()) || '[]'); } catch(e) { return []; } }
+// Brouillons de menu : le quota du navigateur ne doit pas bloquer une correction.
+// Les scans et les envois en attente ne sont jamais effacés pour libérer de la place.
+const ABC_SELECTION_MEMOIRE = new Map();
+function abcLireSelection(cle) {
+    if(ABC_SELECTION_MEMOIRE.has(cle))return ABC_SELECTION_MEMOIRE.get(cle);
+    try {return localStorage.getItem(cle);}catch(e){return null;}
+}
+function abcStockerSelection(cle,texte) {
+    ABC_SELECTION_MEMOIRE.set(cle,texte);
+    try {localStorage.setItem(cle,texte);}catch(e){
+        abcMessage('Stockage local saturé ou indisponible : le brouillon reste disponible pendant cette session. Validez le menu pour l’enregistrer dans Google Sheets.');
+    }
+}
+function abcSelection() { try { return JSON.parse(abcLireSelection(abcSelectionKey()) || '[]'); } catch(e) { return []; } }
 function abcSauverSelection() {
     const valeurs=Array.from(document.querySelectorAll('[data-catalogue-id]:checked')).map(e=>e.dataset.catalogueId+(e.dataset.maison ? ':maison' : ''));
-    localStorage.setItem(abcSelectionKey(),JSON.stringify(valeurs));
+    abcStockerSelection(abcSelectionKey(),JSON.stringify(valeurs));
 }
 function abcFicheFinale(item) {
     const vus=new Set();
@@ -697,7 +710,7 @@ function abcAfficherCatalogue() {
             button.addEventListener('click',async()=>{
                 const libelle=input.value.trim();if(!libelle)return;
                 const school=abcEcole();button.disabled=true;
-                try {const res=await abcModifierCatalogue({operation:'save',rubrique:type,nature,libelle});if(abcEcole()!==school)return;const sel=abcSelection();sel.push(res.id);localStorage.setItem(abcSelectionKey(),JSON.stringify(sel));abcAfficherCatalogue();}
+                try {const res=await abcModifierCatalogue({operation:'save',rubrique:type,nature,libelle});if(abcEcole()!==school)return;const sel=abcSelection();sel.push(res.id);abcStockerSelection(abcSelectionKey(),JSON.stringify(sel));abcAfficherCatalogue();}
                 catch(e){abcMessage(e.message);}finally{button.disabled=false;}
             });ligne.append(input,button);td.append(ligne);
         });
@@ -820,7 +833,7 @@ function abcReprendreMenu(force=false) {
     if(statut)statut.textContent=texte?'Menu enregistré le '+date+' : '+texte:'Aucun menu enregistré pour le '+date+'.';
     if(texte){
         const ids=abcLireMenuEnregistre(texte);
-        if(force||localStorage.getItem(abcSelectionKey())===null)localStorage.setItem(abcSelectionKey(),JSON.stringify(ids));
+        if(force||abcLireSelection(abcSelectionKey())===null)abcStockerSelection(abcSelectionKey(),JSON.stringify(ids));
     }
     abcAfficherCatalogue();abcAfficherCorrectionsJour();
 }
@@ -928,7 +941,7 @@ function abcAfficherMenuCorrection() {
     ids.forEach(id=>{const x=ABC_CATALOGUE.items.find(x=>x.id===id);if(!x||!x.actif)return;
         const ligne=abcEl('div');ligne.style.cssText='display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #e2e8f0;';
         const moins=abcEl('button','− Retirer');moins.type='button';moins.style.cssText='cursor:pointer;min-height:38px;padding:6px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff1f2;color:#991b1b;';
-        moins.addEventListener('click',()=>{const selection=abcSelection().filter(v=>v!==id&&v!==id+':maison');localStorage.setItem(abcSelectionKey(),JSON.stringify(selection));abcAfficherCatalogue();abcAfficherMenuCorrection();});
+        moins.addEventListener('click',()=>{const selection=abcSelection().filter(v=>v!==id&&v!==id+':maison');abcStockerSelection(abcSelectionKey(),JSON.stringify(selection));abcAfficherCatalogue();abcAfficherMenuCorrection();});
         ligne.append(moins,abcEl('span',x.libelle+' · '+ABC_RUBRIQUES[x.rubrique]+(x.nature==='option'?' · option':'')));liste.append(ligne);
     });
     if(!ids.length)liste.append(abcEl('p','Aucun aliment sélectionné pour ce menu.'));
@@ -950,7 +963,7 @@ function abcInstallerOngletCorrection() {
     const ajouter=abcEl('div');ajouter.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;';
     const rubrique=abcEl('select');rubrique.id='abc-menu-ajout-type';rubrique.setAttribute('aria-label','Rubrique de l’aliment à ajouter');Object.entries(ABC_RUBRIQUES).forEach(([v,n])=>{const o=abcEl('option',n);o.value=v;rubrique.append(o);});rubrique.value='plat';rubrique.addEventListener('change',abcAfficherMenuCorrection);ajouter.append(rubrique);
     const select=abcEl('select');select.id='abc-menu-ajout-item';select.style.maxWidth='100%';select.setAttribute('aria-label','Aliment ou option à ajouter au menu');ajouter.append(select);
-    const plus=abcEl('button','+ Ajouter','btn btn-outline');plus.type='button';plus.style.width='auto';plus.addEventListener('click',()=>{if(!select.value)return;localStorage.setItem(abcSelectionKey(),JSON.stringify([...new Set([...abcSelection(),select.value])]));abcAfficherCatalogue();abcAfficherMenuCorrection();});ajouter.append(plus);fond.append(ajouter);
+    const plus=abcEl('button','+ Ajouter','btn btn-outline');plus.type='button';plus.style.width='auto';plus.addEventListener('click',()=>{if(!select.value)return;abcStockerSelection(abcSelectionKey(),JSON.stringify([...new Set([...abcSelection(),select.value])]));abcAfficherCatalogue();abcAfficherMenuCorrection();});ajouter.append(plus);fond.append(ajouter);
     const nouveau=abcEl('p','Un aliment manque au catalogue ? Ajoutez-le dans « Saisie des menus », puis retrouvez-le ici.');fond.append(nouveau);
     const valider=abcEl('button','💾 Valider la correction du menu','btn');valider.type='button';valider.style.width='auto';valider.addEventListener('click',()=>saveMenu());fond.append(valider);
     const analyses=document.getElementById('abc-corrections-analyses');if(analyses){analyses.open=true;fond.append(analyses);}
