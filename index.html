@@ -1151,52 +1151,89 @@
             }, 60000);
         });
 
-        function addLocalFavorite(type) {
-            let inputField = document.getElementById(type + '_libre');
-            let val = inputField.value.trim();
-            if(!val) return;
+        // Favoris de menu : sélection conservée par établissement et par date.
+        function favoriteMenuKey(type) {
+            const school = document.getElementById('select-etablissement').value;
+            const date = document.getElementById('input-menu-date').value || 'courant';
+            return 'menuFavChecked_' + school + '_' + date + '_' + type;
+        }
 
-            let school = document.getElementById('select-etablissement').value;
-            let key = `favs_${school}_${type}`;
+        function favoriteSelection(type) {
+            try { return JSON.parse(localStorage.getItem(favoriteMenuKey(type)) || '[]'); }
+            catch (e) { return []; }
+        }
+
+        function setFavoriteSelection(type, values) {
+            localStorage.setItem(favoriteMenuKey(type), JSON.stringify([...new Set(values)]));
+        }
+
+        function addLocalFavorite(type) {
+            const inputField = document.getElementById(type + '_libre');
+            const val = inputField.value.trim();
+            if (!val) return;
+            const school = document.getElementById('select-etablissement').value;
+            const key = 'favs_' + school + '_' + type;
             let favs = JSON.parse(localStorage.getItem(key) || '[]');
-            if(!favs.includes(val)) {
+            if (!favs.includes(val)) {
                 favs.push(val);
                 localStorage.setItem(key, JSON.stringify(favs));
             }
-            inputField.value = "";
+            // Un aliment ajouté est immédiatement sélectionné pour le menu courant.
+            setFavoriteSelection(type, [...favoriteSelection(type), val]);
+            inputField.value = '';
             renderLocalFavorites();
         }
 
         function removeLocalFavorite(type, val) {
-            let school = document.getElementById('select-etablissement').value;
-            let key = `favs_${school}_${type}`;
-            let favs = JSON.parse(localStorage.getItem(key) || '[]');
-            favs = favs.filter(f => f !== val);
+            const school = document.getElementById('select-etablissement').value;
+            const key = 'favs_' + school + '_' + type;
+            const favs = JSON.parse(localStorage.getItem(key) || '[]').filter(f => f !== val);
             localStorage.setItem(key, JSON.stringify(favs));
+            setFavoriteSelection(type, favoriteSelection(type).filter(f => f !== val));
             renderLocalFavorites();
         }
 
         function renderLocalFavorites() {
-            let school = document.getElementById('select-etablissement').value;
+            const school = document.getElementById('select-etablissement').value;
             ['entree', 'plat', 'accomp', 'dessert'].forEach(type => {
-                let container = document.getElementById(`favs_container_${type}`);
-                if(!container) return;
-                let favs = JSON.parse(localStorage.getItem(`favs_${school}_${type}`) || '[]');
-                container.innerHTML = "";
-                if(favs.length > 0) {
-                    container.style.display = "block";
-                    favs.forEach(f => {
-                        let baseName = type === "entree" ? "entree_base" : (type === "plat" ? "plat_base" : (type === "accomp" ? "accomp_base" : "dessert_douceur"));
-                        container.innerHTML += `
-                            <label class="checkbox-label" style="display:flex; align-items:center; background:white; padding:3px 6px; border-radius:4px; margin-top:4px; border:1px solid #10b981;">
-                                <input type="checkbox" name="${baseName}" value="${f}"> 🌟 ${f} 
-                                <span style="margin-left:auto;"><input type="checkbox" name="fait_maison" value="${f} (Fait Maison)"> 🧑‍🍳</span>
-                                <span style="color:#ef4444; margin-left:6px; cursor:pointer; font-weight:bold;" onclick="removeLocalFavorite('${type}', '${f}')">✖</span>
-                            </label>`;
+                const container = document.getElementById('favs_container_' + type);
+                if (!container) return;
+                const favs = JSON.parse(localStorage.getItem('favs_' + school + '_' + type) || '[]');
+                // Conserver les coches même lorsque le DOM d'une autre catégorie est reconstruit.
+                const selected = new Set(favoriteSelection(type));
+                container.querySelectorAll('input[data-favorite-item]').forEach(cb => {
+                    if (cb.checked) selected.add(cb.value);
+                    else selected.delete(cb.value);
+                });
+                setFavoriteSelection(type, [...selected]);
+                container.replaceChildren();
+                container.style.display = favs.length ? 'block' : 'none';
+                const baseName = type === 'entree' ? 'entree_base' : type === 'plat' ? 'plat_base' : type === 'accomp' ? 'accomp_base' : 'dessert_douceur';
+                favs.forEach(f => {
+                    const label = document.createElement('label');
+                    label.className = 'checkbox-label';
+                    label.style.cssText = 'display:flex;align-items:center;background:white;padding:3px 6px;border-radius:4px;margin-top:4px;border:1px solid #10b981;';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox'; cb.name = baseName; cb.value = f; cb.dataset.favoriteItem = type;
+                    cb.checked = selected.has(f);
+                    cb.addEventListener('change', () => {
+                        const current = new Set(favoriteSelection(type));
+                        if (cb.checked) current.add(f); else current.delete(f);
+                        setFavoriteSelection(type, [...current]);
                     });
-                } else {
-                    container.style.display = "none";
-                }
+                    label.append(cb, document.createTextNode(' 🌟 ' + f + ' '));
+                    const fmWrap = document.createElement('span');
+                    fmWrap.style.marginLeft = 'auto';
+                    const fm = document.createElement('input');
+                    fm.type = 'checkbox'; fm.name = 'fait_maison'; fm.value = f + ' (Fait Maison)';
+                    fmWrap.append(fm, document.createTextNode(' 🧑‍🍳'));
+                    const del = document.createElement('span');
+                    del.style.cssText = 'color:#ef4444;margin-left:6px;cursor:pointer;font-weight:bold;';
+                    del.textContent = '✖';
+                    del.addEventListener('click', ev => { ev.preventDefault(); removeLocalFavorite(type, f); });
+                    label.append(fmWrap, del);
+                    container.appendChild(label);
+                });
             });
         }
 
