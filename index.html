@@ -204,7 +204,7 @@
         .prec-kpi .v { font-size:20px; font-weight:900; color:#1b4332; }
         .prec-kpi .l { font-size:11px; color:#64748b; }
 </style>
-<link rel="stylesheet" href="abc-mobile.css?v=20261021-aides-1">
+<link rel="stylesheet" href="abc-mobile.css?v=20261021-borne-adaptive-1">
 </head>
 <body>
 <div id="tip-flottant"></div>
@@ -369,10 +369,10 @@
             <!-- PÔLE 2 : BORNE ET SMARTPHONE (RÉVISÉ : 1 CLIC = AVIS + SCAN) -->
             <div id="view-borne" class="view-section">
                 <div class="borne-container" style="max-width: 1050px;">
-                    <div style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
+                    <div class="abc-borne-main" style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
                         
                         <!-- Zone de la caméra (colonne de gauche) -->
-                        <div style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="abc-borne-camera" style="flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             
                             <div id="instruction-text" class="instruction-banner state-searching" style="margin-bottom: 8px;">
                                 🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS
@@ -416,7 +416,7 @@
                         </div>
 
                         <!-- Zone des 3 GROS boutons (colonne de droite) -->
-                        <div style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
+                        <div class="abc-borne-avis" style="width: 240px; display: flex; flex-direction: column; gap: 10px; justify-content: center; background: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 12px; border: 2px solid #2d6a4f; box-shadow: 0 8px 20px rgba(0,0,0,0.2);">
                             <div style="font-size: 11px; font-weight: 900; color: #f8fafc; text-align: center; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 0.5px;">🎯 Ton avis flash :</div>
                             <div style="font-size: 9px; color: #94a3b8; text-align: center; margin-bottom: 6px; font-style: italic;">Un clic envoie ton scan directement !</div>
 
@@ -2878,11 +2878,26 @@
             }
         }
 
-        function toggleBorneFullscreen() {
-            const elem = document.getElementById('view-borne');
-            if (!document.fullscreenElement) elem.requestFullscreen().catch(() => {});
-            else document.exitFullscreen();
+        function abcAjusterBornePleinEcran(actif) {
+            const vue=document.getElementById('view-borne');if(!vue)return;
+            vue.classList.toggle('abc-borne-immersive',actif);
+            document.body.classList.toggle('abc-borne-plein',actif);
+            let sortie=document.getElementById('abc-borne-quitter-plein');
+            if(!sortie){sortie=document.createElement('button');sortie.type='button';sortie.id='abc-borne-quitter-plein';sortie.textContent='⛶ Quitter le plein écran';sortie.addEventListener('click',toggleBorneFullscreen);vue.prepend(sortie);}
+            sortie.hidden=!actif;
         }
+        async function toggleBorneFullscreen() {
+            const elem=document.getElementById('view-borne');
+            if(elem.classList.contains('abc-borne-immersive')||document.fullscreenElement){
+                abcAjusterBornePleinEcran(false);
+                if(document.fullscreenElement&&document.exitFullscreen)try{await document.exitFullscreen();}catch(e){}
+                return;
+            }
+            abcAjusterBornePleinEcran(true);
+            if(elem.requestFullscreen)try{await elem.requestFullscreen();}catch(e){/* Le mode adapté à la fenêtre reste utilisable. */}
+        }
+        document.addEventListener('fullscreenchange',()=>abcAjusterBornePleinEcran(document.fullscreenElement===document.getElementById('view-borne')));
+        document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.fullscreenElement)abcAjusterBornePleinEcran(false);});
 
         function stopCamera() { if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; } }
         
