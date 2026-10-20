@@ -3336,9 +3336,11 @@
             const school = document.getElementById('select-etablissement').value;
             const errBanner = document.getElementById('dashboard-error-banner');
             const requete = ++requeteDashboardABC;
+            let donneesRecuesABC = false;
 
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
             .then(response => response.json()).then(data => {
+                donneesRecuesABC = true;
                 // Réponse d'un établissement qu'on a quitté entre-temps : on l'ignore
                 if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
                 if (!data || data.ecole !== school) {
@@ -3393,12 +3395,16 @@
                 }
             }).catch(err => {
                 if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
-                clearDashboardToZero();
-                terminerChargementEtablissementABC('Chargement impossible pour ' + school + '. Nouvelle tentative automatique.');
+                console.error('Chargement A.B.C.', school, err);
+                const detail = err && err.message ? err.message : String(err);
+                if (!globalRawData || globalRawData.ecole !== school) clearDashboardToZero();
+                terminerChargementEtablissementABC(donneesRecuesABC
+                    ? 'Données reçues pour ' + school + ', erreur d’affichage : ' + detail
+                    : 'Connexion Google Sheets interrompue pour ' + school + ' : ' + detail + '. Nouvelle tentative automatique.');
                 echecsConnexionConsecutifs++;
                 if (echecsConnexionConsecutifs >= 3) {
                     if(errBanner) { 
-                        errBanner.innerText = "Erreur de connexion persistante à Google Sheets (Vérifiez le réseau)."; 
+                        errBanner.innerText = "Chargement interrompu : " + detail + ""; 
                         errBanner.style.display = "block"; 
                     }
                 }
