@@ -204,7 +204,7 @@
         .prec-kpi .v { font-size:20px; font-weight:900; color:#1b4332; }
         .prec-kpi .l { font-size:11px; color:#64748b; }
 </style>
-<link rel="stylesheet" href="abc-mobile.css?v=20261021-borne-complete-1">
+<link rel="stylesheet" href="abc-mobile.css?v=20261021-deux-modes-1">
 </head>
 <body>
 <div id="tip-flottant"></div>
@@ -367,7 +367,11 @@
             </div>
             
             <!-- PÔLE 2 : BORNE ET SMARTPHONE (RÉVISÉ : 1 CLIC = AVIS + SCAN) -->
-            <div id="view-borne" class="view-section">
+            <div id="view-borne" class="view-section abc-borne-classique">
+                <div id="abc-borne-modes" role="group" aria-label="Présentation de la borne">
+                    <button type="button" id="abc-mode-complet" aria-pressed="false" onclick="abcChoisirModeBorne('complet')">⛶ Mode complet</button>
+                    <button type="button" id="abc-mode-classique" aria-pressed="true" onclick="abcChoisirModeBorne('classique')">▣ Mode classique</button>
+                </div>
                 <div class="borne-container" style="width:100%;max-width:none;">
                     <div class="abc-borne-main" style="display: flex; gap: 15px; flex-grow: 1; align-items: stretch;">
                         
@@ -404,7 +408,7 @@
                                         <label style="font-size: 10px; font-weight: bold; color: #1b4332;">Contr :</label>
                                         <input type="range" id="cam-contrast" min="50" max="200" value="100" oninput="applyVideoFilters()" style="width: 45px;">
                                     </div>
-                                    <button type="button" class="btn-period" onclick="toggleBorneFullscreen()" style="background: #1b4332; color: white; padding: 5px 10px; font-size: 10.5px; font-weight: bold; border-radius: 5px;">⛶ Plein écran</button>
+                                    
                                 </div>
                             </div>
 
@@ -2881,21 +2885,21 @@
         function abcAjusterBornePleinEcran(actif) {
             const vue=document.getElementById('view-borne');if(!vue)return;
             vue.classList.toggle('abc-borne-immersive',actif);
+            vue.classList.toggle('abc-borne-classique',!actif);
             document.body.classList.toggle('abc-borne-plein',actif);
-            let sortie=document.getElementById('abc-borne-quitter-plein');
-            if(!sortie){sortie=document.createElement('button');sortie.type='button';sortie.id='abc-borne-quitter-plein';sortie.textContent='⛶ Quitter le plein écran';sortie.addEventListener('click',toggleBorneFullscreen);vue.prepend(sortie);}
-            sortie.hidden=!actif;
+            document.getElementById('abc-mode-complet')?.setAttribute('aria-pressed',String(actif));
+            document.getElementById('abc-mode-classique')?.setAttribute('aria-pressed',String(!actif));
         }
-        async function toggleBorneFullscreen() {
-            const elem=document.getElementById('view-borne');
-            if(elem.classList.contains('abc-borne-immersive')||document.fullscreenElement){
-                abcAjusterBornePleinEcran(false);
-                if(document.fullscreenElement&&document.exitFullscreen)try{await document.exitFullscreen();}catch(e){}
-                return;
+        async function abcChoisirModeBorne(mode) {
+            const vue=document.getElementById('view-borne');if(!vue)return;
+            if(mode==='classique'){
+                if(document.fullscreenElement&&document.exitFullscreen)try{await document.exitFullscreen();}catch(e){return;}
+                abcAjusterBornePleinEcran(false);return;
             }
             abcAjusterBornePleinEcran(true);
-            if(elem.requestFullscreen)try{await elem.requestFullscreen();}catch(e){/* Le mode adapté à la fenêtre reste utilisable. */}
+            if(!document.fullscreenElement&&vue.requestFullscreen)try{await vue.requestFullscreen();}catch(e){/* Conserve le mode adapté à la fenêtre. */}
         }
+        function toggleBorneFullscreen(){const vue=document.getElementById('view-borne');return abcChoisirModeBorne(vue?.classList.contains('abc-borne-immersive')?'classique':'complet');}
         document.addEventListener('fullscreenchange',()=>abcAjusterBornePleinEcran(document.fullscreenElement===document.getElementById('view-borne')));
         document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.fullscreenElement)abcAjusterBornePleinEcran(false);});
 
