@@ -2983,15 +2983,18 @@
                 } catch (e) { res(null); }
             });
         }
-        function scanDbOp(mode, fn) { return new Promise(res => { if (!SCAN_Q.db) return res(null); try { const t = SCAN_Q.db.transaction("q", mode), r = fn(t.objectStore("q")); t.oncomplete = () => res(r && r.result !== undefined ? r.result : true); t.onerror = () => res(null); } catch (e) { res(null); } }); }
-        function scanEnfiler(payload) {
+        function scanDbOp(mode, fn) { return new Promise(res => { if (!SCAN_Q.db) return res(null); try { const t = SCAN_Q.db.transaction("q", mode), r = fn(t.objectStore("q")); t.oncomplete = () => res(r && r.result !== undefined ? r.result : true); t.onerror = () => res(null); t.onabort = () => res(null); } catch (e) { res(null); } }); }
+        async function scanEnfiler(payload) {
             payload.scan_id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
             payload.horodatage = new Date().toISOString();
-            const it = { id: payload.scan_id, payload: payload, essais: 0, prochain: 0, enVol: false };
+            const it = { id: payload.scan_id, payload: payload, essais: 0, prochain: Infinity, enVol: false, sauvegarde: false };
             SCAN_Q.items.push(it);
-            scanDbOp("readwrite", st => st.put({ id: it.id, payload: it.payload, essais: 0 }));
             scanMajPuce();
-            scanPomper();
+            // Attendre l’ouverture de la base puis la fin réelle de la transaction.
+            if(SCAN_Q.initialisation)await SCAN_Q.initialisation;
+            it.sauvegarde = (await scanDbOp("readwrite", st => st.put({ id: it.id, payload: it.payload, essais: 0 }))) !== null;
+            it.prochain=0;
+            scanMajPuce();scanPomper();
         }
         function scanPomper() {
             while (SCAN_Q.enVol < 3) {
@@ -3003,6 +3006,7 @@
         async function scanEnvoyer(it) {
             it.enVol = true; SCAN_Q.enVol++;
             try {
+                if(!it.sauvegarde)it.sauvegarde=(await scanDbOp("readwrite",st=>st.put({id:it.id,payload:it.payload,essais:it.essais})))!==null;
                 const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 90000);
                 const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(it.payload), signal: ctrl.signal });
                 clearTimeout(t);
@@ -3032,20 +3036,26 @@
             const att = SCAN_Q.items.length;
             let h = `📤 <strong>${SCAN_Q.ok}</strong> enregistré(s)`;
             if (att) h += ` · ⏳ <strong>${att}</strong> en attente`;
+            const fragiles=SCAN_Q.items.filter(x=>!x.sauvegarde).length;
+            if(fragiles)h+=`<br><strong style="color:#b91c1c">⚠️ ${fragiles} scan(s) sans sauvegarde locale confirmée. Gardez cette page ouverte jusqu’à leur enregistrement.</strong>`;
             if (SCAN_Q.nonVisible) h += ` · 👁️ ${SCAN_Q.nonVisible} sans plateau visible`;
             if (SCAN_Q.camera) h += ` · 📷 ${SCAN_Q.camera} refusé(s) (caméra)`;
             if (SCAN_Q.derniereErreur) h += `<br><span style="color:#b91c1c; font-weight:700;">⚠️ ${SCAN_Q.derniereErreur.replace(/</g, "&lt;")}</span> <span style="color:#64748b;">(nouvel essai automatique, clic = relancer)</span>`;
             el.style.borderColor = SCAN_Q.derniereErreur ? "#ef4444" : "#cbd5e1";
             el.innerHTML = h;
         }
-        (async function scanReprise() {
+        SCAN_Q.initialisation = (async function scanReprise() {
             SCAN_Q.db = await scanDbOuvrir();
             try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {} // demande au navigateur de ne pas purger ces données quand la mémoire manque
             const reste = await scanDbOp("readonly", st => st.getAll());
-            if (Array.isArray(reste)) reste.forEach(x => { if (!SCAN_Q.items.some(y => y.id === x.id)) SCAN_Q.items.push({ id: x.id, payload: x.payload, essais: x.essais || 0, prochain: 0, enVol: false }); });
+            if (Array.isArray(reste)) reste.forEach(x => { if (!SCAN_Q.items.some(y => y.id === x.id)) SCAN_Q.items.push({ id: x.id, payload: x.payload, essais: x.essais || 0, prochain: 0, enVol: false, sauvegarde: true }); });
             scanMajPuce(); scanPomper();
             setInterval(scanPomper, 20000);
         })();
+
+        window.addEventListener('beforeunload', e => {
+            if(SCAN_Q.items.some(x=>!x.sauvegarde)){e.preventDefault();e.returnValue='';}
+        });
 
         // Signal de confirmation : affichage seul, sans toucher aux réglages de la borne.
         function afficherFlashMerci() {
