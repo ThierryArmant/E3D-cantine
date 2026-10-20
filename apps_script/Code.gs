@@ -286,6 +286,10 @@ function doPost(e) {
 
     if (action === "askHub" || action === "questionHub" || action === "analyserQuestion") {
       return reponseJson({ answer: handleAskHub(data) });
+    } else if (action === "saveCorrectionAliment") {
+      responseOutput = handleCorrectionAlimentABC(data);
+    } else if (action === "correctBagWeights") {
+      responseOutput = handleCorrigerPeseeABC(data);
     } else if (action === "saveCatalogue") {
       responseOutput = handleCatalogueABC(data);
     } else if (action === "logMenu") {
@@ -902,7 +906,7 @@ function doGet(e) {
         return reponseJson({
           ecole: school, effectifCouverts: dernierEffectif || parametres.effectif_defaut, dernierMenu: dernierMenu,
           historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, parametres: parametres,
-          rawGaspillage: rawGaspillage, sacsHistory: h, catalogueVersion: 1, catalogue: lireCatalogueABC(sheets)
+          rawGaspillage: rawGaspillage, sacsHistory: h, catalogueVersion: 1, catalogue: lireCatalogueABC(sheets), correctionsVersion: 1, exclusionsAnalyses: lireExclusionsAnalysesABC(sheets), peseesVersion: 1, peseesDetail: lirePeseesDetailABC(sheets)
         });
       } catch (err) {
         vide.error = err.toString();
@@ -984,4 +988,49 @@ function identifierCatalogueABC(nom, composant, catalogue) {
     let vus = {}; while (x.fusionVers && !vus[x.id]) { vus[x.id] = true; const c = catalogue.find(function (y) { return y.id === x.fusionVers; }); if (!c) break; x = c; } return x;
   });
   return finals.every(function (x) { return x.id === finals[0].id; }) ? finals[0] : null;
+}
+
+// Corrections datées et réversibles : les observations originales restent intactes.
+function lireExclusionsAnalysesABC(sheets) {
+  const f=sheets.menus.getParent().getSheetByName('Corrections_Analyses');
+  if(!f)return {};
+  const parJour={};
+  f.getDataRange().getValues().slice(1).forEach(function(l){
+    const d=l[0] instanceof Date?dateIso(l[0]):String(l[0]),cle=String(l[1]);if(!d||!cle)return;
+    const ensemble=parJour[d]=parJour[d]||new Set();
+    if(String(l[2])==='EXCLURE')ensemble.add(cle);else ensemble.delete(cle);
+  });
+  const resultat={};Object.keys(parJour).forEach(function(d){resultat[d]=Array.from(parJour[d]);});return resultat;
+}
+function handleCorrectionAlimentABC(data) {
+  const sheets=getSheetsABC(data.ecole||data.etablissement);
+  const d=String(data.date||''),cle=String(data.aliment||'').trim().slice(0,160);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||!cle||typeof data.exclure!=='boolean')throw new Error('Date ou aliment invalide.');
+  const lock=LockService.getScriptLock();lock.waitLock(30000);
+  try{
+    const ss=sheets.menus.getParent();let f=ss.getSheetByName('Corrections_Analyses');
+    if(!f){f=ss.insertSheet('Corrections_Analyses');f.appendRow(['Date_service','Identification','Action','Horodatage']);}
+    f.appendRow([d,cle,data.exclure?'EXCLURE':'RETABLIR',new Date()]);SpreadsheetApp.flush();
+    return {success:true,correctionsVersion:1,exclusionsAnalyses:lireExclusionsAnalysesABC(sheets)};
+  }finally{lock.releaseLock();}
+}
+function lirePeseesDetailABC(sheets) {
+  return sheets.sacs.getDataRange().getValues().slice(1).map(function(l,i){
+    return {ligne:i+2,date:dateIso(l[0]),revision:JSON.stringify(l.slice(0,6)),alimentaire:Number(l[1])||0,fruits:Number(l[2])||0,pain:Number(l[3])||0,emballages:Number(l[4])||0,serviettes:Number(l[5])||0};
+  });
+}
+function handleCorrigerPeseeABC(data) {
+  const sheets=getSheetsABC(data.ecole||data.etablissement);
+  const ligne=Number(data.ligne),champs=['alimentaire','fruits','pain','emballages','serviettes'];
+  if(!Number.isInteger(ligne)||ligne<2||!data.revision)throw new Error('Sélectionnez une pesée existante.');
+  const poids=champs.map(function(c){const n=Number(data[c]);if(!Number.isFinite(n)||n<0)throw new Error('Les poids doivent être positifs ou nuls.');return n;});
+  const lock=LockService.getScriptLock();lock.waitLock(30000);
+  try{
+    const valeurs=sheets.sacs.getDataRange().getValues();const ancien=valeurs[ligne-1];
+    if(!ancien||JSON.stringify(ancien.slice(0,6))!==data.revision)throw new Error('Cette pesée a été modifiée. Rechargez avant de corriger.');
+    // La date et les autres lignes ne sont pas modifiées ; seule cette pesée est remplacée.
+    sheets.sacs.getRange(ligne,2,1,5).setValues([poids]);SpreadsheetApp.flush();
+  }finally{lock.releaseLock();}
+  actualiserComparaisonPesees(sheets);
+  return {success:true,peseesVersion:1,peseesDetail:lirePeseesDetailABC(sheets)};
 }

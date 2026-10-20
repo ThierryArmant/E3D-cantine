@@ -975,6 +975,12 @@
             const alias = { 'poisson cury':'poisson curry', 'tarte aux citron':'tarte au citron', 'vrap crevette':'wrap crevette' };
             return alias[cle] || cle;
         }
+        function cleObservationStat(it) {
+            const nom = cleAlimentStat(it.nom), etat = cleAlimentStat(it.etat);
+            if (nom === 'poisson' && /\bcurry\b/.test(etat)) return 'poisson curry';
+            if (nom === 'poisson' && /\bpane\b/.test(etat)) return 'poisson pane';
+            return nom;
+        }
         function listeExclusionsStat(date) {
             const school = document.getElementById('select-etablissement')?.value || 'defaut';
             const menu = (globalRawData?.historiqueMenus || {})[normalizeDate(date)];
@@ -983,6 +989,7 @@
             try { values = JSON.parse(localStorage.getItem('exclusionsABC_' + school + '_' + jour) || '[]'); } catch(e) {}
             // Compatibilité avec les anciennes exclusions, limitées au menu de cette date.
             if (menu) { try { values = values.concat(JSON.parse(localStorage.getItem('listeNoire_' + school + '_' + menu) || '[]')); } catch(e) {} }
+            values = values.concat((globalRawData?.exclusionsAnalyses || {})[jour] || []);
             return new Set(values.map(cleAlimentStat));
         }
         function itemsStatistiques(commentaire, date) {
@@ -991,7 +998,7 @@
             const libelles = { 'carottes rapees':'Carottes râpées', 'poisson pane':'Poisson pané', 'poulet roti':'Poulet rôti', 'poulet roti cuisse':'Poulet rôti / Cuisse', 'poisson curry':'Poisson curry', 'tarte au citron':'Tarte au citron', 'wrap crevette':'Wrap crevette' };
             return parseScanItems(commentaire).flatMap(it => {
                 const cle = cleAlimentStat(it.nom);
-                if (!cle || bannis.has(cle)) return [];
+                if (!cle || bannis.has(cle) || bannis.has(cleObservationStat(it))) return [];
                 const generique = /^(entree|dessert|plat|plat principal|plat chaud|accompagnement|aliment|inconnu|non identifie)( non identifie)?$/.test(cle);
                 let reference = Object.keys(COEFFICIENTS_INEVITABLES).concat(Object.keys(COEFFICIENTS_CARBONE_ADEME)).find(n => cleAlimentStat(n) === cle);
                 let nom = libelles[cle] || (reference ? reference.charAt(0).toUpperCase() + reference.slice(1) : cle.charAt(0).toUpperCase() + cle.slice(1));
@@ -4099,6 +4106,6 @@
             }
         };
     </script>
-<script src="abc-catalogue.js?v=20261020-2"></script>
+<script src="abc-catalogue.js?v=20261020-3"></script>
 </body>
 </html>

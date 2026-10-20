@@ -592,7 +592,7 @@ const ABC_CATALOGUE_INITIAL = [
 ];
 /* A.B.C. : catalogue par établissement, sans dépendance externe. */
 'use strict';
-const ABC_CATALOGUE = { school: '', items: [], shared: false, loading: false, busy: false, choice: '', request: 0 };
+const ABC_CATALOGUE = { school: '', items: [], shared: false, loading: false, busy: false, choice: '', request: 0, menus: {}, exclusions: {}, pesees: [], scans: [] };
 const ABC_RUBRIQUES = { entree: 'Entrées', plat: 'Plats principaux', accomp: 'Accompagnements', dessert: 'Desserts & laitages' };
 function abcCle(v) { return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/[^a-z0-9]+/g, ' ').trim(); }
 function abcEcole() { return document.getElementById('select-etablissement')?.value || ''; }
@@ -628,17 +628,25 @@ function abcAccepterCatalogue(data, school) {
     } else {
         abcMessage('Le catalogue partagé nécessite le nouveau GS. Les choix du menu sont utilisables ; les ajouts permanents seront disponibles après son installation.');
     }
-    abcChoixMenu(data.historiqueMenus || {});
+    if (data.historiqueMenus) {
+        ABC_CATALOGUE.menus = data.historiqueMenus;
+        ABC_CATALOGUE.exclusions = data.exclusionsAnalyses || {};
+        ABC_CATALOGUE.pesees = data.peseesDetail || [];
+        ABC_CATALOGUE.scans = data.rawGaspillage || [];
+        abcReprendreMenu(false);
+    }
+    abcChoixMenu(ABC_CATALOGUE.menus || {});
+    abcActualiserCorrections();
 }
 function abcChangerCatalogue() {
-    ABC_CATALOGUE.school=abcEcole(); ABC_CATALOGUE.shared=false; ABC_CATALOGUE.choice=''; ABC_CATALOGUE.request++;
+    ABC_CATALOGUE.school=abcEcole(); ABC_CATALOGUE.menus={}; ABC_CATALOGUE.exclusions={}; ABC_CATALOGUE.pesees=[]; ABC_CATALOGUE.scans=[]; ABC_CATALOGUE.shared=false; ABC_CATALOGUE.choice=''; ABC_CATALOGUE.request++;
     ABC_CATALOGUE.items=ABC_CATALOGUE_INITIAL.map((x,i)=>({...x,id:'initial-'+i,alias:[],actif:true,revision:1,fusionVers:''}));
     // Les anciens favoris restent utilisables et peuvent être transférés explicitement.
     Object.keys(ABC_RUBRIQUES).forEach(type=>{
         let favoris=[];try{favoris=JSON.parse(localStorage.getItem('favs_'+abcEcole()+'_'+type)||'[]');}catch(e){}
         favoris.forEach((libelle,i)=>{if(!ABC_CATALOGUE.items.some(x=>x.rubrique===type&&abcCle(x.libelle)===abcCle(libelle))) ABC_CATALOGUE.items.push({id:'local-'+type+'-'+i,rubrique:type,nature:'base',libelle,alias:[],actif:true,revision:1,local:true});});
     });
-    abcAfficherCatalogue(); abcAfficherGestion(); abcChoixMenu({});
+    abcAfficherCatalogue(); abcAfficherGestion(); abcChoixMenu({}); abcActualiserCorrections();
     abcMessage('Chargement du catalogue de '+abcEcole()+'…');
 }
 async function abcRechargerCatalogue() {
@@ -757,12 +765,12 @@ function abcInstallerAideMenu() {
     const fermer=abcEl('button','×');fermer.type='button';fermer.setAttribute('aria-label','Fermer l’aide');fermer.style.cssText='min-width:36px;min-height:36px;background:#eef5ef;color:#17382b;border:0;border-radius:6px;font-size:22px;';
     entete.append(titre,fermer);panneau.append(entete);
     const sections=[
-        ['1. Choisir le service','Sélectionnez votre établissement et la date du menu.'],
+        ['1. Choisir le service','Sélectionnez votre établissement et la date du menu. Pour une date passée, cliquez sur « Reprendre le menu enregistré ».'],
         ['2. Ajouter un aliment','Dans la bonne colonne, saisissez son nom dans « Autre aliment… », puis cliquez sur 💾. Il est enregistré dans votre catalogue et coché pour ce menu.'],
         ['3. Ajouter une sauce ou une option','Utilisez « Autre sauce / option… », puis 💾. Exemple : cochez Poisson dans les bases et Sauce curry dans les options.'],
         ['4. Composer le menu','Cochez les aliments et leurs options. La case 🧑‍🍳 indique « fait maison ». Décochez un aliment pour le retirer du menu du jour.'],
         ['5. Corriger un nom','Ouvrez « Gérer le catalogue de cet établissement », choisissez l’aliment, corrigez son nom et cliquez sur « Enregistrer la correction ». Les anciennes observations restent associées.'],
-        ['6. Valider','Cliquez sur « VALIDER LE MENU POUR LA BORNE ». Le menu est enregistré pour l’établissement et la date choisis.']
+        ['6. Valider / Corriger','Validez le menu pour l’enregistrer. L’onglet « Corrections » permet ensuite d’ajouter (+), de retirer (−), d’écarter une identification IA ou de corriger une pesée pour une date précise.']
     ];
     sections.forEach(([nom,texte])=>{const section=abcEl('section');section.style.cssText='margin:10px 0;';section.append(abcEl('strong',nom));const p=abcEl('p',texte);p.style.cssText='margin:3px 0 0;';section.append(p);panneau.append(section);});
     const note=abcEl('p','Chaque établissement conserve son propre catalogue. Pour retirer un élément du catalogue, utilisez « Désactiver » ; pour réunir deux doublons, utilisez « Fusionner ».');
@@ -774,6 +782,160 @@ function abcInstallerAideMenu() {
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panneau.hidden){close();bouton.focus();}});
     document.addEventListener('click',e=>{if(!panneau.hidden&&!panneau.contains(e.target)&&!bouton.contains(e.target))close();});
     document.querySelectorAll('.sidebar-menu .menu-item').forEach(e=>e.addEventListener('click',close));
+}
+
+
+// Reprise d'un menu enregistré : un clic charge les cases, la validation enregistre la correction.
+function abcLireMenuEnregistre(texte) {
+    const ids=[]; const types=Object.keys(ABC_RUBRIQUES);
+    const preparation={
+        'poulet roti cuisse':['Poulet','Rôti','Cuisse'], 'poulet roti':['Poulet','Rôti'], 'poulet tex mex':['Poulet','Tex-mex'],
+        'poisson curry':['Poisson','Sauce curry'], 'poisson cury':['Poisson','Sauce curry'], 'poisson pane':['Poisson','Pané']
+    };
+    String(texte||'').split('|').slice(0,4).forEach((part,index)=>{
+        const type=types[index];if(/^\s*sans\b/i.test(part))return;
+        const choisir=(nom,nature)=>{
+            const cle=abcCle(nom);if(!cle)return;
+            let item=ABC_CATALOGUE.items.find(x=>x.rubrique===type&&x.nature===nature&&x.actif&&!x.fusionVers&&[x.libelle,...(x.alias||[])].some(a=>abcCle(a)===cle));
+            if(!item){item={id:'menu-'+type+'-'+nature+'-'+cle,rubrique:type,nature,libelle:nom.trim(),alias:[],actif:true,local:true,revision:1};ABC_CATALOGUE.items.push(item);}
+            ids.push(item.id);return item;
+        };
+        let base=part.trim();const opt=base.match(/\s+\(([^()]*)\)\s*$/);
+        if(opt&&opt[1].split(',').some(n=>ABC_CATALOGUE.items.some(x=>x.rubrique===type&&x.nature==='option'&&abcCle(x.libelle)===abcCle(n)))){
+            opt[1].split(',').forEach(n=>choisir(n,'option'));base=base.slice(0,opt.index);
+        }
+        base.split(/\s+\+\s+/).forEach(morceau=>{
+            const maison=/🧑|fait maison/i.test(morceau);let nom=morceau.replace(/\(Fait Maison\)/ig,'').replace(/[\p{Extended_Pictographic}\u200d\ufe0f]/gu,'').trim();
+            const prep=type==='plat'?preparation[abcCle(nom)]:null;
+            const x=choisir(prep?prep[0]:nom,'base');if(x&&maison)ids.push(x.id+':maison');
+            if(prep)prep.slice(1).forEach(n=>choisir(n,'option'));
+        });
+    });
+    return Array.from(new Set(ids));
+}
+function abcReprendreMenu(force=false) {
+    const date=document.getElementById('input-menu-date')?.value||abcJour();
+    const texte=(ABC_CATALOGUE.menus||{})[date];
+    const statut=document.getElementById('abc-menu-enregistre');
+    if(statut)statut.textContent=texte?'Menu enregistré le '+date+' : '+texte:'Aucun menu enregistré pour le '+date+'.';
+    if(texte){
+        const ids=abcLireMenuEnregistre(texte);
+        if(force||localStorage.getItem(abcSelectionKey())===null)localStorage.setItem(abcSelectionKey(),JSON.stringify(ids));
+    }
+    abcAfficherCatalogue();abcAfficherCorrectionsJour();
+}
+function abcAfficherCorrectionsJour() {
+    const select=document.getElementById('abc-correction-item');if(!select)return;
+    const date=document.getElementById('input-menu-date')?.value||abcJour();const precedent=select.value;
+    const vus=new Map();
+    if(ABC_CATALOGUE.school===abcEcole())(ABC_CATALOGUE.scans||[]).filter(s=>normalizeDate(s.dateRaw)===date&&s.type==='SCAN_IA_VISION').forEach(s=>parseScanItems(s.commentaire).forEach(it=>{
+        const cle=cleObservationStat(it);if(!vus.has(cle))vus.set(cle,it.nom+(it.etat!=='non précisé'?' · '+it.etat:''));
+    }));
+    const exclus=(ABC_CATALOGUE.exclusions||{})[date]||[];exclus.forEach(c=>{if(!vus.has(c))vus.set(c,c);});
+    select.replaceChildren(abcEl('option','— Choisir une identification à corriger —'));select.firstChild.value='';
+    vus.forEach((nom,cle)=>{const o=abcEl('option',nom+(exclus.includes(cle)?' (écarté)':''));o.value=cle;select.append(o);});select.value=vus.has(precedent)?precedent:'';
+}
+async function abcCorrigerAlimentJour(exclure) {
+    const school=abcEcole(),date=document.getElementById('input-menu-date').value,aliment=document.getElementById('abc-correction-item').value;
+    const statut=document.getElementById('abc-correction-status');
+    if(!aliment){statut.textContent='Choisissez l’aliment détecté à tort.';return;}
+    statut.textContent='Enregistrement de la correction du '+date+'…';
+    try{
+        const r=await fetch(ADRESSE_SHEET_OFFICIELLE,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({action:'saveCorrectionAliment',ecole:school,date,aliment,exclure})});const data=await r.json();
+        if(!data.success||data.correctionsVersion!==1)throw new Error(data.error||'Cette fonction nécessite le dernier GS complet et son redéploiement.');
+        if(school!==abcEcole())return;
+        ABC_CATALOGUE.exclusions=data.exclusionsAnalyses||{};
+        if(globalRawData?.ecole===school){globalRawData.exclusionsAnalyses=ABC_CATALOGUE.exclusions;applyCustomDateFilter();}
+        abcAfficherCorrectionsJour();statut.textContent=(exclure?'Identification écartée':'Correction annulée')+' pour le '+date+'. Les scans d’origine sont conservés.';
+    }catch(e){if(school===abcEcole())statut.textContent=e.message;}
+}
+function abcInstallerRetoucheMenu() {
+    if(document.getElementById('abc-menu-enregistre'))return;
+    const table=document.querySelector('.menu-table');if(!table)return;
+    const ligne=abcEl('div');ligne.style.cssText='margin:10px 0;padding:10px;background:#eff6ff;border-radius:7px;font-size:12px;';
+    const statut=abcEl('p','Choisissez une date pour reprendre son menu.');statut.id='abc-menu-enregistre';statut.style.margin='0 0 7px';
+    const reprendre=abcEl('button','↩ Reprendre le menu enregistré','btn btn-outline');reprendre.type='button';reprendre.style.width='auto';reprendre.addEventListener('click',()=>abcReprendreMenu(true));ligne.append(statut,reprendre);
+    const details=abcEl('details');details.id='abc-corrections-analyses';details.style.marginTop='10px';details.append(abcEl('summary','Corriger un aliment détecté à tort ce jour-là'));
+    details.append(abcEl('p','Exemple : le cuisinier confirme que le poisson curry n’a pas été servi. Choisissez cette identification et marquez-la non servie pour cette date.'));
+    const select=abcEl('select');select.id='abc-correction-item';select.setAttribute('aria-label','Identification à corriger pour cette date');select.style.maxWidth='100%';details.append(select);
+    [[true,'− Écarter des analyses'],[false,'+ Rétablir cette identification']].forEach(([action,nom])=>{const b=abcEl('button',nom,'btn btn-outline');b.type='button';b.style.cssText='width:auto;margin:5px;';b.addEventListener('click',()=>abcCorrigerAlimentJour(action));details.append(b);});
+    const etat=abcEl('p');etat.id='abc-correction-status';etat.setAttribute('role','status');details.append(etat);ligne.append(details);table.parentNode.insertAdjacentElement('beforebegin',ligne);
+}
+
+function abcAfficherPeseesCorrigeables() {
+    const select=document.getElementById('abc-pesee-selection');if(!select)return;
+    const precedent=select.value;select.replaceChildren(abcEl('option','— Choisir une pesée à corriger —'));select.firstChild.value='';
+    (ABC_CATALOGUE.pesees||[]).forEach(x=>{const o=abcEl('option',x.date+' · ligne '+x.ligne+' · alimentaire '+x.alimentaire+' kg · fruits '+x.fruits+' kg · pain '+x.pain+' kg');o.value=String(x.ligne);select.append(o);});
+    if((ABC_CATALOGUE.pesees||[]).some(x=>String(x.ligne)===precedent))select.value=precedent;
+    abcChargerPesee();
+}
+function abcChargerPesee() {
+    const x=(ABC_CATALOGUE.pesees||[]).find(x=>String(x.ligne)===document.getElementById('abc-pesee-selection')?.value);
+    ['alimentaire','fruits','pain','emballages','serviettes'].forEach(c=>{const input=document.getElementById('abc-pesee-'+c);if(input)input.value=x?x[c]:'';});
+}
+async function abcCorrigerPesee() {
+    const statut=document.getElementById('abc-pesee-status');const x=(ABC_CATALOGUE.pesees||[]).find(x=>String(x.ligne)===document.getElementById('abc-pesee-selection').value);
+    if(!x){statut.textContent='Choisissez la pesée à corriger.';return;}
+    const school=abcEcole(),payload={action:'correctBagWeights',ecole:school,ligne:x.ligne,revision:x.revision};
+    for(const c of ['alimentaire','fruits','pain','emballages','serviettes']){const input=document.getElementById('abc-pesee-'+c);if(input.value===''){statut.textContent='Renseignez les cinq poids, même à zéro.';return;}payload[c]=Number(input.value);if(!Number.isFinite(payload[c])||payload[c]<0){statut.textContent='Poids invalide.';return;}}
+    statut.textContent='Correction de la pesée du '+x.date+'…';
+    try{
+        const r=await fetch(ADRESSE_SHEET_OFFICIELLE,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(payload)});const data=await r.json();
+        if(!data.success||data.peseesVersion!==1)throw new Error(data.error||'Installez et redéployez le dernier GS complet pour corriger une pesée.');
+        if(school!==abcEcole())return;ABC_CATALOGUE.pesees=data.peseesDetail;abcAfficherPeseesCorrigeables();
+        statut.textContent='Pesée corrigée. Actualisation du tableau de bord…';loadLiveData();
+    }catch(e){if(school===abcEcole())statut.textContent=e.message;}
+}
+function abcInstallerCorrectionPesees() {
+    if(document.getElementById('abc-pesee-selection'))return;
+    const vue=document.getElementById('view-saisie-dechets');if(!vue)return;
+    const box=abcEl('details');box.id='abc-corrections-pesees';box.style.cssText='margin:12px 0;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;max-width:1050px;font-size:13px;';box.append(abcEl('summary','✏️ Corriger une pesée déjà enregistrée / erreur de bac'));
+    box.append(abcEl('p','Choisissez la pesée concernée et répartissez le poids entre les bons bacs. L’enregistrement remplace cette pesée. Exemple : 1 kg de pain dans le bac alimentaire → retirez 1 kg à alimentaire et ajoutez 1 kg à pain.'));
+    const select=abcEl('select');select.id='abc-pesee-selection';select.setAttribute('aria-label','Pesée existante à corriger');select.style.maxWidth='100%';select.addEventListener('change',abcChargerPesee);box.append(select);
+    const ligne=abcEl('div');ligne.style.cssText='display:flex;flex-wrap:wrap;gap:10px;margin:10px 0;';
+    Object.entries({alimentaire:'Alimentaire',fruits:'Fruits',pain:'Pain',emballages:'Emballages',serviettes:'Serviettes'}).forEach(([c,nom])=>{const label=abcEl('label',nom+' (kg) ');const input=abcEl('input');input.id='abc-pesee-'+c;input.type='number';input.min='0';input.step='0.001';input.style.cssText='width:90px;padding:7px;';label.append(input);ligne.append(label);});box.append(ligne);
+    const save=abcEl('button','💾 Enregistrer la correction de cette pesée','btn');save.type='button';save.style.width='auto';save.addEventListener('click',abcCorrigerPesee);box.append(save);
+    const statut=abcEl('p');statut.id='abc-pesee-status';statut.setAttribute('role','status');box.append(statut);vue.prepend(box);
+}
+
+function abcActualiserCorrections() { abcAfficherMenuCorrection();abcAfficherCorrectionsJour();abcAfficherPeseesCorrigeables(); }
+function abcAfficherMenuCorrection() {
+    const liste=document.getElementById('abc-correction-menu-items');if(!liste)return;
+    const date=document.getElementById('input-menu-date').value;
+    const resume=document.getElementById('abc-correction-menu-summary');if(resume)resume.textContent=(ABC_CATALOGUE.menus||{})[date]?'Menu enregistré pour le '+date+' · modifiez les éléments puis validez.':'Aucun menu enregistré pour le '+date+' · vous pouvez en composer un.';
+    liste.replaceChildren();const ids=abcSelection().filter(id=>!id.endsWith(':maison'));
+    ids.forEach(id=>{const x=ABC_CATALOGUE.items.find(x=>x.id===id);if(!x||!x.actif)return;
+        const ligne=abcEl('div');ligne.style.cssText='display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #e2e8f0;';
+        const moins=abcEl('button','− Retirer');moins.type='button';moins.style.cssText='min-height:38px;padding:6px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff1f2;color:#991b1b;';
+        moins.addEventListener('click',()=>{const selection=abcSelection().filter(v=>v!==id&&v!==id+':maison');localStorage.setItem(abcSelectionKey(),JSON.stringify(selection));abcAfficherCatalogue();abcAfficherMenuCorrection();});
+        ligne.append(moins,abcEl('span',x.libelle+' · '+ABC_RUBRIQUES[x.rubrique]+(x.nature==='option'?' · option':'')));liste.append(ligne);
+    });
+    if(!ids.length)liste.append(abcEl('p','Aucun aliment sélectionné pour ce menu.'));
+    const select=document.getElementById('abc-menu-ajout-item');if(!select)return;const type=document.getElementById('abc-menu-ajout-type').value;
+    select.replaceChildren(abcEl('option','— Choisir un aliment ou une option —'));select.firstChild.value='';
+    ABC_CATALOGUE.items.filter(x=>x.actif&&!x.fusionVers&&x.rubrique===type&&!ids.includes(x.id)).forEach(x=>{const o=abcEl('option',x.libelle+(x.nature==='option'?' (option)':''));o.value=x.id;select.append(o);});
+}
+function abcInstallerOngletCorrection() {
+    if(document.getElementById('view-corrections'))return;
+    const vue=abcEl('div',undefined,'view-section');vue.id='view-corrections';vue.style.maxWidth='1050px';
+    const fond=abcEl('div');fond.style.cssText='background:white;border-radius:8px;padding:16px;';vue.append(fond);
+    fond.append(abcEl('h2','✏️ Corrections du service'));
+    const label=abcEl('label','Date à corriger : ');const date=abcEl('input');date.type='date';date.id='abc-date-correction';date.value=document.getElementById('input-menu-date').value;date.style.cssText='padding:8px;margin:8px;';label.append(date);fond.append(label);
+    date.addEventListener('change',()=>{document.getElementById('input-menu-date').value=date.value;abcReprendreMenu(false);abcAfficherMenuCorrection();});
+    const resume=abcEl('p');resume.id='abc-correction-menu-summary';fond.append(resume);
+    const reprendre=abcEl('button','↩ Reprendre le menu enregistré','btn btn-outline');reprendre.type='button';reprendre.style.width='auto';reprendre.addEventListener('click',()=>{abcReprendreMenu(true);abcAfficherMenuCorrection();});fond.append(reprendre);
+    fond.append(abcEl('h3','Menu : ajouter ou retirer un élément'));
+    const liste=abcEl('div');liste.id='abc-correction-menu-items';fond.append(liste);
+    const ajouter=abcEl('div');ajouter.style.cssText='display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;';
+    const rubrique=abcEl('select');rubrique.id='abc-menu-ajout-type';rubrique.setAttribute('aria-label','Rubrique de l’aliment à ajouter');Object.entries(ABC_RUBRIQUES).forEach(([v,n])=>{const o=abcEl('option',n);o.value=v;rubrique.append(o);});rubrique.value='plat';rubrique.addEventListener('change',abcAfficherMenuCorrection);ajouter.append(rubrique);
+    const select=abcEl('select');select.id='abc-menu-ajout-item';select.style.maxWidth='100%';select.setAttribute('aria-label','Aliment ou option à ajouter au menu');ajouter.append(select);
+    const plus=abcEl('button','+ Ajouter','btn btn-outline');plus.type='button';plus.style.width='auto';plus.addEventListener('click',()=>{if(!select.value)return;localStorage.setItem(abcSelectionKey(),JSON.stringify([...new Set([...abcSelection(),select.value])]));abcAfficherCatalogue();abcAfficherMenuCorrection();});ajouter.append(plus);fond.append(ajouter);
+    const nouveau=abcEl('p','Un aliment manque au catalogue ? Ajoutez-le dans « Saisie des menus », puis retrouvez-le ici.');fond.append(nouveau);
+    const valider=abcEl('button','💾 Valider la correction du menu','btn');valider.type='button';valider.style.width='auto';valider.addEventListener('click',()=>saveMenu());fond.append(valider);
+    const analyses=document.getElementById('abc-corrections-analyses');if(analyses){analyses.open=true;fond.append(analyses);}
+    const pesees=document.getElementById('abc-corrections-pesees');if(pesees)fond.append(pesees);
+    document.querySelector('.content-area').append(vue);
+    const nav=abcEl('li','✏️ Corrections','menu-item');nav.id='menu-view-corrections';nav.addEventListener('click',()=>{switchView('view-corrections');abcReprendreMenu(false);abcActualiserCorrections();loadLiveData();});document.getElementById('menu-view-rapport').insertAdjacentElement('beforebegin',nav);
 }
 
 function abcInitialiserInterface() {
@@ -799,7 +961,8 @@ function abcInitialiserInterface() {
     zone.append(abcEl('span','Tu avais pris quoi ? '));
     ['poulet','poisson','les deux'].forEach((v,i)=>{const b=abcEl('button',['🍗 Poulet','🐟 Poisson','Les deux'][i]);b.type='button';b.dataset.choix=v;b.setAttribute('aria-pressed','false');b.style.cssText='min-height:44px;padding:6px 12px;margin:3px;border:1px solid #93b2a1;border-radius:6px;background:white;color:#17382b;';b.addEventListener('click',()=>{ABC_CATALOGUE.choice=ABC_CATALOGUE.choice===v?'':v;zone.querySelectorAll('button').forEach(bt=>{const on=bt.dataset.choix===ABC_CATALOGUE.choice;bt.setAttribute('aria-pressed',String(on));bt.style.background=on?'#bbf7d0':'white';});});zone.append(b);});
     const video=document.getElementById('abc-zone-plateau');video?.insertAdjacentElement('afterend',zone);
-    document.getElementById('input-menu-date')?.addEventListener('change',abcAfficherCatalogue);
+    abcInstallerRetoucheMenu(); abcInstallerCorrectionPesees(); abcInstallerOngletCorrection();
+    document.getElementById('input-menu-date')?.addEventListener('change',()=>{ document.getElementById('abc-date-correction').value=document.getElementById('input-menu-date').value; abcReprendreMenu(false); abcActualiserCorrections(); });
     abcChangerCatalogue();
 }
 // Les fonctions de saisie existantes utilisent désormais le catalogue et les sélections datées.
