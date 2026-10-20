@@ -204,7 +204,7 @@
         .prec-kpi .v { font-size:20px; font-weight:900; color:#1b4332; }
         .prec-kpi .l { font-size:11px; color:#64748b; }
 </style>
-<link rel="stylesheet" href="abc-mobile.css?v=20261021-borne-fond-noir-1">
+<link rel="stylesheet" href="abc-mobile.css?v=20261021-trois-modes-1024-1">
 </head>
 <body>
 <div id="tip-flottant"></div>
@@ -370,6 +370,7 @@
             <div id="view-borne" class="view-section abc-borne-adaptatif">
                 <div id="abc-borne-modes" role="group" aria-label="Présentation de la borne">
                     <button type="button" id="abc-mode-complet" aria-pressed="true" onclick="abcChoisirModeBorne('actuel')">Affichage actuel</button>
+                    <button type="button" id="abc-mode-intermediaire" aria-pressed="false" onclick="abcChoisirModeBorne('intermediaire')">Intermédiaire · 1024 px</button>
                     <button type="button" id="abc-mode-classique" aria-pressed="false" onclick="abcChoisirModeBorne('precedent')">Affichage précédent</button>
                     <button type="button" id="abc-mode-plein" onclick="toggleBorneFullscreen()">⛶ Plein écran</button>
                 </div>
@@ -2885,11 +2886,9 @@
 
         function abcChoisirModeBorne(mode) {
             const vue=document.getElementById('view-borne');if(!vue)return;
-            const actuel=mode==='actuel';
-            vue.classList.toggle('abc-borne-adaptatif',actuel);
-            vue.classList.toggle('abc-borne-classique',!actuel);
-            document.getElementById('abc-mode-complet')?.setAttribute('aria-pressed',String(actuel));
-            document.getElementById('abc-mode-classique')?.setAttribute('aria-pressed',String(!actuel));
+            const choix=['actuel','intermediaire','precedent'].includes(mode)?mode:'actuel';
+            const modes=[['actuel','abc-borne-adaptatif','abc-mode-complet'],['intermediaire','abc-borne-intermediaire','abc-mode-intermediaire'],['precedent','abc-borne-classique','abc-mode-classique']];
+            modes.forEach(([valeur,classe,id])=>{const actif=choix===valeur;vue.classList.toggle(classe,actif);document.getElementById(id)?.setAttribute('aria-pressed',String(actif));});
         }
         function abcAjusterBornePleinEcran(actif) {
             const vue=document.getElementById('view-borne');if(!vue)return;
