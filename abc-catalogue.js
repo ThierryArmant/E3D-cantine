@@ -685,17 +685,49 @@ async function abcModifierCatalogue(data) {
         return res;
     } finally { ABC_CATALOGUE.busy=false; }
 }
+
+const ABC_EDITIONS_LISTES = new Map();
+function abcCleEditionListe(type,nature){return abcEcole()+'|'+type+'|'+nature;}
+function abcOuvrirEditionListe(type,nature){
+ const noms=new Map();ABC_CATALOGUE.items.filter(x=>x.rubrique===type&&x.nature===nature&&x.actif&&!x.fusionVers).forEach(x=>noms.set(x.id,{id:x.id,libelle:x.libelle,original:x.libelle,revision:x.revision}));
+ ABC_EDITIONS_LISTES.set(abcCleEditionListe(type,nature),{noms,saving:false,message:''});
+}
+async function abcTerminerEditionListe(type,nature){
+ const school=abcEcole(),cle=abcCleEditionListe(type,nature),edition=ABC_EDITIONS_LISTES.get(cle);if(!edition||edition.saving)return;
+ const changements=Array.from(edition.noms.values()).filter(x=>x.libelle.trim()!==x.original);
+ if(changements.some(x=>!x.libelle.trim())){edition.message='Un nom est vide. Complétez-le avant de terminer.';abcAfficherCatalogue();return;}
+ if(!changements.length){ABC_EDITIONS_LISTES.delete(cle);abcAfficherCatalogue();return;}
+ edition.saving=true;edition.message='Enregistrement des noms…';abcAfficherCatalogue();
+ try{
+  for(const x of changements){
+   if(school!==abcEcole())return;
+   const res=await abcModifierCatalogue({operation:'save',id:x.id,revision:x.revision,rubrique:type,nature,libelle:x.libelle.trim()});
+   const enregistre=(res.catalogue||[]).find(y=>y.id===x.id);
+   x.original=x.libelle.trim();x.libelle=x.original;if(enregistre)x.revision=enregistre.revision;
+  }
+  ABC_EDITIONS_LISTES.delete(cle);if(school===abcEcole()){abcAfficherCatalogue();abcMessage('✓ Noms enregistrés dans le catalogue de '+school+'.');}
+ }catch(e){edition.message='Enregistrement interrompu : '+e.message;abcMessage(edition.message);}
+ finally{edition.saving=false;if(school===abcEcole()&&ABC_EDITIONS_LISTES.has(cle))abcAfficherCatalogue();}
+}
+
 function abcAfficherCatalogue() {
     const selected=new Set(abcSelection());
     document.querySelectorAll('[data-abc-rubrique]').forEach(td=>{
         const type=td.dataset.abcRubrique;td.replaceChildren();
         ['base','option'].forEach(nature=>{
-            const titre=abcEl('div',nature==='base'?'Bases / Plats composés':'Options / Sauces / Préparations','sub-theme');td.append(titre);
+            const cleEdition=abcCleEditionListe(type,nature),edition=ABC_EDITIONS_LISTES.get(cleEdition);
+            const titre=abcEl('div',undefined,'sub-theme');titre.style.cssText='display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;';
+            titre.append(abcEl('span',nature==='base'?'Bases / Plats composés':'Options / Sauces / Préparations'));
+            const crayon=abcEl('button',edition?'✓ Terminé':'✏️ Modifier');crayon.type='button';crayon.setAttribute('aria-label',(edition?'Enregistrer les noms de ':'Modifier les noms de ')+ABC_RUBRIQUES[type]+(nature==='option'?' · sauces et options':''));crayon.style.cssText='min-height:40px;padding:7px 10px;border:1px solid #2d6a4f;border-radius:7px;background:white;color:#1b4332;cursor:pointer;font-size:14px;';crayon.disabled=!!edition?.saving;
+            crayon.addEventListener('click',()=>{if(ABC_EDITIONS_LISTES.has(cleEdition))abcTerminerEditionListe(type,nature);else{abcOuvrirEditionListe(type,nature);abcAfficherCatalogue();}});titre.append(crayon);td.append(titre);
+            if(edition){const aide=abcEl('p',edition.message||'Modifiez les noms, puis cliquez sur « Terminé ».');aide.setAttribute('role','status');aide.style.cssText='font-size:13px;color:#475569;padding:6px 0;';td.append(aide);}
             const groupe=abcEl('div');groupe.style.cssText='max-height:240px;overflow:auto;';td.append(groupe);
             ABC_CATALOGUE.items.filter(x=>x.rubrique===type&&x.nature===nature&&x.actif&&!x.fusionVers).forEach(x=>{
                 const label=abcEl('label',undefined,'checkbox-label');const cb=abcEl('input');cb.type='checkbox';cb.dataset.catalogueId=x.id;
                 cb.value=x.libelle;cb.name=type==='dessert'?'dessert_douceur':type+'_base';if(nature==='option')cb.name=type+'_opt';cb.checked=selected.has(x.id);
-                cb.addEventListener('change',abcSauverSelection);label.append(cb,abcEl('span',(nature==='option'?'+ ':'')+x.libelle));
+                cb.addEventListener('change',abcSauverSelection);label.append(cb);
+                if(edition){const fiche=edition.noms.get(x.id);const nom=abcEl('input');nom.type='text';nom.value=fiche?fiche.libelle:x.libelle;nom.setAttribute('aria-label','Nom de '+x.libelle);nom.style.cssText='min-width:0;width:100%;flex:1;padding:8px;border:1px solid #94a3b8;border-radius:6px;font-size:16px;';nom.disabled=edition.saving;nom.addEventListener('input',()=>{const entree=edition.noms.get(x.id);if(entree)entree.libelle=nom.value;});label.append(nom);}
+                else label.append(abcEl('span',(nature==='option'?'+ ':'')+x.libelle));
                 if(nature==='base'){
                     const fm=abcEl('input');fm.type='checkbox';fm.name='fait_maison';fm.dataset.catalogueId=x.id;fm.dataset.maison='1';fm.checked=selected.has(x.id+':maison');fm.setAttribute('aria-label',x.libelle+' fait maison');fm.addEventListener('change',abcSauverSelection);
                     const span=abcEl('span');span.style.marginLeft='auto';span.append(fm,document.createTextNode(' 🧑‍🍳'));label.append(span);
@@ -978,7 +1010,7 @@ function abcInitialiserInterface() {
     const tds=Array.from(table.querySelectorAll('tbody tr:first-child > td'));
     Object.keys(ABC_RUBRIQUES).forEach((t,i)=>{if(tds[i])tds[i].dataset.abcRubrique=t;});
     const details=abcEl('details');details.style.cssText='padding:12px;background:#f0fdf4;border:1px solid #bbd7c3;border-radius:8px;margin:12px 0;';
-    details.append(abcEl('summary','✏️ Gérer le catalogue de cet établissement'));
+    details.append(abcEl('summary','Options avancées du catalogue · fusion et désactivation'));
     const status=abcEl('p','Chargement du catalogue…');status.id='abc-catalogue-status';status.setAttribute('role','status');details.append(status);
     const row=abcEl('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:8px;align-items:center;';
     const sel=abcEl('select');sel.id='abc-edit-select';sel.setAttribute('aria-label','Élément du catalogue');sel.style.maxWidth='100%';sel.addEventListener('change',abcChoisirEdition);row.append(sel);
