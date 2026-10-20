@@ -129,12 +129,12 @@ body.abc-borne-plein{overflow:hidden!important}
 :is(.abc-borne-immersive,:fullscreen) .abc-borne-camera{min-width:0;min-height:0;gap:4px;justify-content:flex-start!important}
 :is(.abc-borne-immersive,:fullscreen) #instruction-text{font-size:clamp(16px,2.4vw,30px)!important;padding:8px!important;margin:0!important;flex:none;line-height:1.15}
 :is(.abc-borne-immersive,:fullscreen) #scan-statut{margin:0!important;padding:3px 7px!important;flex:none}
-:is(.abc-borne-immersive,:fullscreen) #zoom-barre,:is(.abc-borne-immersive,:fullscreen) .abc-borne-camera>div:has(#camera-select){display:none!important}
+
 :is(.abc-borne-immersive,:fullscreen) #abc-zone-plateau{min-height:0!important;flex:1!important;height:0;margin:0!important}
 :is(.abc-borne-immersive,:fullscreen) #camera-feed{position:absolute;inset:0;width:100%;height:100%;object-fit:contain!important;background:#0f172a}
 :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis{width:auto!important;min-width:0;min-height:0;padding:8px!important;gap:7px!important}
 :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis>div{flex:none;margin:0!important}
-:is(.abc-borne-immersive,:fullscreen) .abc-borne-avis>div:nth-child(2){display:none}
+
 :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis button{min-height:0!important;min-width:0;padding:6px!important;font-size:clamp(16px,2vw,28px)!important;line-height:1.15;overflow-wrap:break-word}
 :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis button>span[aria-hidden]{font-size:clamp(24px,4vh,40px)!important}
 :is(.abc-borne-immersive,:fullscreen) #abc-choix-plat{padding:5px!important;margin:0!important;flex:none}
@@ -144,14 +144,14 @@ body.abc-borne-plein{overflow:hidden!important}
 @media(orientation:portrait){
  :is(.abc-borne-immersive,:fullscreen) .abc-borne-main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) clamp(160px,28dvh,260px)}
  :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
- :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis>div{display:none}
+
  :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis button{font-size:clamp(16px,3vw,24px)!important}
  #abc-borne-quitter-plein{min-height:44px}
 }
 @media(orientation:landscape) and (max-height:480px){
  :is(.abc-borne-immersive,:fullscreen) #instruction-text{font-size:16px!important;padding:4px!important}
- :is(.abc-borne-immersive,:fullscreen) #scan-statut{display:none}
- :is(.abc-borne-immersive,:fullscreen) #abc-choix-plat strong{display:none}
+
+
  :is(.abc-borne-immersive,:fullscreen) .abc-borne-avis button{flex-direction:row!important;gap:6px!important}
  :is(.abc-borne-immersive,:fullscreen) .borne-container>div:last-child:not(.abc-borne-main){max-height:24px}
 }
@@ -161,3 +161,24 @@ body.abc-borne-plein{overflow:hidden!important}
 #view-borne .borne-container{max-width:none!important;width:100%;min-width:0}
 #view-borne:fullscreen{width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important;box-sizing:border-box}
 #view-borne:fullscreen::backdrop{background:#edf5ef}
+
+/* Plein écran complet : toutes les commandes restent présentes. */
+#view-borne:is(.abc-borne-immersive,:fullscreen){overflow:auto!important}
+#view-borne:is(.abc-borne-immersive,:fullscreen) #zoom-barre,
+#view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-camera>div:has(#camera-select){display:flex!important;flex:none;flex-wrap:wrap;gap:5px!important;padding:4px 6px!important;margin:0!important}
+#view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-camera>div:has(#camera-select)>div{flex-wrap:wrap;min-width:0}
+#view-borne:is(.abc-borne-immersive,:fullscreen) #camera-select{min-width:0;max-width:min(300px,65vw);min-height:30px}
+#view-borne:is(.abc-borne-immersive,:fullscreen) #zoom-barre input[type=range]{min-height:26px}
+#view-borne:is(.abc-borne-immersive,:fullscreen) #abc-zone-plateau{min-height:120px!important}
+#view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-camera{min-height:340px}
+#view-borne:is(.abc-borne-immersive,:fullscreen) #instruction-text{font-size:clamp(16px,1.8vw,25px)!important;padding:6px!important}
+#view-borne:is(.abc-borne-immersive,:fullscreen) .borne-container>div:last-child:not(.abc-borne-main){max-height:none!important;overflow:visible;font-size:12px!important}
+@media(orientation:portrait){
+ #view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-main{grid-template-rows:minmax(340px,1fr) minmax(180px,28dvh)}
+ #view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-avis{grid-template-rows:auto auto minmax(60px,1fr) minmax(60px,1fr)}
+ #view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-avis>div{grid-column:1 / -1}
+}
+@media(orientation:landscape) and (max-height:480px){
+ #view-borne:is(.abc-borne-immersive,:fullscreen) .abc-borne-camera{min-height:300px}
+ #view-borne:is(.abc-borne-immersive,:fullscreen) #abc-zone-plateau{min-height:100px!important}
+}
