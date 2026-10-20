@@ -211,3 +211,14 @@ body.abc-borne-plein{overflow:hidden!important}
 #view-borne:fullscreen::backdrop{background:#000}
 #view-borne .borne-container>div:last-child:not(.abc-borne-main){color:#e2e8f0!important}
 #view-borne #borne-menu-active{color:#d1fae5!important}
+
+/* Présentation intermédiaire : largeur maximale 1024 px, sans forcer la résolution de l’écran. */
+#view-borne.abc-borne-intermediaire .borne-container{width:100%!important;max-width:1024px!important;margin:0 auto;padding:10px}
+#view-borne.abc-borne-intermediaire .abc-borne-main{display:grid!important;grid-template-columns:minmax(0,1fr) 200px;gap:10px!important}
+#view-borne.abc-borne-intermediaire .abc-borne-avis{width:auto!important;padding:9px!important;gap:8px!important}
+#view-borne.abc-borne-intermediaire .abc-borne-avis button{font-size:20px!important}
+@media(max-width:600px){
+ #view-borne.abc-borne-intermediaire .abc-borne-main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(340px,1fr) minmax(180px,28dvh)}
+ #view-borne.abc-borne-intermediaire .abc-borne-avis{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto minmax(60px,1fr) minmax(60px,1fr)}
+ #view-borne.abc-borne-intermediaire .abc-borne-avis>div{grid-column:1 / -1}
+}
