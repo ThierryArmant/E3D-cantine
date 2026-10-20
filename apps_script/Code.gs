@@ -1,9 +1,9 @@
 // ==========================================================================
 // A.B.C. – Assiette Bas Carbone : serveur Google Apps Script (version 3)
-// Ce fichier NE CONTIENT NI clé API NI identifiants de tableurs.
+// La clé API reste dans les propriétés du script ; les établissements viennent de Configuration.
 //  - Clé Gemini      : Propriétés du script > GEMINI_KEY   (voir configurerCle)
-//  - Annuaire écoles : tableur central (propriété ANNUAIRE_SHEET_ID) ou, à défaut,
-//                      la constante ANNUAIRE_ECOLES ci-dessous.
+//  - Annuaire écoles : colonnes A (nom) et B (ID Google Sheets), onglet Configuration de Giono.
+//  - CONFIGURATION_SHEET_ID / CONFIGURATION_ONGLET dans les propriétés permettent de déplacer cette liste.
 // ==========================================================================
 const NOM_MODELE_GEMINI = "gemini-3.5-flash";
 const URL_REFERENTIEL = "https://raw.githubusercontent.com/ThierryArmant/E3D-cantine/main/plan_alimentaire_reference.txt";
@@ -17,14 +17,10 @@ const PARAMETRES_DEFAUT = [
   ["portion_dessert_g", 100, "Dessert ou laitage (g) - référence collège : pâtisserie 80 à 100, compote 100 à 120, yaourt 125"],
   ["portion_fruit_g", 150, "Fruit frais (g) - référence collège : 150 à 180"],
   ["portion_pain_g", 50, "Pain (g) - référence collège : 40 à 50 par repas"],
+  ["portion_sauce_g", 20, "Sauce séparée : portion de travail en g, à ajuster selon le service"],
   ["effectif_defaut", 450, "Effectif attendu par défaut (couverts)"],
   ["prix_kg_eur", 4.5, "Coût moyen de la denrée (€/kg)"]
 ];
-
-// Secours si aucun annuaire central n'est configuré : { "NOM ÉTABLISSEMENT": "ID_DU_TABLEUR" }
-const ANNUAIRE_ECOLES = {
-  // "COLLEGE EXEMPLE": "ID_GOOGLE_SHEET"
-};
 
 // ==========================================================================
 // CLÉ GEMINI (jamais dans le code)
@@ -42,37 +38,6 @@ function configurerCle() {
   PropertiesService.getScriptProperties().setProperty("GEMINI_KEY", MA_CLE);
 }
 
-// ▶️ DIAGNOSTIC : à exécuter depuis l'éditeur (menu « Exécuter » > diagnostic) puis ouvrir « Journal d'exécution ».
-// Il dit en clair si la clé IA est présente, si le modèle répond, et si les tableurs sont accessibles.
-function diagnostic() {
-  const lignes = [];
-  const k = PropertiesService.getScriptProperties().getProperty("GEMINI_KEY");
-  lignes.push(k ? "✅ Clé GEMINI_KEY présente (" + k.length + " caractères)" : "❌ Clé GEMINI_KEY ABSENTE : exécute configurerCle() une fois (ou ajoute la propriété du script).");
-  if (k) {
-    try {
-      const rep = appelerGeminiParRequete({ contents: [{ parts: [{ text: "Réponds uniquement par le mot OK." }] }] });
-      const txt = JSON.parse(rep.getContentText()).candidates[0].content.parts[0].text;
-      lignes.push("✅ Le modèle " + NOM_MODELE_GEMINI + " répond : " + String(txt).trim().slice(0, 40));
-    } catch (e) {
-      lignes.push("❌ Appel au modèle " + NOM_MODELE_GEMINI + " en échec : " + String(e.message).slice(0, 300));
-    }
-  }
-  try {
-    const ann = getAnnuaire();
-    const noms = Object.keys(ann || {});
-    lignes.push("✅ Annuaire lu : " + noms.length + " établissement(s) : " + noms.join(", "));
-    noms.slice(0, 5).forEach(function (n) {
-      try { getSheetsABC(n); lignes.push("   ✅ Tableur « " + n + " » accessible"); }
-      catch (e) { lignes.push("   ❌ Tableur « " + n + " » : " + String(e.message).slice(0, 200)); }
-    });
-  } catch (e) {
-    lignes.push("❌ Annuaire : " + String(e.message).slice(0, 300));
-  }
-  const bilan = lignes.join("\n");
-  console.log(bilan);
-  return bilan;
-}
-
 // ==========================================================================
 // ANNUAIRE DES ÉTABLISSEMENTS
 // ==========================================================================
@@ -80,56 +45,101 @@ function normaliserNomEcole(nom) {
   return String(nom || "").replace(/[’‘`]/g, "'").replace(/\s+/g, " ").trim().toUpperCase();
 }
 
-// Retourne { NOM_NORMALISÉ: { nom, id } } pour les établissements actifs ayant un tableur.
-function getAnnuaire() {
+// Source unique de l'annuaire : votre tableau Configuration, lu sans cache.
+// A = nom, B = ID ou URL du Google Sheets, C facultative = Actif (NON pour masquer).
+// Toutes les lignes nommées sont lues ; seules celles avec un ID actif apparaissent dans l’application.
+function getFeuilleConfigurationABC() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty("CONFIGURATION_SHEET_ID") || "1rOpj4tsz6vv1zdaAU2e9Ef8n1Bd_yg7HRWA51dbCFAo";
+  const nom = props.getProperty("CONFIGURATION_ONGLET") || "Configuration";
+  const ss = SpreadsheetApp.openById(id);
+  const feuilles = ss.getSheets().filter(function (f) {
+    return normaliserNomEcole(f.getName()) === normaliserNomEcole(nom);
+  });
+  if (feuilles.length !== 1) throw new Error("Onglet de configuration introuvable ou ambigu : " + nom + ". Vérifiez CONFIGURATION_ONGLET dans les propriétés du script.");
+  return feuilles[0];
+}
+
+function extraireIdTableurABC(valeur) {
+  const texte = String(valeur || "").trim();
+  if (!texte) return "";
+  const url = texte.match(/^https:\/\/docs\.google\.com\/spreadsheets\/d\/([A-Za-z0-9_-]+)/);
+  const id = url ? url[1] : texte;
+  if (!/^[A-Za-z0-9_-]{20,}$/.test(id)) throw new Error("Identifiant Google Sheets invalide. Collez son ID ou son URL complète.");
+  return id;
+}
+
+function getReseauCompletABC() {
   const resultat = {};
-  const idCentral = PropertiesService.getScriptProperties().getProperty("ANNUAIRE_SHEET_ID");
-  if (idCentral) {
-    const feuille = SpreadsheetApp.openById(idCentral).getSheetByName("Annuaire");
-    if (feuille) {
-      const lignes = feuille.getDataRange().getValues();
-      for (let i = 1; i < lignes.length; i++) {
-        const nom = String(lignes[i][0] || "").trim();
-        const id = String(lignes[i][1] || "").trim();
-        const actif = String(lignes[i][2] || "OUI").trim().toUpperCase();
-        if (nom && id && actif !== "NON") resultat[normaliserNomEcole(nom)] = { nom: nom, id: id };
-      }
-      return resultat;
-    }
-  }
-  for (const nom in ANNUAIRE_ECOLES) {
-    const id = String(ANNUAIRE_ECOLES[nom] || "").trim();
-    if (id) resultat[normaliserNomEcole(nom)] = { nom: nom, id: id };
+  const ids = {};
+  const lignes = getFeuilleConfigurationABC().getDataRange().getValues();
+  for (let i = 0; i < lignes.length; i++) {
+    const nom = String(lignes[i][0] || "").replace(/\s+/g, " ").trim();
+    const brut = String(lignes[i][1] || "").trim();
+    // Accepte votre en-tête « S | Id google sheet » et une liste sans en-tête.
+    if (i === 0 && /^(id|identifiant)(?:[ _-]|$)/i.test(brut)) continue;
+    if (!nom && !brut) continue;
+    const actif = String(lignes[i][2] || "").trim().toUpperCase() !== "NON";
+    if (!nom) throw new Error("Configuration, ligne " + (i + 1) + " : nom d'établissement manquant.");
+    let id;
+    try { id = extraireIdTableurABC(brut); }
+    catch (err) { throw new Error("Configuration, ligne " + (i + 1) + " (" + nom + ") : " + err.message); }
+    const cle = normaliserNomEcole(nom);
+    if (Object.prototype.hasOwnProperty.call(resultat, cle)) throw new Error("Configuration : établissement en double, " + nom);
+    if (id && Object.prototype.hasOwnProperty.call(ids, id)) throw new Error("Configuration : le même tableur est associé à deux établissements : " + ids[id] + " et " + nom);
+    resultat[cle] = { nom: nom, id: id, actif: actif, integre: !!id && actif };
+    if (id) ids[id] = nom;
   }
   return resultat;
 }
 
-// ▶️ À exécuter une fois : crée le tableur central "A.B.C. – Annuaire" à partir de ANNUAIRE_ECOLES.
-function creerAnnuaireCentral() {
-  const ss = SpreadsheetApp.create("A.B.C. – Annuaire des établissements");
-  const feuille = ss.getSheets()[0];
-  feuille.setName("Annuaire");
-  feuille.appendRow(["Etablissement", "ID_Tableur", "Actif (OUI/NON)"]);
-  for (const nom in ANNUAIRE_ECOLES) feuille.appendRow([nom, ANNUAIRE_ECOLES[nom] || "", ANNUAIRE_ECOLES[nom] ? "OUI" : "NON"]);
-  PropertiesService.getScriptProperties().setProperty("ANNUAIRE_SHEET_ID", ss.getId());
-  Logger.log("Annuaire créé : " + ss.getUrl());
-  return ss.getUrl();
+// Seuls les établissements intégrés sont transmis à l'application et aux calculs.
+// La liste complète reste accessible dans getReseauCompletABC(), y compris sans ID.
+function getAnnuaire() {
+  const reseau = getReseauCompletABC();
+  const integres = {};
+  Object.keys(reseau).forEach(function (cle) {
+    if (reseau[cle].integre) integres[cle] = reseau[cle];
+  });
+  return integres;
+}
+
+// Contrôle à exécuter une fois après installation, sans écriture dans les classeurs.
+function verifierConfigurationABC() {
+  const annuaire = getReseauCompletABC();
+  const resultat = Object.keys(annuaire).map(function (cle) {
+    const e = annuaire[cle];
+    if (!e.integre) return { etablissement: e.nom, statut: e.id ? "désactivé" : "en attente", integre: false };
+    try { SpreadsheetApp.openById(e.id); return { etablissement: e.nom, accessible: true }; }
+    catch (err) { return { etablissement: e.nom, accessible: false, erreur: String(err) }; }
+  });
+  Logger.log(JSON.stringify(resultat));
+  return resultat;
 }
 
 // ▶️ À exécuter depuis l'éditeur pour accueillir un nouvel établissement :
 //    creerEtablissement("COLLEGE EXEMPLE") crée son tableur (3 onglets + Parametres) et l'ajoute à l'annuaire.
 function creerEtablissement(nom) {
-  if (!nom) throw new Error("Indique le nom de l'établissement : creerEtablissement('NOM').");
-  const ss = SpreadsheetApp.create("A.B.C. – " + nom);
-  initialiserClasseur(ss);
-  const idCentral = PropertiesService.getScriptProperties().getProperty("ANNUAIRE_SHEET_ID");
-  if (idCentral) {
-    SpreadsheetApp.openById(idCentral).getSheetByName("Annuaire").appendRow([nom, ss.getId(), "OUI"]);
-  } else {
-    Logger.log("Aucun annuaire central : ajoute \"" + nom + "\": \"" + ss.getId() + "\" dans ANNUAIRE_ECOLES.");
-  }
-  Logger.log("Tableur créé : " + ss.getUrl());
-  return ss.getId();
+  nom = String(nom || "").replace(/\s+/g, " ").trim();
+  if (!nom) throw new Error("Indique le nom de l'établissement.");
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const annuaire = getAnnuaire();
+    const cle = normaliserNomEcole(nom);
+    if (annuaire[cle]) throw new Error("Établissement déjà configuré : " + nom);
+    const feuille = getFeuilleConfigurationABC();
+    const lignes = feuille.getDataRange().getValues();
+    const attentes = [];
+    lignes.forEach(function (l, i) { if (normaliserNomEcole(l[0]) === cle) attentes.push(i + 1); });
+    if (attentes.length > 1) throw new Error("Plusieurs lignes portent ce nom dans Configuration.");
+    const ss = SpreadsheetApp.create("A.B.C. – " + nom);
+    initialiserClasseur(ss);
+    if (attentes.length) feuille.getRange(attentes[0], 1, 1, 3).setValues([[nom, ss.getId(), "OUI"]]);
+    else feuille.appendRow([nom, ss.getId(), "OUI"]);
+    Logger.log("Tableur créé : " + ss.getUrl());
+    return ss.getId();
+  } finally { lock.releaseLock(); }
 }
 
 // ==========================================================================
@@ -139,7 +149,7 @@ function initialiserClasseur(ss) {
   let sheetGaspillage = ss.getSheetByName("Suivi_Gaspillage");
   if (!sheetGaspillage) {
     const def = ss.getSheets()[0];
-    if (def && ["Historique_Menus", "Pesees_Sacs", "Parametres"].indexOf(def.getName()) === -1) {
+    if (def && /^Feuille ?1$|^Sheet ?1$/i.test(def.getName())) {
       def.setName("Suivi_Gaspillage"); sheetGaspillage = def;
     } else { sheetGaspillage = ss.insertSheet("Suivi_Gaspillage"); }
   }
@@ -174,7 +184,7 @@ function getSheetsABC(nomEcole) {
   const entree = getAnnuaire()[normaliserNomEcole(nomEcole)];
   // Isolation stricte : jamais d'identifiant par défaut ni de bascule vers un autre établissement
   if (!entree) {
-    throw new Error("Établissement non configuré : '" + nomEcole + "'. Ajoute-le avec creerEtablissement().");
+    throw new Error("Établissement non configuré : '" + nomEcole + "'. Renseignez son nom et son ID dans Configuration.");
   }
   const sheets = initialiserClasseur(SpreadsheetApp.openById(entree.id));
   if (!sheets.gaspillage.getRange("K1").getValue()) sheets.gaspillage.getRange("K1").setValue("Detail_Ingredients_JSON");
@@ -215,7 +225,7 @@ function getMenuDuJour(sheets, isoJour) {
     dernier = String(lignes[i][2]);
     if (dateIso(lignes[i][0]) === isoJour) jour = String(lignes[i][2]);
   }
-  return jour || dernier || "";
+  return jour || "";
 }
 
 // ==========================================================================
@@ -276,6 +286,8 @@ function doPost(e) {
 
     if (action === "askHub" || action === "questionHub" || action === "analyserQuestion") {
       return reponseJson({ answer: handleAskHub(data) });
+    } else if (action === "saveCatalogue") {
+      responseOutput = handleCatalogueABC(data);
     } else if (action === "logMenu") {
       responseOutput = handleLogMenu(data);
     } else if (action === "logBagWeights") {
@@ -450,8 +462,7 @@ function handleLogBagWeights(data) {
   if (data.date_pesee) {
     let parts = data.date_pesee.split("-");
     if (parts.length === 3) {
-      // Midi dans le fuseau du script : évite le passage au jour précédent à l’affichage.
-      datePesee = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+      datePesee = new Date(parts[0], parts[1] - 1, parts[2]);
     }
   }
 
@@ -467,55 +478,63 @@ function handleLogBagWeights(data) {
   return { success: true };
 }
 
-// Comparaison expérimentale des estimations visuelles et des pesées de sacs.
-// Les catégories non comparables ne reçoivent jamais un faux poids virtuel.
+// Comparaison expérimentale : les masses de référence de l’IA ne sont pas des pesées.
 function actualiserComparaisonPesees(sheets) {
   const ss = sheets.sacs.getParent();
   let feuille = ss.getSheetByName("Comparaison_Pesees_IA");
   if (!feuille) feuille = ss.insertSheet("Comparaison_Pesees_IA");
   const entete = ["Date", "Catégorie", "Pesée réelle (kg)", "Estimation IA (kg)", "Écart signé (kg)", "Erreur absolue (%)", "Scans analysés", "Statut / limites"];
   const jours = {};
-  function jour(d) { return dateIso(d); }
   const sacs = sheets.sacs.getDataRange().getValues();
-  for (let i=1; i<sacs.length; i++) {
-    const d=jour(sacs[i][0]); if (!d) continue;
-    if (!jours[d]) jours[d]={reel:[0,0,0,0,0], virtuel:0, scans:0,aPesee:false};
-    jours[d].aPesee=true;
-    for (let j=0;j<5;j++) jours[d].reel[j]+=Number(sacs[i][j+1])||0;
+  for (let i = 1; i < sacs.length; i++) {
+    const d = dateIso(sacs[i][0]); if (!d) continue;
+    if (!jours[d]) jours[d] = { reel: [0,0,0,0,0], virtuel: 0, scans: 0 };
+    for (let j = 0; j < 5; j++) jours[d].reel[j] += Number(sacs[i][j+1]) || 0;
   }
   const scans = sheets.gaspillage.getDataRange().getValues();
   const vus = {};
-  for (let i=1;i<scans.length;i++) {
-    if (scans[i][1]!=="SCAN_IA_VISION") continue;
-    const d=jour(scans[i][0]); if (!jours[d]) jours[d]={reel:[0,0,0,0,0],virtuel:0,scans:0,aPesee:false};
-    const id=String(scans[i][11]||"");
-    if (id && vus[d+"|"+id]) continue;
-    if (id) vus[d+"|"+id]=true;
+  for (let i = 1; i < scans.length; i++) {
+    if (scans[i][1] !== "SCAN_IA_VISION") continue;
+    const d = dateIso(scans[i][0]); if (!jours[d]) continue;
+    const id = String(scans[i][11] || "");
+    if (id && vus[d + "|" + id]) continue;
+    if (id) vus[d + "|" + id] = true;
     jours[d].scans++;
-    jours[d].virtuel+=(Number(scans[i][7])||0)/1000;
+    jours[d].virtuel += (Number(scans[i][7]) || 0) / 1000;
   }
-  const lignes=[entete], categories=["Alimentaire","Fruits","Pain","Emballages","Serviettes"];
+  const lignes = [entete], categories = ["Alimentaire", "Fruits", "Pain", "Emballages", "Serviettes"];
   Object.keys(jours).sort().forEach(function(d) {
-    const o=jours[d];
-    for (let j=0;j<5;j++) {
-      // Le poids IA total comprend plusieurs catégories : il ne correspond à aucun sac isolé.
-      lignes.push([d,categories[j],o.aPesee ? o.reel[j] : "", "", "", "",o.scans,
-        j===0 ? "Non comparable directement : IA total multi-catégories ; séparer les aliments et vérifier la couverture des plateaux." :
-        "Non estimable de façon fiable avec les données actuelles ; ne pas assimiler une absence d'estimation à zéro."]);
+    const o = jours[d];
+    for (let j = 0; j < 5; j++) {
+      lignes.push([d, categories[j], o.reel[j], "", "", "", o.scans,
+        j === 0 ? "Non comparable directement : l’IA additionne plusieurs catégories ; vérifier le périmètre et la couverture des scans." :
+        "Catégorie non estimable de façon fiable : ne pas assimiler une donnée absente à zéro."]);
     }
-    const totalReel=o.reel.reduce(function(a,b){return a+b;},0);
-    lignes.push([d,"TOTAL exploratoire (périmètres différents)",o.aPesee ? totalReel : "",
-      Math.round(o.virtuel*1000)/1000,
-      o.aPesee ? Math.round((o.virtuel-totalReel)*1000)/1000 : "",
-      o.aPesee && totalReel>0 ? Math.round(Math.abs(o.virtuel-totalReel)/totalReel*10000)/100 : "",
-      o.scans,"INDICATEUR NON VALIDÉ : sacs et scans ne couvrent pas nécessairement les mêmes déchets ; ne pas interpréter comme taux d'erreur IA."]);
+    const total = o.reel.reduce(function(a,b) { return a+b; }, 0);
+    lignes.push([d, "TOTAL exploratoire (périmètres différents)", total,
+      Math.round(o.virtuel*1000)/1000, Math.round((o.virtuel-total)*1000)/1000,
+      total > 0 ? Math.round(Math.abs(o.virtuel-total)/total*10000)/100 : "", o.scans,
+      "INDICATEUR NON VALIDÉ : déchets des sacs et restes des plateaux ne couvrent pas nécessairement le même périmètre ; pas un taux d’erreur IA."]);
   });
   feuille.clearContents();
   feuille.getRange(1,1,lignes.length,entete.length).setValues(lignes);
   feuille.setFrozenRows(1);
   feuille.getRange(1,1,1,entete.length).setFontWeight("bold");
-  if (lignes.length>1) feuille.getRange(2,3,lignes.length-1,4).setNumberFormat("0.000");
-  return {success:true,jours:Object.keys(jours).length,lignes:lignes.length-1};
+  if (lignes.length > 1) feuille.getRange(2,3,lignes.length-1,4).setNumberFormat("0.000");
+  return { success: true, jours: Object.keys(jours).length, lignes: lignes.length-1 };
+}
+
+// À exécuter une fois dans l’éditeur Apps Script pour créer/recalculer
+// les feuilles de comparaison des établissements configurés.
+function initialiserComparaisonsTousEtablissements() {
+  const annuaire = getAnnuaire();
+  const resultats = [];
+  Object.keys(annuaire).forEach(function(nom) {
+    try { resultats.push({ etablissement: nom, resultat: actualiserComparaisonPesees(getSheetsABC(nom)) }); }
+    catch (e) { resultats.push({ etablissement: nom, erreur: String(e) }); }
+  });
+  Logger.log(JSON.stringify(resultats));
+  return resultats;
 }
 
 // ==========================================================================
@@ -530,6 +549,7 @@ function nettoyerTexte(t) {
 
 function portionReference(composant, aliment, p) {
   const a = String(aliment || "").toLowerCase();
+  if (/^sauce\b/i.test(a)) return p.portion_sauce_g || 20;
   if (composant === "pain") return p.portion_pain_g;
   if (composant === "entree") return p.portion_entree_g;
   if (composant === "plat") return p.portion_plat_g;
@@ -556,17 +576,18 @@ function scanDejaEnregistre(feuille, idScan) {
   return false;
 }
 
-
-// Écriture atomique : le verrou ne couvre pas l'appel Gemini.
+// Verrou court autour de la seule écriture, sans ralentir l’appel Gemini.
 function enregistrerScanUnique(feuille, ligne, idScan) {
-  const lock = LockService.getScriptLock();
-  if (!lock.tryLock(20000)) throw new Error('Enregistrement occupé : réessayer le scan.');
+  const verrou = LockService.getScriptLock();
+  if (!verrou.tryLock(20000)) throw new Error("Enregistrement occupé : réessayer le scan.");
   try {
     if (idScan && scanDejaEnregistre(feuille, idScan)) return false;
     feuille.appendRow(ligne);
     SpreadsheetApp.flush();
     return true;
-  } finally { lock.releaseLock(); }
+  } finally {
+    verrou.releaseLock();
+  }
 }
 
 function handleLogScanImage(data) {
@@ -576,6 +597,7 @@ function handleLogScanImage(data) {
   const params = getParametres(sheets);
   const quand = horodatageScan(data.horodatage);
   const idScan = data.scan_id ? String(data.scan_id).slice(0, 40) : "";
+  // Contrôle rapide ; la vérification définitive est atomique lors de l’écriture.
   // Renvoi automatique de la borne : si ce scan est déjà enregistré, on ne le compte pas deux fois.
   if (idScan && scanDejaEnregistre(sheets.gaspillage, idScan)) return { success: true, doublon: true };
 
@@ -588,22 +610,29 @@ function handleLogScanImage(data) {
   if (cleanBase64 === "image_active_simulee") return { success: true, ignore: true, raison: "Caméra indisponible" };
 
   // Le menu du jour vient du tableur (complet), pas du texte tronqué envoyé par la borne.
-  const menuJour = getMenuDuJour(sheets, dateIso(quand)) || data.menu_jour || "Non spécifié";
+  const menuJour = getMenuDuJour(sheets, dateIso(quand)) || "Non renseigné pour cette date";
 
+  const catalogueScan = lireCatalogueABC(sheets);
+  const choixPlat = ['poulet', 'poisson', 'les deux'].indexOf(data.choix_plat) >= 0 ? data.choix_plat : 'non précisé';
+  const nomsCatalogue = catalogueScan.filter(function (x) { return x.actif && !x.fusionVers && cleCatalogueABC(menuJour).indexOf(cleCatalogueABC(x.libelle)) >= 0; }).map(function (x) { return x.libelle; });
   const promptVision = `Tu es un capteur optique pour la restauration scolaire (Projet A.B.C.). Tu ne calcules AUCUN poids : tu estimes seulement, visuellement, la part de chaque aliment qui RESTE sur le plateau.
 La photo est prise de dessus, à la fin du repas, juste avant que l'élève vide son plateau.
 MENU DU JOUR (options possibles ; sépare les aliments par "+", les rubriques par "|" : entrée | plat | accompagnement | dessert) : "${menuJour}".
 
+PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « ${choixPlat} ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste.
+NOMS DU CATALOGUE : ${nomsCatalogue.join(', ')}. Utilise le nom exact s'il correspond visuellement à l'aliment.
 RÈGLES
-- Inventorie CHAQUE aliment visible séparément, même s'il n'est pas au menu. Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu'un plat a été servi.
-- Identifie pour CHAQUE aliment sa forme, sa préparation visible, son état après consommation et les pourcentages restant/mangé. Conserve les distinctions de préparation (ex. carottes râpées ou cuites) et les aliments distincts sur un même plateau.
-- La couleur, la présence ou le nom d'une sauce ne permettent JAMAIS à eux seuls d'identifier poulet, poisson ou une recette. Ne déduis pas « poisson au curry » d'une sauce jaune ni « poisson » de sa présence au menu.
-- Si l'aliment principal est masqué ou impossible à distinguer, emploie une désignation visuelle générique (ex. « aliment en sauce non identifiable ») et une confiance « faible » ; n'invente pas une espèce ou une recette.
-- Ne décris pas deux fois la même portion physique sous des noms différents. Plusieurs portions réellement distinctes doivent rester distinctes.
-- Si tu vois un aliment hors menu, décris-le prudemment selon ce qui est visible et indique une confiance adaptée aux indices visuels.
+- Décris séparément la base, sa forme et sa préparation : aliment « Poisson », préparation « sauce curry ». Une sauce adhérente ne constitue pas une deuxième portion. Une sauce ne peut être listée séparément que si elle est réellement distincte et visible.
+- Ne crée jamais un aliment à 0 % de restes d'après le seul menu ou l'avis « tout fini » ; l'absence d'un aliment ne prouve pas qu'il a été pris.
+- En cas d'ambiguïté poulet/poisson, utilise la précision de l'élève uniquement pour une identification compatible avec l'image ; sans preuve suffisante, écris « Aliment non identifié » avec une confiance faible.
+- Inventorie CHAQUE aliment visible séparément, même hors menu. Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu’un plat a été servi.
+- Pour chaque aliment, distingue sa forme, sa préparation visible, son état après consommation et les pourcentages restant/mangé. Distingue carottes râpées et cuites, par exemple.
+- Une sauce ou sa couleur ne suffisent jamais à identifier poisson, poulet ou une recette. Ne déduis pas « poisson au curry » d’une sauce jaune ni de sa présence au menu.
+- Si l’aliment est masqué ou non identifiable, utilise une désignation visuelle générique et une confiance « faible » ; n’invente pas d’espèce ou de recette.
+- Ne décris pas deux fois la même portion physique sous des noms différents ; conserve les portions réellement distinctes.
+- Ne déduis pas le nom d’un aliment entièrement consommé de son emballage, d’os, de traces ou du menu : sans indice visuel distinctif, son identité reste inconnue.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste.
-- Ne déduis pas le nom d'un aliment entièrement consommé de son emballage, d'os, de traces ou du menu : sans indice visuel distinctif, l'identification reste inconnue.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
 - N'utilise ni deux-points, ni crochets, ni barre verticale dans les champs texte.
@@ -641,10 +670,12 @@ Réponds en JSON strict :
     const composant = String(a.composant || "").toLowerCase();
     const incoherent = isNaN(reste) || isNaN(mange) || Math.abs(reste + mange - 100) > 15 || reste < 0 || reste > 100;
     if (incoherent || COMPOSANTS_VALIDES.indexOf(composant) === -1 || !nettoyerTexte(a.aliment)) { ecartes.push(a); return; }
-    const aliment = nettoyerTexte(a.aliment);
+    const alimentBrut = nettoyerTexte(a.aliment);
+    const fiche = identifierCatalogueABC(alimentBrut, composant, catalogueScan);
+    const aliment = fiche ? fiche.libelle : alimentBrut;
     const portion = portionReference(composant, aliment, params);
     retenus.push({
-      composant: composant, aliment: aliment, forme: nettoyerTexte(a.forme) || "?", preparation: nettoyerTexte(a.preparation) || "?",
+      catalogue_id: fiche ? fiche.id : "", aliment_brut: alimentBrut, composant: composant, aliment: aliment, forme: nettoyerTexte(a.forme) || "?", preparation: nettoyerTexte(a.preparation) || "?",
       etat_reste: nettoyerTexte(a.etat_reste), reste_pct: Math.round(reste), portion_ref_g: portion,
       reste_g_ref: Math.round(portion * reste / 100), confiance: nettoyerTexte(a.confiance) || "moyenne"
     });
@@ -820,7 +851,12 @@ RÈGLE DE CALCUL ET DE FORMATAGE DE LA PARTIE 2 :
 function doGet(e) {
   if (e.parameter && e.parameter.action) {
     if (e.parameter.action === "getEtablissements") {
-      return reponseJson(Object.keys(getAnnuaire()).map(function (k) { return getAnnuaire()[k].nom; }));
+      const annuaire = getAnnuaire();
+      return reponseJson(Object.keys(annuaire).map(function (k) { return annuaire[k].nom; }));
+    }
+    if (e.parameter.action === "getCatalogue") {
+      try { return reponseJson(reponseCatalogueABC(getSheetsABC(e.parameter.ecole))); }
+      catch (err) { return reponseJson({ success: false, error: String(err) }); }
     }
     if (e.parameter.action === "getDashboard") {
       const school = e.parameter.ecole;
@@ -866,7 +902,7 @@ function doGet(e) {
         return reponseJson({
           ecole: school, effectifCouverts: dernierEffectif || parametres.effectif_defaut, dernierMenu: dernierMenu,
           historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, parametres: parametres,
-          rawGaspillage: rawGaspillage, sacsHistory: h
+          rawGaspillage: rawGaspillage, sacsHistory: h, catalogueVersion: 1, catalogue: lireCatalogueABC(sheets)
         });
       } catch (err) {
         vide.error = err.toString();
@@ -875,4 +911,77 @@ function doGet(e) {
     }
   }
   return HtmlService.createHtmlOutputFromFile('Index').setTitle('A.B.C. - Assiette Bas Carbone').setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+const CATALOGUE_INITIAL_ABC = [{"rubrique": "entree", "nature": "base", "libelle": "Buffet d'entrées"}, {"rubrique": "entree", "nature": "base", "libelle": "Salade verte"}, {"rubrique": "entree", "nature": "base", "libelle": "Salade d'endives"}, {"rubrique": "entree", "nature": "base", "libelle": "Tomates"}, {"rubrique": "entree", "nature": "base", "libelle": "Carottes râpées"}, {"rubrique": "entree", "nature": "base", "libelle": "Taboulé"}, {"rubrique": "entree", "nature": "base", "libelle": "Charcuterie"}, {"rubrique": "entree", "nature": "base", "libelle": "Quiche / Tarte"}, {"rubrique": "entree", "nature": "base", "libelle": "Salade piémontaise"}, {"rubrique": "entree", "nature": "base", "libelle": "Pâté en croûte"}, {"rubrique": "entree", "nature": "option", "libelle": "Mozzarella"}, {"rubrique": "entree", "nature": "option", "libelle": "Noix"}, {"rubrique": "entree", "nature": "option", "libelle": "Roquefort/Bleu"}, {"rubrique": "entree", "nature": "option", "libelle": "Vinaigrette"}, {"rubrique": "entree", "nature": "option", "libelle": "Assaisonnement à part"}, {"rubrique": "plat", "nature": "base", "libelle": "Couscous"}, {"rubrique": "plat", "nature": "base", "libelle": "Paella"}, {"rubrique": "plat", "nature": "base", "libelle": "Tajine"}, {"rubrique": "plat", "nature": "base", "libelle": "Gardiane de Taureau"}, {"rubrique": "plat", "nature": "base", "libelle": "Chili (Con Carné/Végé)"}, {"rubrique": "plat", "nature": "base", "libelle": "Lasagnes"}, {"rubrique": "plat", "nature": "base", "libelle": "Bœuf Bourguignon"}, {"rubrique": "plat", "nature": "base", "libelle": "Poisson"}, {"rubrique": "plat", "nature": "base", "libelle": "Cordon bleu"}, {"rubrique": "plat", "nature": "base", "libelle": "Omelette"}, {"rubrique": "plat", "nature": "base", "libelle": "Saucisse"}, {"rubrique": "plat", "nature": "base", "libelle": "Merguez"}, {"rubrique": "plat", "nature": "base", "libelle": "Croustillant fromager bio"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce Tomate"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce Champignons"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce Poivre"}, {"rubrique": "plat", "nature": "option", "libelle": "Aux Olives"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce poulette"}, {"rubrique": "plat", "nature": "option", "libelle": "Bio"}, {"rubrique": "accomp", "nature": "base", "libelle": "Pâtes"}, {"rubrique": "accomp", "nature": "base", "libelle": "Riz"}, {"rubrique": "accomp", "nature": "base", "libelle": "Purée"}, {"rubrique": "accomp", "nature": "base", "libelle": "Lentilles"}, {"rubrique": "accomp", "nature": "base", "libelle": "Haricots verts"}, {"rubrique": "accomp", "nature": "base", "libelle": "Petits pois / Carottes"}, {"rubrique": "accomp", "nature": "base", "libelle": "Brocolis / Choux"}, {"rubrique": "accomp", "nature": "base", "libelle": "Ratatouille / Aubergines"}, {"rubrique": "accomp", "nature": "base", "libelle": "Épinards"}, {"rubrique": "accomp", "nature": "base", "libelle": "Endives cuites"}, {"rubrique": "accomp", "nature": "base", "libelle": "Tomates provençales"}, {"rubrique": "accomp", "nature": "base", "libelle": "Pommes de terre persillées"}, {"rubrique": "accomp", "nature": "base", "libelle": "Gratin d'aubergines"}, {"rubrique": "accomp", "nature": "base", "libelle": "Poêlée de courgettes au curry"}, {"rubrique": "accomp", "nature": "base", "libelle": "Pain"}, {"rubrique": "dessert", "nature": "base", "libelle": "Yaourt"}, {"rubrique": "dessert", "nature": "base", "libelle": "Yaourt aromatisé"}, {"rubrique": "dessert", "nature": "base", "libelle": "Yaourt bio brassé"}, {"rubrique": "dessert", "nature": "base", "libelle": "Fromage"}, {"rubrique": "dessert", "nature": "base", "libelle": "Emmental"}, {"rubrique": "dessert", "nature": "base", "libelle": "Tomme"}, {"rubrique": "dessert", "nature": "base", "libelle": "Ortolan bio"}, {"rubrique": "dessert", "nature": "base", "libelle": "Fruit de saison"}, {"rubrique": "dessert", "nature": "base", "libelle": "Compote"}, {"rubrique": "dessert", "nature": "base", "libelle": "Crème dessert / Liégeois"}, {"rubrique": "dessert", "nature": "base", "libelle": "Île flottante"}, {"rubrique": "dessert", "nature": "base", "libelle": "Pâtisserie / Flan"}, {"rubrique": "dessert", "nature": "base", "libelle": "Glace"}, {"rubrique": "entree", "nature": "base", "libelle": "Œuf dur"}, {"rubrique": "entree", "nature": "option", "libelle": "Mayonnaise"}, {"rubrique": "entree", "nature": "option", "libelle": "Sauce yaourt"}, {"rubrique": "entree", "nature": "option", "libelle": "Citron"}, {"rubrique": "plat", "nature": "base", "libelle": "Poulet"}, {"rubrique": "plat", "nature": "base", "libelle": "Dinde"}, {"rubrique": "plat", "nature": "base", "libelle": "Bœuf"}, {"rubrique": "plat", "nature": "base", "libelle": "Porc"}, {"rubrique": "plat", "nature": "base", "libelle": "Veau"}, {"rubrique": "plat", "nature": "base", "libelle": "Agneau"}, {"rubrique": "plat", "nature": "base", "libelle": "Steak haché"}, {"rubrique": "plat", "nature": "base", "libelle": "Boulettes"}, {"rubrique": "plat", "nature": "base", "libelle": "Préparation végétale"}, {"rubrique": "plat", "nature": "option", "libelle": "Rôti"}, {"rubrique": "plat", "nature": "option", "libelle": "Grillé"}, {"rubrique": "plat", "nature": "option", "libelle": "Pané"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauté"}, {"rubrique": "plat", "nature": "option", "libelle": "Cuisse"}, {"rubrique": "plat", "nature": "option", "libelle": "Tex-mex"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce curry"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce crème"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce citron"}, {"rubrique": "plat", "nature": "option", "libelle": "Sauce bolognaise"}, {"rubrique": "accomp", "nature": "base", "libelle": "Semoule"}, {"rubrique": "accomp", "nature": "base", "libelle": "Boulgour"}, {"rubrique": "accomp", "nature": "base", "libelle": "Épeautre"}, {"rubrique": "accomp", "nature": "base", "libelle": "Quinoa"}, {"rubrique": "accomp", "nature": "base", "libelle": "Frites"}, {"rubrique": "accomp", "nature": "base", "libelle": "Potatoes"}, {"rubrique": "accomp", "nature": "base", "libelle": "Pommes de terre"}, {"rubrique": "accomp", "nature": "base", "libelle": "Courgettes"}, {"rubrique": "accomp", "nature": "base", "libelle": "Petits pois"}, {"rubrique": "accomp", "nature": "base", "libelle": "Brocolis"}, {"rubrique": "accomp", "nature": "base", "libelle": "Chou-fleur"}, {"rubrique": "accomp", "nature": "base", "libelle": "Carottes"}, {"rubrique": "accomp", "nature": "base", "libelle": "Poireaux"}, {"rubrique": "accomp", "nature": "option", "libelle": "Vapeur"}, {"rubrique": "accomp", "nature": "option", "libelle": "Rôti"}, {"rubrique": "accomp", "nature": "option", "libelle": "Gratiné"}, {"rubrique": "accomp", "nature": "option", "libelle": "Beurre"}, {"rubrique": "accomp", "nature": "option", "libelle": "Fromage râpé"}, {"rubrique": "accomp", "nature": "option", "libelle": "Sauce tomate"}, {"rubrique": "accomp", "nature": "option", "libelle": "Sauce curry"}, {"rubrique": "accomp", "nature": "option", "libelle": "Crème"}, {"rubrique": "dessert", "nature": "base", "libelle": "Fruit frais"}, {"rubrique": "dessert", "nature": "base", "libelle": "Tarte"}, {"rubrique": "dessert", "nature": "base", "libelle": "Gâteau"}, {"rubrique": "dessert", "nature": "option", "libelle": "Vanille"}, {"rubrique": "dessert", "nature": "option", "libelle": "Chocolat"}, {"rubrique": "dessert", "nature": "option", "libelle": "Citron"}, {"rubrique": "dessert", "nature": "option", "libelle": "Pommes"}, {"rubrique": "dessert", "nature": "option", "libelle": "Fruits rouges"}, {"rubrique": "dessert", "nature": "option", "libelle": "Coulis"}, {"rubrique": "dessert", "nature": "option", "libelle": "Confiture"}, {"rubrique": "dessert", "nature": "option", "libelle": "Sucre"}, {"rubrique": "dessert", "nature": "option", "libelle": "Chantilly"}];
+// Catalogue autonome de chaque établissement. Les identifiants ne changent jamais.
+function cleCatalogueABC(texte) {
+  return String(texte || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/œ/g, 'oe').replace(/[^a-z0-9]+/g, ' ').trim();
+}
+function feuilleCatalogueABC(sheets) {
+  const ss = sheets.menus.getParent();
+  let f = ss.getSheetByName('Catalogue');
+  if (!f) {
+    const lock = LockService.getScriptLock(); lock.waitLock(30000);
+    try {
+      f = ss.getSheetByName('Catalogue');
+      if (!f) {
+        f = ss.insertSheet('Catalogue');
+        const lignes = [['ID', 'Rubrique', 'Nature', 'Libelle', 'Alias_JSON', 'Actif', 'Fusion_vers', 'Revision']];
+        CATALOGUE_INITIAL_ABC.forEach(function (x, i) { lignes.push(['initial-' + i, x.rubrique, x.nature, x.libelle, '[]', 'OUI', '', 1]); });
+        f.getRange(1, 1, lignes.length, 8).setValues(lignes);
+      }
+    } finally { lock.releaseLock(); }
+  }
+  return f;
+}
+function lireCatalogueABC(sheets) {
+  const lignes = feuilleCatalogueABC(sheets).getDataRange().getValues();
+  return lignes.slice(1).filter(function (l) { return l[0]; }).map(function (l) {
+    let aliases = []; try { aliases = JSON.parse(l[4] || '[]'); } catch (e) {}
+    return { id: String(l[0]), rubrique: String(l[1]), nature: String(l[2]), libelle: String(l[3]),
+      alias: Array.isArray(aliases) ? aliases : [], actif: String(l[5]).toUpperCase() !== 'NON', fusionVers: String(l[6] || ''), revision: Number(l[7]) || 1 };
+  });
+}
+function reponseCatalogueABC(sheets) { return { success: true, catalogueVersion: 1, catalogue: lireCatalogueABC(sheets) }; }
+function handleCatalogueABC(data) {
+  const sheets = getSheetsABC(data.ecole || data.etablissement);
+  // Initialisation avant le verrou de mutation : évite de reprendre le même verrou.
+  const feuille = feuilleCatalogueABC(sheets);
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const liste = lireCatalogueABC(sheets);
+    const operation = data.operation || 'save';
+    let item = liste.find(function (x) { return x.id === data.id; });
+    if (data.id && !item) throw new Error('Élément du catalogue introuvable dans cet établissement.');
+    if (item && Number(data.revision) !== item.revision) throw new Error('Cet élément a été modifié sur un autre appareil. Rechargez le catalogue.');
+    if (operation === 'merge') {
+      const cible = liste.find(function (x) { return x.id === data.cibleId && x.actif && !x.fusionVers; });
+      if (!item || !cible || item.id === cible.id || item.rubrique !== cible.rubrique || item.nature !== cible.nature) throw new Error('Fusionnez deux éléments distincts de la même rubrique et du même type.');
+      cible.alias = Array.from(new Set(cible.alias.concat([item.libelle], item.alias))); cible.revision++;
+      item.actif = false; item.fusionVers = cible.id; item.revision++;
+    } else if (operation === 'deactivate') {
+      if (!item) throw new Error('Élément manquant.'); item.actif = false; item.revision++;
+    } else if (operation === 'save') {
+      const libelle = String(data.libelle || '').replace(/[\[\]:|<>]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+      if (!libelle || ['entree','plat','accomp','dessert'].indexOf(data.rubrique) < 0 || ['base','option'].indexOf(data.nature) < 0) throw new Error('Libellé, rubrique ou type invalide.');
+      if (liste.some(function (x) { return x.actif && !x.fusionVers && x.id !== data.id && x.rubrique === data.rubrique && x.nature === data.nature && cleCatalogueABC(x.libelle) === cleCatalogueABC(libelle); })) throw new Error('Cet élément existe déjà dans cette rubrique.');
+      if (!item) { item = { id: Utilities.getUuid(), alias: [], revision: 0, fusionVers: '' }; liste.push(item); }
+      if (item.libelle && item.libelle !== libelle) item.alias = Array.from(new Set(item.alias.concat([item.libelle])));
+      item.libelle = libelle; item.rubrique = data.rubrique; item.nature = data.nature; item.actif = true; item.revision++;
+    } else { throw new Error('Opération de catalogue inconnue.'); }
+    const lignes = liste.map(function (x) { return [x.id, x.rubrique, x.nature, x.libelle, JSON.stringify(x.alias), x.actif ? 'OUI' : 'NON', x.fusionVers || '', x.revision]; });
+    feuille.getRange(2, 1, lignes.length, 8).setValues(lignes);
+    SpreadsheetApp.flush();
+    return { success: true, catalogueVersion: 1, catalogue: liste, id: item.id };
+  } finally { lock.releaseLock(); }
+}
+function identifierCatalogueABC(nom, composant, catalogue) {
+  const rubrique = composant === 'accompagnement' ? 'accomp' : composant;
+  const cle = cleCatalogueABC(nom);
+  let trouves = catalogue.filter(function (x) { return x.rubrique === rubrique && [x.libelle].concat(x.alias).some(function (a) { return cleCatalogueABC(a) === cle; }); });
+  if (!trouves.length) return null;
+  const finals = trouves.map(function (x) {
+    let vus = {}; while (x.fusionVers && !vus[x.id]) { vus[x.id] = true; const c = catalogue.find(function (y) { return y.id === x.fusionVers; }); if (!c) break; x = c; } return x;
+  });
+  return finals.every(function (x) { return x.id === finals[0].id; }) ? finals[0] : null;
 }

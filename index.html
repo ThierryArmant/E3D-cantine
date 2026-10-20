@@ -217,12 +217,13 @@
 
         <ul class="sidebar-menu">
             <li class="menu-item active" id="menu-view-dashboard" onclick="switchView('view-dashboard')">📊 Tableau de bord</li>
-            <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
-            <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖ Saisie des Déchets</li>
 
             <li style="padding: 14px 15px 4px 15px; font-size: 9.5px; color: #86efac; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 10px; border-top: 1px solid #2d6a4f; cursor: default;">L'Espace des Éco-Délégués</li>
 
-            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">👨‍🍳 Éco-Délégués (Menu)</li>
+            <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">📝 Saisie des menus</li>
+            <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
+            <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖ Saisie des déchets</li>
+            <li style="padding:14px 15px 4px;font-size:10px;color:#86efac;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-top:10px;border-top:1px solid #2d6a4f;">Espace cuisine</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
             <li class="menu-item" id="menu-view-precision" onclick="switchView('view-precision')" style="font-size:12px; opacity:.7;">🔬 Précision scan / balance</li>
             <li class="menu-item" id="menu-audit" onclick="openMethodologyModal()">🛡️ Audit des calculs</li>
@@ -283,22 +284,22 @@
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                         <div class="dashboard-col" style="background: rgba(236, 253, 245, 0.95) !important; border: 1.5px solid #34d399;">
-                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Plébiscités (> 75%)</h3>
+                            <h3 style="color: #065f46; margin-bottom: 10px; font-size: 13px;">🟢 Restes estimés : 0 à 25 %</h3>
                             <div id="period-adhesion-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 252, 232, 0.95) !important; border: 1.5px solid #fde047;">
-                            <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 En bonne voie (60% - 74%)</h3>
+                            <h3 style="color: #854d0e; margin-bottom: 10px; font-size: 13px;">🟡 Restes estimés : plus de 25 à 40 %</h3>
                             <div id="period-bonnevoie-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                         <div class="dashboard-col" style="background: rgba(255, 237, 213, 0.95) !important; border: 1.5px solid #fdba74;">
-                            <h3 style="color: #9a3412; margin-bottom: 10px; font-size: 13px;">🟠 Acceptable (45% - 59%)</h3>
+                            <h3 style="color: #9a3412; margin-bottom: 10px; font-size: 13px;">🟠 Restes estimés : plus de 40 à 55 %</h3>
                             <div id="period-acceptable-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                         <div class="dashboard-col" style="background: rgba(254, 242, 242, 0.95) !important; border: 1.5px solid #f87171;">
-                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Alertes Gaspillage (< 45%)</h3>
+                            <h3 style="color: #991b1b; margin-bottom: 10px; font-size: 13px;">🔴 Restes estimés : plus de 55 %</h3>
                             <div id="period-rejets-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding-right: 5px;"></div>
                         </div>
                     </div>
@@ -968,16 +969,55 @@
             return items;
         }
 
+        // Traitement commun, non destructif : noms, alias et exclusions sont identiques dans toutes les vues.
+        function cleAlimentStat(nom) {
+            const cle = String(nom || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/œ/g,'oe').replace(/[^a-z0-9]+/g,' ').trim();
+            const alias = { 'poisson cury':'poisson curry', 'tarte aux citron':'tarte au citron', 'vrap crevette':'wrap crevette' };
+            return alias[cle] || cle;
+        }
+        function listeExclusionsStat(date) {
+            const school = document.getElementById('select-etablissement')?.value || 'defaut';
+            const menu = (globalRawData?.historiqueMenus || {})[normalizeDate(date)];
+            const jour = normalizeDate(date);
+            let values = [];
+            try { values = JSON.parse(localStorage.getItem('exclusionsABC_' + school + '_' + jour) || '[]'); } catch(e) {}
+            // Compatibilité avec les anciennes exclusions, limitées au menu de cette date.
+            if (menu) { try { values = values.concat(JSON.parse(localStorage.getItem('listeNoire_' + school + '_' + menu) || '[]')); } catch(e) {} }
+            return new Set(values.map(cleAlimentStat));
+        }
+        function itemsStatistiques(commentaire, date) {
+            if (/photo noire|inexploitable/i.test(commentaire || '')) return [];
+            const bannis = listeExclusionsStat(date);
+            const libelles = { 'carottes rapees':'Carottes râpées', 'poisson pane':'Poisson pané', 'poulet roti':'Poulet rôti', 'poulet roti cuisse':'Poulet rôti / Cuisse', 'poisson curry':'Poisson curry', 'tarte au citron':'Tarte au citron', 'wrap crevette':'Wrap crevette' };
+            return parseScanItems(commentaire).flatMap(it => {
+                const cle = cleAlimentStat(it.nom);
+                if (!cle || bannis.has(cle)) return [];
+                const generique = /^(entree|dessert|plat|plat principal|plat chaud|accompagnement|aliment|inconnu|non identifie)( non identifie)?$/.test(cle);
+                let reference = Object.keys(COEFFICIENTS_INEVITABLES).concat(Object.keys(COEFFICIENTS_CARBONE_ADEME)).find(n => cleAlimentStat(n) === cle);
+                let nom = libelles[cle] || (reference ? reference.charAt(0).toUpperCase() + reference.slice(1) : cle.charAt(0).toUpperCase() + cle.slice(1));
+                const preparations = { 'poisson curry': ['Poisson', 'sauce curry'], 'poisson pane': ['Poisson', 'pané'],
+                    'poulet roti': ['Poulet', 'rôti'], 'poulet roti cuisse': ['Poulet', 'rôti, cuisse'], 'poulet tex mex': ['Poulet', 'tex-mex'] };
+                const preparation = preparations[cle];
+                let etat = it.etat;
+                if (preparation) { nom = preparation[0]; etat = [it.etat === 'non précisé' ? '' : it.etat, preparation[1]].filter(Boolean).join(', '); }
+                if (typeof abcNomCatalogue === 'function') nom = abcNomCatalogue(nom, it.composant);
+                const incertain = generique || it.confiance === 'faible' || it.confiance === 'basse' || /non identifi/.test(cle);
+                if (incertain) nom = 'Non identifié (' + (it.composant || 'aliment') + ')';
+                return [Object.assign({}, it, { nom: nom, nomBrut: it.nom, etat: etat, incertain: incertain })];
+            });
+        }
+
         // Portions de référence de l'établissement (onglet "Parametres" du tableur), valeurs par défaut sinon.
         function getPortionsEtab() {
             const p = (globalRawData && globalRawData.parametres) || {};
             return {
                 entree: p.portion_entree_g || 80, plat: p.portion_plat_g || 100, accompagnement: p.portion_garniture_g || 150,
-                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50
+                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50, sauce: p.portion_sauce_g || 20
             };
         }
 
         function portionPour(item, portions) {
+            if (/^sauce\b/i.test(item.nom)) return portions.sauce || 20;
             if (item.composant === "dessert" && estFruit(item.nom)) return portions.fruit;
             return portions[item.composant] || portions.plat;
         }
@@ -1296,7 +1336,7 @@
                                evitableKg: 0, inevitableKg: 0, carboneKg: 0, nonAlloue: { alim: 0, fruits: 0, pain: 0 }, predictedKg: 0, predictedBins: { alim: 0, fruits: 0, pain: 0 } };
                 const brut = {};
                 (scansParJour[d] || []).forEach(s => {
-                    const items = parseScanItems(s.commentaire);
+                    const items = itemsStatistiques(s.commentaire, s.dateRaw);
                     const detail = items.map(it => Object.assign({}, it, { composant: it.composant || devinerComposant(it.nom) }));
                     if (items.some(it => !it.composant)) res.scansComposantDevine = (res.scansComposantDevine || 0) + 1;
                     if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
@@ -1388,16 +1428,21 @@
             let poidsTotalEvitablePeriode = 0, poidsTotalInevitablesPeriode = 0, carboneKg = 0, couverts = 0, nbJours = 0;
             const menuFallback = localStorage.getItem(`menuActive-${school}`) || "";
 
+            const peseesParJour = {};
             for (let i = 0; i < sh.datesRaw.length; i++) {
-                let d = normalizeDate(sh.datesRaw[i]);
-                if (d < startDate || d > endDate) continue;
+                const d = normalizeDate(sh.datesRaw[i]);
+                if (!d || d < startDate || d > endDate) continue;
+                const j = peseesParJour[d] = peseesParJour[d] || { alim: 0, fruits: 0, pain: 0 };
+                j.alim += Number(sh.alimentaire[i]) || 0; j.fruits += Number(sh.fruits[i]) || 0; j.pain += Number(sh.pain[i]) || 0;
+            }
+            for (const d of Object.keys(peseesParJour)) {
                 nbJours++;
-                const alimJour = sh.alimentaire[i] || 0, fruitsJour = sh.fruits[i] || 0, painJour = sh.pain[i] || 0;
+                const j = peseesParJour[d], alimJour = j.alim, fruitsJour = j.fruits, painJour = j.pain;
                 totalFruitsKg += fruitsJour; totalPainKg += painJour;
                 couverts += effectifs[d] || params.effectif_defaut || effectifSaisi;
 
                 // Menu enregistré ce jour-là (par date), sinon dernier menu actif
-                const menuDuJour = (globalRawData.historiqueMenus || {})[d] || menuFallback;
+                const menuDuJour = (globalRawData.historiqueMenus || {})[d] || "";
                 const tauxJour = menuDuJour ? getTauxInevitablesPourTexte(menuDuJour) : 0.15;
 
                 const jc = cal.jours[d];
@@ -1889,6 +1934,7 @@
         // Facteur carbone selon l'état : un aliment cuit prend la ligne « cuit » quand elle existe (ex. carotte cuite 1,34 contre crue 0,40)
         function facteurCarboneEtat(nom, etat) {
             const e = normaliserNomAliment(etat);
+            if (/pane|pané/.test(e) && /poisson/i.test(nom)) return getFacteurCarbone(nom + " pané");
             if (/cuit|vapeur|bouilli|sauté|poêlé|rôti|four|braisé|mijoté|gratiné/.test(e)) {
                 const n = normaliserNomAliment(nom);
                 for (const cand of [n + " cuites", n + " cuits", n + "s cuites", n + "s cuits"]) {
@@ -1969,15 +2015,14 @@
 
         function bannirItemHallucine(rawKey, event) {
             event.stopPropagation();
-            const school = document.getElementById('select-etablissement')?.value || "defaut";
-            const menuActif = localStorage.getItem(`menuActive-${school}`) || "defaut";
-            let key = `listeNoire_${school}_${menuActif}`;
-            
-            let banniList = JSON.parse(localStorage.getItem(key) || '[]');
-            if (!banniList.includes(rawKey)) {
-                banniList.push(rawKey);
-                localStorage.setItem(key, JSON.stringify(banniList));
-            }
+            const school = document.getElementById('select-etablissement').value;
+            const item = globalItemsDetailedStats[rawKey];
+            (item?.serie || []).forEach(j => {
+                const key = 'exclusionsABC_' + school + '_' + j.d;
+                let liste = []; try { liste = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) {}
+                if (!liste.includes(rawKey)) liste.push(rawKey);
+                localStorage.setItem(key, JSON.stringify(liste));
+            });
             applyCustomDateFilter();
         }
 
@@ -2009,9 +2054,9 @@
 
             // Taux de restes par aliment : lus dans les crochets écrits par le script (aucun poids ici)
             scansValides.forEach(scan => {
-                parseScanItems(scan.commentaire).forEach(it => {
+                itemsStatistiques(scan.commentaire, scan.dateRaw).forEach(it => {
                     const nom = it.nom;
-                    if (!nom || banniList.includes(nom)) return;
+                    if (!nom) return;
                     const st = dynamicFoodStats[nom] = dynamicFoodStats[nom] || { totalRestes: 0, totalTauxMange: 0, count: 0, rawName: nom, composants: {}, etats: {}, jours: {} };
                     const se = st.etats[it.etat] = st.etats[it.etat] || { count: 0, totalRestes: 0 };
                     se.count += 1; se.totalRestes += it.restePct;
@@ -2041,7 +2086,7 @@
                 selectFilter.innerHTML = `<option value="all">-- Tous les items du menu --</option>`;
             }
 
-            let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [];
+            let plebiscites = [], bonneVoie = [], acceptables = [], rejets = [], incertains = [];
 
             Object.keys(dynamicFoodStats).forEach(key => {
                 let stats = dynamicFoodStats[key];
@@ -2080,11 +2125,12 @@
                 if (selectFilter) {
                     let opt = document.createElement('option');
                     opt.value = key;
-                    opt.innerText = `${key} (${tauxMange}% mangé / ${rejetPct}% rejet)`;
+                    opt.innerText = `${key} (${rejetPct}% de restes estimés)`;
                     selectFilter.appendChild(opt);
                 }
 
-                if (tauxMange >= 75) plebiscites.push(itemObj);
+                if (key.startsWith('Non identifié')) incertains.push(itemObj);
+                else if (tauxMange >= 75) plebiscites.push(itemObj);
                 else if (tauxMange >= 60) bonneVoie.push(itemObj);
                 else if (tauxMange >= 45) acceptables.push(itemObj);
                 else rejets.push(itemObj);
@@ -2097,10 +2143,8 @@
 
             if (typeof renderAnalyseFineSynthese === 'function') renderAnalyseFineSynthese(plebiscites, rejets);
 
-            plebiscites.sort((a, b) => b.tauxMange - a.tauxMange);
-            bonneVoie.sort((a, b) => b.tauxMange - a.tauxMange);
-            acceptables.sort((a, b) => b.rejetPct - a.rejetPct);
-            rejets.sort((a, b) => b.rejetPct - a.rejetPct);
+            const masse = x => x.pese ? (x.poidsEvitKg || 0) : (x.estEvitKg || 0);
+            [plebiscites, bonneVoie, acceptables, rejets, incertains].forEach(l => l.sort((a,b) => masse(b)-masse(a)));
 
             function renderList(list, containerId, theme) {
                 const container = document.getElementById(containerId);
@@ -2122,38 +2166,39 @@
                         let t = `⚖️ ${item.poidsEvitKg.toFixed(2)} kg évitables jetés`;
                         if (item.poidsInevKg > 0.004) t += ` · ${item.poidsInevKg.toFixed(2)} kg inév.`;
                         t += ` · 🌍 ${item.poidsTotalCarbone.toFixed(2)} kg CO₂e`;
-                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;" title="Poids réel calé sur les pesées des bacs ; CO₂e = poids évitable × facteur Agribalyse 3.2">${t}</div>`;
+                        extraText = `<div style="font-size: 8.5px; color: #b91c1c; margin-top: 2px; font-weight: bold;" title="Répartition estimée des pesées des bacs ; CO₂e estimé = poids évitable × facteur Agribalyse 3.2">${t}</div>`;
                     } else {
                         extraText = `<div style="font-size: 8.5px; color: #92400e; margin-top: 2px; font-weight: bold;" title="Pas de pesée des bacs pour cette période : estimation sur les portions de référence × reste observé, sur les plateaux scannés uniquement">⚖️ ≈ ${item.estEvitKg.toFixed(2)} kg évitables (estimé) · 🌍 ≈ ${item.estCarbKg.toFixed(2)} kg CO₂e</div>`;
                     }
 
                     if (theme === 'vert') {
                         cardClass = "gourmet-dish-card plebiscite";
-                        valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
+                        valText = `<span style="color:white; background:#059669; padding:2px 6px; border-radius:4px;">${item.rejetPct}% de restes estimés</span>`;
                     } else if (theme === 'jaune') {
                         cardClass = "gourmet-dish-card bonne-voie";
-                        valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.tauxMange}% mangé</span>`;
+                        valText = `<span style="color:white; background:#65a30d; padding:2px 6px; border-radius:4px;">${item.rejetPct}% de restes estimés</span>`;
                     } else if (theme === 'orange') {
                         cardClass = "gourmet-dish-card acceptable";
-                        valText = `<span style="color:white; background:#ea580c; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
+                        valText = `<span style="color:white; background:#ea580c; padding:2px 6px; border-radius:4px;">${item.rejetPct}% de restes estimés</span>`;
                     } else {
                         cardClass = "gourmet-dish-card alerte";
-                        valText = `<span style="color:white; background:#dc2626; padding:2px 6px; border-radius:4px;">${item.rejetPct}% rejet</span>`;
+                        valText = `<span style="color:white; background:#dc2626; padding:2px 6px; border-radius:4px;">${item.rejetPct}% de restes estimés</span>`;
                     }
                     
                     let fallbackHtml = `this.outerHTML='<div style=\\'width:40px; height:40px; border-radius:4px; margin:4px 4px 4px 6px; flex-shrink:0; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:22px; border:1px solid #e2e8f0;\\'>${item.emoji}</div>'`;
 
                     const mini = miniHistorique(item.serie);
                     container.innerHTML += `
-                        <div class="${cardClass}" onclick="typeof openItemDetail === 'function' ? openItemDetail('${item.rawKey}') : null" title="Cliquer pour analyser cet ingrédient" style="position: relative;">
+                        <div class="${cardClass}" onclick="typeof openItemDetail === 'function' ? openItemDetail(decodeURIComponent('${encodeURIComponent(item.rawKey).replace(/'/g, '%27')}')) : null" title="Cliquer pour analyser cet ingrédient" style="position: relative;">
                             <img src="${item.thumb}" onerror="${fallbackHtml}" class="dish-thumb-photo" alt="">
                             <div style="flex-grow: 1; padding-right: 8px; overflow: hidden; padding-bottom: 4px;">
-                                <div class="text-truncate" title="${item.label}" style="font-size:11.5px;">${item.label}</div>
-                                <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
+                                <div class="text-truncate" title="${String(item.label).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;")}" style="font-size:11.5px;">${String(item.label).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;")}</div>
                                 ${extraText}
+                                <div style="font-size: 9.5px; font-weight: 800; margin-top:2px;">${valText}</div>
+                                <div style="font-size:9px;color:#64748b;">${item.occurrences} observations${item.occurrences < 5 ? " · peu de données" : ""} · répartition estimée</div>
                                 ${mini}
                             </div>
-                            <button type="button" onclick="typeof bannirItemHallucine === 'function' ? bannirItemHallucine('${item.rawKey}', event) : null" title="Supprimer cette hallucination" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️</button>
+                            <button type="button" onclick="typeof bannirItemHallucine === 'function' ? bannirItemHallucine(decodeURIComponent('${encodeURIComponent(item.rawKey).replace(/'/g, '%27')}'), event) : null" title="Supprimer cette hallucination" style="position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.1); border: none; color: #ef4444; border-radius: 50%; width: 18px; height: 18px; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.background='#ef4444'; this.style.color='#fff';" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'; this.style.color='#ef4444';">🗑️</button>
                         </div>
                     `;
                 });
@@ -2163,6 +2208,11 @@
             renderList(bonneVoie, 'period-bonnevoie-grid', 'jaune');
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
+            let zoneIncertaine = document.getElementById('period-incertains-grid');
+            if (!zoneIncertaine) { zoneIncertaine = document.createElement('div'); zoneIncertaine.id='period-incertains-grid'; containerRejets.parentNode.insertAdjacentElement('afterend',zoneIncertaine); }
+            renderList(incertains, 'period-incertains-grid', 'orange');
+            zoneIncertaine.style.display = incertains.length ? 'grid' : 'none';
+            zoneIncertaine.setAttribute('aria-label','Déchets dont l’aliment n’est pas identifié avec certitude');
 
             renderConformite(globalItemsDetailedStats);
             croiseScans = scansValides;
@@ -2176,7 +2226,7 @@
         }
 
         // ===== VUE GRAPHIQUE : barres par aliment, filtrées par composante (entrée, plat, garniture, dessert, pain) =====
-        let graphComp = "all", graphMetric = "mange";
+        let graphComp = "all", graphMetric = "kg";
         const GRAPH_COMPOSANTES = [["all", "Tout"], ["entree", "Entrées"], ["plat", "Plats"], ["accompagnement", "Garnitures"], ["dessert", "Desserts"], ["pain", "Pain"]];
 
         function composanteDominante(item) {
@@ -2210,7 +2260,7 @@
             const fond = graphMetric === "mange"
                 ? "background-image:linear-gradient(to right,#fee2e2 0,#fee2e2 45%,#ffedd5 45%,#ffedd5 60%,#ecfccb 60%,#ecfccb 75%,#d1fae5 75%,#d1fae5 100%);" : "background:#f1f5f9;";
             zone.innerHTML = repere + lignes.map(l => `
-                <div onclick="openItemDetail('${echapper(l.it.rawKey)}')" title="Cliquer pour analyser ${echapper(l.it.label)}" style="display:flex; align-items:center; gap:8px; margin:3px 0; cursor:pointer; ${l.it.occurrences < 5 ? "opacity:0.6;" : ""}">
+                <div onclick="openItemDetail(decodeURIComponent('${encodeURIComponent(l.it.rawKey).replace(/'/g, '%27')}'))" title="Cliquer pour analyser ${echapper(l.it.label)}" style="display:flex; align-items:center; gap:8px; margin:3px 0; cursor:pointer; ${l.it.occurrences < 5 ? "opacity:0.6;" : ""}">
                     <div style="width:142px; flex-shrink:0; font-size:11px; font-weight:600; color:#1e293b; text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${echapper(l.it.label)}</div>
                     <div style="flex:1; height:16px; border-radius:3px; ${fond}"><div style="height:100%; width:${Math.max(1, Math.min(100, l.largeur))}%; background:${l.couleur}; border-radius:3px;"></div></div>
                     <div style="width:118px; flex-shrink:0; font-size:10.5px; color:#334155;"><strong>${l.texte}</strong> · ${l.it.occurrences}${l.it.occurrences < 5 ? " ⚠️" : ""}</div>
@@ -2240,7 +2290,7 @@
         function plateauxCroises() {
             const out = [];
             croiseScans.forEach(s => {
-                const items = parseScanItems(s.commentaire).map(it => Object.assign({}, it, { comp: it.composant || devinerComposant(it.nom) }));
+                const items = itemsStatistiques(s.commentaire, s.dateRaw).map(it => Object.assign({}, it, { comp: it.composant || devinerComposant(it.nom) }));
                 if (!items.length) return;
                 out.push({ scan: s, date: normalizeDate(s.dateRaw), min: heureScanMin(s), avis: avisCourt(s.avis_eleve), items: items, mange: moy(items.map(i => 100 - i.restePct)) });
             });
@@ -2480,7 +2530,7 @@
             ((globalRawData && globalRawData.rawGaspillage) || []).forEach(sc => {
                 if (sc.type !== "SCAN_IA_VISION") return;
                 const d = normalizeDate(sc.dateRaw);
-                parseScanItems(sc.commentaire).forEach(it => {
+                itemsStatistiques(sc.commentaire, sc.dateRaw).forEach(it => {
                     const comp = it.composant || devinerComposant(it.nom), nom = normaliserNomAliment(it.nom);
                     (jourItems[d] = jourItems[d] || []).push({ nom: it.nom, cle: nom, comp: comp, reste: it.restePct });
                     if (nom === cle || nom.includes(cle) || cle.includes(nom)) obs.push({ date: d, reste: it.restePct, etat: it.etat, avis: avisCourt(sc.avis_eleve), comp: comp });
@@ -2603,7 +2653,7 @@
             ((globalRawData && globalRawData.rawGaspillage) || []).forEach(sc => {
                 if (sc.type !== "SCAN_IA_VISION") return;
                 let presentDansScan = false;
-                parseScanItems(sc.commentaire).forEach(it => {
+                itemsStatistiques(sc.commentaire, sc.dateRaw).forEach(it => {
                     const nom = normaliserNomAliment(it.nom);
                     if (nom === cle || nom.includes(cle) || cle.includes(nom)) {
                         presentDansScan = true;
@@ -3053,12 +3103,14 @@
                 action: "logScanImage", 
                 etablissement: document.getElementById('select-etablissement') ? document.getElementById('select-etablissement').value : "Établissement", 
                 menu_jour: document.getElementById('borne-menu-active') ? document.getElementById('borne-menu-active').innerText : "--", 
+                choix_plat: typeof ABC_CATALOGUE !== 'undefined' ? ABC_CATALOGUE.choice : '',
                 avis_eleve: choixAvisCourant,
                 image_base64: imageCapturee 
             };
 
             // 5. Mise en file d'attente : l'élève n'attend pas, mais la photo n'est supprimée qu'après confirmation du serveur
             scanEnfiler(payload);
+            if (typeof ABC_CATALOGUE !== 'undefined') { ABC_CATALOGUE.choice = ''; abcChoixMenu(menusHistorique); }
 
             // 6. LIBÉRATION IMMÉDIATE (1 SECONDE)
             setTimeout(() => {
@@ -3230,7 +3282,7 @@
             if (viewId === 'view-borne') {
                 initCamera(); 
                 const school = document.getElementById('select-etablissement').value;
-                const menuLocal = localStorage.getItem(`menuActive-${school}`);
+                const menuLocal = (menusHistorique || {})[typeof abcJour === 'function' ? abcJour() : new Date().toISOString().split('T')[0]] || 'Menu du jour non renseigné';
                 if (menuLocal) {
                     const displayMenu = document.getElementById('borne-menu-active');
                     if (displayMenu) displayMenu.innerText = menuLocal.substring(0, 50) + (menuLocal.length > 50 ? "..." : "");
@@ -3300,7 +3352,7 @@
                 if (data && data.dernierMenu && data.dernierMenu !== "Non configuré") {
                     localStorage.setItem(`menuActive-${school}`, data.dernierMenu);
                     let displayMenu = document.getElementById('borne-menu-active');
-                    if(displayMenu) displayMenu.innerText = data.dernierMenu.substring(0, 50) + "...";
+                    if(displayMenu) { const menuExact = (data.historiqueMenus || {})[typeof abcJour === 'function' ? abcJour() : new Date().toISOString().split('T')[0]]; displayMenu.innerText = menuExact || 'Menu du jour non renseigné'; }
                 }
 
                 {
@@ -3316,6 +3368,7 @@
                     if (lbl && data.parametres && data.parametres.prix_kg_eur) lbl.innerText = `Poids évitable × ${Number(data.parametres.prix_kg_eur).toFixed(2).replace('.', ',')} €/kg`;
                 }
 
+                if (typeof abcAccepterCatalogue === 'function') abcAccepterCatalogue(data, school);
                 menusHistorique = data.historiqueMenus || {};
                 renderControleFrequences();
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
@@ -3372,7 +3425,7 @@
             croiseScans = [];
             if (typeof renderLecturesCroisees === 'function') renderLecturesCroisees();
             const vide = "<p style='color:#64748b; font-size:11px; text-align:center; padding:15px; grid-column:1/-1;'>En attente de données...</p>";
-            ['period-adhesion-grid', 'period-bonnevoie-grid', 'period-acceptable-grid', 'period-rejets-grid'].forEach(id => {
+            ['period-adhesion-grid', 'period-bonnevoie-grid', 'period-acceptable-grid', 'period-rejets-grid', 'period-incertains-grid'].forEach(id => {
                 const el = document.getElementById(id); if (el) el.innerHTML = vide;
             });
             const sel = document.getElementById('select-filter-item');
@@ -3412,6 +3465,7 @@
             localStorage.setItem('schoolActuelle', school);
             reinitialiserAffichageEtablissement();
             afficherChargementEtablissementABC(school);
+            if (typeof abcChangerCatalogue === 'function') abcChangerCatalogue();
             menusHistorique = {};
             const ctrl = document.getElementById('controle-frequences'); if (ctrl) ctrl.innerHTML = "";
             const reportSchoolElem = document.getElementById('report-school-name');
@@ -4045,5 +4099,6 @@
             }
         };
     </script>
+<script src="abc-catalogue.js?v=20261020-1"></script>
 </body>
 </html>
