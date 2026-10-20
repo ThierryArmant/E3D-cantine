@@ -73,4 +73,11 @@ const front=vm.createContext({renderLocalFavorites(){},getCurrentCheckedMenu(){}
 vm.runInContext(fs.readFileSync('abc-catalogue.js','utf8'),front);
 const noms=vm.runInContext(`ABC_CATALOGUE.items=ABC_CATALOGUE_INITIAL.map((x,i)=>({...x,id:'initial-'+i,actif:true,alias:[]}));const ids=abcLireMenuEnregistre('Sans entrée | Poisson cury + Poulet rôti | Riz | Glace');ABC_CATALOGUE.items.filter(x=>ids.includes(x.id)).map(x=>x.libelle);`,front);
 assert.ok(noms.includes('Poisson')&&noms.includes('Poulet')&&noms.includes('Sauce curry')&&noms.includes('Riz'));
+// Un quota saturé ne bloque ni le brouillon ni son isolation et ne supprime aucune donnée.
+front.localStorage={getItem:()=>null,setItem:()=>{throw new Error('QuotaExceededError');},removeItem:()=>{throw new Error('Suppression interdite');},clear:()=>{throw new Error('Suppression interdite');}};
+front.document.getElementById=id=>id==='select-etablissement'?{value:'A'}:id==='input-menu-date'?{value:'2026-10-16'}:null;
+vm.runInContext(`abcStockerSelection(abcSelectionKey(),JSON.stringify(['poisson']));`,front);
+assert.equal(JSON.stringify(front.abcSelection()),'['+'"poisson"'+']');
+front.document.getElementById=id=>id==='select-etablissement'?{value:'B'}:id==='input-menu-date'?{value:'2026-10-16'}:null;
+assert.equal(JSON.stringify(front.abcSelection()),'[]');
 console.log('Vérifications réussies : catalogue isolé, corrections datées réversibles, transfert de bac sans doublon, conservation des autres lignes, rechargement du menu, masses et syntaxe.');
