@@ -1199,13 +1199,8 @@
                 const container = document.getElementById('favs_container_' + type);
                 if (!container) return;
                 const favs = JSON.parse(localStorage.getItem('favs_' + school + '_' + type) || '[]');
-                // Conserver les coches même lorsque le DOM d'une autre catégorie est reconstruit.
+                // Les changements de coche sont déjà sauvegardés par leurs événements.
                 const selected = new Set(favoriteSelection(type));
-                container.querySelectorAll('input[data-favorite-item]').forEach(cb => {
-                    if (cb.checked) selected.add(cb.value);
-                    else selected.delete(cb.value);
-                });
-                setFavoriteSelection(type, [...selected]);
                 container.replaceChildren();
                 container.style.display = favs.length ? 'block' : 'none';
                 const baseName = type === 'entree' ? 'entree_base' : type === 'plat' ? 'plat_base' : type === 'accomp' ? 'accomp_base' : 'dessert_douceur';
@@ -1236,6 +1231,8 @@
                 });
             });
         }
+
+        document.getElementById('input-menu-date')?.addEventListener('change', renderLocalFavorites);
 
         function setQuickPeriod(type, btnElem) {
             document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
