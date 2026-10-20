@@ -736,7 +736,48 @@ function abcChoixMenu(menus) {
     if(!visible)ABC_CATALOGUE.choice='';
     zone.querySelectorAll('button').forEach(b=>{const on=b.dataset.choix===ABC_CATALOGUE.choice;b.setAttribute('aria-pressed',String(on));b.style.background=on?'#bbf7d0':'white';});
 }
+
+function abcInstallerAideMenu() {
+    if (document.getElementById('abc-aide-menu')) return;
+    const table = document.querySelector('.menu-table');
+    if (!table) return;
+    const barre = abcEl('div');
+    barre.style.cssText = 'display:flex;justify-content:flex-end;position:sticky;top:0;z-index:8;padding:6px 0;background:white;';
+    const bouton = abcEl('button', '❔ Comment saisir le menu ?', 'btn btn-outline');
+    bouton.type='button';bouton.style.cssText='width:auto;font-size:13px;padding:9px 12px;';
+    bouton.setAttribute('aria-expanded','false');bouton.setAttribute('aria-controls','abc-aide-menu');
+    barre.append(bouton);
+    table.parentNode.insertAdjacentElement('beforebegin',barre);
+    const panneau = abcEl('aside');
+    panneau.id='abc-aide-menu';panneau.hidden=true;
+    panneau.setAttribute('role','dialog');panneau.setAttribute('aria-label','Aide à la saisie des menus');panneau.setAttribute('aria-modal','false');
+    panneau.style.cssText='position:fixed;right:16px;bottom:16px;width:360px;max-width:calc(100vw - 32px);max-height:80vh;overflow:auto;z-index:10020;background:white;color:#17382b;border:2px solid #2d6a4f;border-radius:12px;box-shadow:0 8px 30px #0003;padding:16px;font-size:13px;line-height:1.5;';
+    const entete=abcEl('div');entete.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px;';
+    const titre=abcEl('strong','Saisir le menu, simplement');
+    const fermer=abcEl('button','×');fermer.type='button';fermer.setAttribute('aria-label','Fermer l’aide');fermer.style.cssText='min-width:36px;min-height:36px;background:#eef5ef;color:#17382b;border:0;border-radius:6px;font-size:22px;';
+    entete.append(titre,fermer);panneau.append(entete);
+    const sections=[
+        ['1. Choisir le service','Sélectionnez votre établissement et la date du menu.'],
+        ['2. Ajouter un aliment','Dans la bonne colonne, saisissez son nom dans « Autre aliment… », puis cliquez sur 💾. Il est enregistré dans votre catalogue et coché pour ce menu.'],
+        ['3. Ajouter une sauce ou une option','Utilisez « Autre sauce / option… », puis 💾. Exemple : cochez Poisson dans les bases et Sauce curry dans les options.'],
+        ['4. Composer le menu','Cochez les aliments et leurs options. La case 🧑‍🍳 indique « fait maison ». Décochez un aliment pour le retirer du menu du jour.'],
+        ['5. Corriger un nom','Ouvrez « Gérer le catalogue de cet établissement », choisissez l’aliment, corrigez son nom et cliquez sur « Enregistrer la correction ». Les anciennes observations restent associées.'],
+        ['6. Valider','Cliquez sur « VALIDER LE MENU POUR LA BORNE ». Le menu est enregistré pour l’établissement et la date choisis.']
+    ];
+    sections.forEach(([nom,texte])=>{const section=abcEl('section');section.style.cssText='margin:10px 0;';section.append(abcEl('strong',nom));const p=abcEl('p',texte);p.style.cssText='margin:3px 0 0;';section.append(p);panneau.append(section);});
+    const note=abcEl('p','Chaque établissement conserve son propre catalogue. Pour retirer un élément du catalogue, utilisez « Désactiver » ; pour réunir deux doublons, utilisez « Fusionner ».');
+    note.style.cssText='margin:12px 0 0;padding-top:10px;border-top:1px solid #d3e2d7;font-size:12px;';panneau.append(note);
+    document.body.append(panneau);
+    function close() { panneau.hidden=true;bouton.setAttribute('aria-expanded','false'); }
+    bouton.addEventListener('click',()=>{const ouvrir=panneau.hidden;panneau.hidden=!ouvrir;bouton.setAttribute('aria-expanded',String(ouvrir));if(ouvrir)fermer.focus();});
+    fermer.addEventListener('click',()=>{close();bouton.focus();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!panneau.hidden){close();bouton.focus();}});
+    document.addEventListener('click',e=>{if(!panneau.hidden&&!panneau.contains(e.target)&&!bouton.contains(e.target))close();});
+    document.querySelectorAll('.sidebar-menu .menu-item').forEach(e=>e.addEventListener('click',close));
+}
+
 function abcInitialiserInterface() {
+    abcInstallerAideMenu();
     const table=document.querySelector('.menu-table');if(!table)return;
     const tds=Array.from(table.querySelectorAll('tbody tr:first-child > td'));
     Object.keys(ABC_RUBRIQUES).forEach((t,i)=>{if(tds[i])tds[i].dataset.abcRubrique=t;});
