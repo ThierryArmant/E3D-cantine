@@ -999,17 +999,31 @@
             values = values.concat((globalRawData?.exclusionsAnalyses || {})[jour] || []);
             return new Set(values.map(cleAlimentStat));
         }
+        // Correction historique confirmée par le responsable du service.
+        // Les observations originales restent intactes. Une fausse identification
+        // devient incertaine, sans être arbitrairement réattribuée au poisson pané.
+        const CORRECTIONS_OBSERVATIONS_ABC = [
+            { ecole: 'COLLEGE J. GIONO', date: '2026-10-16', aliment: 'poisson curry', motif: 'Poisson curry non servi — correction confirmée par le responsable' }
+        ];
         function itemsStatistiques(commentaire, date) {
             if (/photo noire|inexploitable/i.test(commentaire || '')) return [];
             const bannis = listeExclusionsStat(date);
             const libelles = { 'carottes rapees':'Carottes râpées', 'poisson pane':'Poisson pané', 'poulet roti':'Poulet rôti', 'poulet roti cuisse':'Poulet rôti / Cuisse', 'poisson curry':'Poisson curry', 'tarte au citron':'Tarte au citron', 'wrap crevette':'Wrap crevette' };
             return parseScanItems(commentaire).flatMap(it => {
                 const cle = cleAlimentStat(it.nom);
-                if (!cle || bannis.has(cle) || bannis.has(cleObservationStat(it))) return [];
+                if (!cle) return [];
+                const correction = CORRECTIONS_OBSERVATIONS_ABC.find(c =>
+                    c.ecole === document.getElementById('select-etablissement')?.value &&
+                    c.date === normalizeDate(date) && c.aliment === cleObservationStat(it));
+                if (correction) return [Object.assign({}, it, {
+                    nom: 'Non identifié (' + (it.composant || 'plat') + ')',
+                    nomBrut: it.nom, incertain: true, correction: correction.motif, confiance: 'faible'
+                })];
+                if (bannis.has(cle) || bannis.has(cleObservationStat(it))) return [];
                 const generique = /^(entree|dessert|plat|plat principal|plat chaud|accompagnement|aliment|inconnu|non identifie)( non identifie)?$/.test(cle);
                 let reference = Object.keys(COEFFICIENTS_INEVITABLES).concat(Object.keys(COEFFICIENTS_CARBONE_ADEME)).find(n => cleAlimentStat(n) === cle);
                 let nom = libelles[cle] || (reference ? reference.charAt(0).toUpperCase() + reference.slice(1) : cle.charAt(0).toUpperCase() + cle.slice(1));
-                const preparations = { 'poisson curry': ['Poisson', 'sauce curry'], 'poisson pane': ['Poisson', 'pané'],
+                const preparations = { 'poisson curry': ['Poisson', 'sauce curry'], 'poisson pane': ['Poisson pané', 'pané'],
                     'poulet roti': ['Poulet', 'rôti'], 'poulet roti cuisse': ['Poulet', 'rôti, cuisse'], 'poulet tex mex': ['Poulet', 'tex-mex'] };
                 const preparation = preparations[cle];
                 let etat = it.etat;
@@ -2063,12 +2077,14 @@
                 return !c.includes("noire") && !c.includes("inexploitable");
             });
 
+            let correctionsHistoriques = 0;
             let dynamicFoodStats = {};
             globalItemsDetailedStats = {};
 
             // Taux de restes par aliment : lus dans les crochets écrits par le script (aucun poids ici)
             scansValides.forEach(scan => {
                 itemsStatistiques(scan.commentaire, scan.dateRaw).forEach(it => {
+                    if (it.correction) correctionsHistoriques++;
                     const nom = it.nom;
                     if (!nom) return;
                     const st = dynamicFoodStats[nom] = dynamicFoodStats[nom] || { totalRestes: 0, totalTauxMange: 0, count: 0, rawName: nom, composants: {}, etats: {}, jours: {} };
@@ -2082,6 +2098,20 @@
                     st.composants[comp] = (st.composants[comp] || 0) + 1;
                 });
             });
+
+            const couvertureABC = document.getElementById('bandeau-couverture');
+            let bilanCorrectionsABC = document.getElementById('abc-corrections-historiques-bilan');
+            if (!bilanCorrectionsABC && couvertureABC) {
+                bilanCorrectionsABC = document.createElement('p');
+                bilanCorrectionsABC.id = 'abc-corrections-historiques-bilan';
+                bilanCorrectionsABC.setAttribute('role', 'status');
+                bilanCorrectionsABC.style.cssText = 'padding:8px 12px;background:#eff6ff;color:#1e3a5f;border-radius:6px;font-size:13px;';
+                couvertureABC.insertAdjacentElement('afterend', bilanCorrectionsABC);
+            }
+            if (bilanCorrectionsABC) {
+                bilanCorrectionsABC.hidden = !correctionsHistoriques;
+                bilanCorrectionsABC.textContent = correctionsHistoriques + ' identification(s) historique(s) corrigée(s) : aliment non servi, identité réelle inconnue. Classées dans « Non identifié ». Scans d’origine conservés.';
+            }
 
             // Fallback pour les vignettes
             function getThumbFallback(alimentName) {
@@ -3487,6 +3517,7 @@
             if (sel) sel.innerHTML = '<option value="all">-- Tous les items du menu --</option>';
             const box = document.getElementById('box-detail-item-filtré'); if (box) box.style.display = "none";
             const ban = document.getElementById('bandeau-couverture'); if (ban) ban.innerHTML = "";
+            const correctionsHist = document.getElementById('abc-corrections-historiques-bilan'); if (correctionsHist) correctionsHist.hidden = true;
             const vert = document.getElementById('analyse-fine-vert'); if (vert) vert.innerHTML = "En attente de données...";
             const rouge = document.getElementById('analyse-fine-rouge'); if (rouge) rouge.innerHTML = "En attente de données...";
             ['crudites', 'poisson', 'frits', 'laitiers', 'desserts', 'pain'].forEach(g => {
