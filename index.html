@@ -1024,7 +1024,7 @@
                 const generique = /^(entree|dessert|plat|plat principal|plat chaud|accompagnement|aliment|inconnu|non identifie)( non identifie)?$/.test(cle);
                 let reference = Object.keys(COEFFICIENTS_INEVITABLES).concat(Object.keys(COEFFICIENTS_CARBONE_ADEME)).find(n => cleAlimentStat(n) === cle);
                 let nom = libelles[cle] || (reference ? reference.charAt(0).toUpperCase() + reference.slice(1) : cle.charAt(0).toUpperCase() + cle.slice(1));
-                const preparations = { 'poisson curry': ['Poisson', 'sauce curry'], 'poisson pane': ['Poisson pané', 'pané'],
+                const preparations = { 'poisson curry': ['Poisson', 'sauce curry'], 'poisson pane': ['Poisson', 'pané'],
                     'poulet roti': ['Poulet', 'rôti'], 'poulet roti cuisse': ['Poulet', 'rôti, cuisse'], 'poulet tex mex': ['Poulet', 'tex-mex'] };
                 const preparation = preparations[cle];
                 let etat = it.etat;
