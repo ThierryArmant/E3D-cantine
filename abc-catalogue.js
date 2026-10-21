@@ -627,7 +627,11 @@ function abcNomCatalogue(nom, composant) {
     if(ABC_CATALOGUE.school!==abcEcole()) return nom;
     const rubrique=composant==='accompagnement'?'accomp':composant;
     const cle=abcCle(nom);
-    const candidats=ABC_CATALOGUE.items.filter(x=>(!rubrique || x.rubrique===rubrique) && [x.libelle,...(x.alias||[])].some(a=>abcCle(a)===cle)).map(abcFicheFinale);
+    const correspondances=ABC_CATALOGUE.items.filter(x=>[x.libelle,...(x.alias||[])].some(a=>abcCle(a)===cle)).map(abcFicheFinale);
+    // L'IA peut classer la même salade en entrée ou en plat. Une correspondance
+    // exacte et unique garde le même nom, sans changer le composant ni la portion.
+    const dansRubrique=correspondances.filter(x=>!rubrique || x.rubrique===rubrique);
+    const candidats=dansRubrique.length ? dansRubrique : correspondances;
     return candidats.length && candidats.every(x=>x.id===candidats[0].id) ? candidats[0].libelle : nom;
 }
 function abcAccepterCatalogue(data, school) {
