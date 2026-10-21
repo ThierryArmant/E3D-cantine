@@ -222,3 +222,8 @@ body.abc-borne-plein{overflow:hidden!important}
  #view-borne.abc-borne-intermediaire .abc-borne-avis{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto auto minmax(60px,1fr) minmax(60px,1fr)}
  #view-borne.abc-borne-intermediaire .abc-borne-avis>div{grid-column:1 / -1}
 }
+
+/* Parcours photo : lecture et validation immédiates, correction à la demande. */
+#abc-photos-service .abc-photo-validee{margin:6px 0;border:1px solid #b7d9c6;border-radius:8px;background:#f0fdf4}
+#abc-photos-service .abc-photo-validee>summary{padding:10px;cursor:pointer;color:#14532d;font-weight:700;font-size:14px}
+#abc-photos-service [hidden]{display:none!important}
