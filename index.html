@@ -1015,6 +1015,7 @@
                 const correction = CORRECTIONS_OBSERVATIONS_ABC.find(c =>
                     c.ecole === document.getElementById('select-etablissement')?.value &&
                     c.date === normalizeDate(date) && c.aliment === cleObservationStat(it));
+                if (correction && bannis.has('poisson')) return [];
                 if (correction) return [Object.assign({}, it, {
                     nom: 'Poisson', nomBrut: it.nom, incertain: false,
                     etat: it.etat.replace(/\bcurry\b/gi, '').replace(/\s+/g, ' ').trim() || 'non précisé',
@@ -1032,6 +1033,7 @@
                 if (typeof abcNomCatalogue === 'function') nom = abcNomCatalogue(nom, it.composant);
                 const incertain = generique || it.confiance === 'faible' || it.confiance === 'basse' || /non identifi/.test(cle);
                 if (incertain) nom = 'Non identifié (' + (it.composant || 'aliment') + ')';
+                if (bannis.has(cleAlimentStat(nom))) return [];
                 return [Object.assign({}, it, { nom: nom, nomBrut: it.nom, etat: etat, incertain: incertain })];
             });
         }
@@ -2084,6 +2086,7 @@
             // Taux de restes par aliment : lus dans les crochets écrits par le script (aucun poids ici)
             scansValides.forEach(scan => {
                 itemsStatistiques(scan.commentaire, scan.dateRaw).forEach(it => {
+                    if (it.incertain) return;
                     const nom = it.nom;
                     if (!nom) return;
                     const st = dynamicFoodStats[nom] = dynamicFoodStats[nom] || { totalRestes: 0, totalTauxMange: 0, count: 0, rawName: nom, composants: {}, etats: {}, jours: {} };
@@ -2237,11 +2240,7 @@
             renderList(bonneVoie, 'period-bonnevoie-grid', 'jaune');
             renderList(acceptables, 'period-acceptable-grid', 'orange');
             renderList(rejets, 'period-rejets-grid', 'rouge');
-            let zoneIncertaine = document.getElementById('period-incertains-grid');
-            if (!zoneIncertaine) { zoneIncertaine = document.createElement('div'); zoneIncertaine.id='period-incertains-grid'; containerRejets.parentNode.insertAdjacentElement('afterend',zoneIncertaine); }
-            renderList(incertains, 'period-incertains-grid', 'orange');
-            zoneIncertaine.style.display = incertains.length ? 'grid' : 'none';
-            zoneIncertaine.setAttribute('aria-label','Déchets dont l’aliment n’est pas identifié avec certitude');
+            document.getElementById('period-incertains-grid')?.remove();
 
             renderConformite(globalItemsDetailedStats);
             croiseScans = scansValides;
