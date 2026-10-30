@@ -67,3 +67,19 @@ Son développement s'inscrit dans une démarche éducative, environnementale et 
 Le code et les éléments originaux du projet sont susceptibles d'être protégés par le droit d'auteur. Leur publication sur GitHub ne constitue pas une autorisation générale d'exploitation commerciale.
 
 Les conditions précises de réutilisation, de modification et de redistribution du code restent à définir dans une licence adaptée, après vérification de la titularité des droits.
+
+---
+
+## 🗓️ Planning de la brigade cantine (`planning/`)
+Page où les élèves s'inscrivent eux-mêmes sur un poste (scan plateau, pain et fruits, biodéchets et emballages) et un créneau d'une demi-heure, lundi, mardi, jeudi et vendredi entre 11h30 et 13h30.
+
+* **Page élève :** `planning/index.html` (GitHub Pages, adresse `…/planning/`).
+* **Affiche avec QR code :** `planning/affiche.html`, à imprimer. Le QR code pointe vers la page élève.
+* **Serveur :** `apps_script/planning/Code.gs`, projet Apps Script séparé de celui d'A.B.C., lié à son propre Google Sheet.
+
+Installation :
+1. Créer un Google Sheet vide (« Planning brigade cantine »), puis Extensions > Apps Script et coller `apps_script/planning/Code.gs`.
+2. Déployer > Nouveau déploiement > Application Web, exécuter en tant que *Moi*, accès *Tout le monde*.
+3. Coller l'adresse `…/exec` dans `planning/index.html`, ligne `var ADRESSE_PLANNING = "";`. Tant qu'elle est vide, la page fonctionne en aperçu avec des exemples, sans rien enregistrer.
+
+Les onglets « Inscriptions » et « Réglages » se créent au premier appel. Jours, créneaux, postes et places se règlent dans « Réglages » ; « Inscriptions ouvertes : Non » fige le planning. Chaque élève choisit un code à 4 chiffres pour pouvoir se retirer ; le Sheet n'en garde qu'une empreinte. Le classeur se télécharge en Excel via Fichier > Télécharger.

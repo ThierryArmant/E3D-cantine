@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Affiche Brigade cantine</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<script src="../abc-qrcode.js?v=1"></script>
+<style>
+/* Affiche A4 portrait : titre en haut, trois postes, QR code en bas — toujours en clair pour l'impression */
+:root {
+  --bg: #ffffff; --fg: #1d2622; --muted: #5b6862; --line: #d3dad6; --accent: #1f6b4f;
+  --poste1: #2f5d8a; --poste2: #b07a16; --poste3: #6d4c2f; --inox: #eef1ef;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+@page { size: A4 portrait; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #c9d1cc; }
+body { font-family: var(--font-body); color: var(--fg); padding: 20px 16px; }
+.outils { max-width: 210mm; margin: 0 auto 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+.outils button { font: inherit; font-weight: 700; background: var(--accent); color: #fff; border: 0; border-radius: 8px; padding: 9px 14px; cursor: pointer; }
+.outils code { background: #fff; padding: 6px 8px; border-radius: 6px; word-break: break-all; }
+.feuille {
+  width: 210mm; max-width: 100%; min-height: 297mm; margin: 0 auto; background: var(--bg);
+  padding: 16mm 15mm 14mm; display: flex; flex-direction: column; gap: 9mm; box-shadow: 0 8px 30px rgba(0,0,0,.18);
+}
+.eyebrow { font-family: var(--font-data); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); font-size: 11pt; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 44pt; line-height: .98; margin: 3mm 0 0; letter-spacing: -0.015em; }
+.chapo { font-size: 15pt; margin: 4mm 0 0; max-width: 34ch; line-height: 1.35; }
+.postes { display: grid; gap: 4mm; }
+.poste { display: grid; grid-template-columns: 9mm 1fr; background: var(--inox); border-radius: 4mm; overflow: hidden; }
+.poste i { background: var(--c); }
+.poste div { padding: 4mm 5mm; }
+.poste b { font-family: var(--font-display); font-weight: 600; font-size: 17pt; display: block; }
+.poste span { font-size: 11.5pt; color: var(--muted); }
+.horaires { display: flex; flex-wrap: wrap; gap: 3mm; }
+.horaires span { font-family: var(--font-data); font-weight: 700; font-size: 13pt; border: 1.5px solid var(--fg); border-radius: 3mm; padding: 2mm 4mm; font-variant-numeric: tabular-nums; }
+.jours { font-size: 13pt; margin: 0 0 3mm; }
+.jours b { font-weight: 700; }
+.bas { margin-top: auto; display: grid; grid-template-columns: auto 1fr; gap: 8mm; align-items: center; border-top: 2px solid var(--fg); padding-top: 8mm; }
+#qr { width: 62mm; height: 62mm; background: #fff; }
+#qr svg { width: 62mm !important; height: 62mm !important; display: block; }
+.etapes { margin: 0; padding-left: 6mm; font-size: 13pt; line-height: 1.5; }
+.etapes li + li { margin-top: 1.5mm; }
+.consigne { font-family: var(--font-display); font-weight: 800; font-size: 22pt; margin: 0 0 3mm; line-height: 1.05; }
+.petit { font-size: 9pt; color: var(--muted); word-break: break-all; margin-top: 3mm; }
+@media (max-width: 560px) { .feuille { padding: 22px 16px; min-height: 0; } h1 { font-size: 30pt; } .bas { grid-template-columns: 1fr; } }
+@media print {
+  html, body { background: #fff; padding: 0; }
+  .outils { display: none; }
+  .feuille { box-shadow: none; width: 210mm; height: 297mm; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+<div class="outils">
+  <button type="button" onclick="window.print()">Imprimer l'affiche</button>
+  <span>Lien de la page élève :</span><code id="lien-texte"></code>
+</div>
+
+<main class="feuille">
+  <header>
+    <div class="eyebrow">Cantine · Assiette Bas Carbone</div>
+    <h1>La brigade du self&nbsp;recrute</h1>
+    <p class="chapo">Aide à faire tourner le service du midi et à réduire le gaspillage. Tu choisis tes créneaux selon ton emploi du temps.</p>
+  </header>
+
+  <section class="postes" id="postes"></section>
+
+  <section>
+    <p class="jours" id="jours"></p>
+    <div class="horaires" id="horaires"></div>
+  </section>
+
+  <section class="bas">
+    <div id="qr" role="img" aria-label="QR code vers la page d'inscription"></div>
+    <div>
+      <p class="consigne">Scanne et inscris-toi</p>
+      <ol class="etapes">
+        <li>Indique ton prénom, l'initiale de ton nom et ta classe.</li>
+        <li>Invente un code de 4 chiffres et garde-le.</li>
+        <li>Touche une place libre sur un créneau où tu n'as pas cours.</li>
+      </ol>
+      <p class="petit" id="lien-petit"></p>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  // Adresse de la page élève, déduite de l'adresse de cette affiche
+  var url = new URL("./", location.href).href;
+  // Réglages affichés sur l'affiche (à garder cohérents avec l'onglet « Réglages » du Sheet)
+  var config = {
+    jours: ["Lundi", "Mardi", "Jeudi", "Vendredi"],
+    creneaux: ["11h30-12h00", "12h00-12h30", "12h30-13h00", "13h00-13h30"],
+    postes: [{ nom: "Scan plateau" }, { nom: "Pain et fruits" }, { nom: "Biodéchets et emballages" }]
+  };
+  var descriptions = {
+    "scan plateau": "Tu guides chaque élève pour scanner son plateau à la borne.",
+    "pain et fruits": "Tu récupères le pain et les restes de fruits.",
+    "biodechets et emballages": "Tu aides au tri des biodéchets et des emballages."
+  };
+  var couleurs = ["var(--poste1)", "var(--poste2)", "var(--poste3)", "var(--accent)"];
+  function norm(s) { return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim(); }
+
+  var zone = document.getElementById("postes");
+  config.postes.forEach(function (p, i) {
+    var l = document.createElement("div"); l.className = "poste";
+    var b = document.createElement("i"); b.style.setProperty("--c", couleurs[i % couleurs.length]); l.appendChild(b);
+    var d = document.createElement("div");
+    var t = document.createElement("b"); t.textContent = p.nom; d.appendChild(t);
+    var s = document.createElement("span"); s.textContent = descriptions[norm(p.nom)] || ""; d.appendChild(s);
+    l.appendChild(d); zone.appendChild(l);
+  });
+
+  var j = document.getElementById("jours");
+  j.innerHTML = "<b></b>, entre 11h30 et 13h30, par demi-heure :";
+  j.firstChild.textContent = config.jours.join(", ").replace(/, ([^,]*)$/, " et $1");
+
+  var h = document.getElementById("horaires");
+  config.creneaux.forEach(function (c) { var s = document.createElement("span"); s.textContent = c.replace("-", " – "); h.appendChild(s); });
+
+  document.getElementById("lien-texte").textContent = url;
+  document.getElementById("lien-petit").textContent = url;
+  var qr = qrcode(0, "M"); qr.addData(url); qr.make();
+  document.getElementById("qr").innerHTML = qr.createSvgTag(8, 0);
+})();
+</script>
+</body>
+</html>

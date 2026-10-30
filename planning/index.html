@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brigade cantine A.B.C.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout : une colonne façon comptoir de self — onglets jours, puis créneaux empilés, trois postes par créneau */
+:root {
+  --bg: #eef1ef;          /* inox clair */
+  --surface: #ffffff;
+  --fg: #1d2622;
+  --muted: #5b6862;
+  --line: #d3dad6;
+  --accent: #1f6b4f;      /* vert brigade */
+  --accent-fg: #ffffff;
+  --poste1: #2f5d8a;      /* scan plateau : bleu ardoise */
+  --poste2: #b07a16;      /* pain et fruits : blé */
+  --poste3: #6d4c2f;      /* biodéchets et emballages : terre */
+  --free: #e4ece8;
+  --mine: #fff4cc;
+  --danger: #a3331f;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "Consolas", monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #141a17; --surface: #1d2521; --fg: #e6ece9; --muted: #9aa8a1; --line: #2e3a34;
+  --accent: #4fbf91; --accent-fg: #0d1512; --poste1: #79a8d6; --poste2: #e0b05a; --poste3: #c39a72;
+  --free: #24302b; --mine: #3d3516; --danger: #f08a73; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #141a17; --surface: #1d2521; --fg: #e6ece9; --muted: #9aa8a1; --line: #2e3a34;
+  --accent: #4fbf91; --accent-fg: #0d1512; --poste1: #79a8d6; --poste2: #e0b05a; --poste3: #c39a72;
+  --free: #24302b; --mine: #3d3516; --danger: #f08a73; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 48px;
+}
+.wrap { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.7rem, 6vw, 2.3rem); line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.lead { margin: 6px 0 0; color: var(--muted); max-width: 52ch; }
+.eyebrow { font-family: var(--font-data); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+.banner { background: var(--mine); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: .9rem; }
+.banner[hidden] { display: none; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: .85rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 3px; background: var(--c); flex: none; }
+
+/* Identité */
+.moi { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.moi h2 { font-family: var(--font-display); font-size: 1.1rem; margin: 0; font-weight: 600; }
+.champs { display: grid; grid-template-columns: 1fr 70px 90px; gap: 10px; }
+.champs .code { grid-column: 1 / -1; }
+@media (min-width: 520px) { .champs { grid-template-columns: 1fr 70px 90px 120px; } .champs .code { grid-column: auto; } }
+label { display: flex; flex-direction: column; gap: 4px; font-size: .8rem; color: var(--muted); font-weight: 700; min-width: 0; }
+input { font: inherit; font-size: 1rem; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; width: 100%; min-width: 0; }
+input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.aide { font-size: .82rem; color: var(--muted); margin: 0; }
+.resume { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.resume strong { font-size: 1.05rem; }
+.btn { font: inherit; font-weight: 700; border-radius: 8px; border: 1px solid transparent; padding: 9px 14px; cursor: pointer; }
+.btn-primaire { background: var(--accent); color: var(--accent-fg); }
+.btn-lien { background: none; border-color: var(--line); color: var(--fg); }
+
+/* Jours */
+.jours { display: grid; grid-template-columns: repeat(var(--n, 4), 1fr); gap: 6px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 6px; }
+.jour { font: inherit; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.jour b { font-family: var(--font-display); font-weight: 600; font-size: .98rem; }
+.jour small { font-family: var(--font-data); font-size: .7rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.jour[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.jour[aria-selected="true"] small { color: var(--accent-fg); opacity: .85; }
+
+/* Créneaux */
+.creneaux { display: flex; flex-direction: column; gap: 14px; }
+.creneau { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.creneau-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.heure { font-family: var(--font-data); font-weight: 700; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.taux { font-family: var(--font-data); font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.poste { display: grid; grid-template-columns: 6px 1fr; border-bottom: 1px solid var(--line); }
+.poste:last-child { border-bottom: 0; }
+.poste-bande { background: var(--c); }
+.poste-corps { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.poste-nom { font-weight: 700; font-size: .95rem; display: flex; justify-content: space-between; gap: 8px; }
+.poste-nom span { font-family: var(--font-data); font-weight: 500; font-size: .75rem; color: var(--muted); }
+.places { display: flex; flex-wrap: wrap; gap: 6px; }
+.place { font: inherit; font-size: .9rem; border-radius: 999px; padding: 5px 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
+.place .classe { color: var(--muted); font-size: .8rem; }
+.place.libre { border-style: dashed; color: var(--accent); background: var(--free); cursor: pointer; font-weight: 700; }
+.place.libre:hover { border-color: var(--accent); }
+.place.libre:disabled { cursor: default; opacity: .55; }
+.place.moi-meme { background: var(--mine); border-color: var(--poste2); cursor: pointer; }
+.place.moi-meme .x { font-weight: 700; color: var(--danger); }
+
+/* Mes créneaux */
+.mes { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.mes h2 { font-family: var(--font-display); font-size: 1.1rem; margin: 0 0 8px; font-weight: 600; }
+.mes ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mes li { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.mes .heure { font-size: .9rem; }
+.vide { color: var(--muted); font-size: .9rem; margin: 0; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 700; max-width: calc(100% - 32px); box-shadow: 0 6px 20px rgba(0,0,0,.2); z-index: 20; }
+.toast.erreur { background: var(--danger); color: #fff; }
+.chargement { color: var(--muted); }
+.lien-affiche { color: var(--accent); font-weight: 700; font-size: .9rem; }
+@media (prefers-reduced-motion: no-preference) { .place, .jour { transition: background .15s, border-color .15s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Service du midi · semaine type</div>
+    <h1 id="titre">Brigade cantine A.B.C.</h1>
+    <p class="lead">Choisis un poste sur les créneaux où tu es libre. Ton nom apparaît aussitôt dans le planning.</p>
+  </header>
+
+  <div class="banner" id="banniere" hidden></div>
+
+  <section class="moi" id="moi" aria-labelledby="moi-titre">
+    <h2 id="moi-titre">Qui es-tu ?</h2>
+    <form id="form-moi" class="champs" novalidate>
+      <label>Prénom<input id="prenom" autocomplete="given-name" maxlength="30" required></label>
+      <label>Initiale<input id="initiale" maxlength="1" autocomplete="off" required></label>
+      <label>Classe<input id="classe" maxlength="12" placeholder="4E2" autocomplete="off" required></label>
+      <label class="code">Code secret<input id="code" inputmode="numeric" pattern="\d{4}" maxlength="4" placeholder="4 chiffres" autocomplete="off" required></label>
+      <button class="btn btn-primaire" type="submit" style="grid-column:1/-1">C'est moi</button>
+    </form>
+    <p class="aide" id="aide-moi">Invente un code de 4 chiffres et garde-le : il te servira pour te retirer d'un créneau.</p>
+    <div class="resume" id="resume" hidden>
+      <div><span class="aide">Tu t'inscris en tant que</span><br><strong id="resume-nom"></strong></div>
+      <button class="btn btn-lien" id="changer" type="button">Changer</button>
+    </div>
+  </section>
+
+  <div class="legend" id="legende"></div>
+
+  <nav class="jours" id="jours" role="tablist" aria-label="Jours de cantine"></nav>
+
+  <section class="creneaux" id="creneaux" aria-live="polite"><p class="chargement">Chargement du planning…</p></section>
+
+  <section class="mes" aria-labelledby="mes-titre">
+    <h2 id="mes-titre">Mes créneaux</h2>
+    <div id="mes"></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+(function () {
+  "use strict";
+  var COULEURS = ["var(--poste1)", "var(--poste2)", "var(--poste3)", "var(--accent)", "var(--muted)"];
+
+  /* ---- Adresse du serveur (déploiement Apps Script, se termine par /exec).
+         Laisse vide pour un aperçu avec des exemples, sans enregistrement. ---- */
+  var ADRESSE_PLANNING = "";
+
+  var gas = !!ADRESSE_PLANNING;
+  function lireReponse(r) {
+    return r.json().then(function (d) { if (d && d.erreur) throw new Error(d.erreur); return d; });
+  }
+  function appel(nom) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    if (!gas) return demo[nom].apply(null, args);
+    if (nom === "getData") return fetch(ADRESSE_PLANNING + "?action=getData", { cache: "no-store" }).then(lireReponse);
+    var corps = nom === "inscrire" ? Object.assign({ action: "inscrire" }, args[0])
+                                   : Object.assign({ action: "retirer", id: args[0] }, args[1]);
+    return fetch(ADRESSE_PLANNING, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(corps) }).then(lireReponse);
+  }
+
+  var demo = (function () {
+    var config = {
+      titre: "Brigade cantine A.B.C.",
+      jours: ["Lundi", "Mardi", "Jeudi", "Vendredi"],
+      creneaux: ["11h30-12h00", "12h00-12h30", "12h30-13h00", "13h00-13h30"],
+      postes: [{ nom: "Scan plateau", places: 2 }, { nom: "Pain et fruits", places: 2 }, { nom: "Biodéchets et emballages", places: 2 }],
+      ouvert: true
+    };
+    var n = 0;
+    var liste = [
+      ["Lundi", "11h30-12h00", "Scan plateau", "Exemple", "A", "4E2"],
+      ["Lundi", "12h00-12h30", "Pain et fruits", "Exemple", "B", "5E1"],
+      ["Lundi", "12h00-12h30", "Biodéchets et emballages", "Exemple", "C", "3E4"],
+      ["Mardi", "12h30-13h00", "Scan plateau", "Exemple", "D", "4E1"]
+    ].map(function (l) { return { id: "d" + (n++), jour: l[0], creneau: l[1], poste: l[2], prenom: l[3], initiale: l[4], classe: l[5], code: "0000" }; });
+    function donnees() {
+      return { config: config, inscriptions: liste.map(function (i) { return { id: i.id, jour: i.jour, creneau: i.creneau, poste: i.poste, prenom: i.prenom, initiale: i.initiale, classe: i.classe }; }) };
+    }
+    return {
+      getData: function () { return Promise.resolve(donnees()); },
+      inscrire: function (d) {
+        if (liste.some(function (i) { return i.jour === d.jour && i.creneau === d.creneau && cle(i) === cle(d); }))
+          return Promise.reject(new Error("Tu es déjà inscrit(e) sur ce créneau."));
+        liste.push({ id: "d" + (n++), jour: d.jour, creneau: d.creneau, poste: d.poste, prenom: cap(d.prenom.trim()), initiale: d.initiale.toUpperCase(), classe: d.classe.toUpperCase().replace(/\s+/g, ""), code: d.code });
+        return Promise.resolve(donnees());
+      },
+      retirer: function (id, ident) {
+        var i = liste.findIndex(function (x) { return x.id === id; });
+        if (i < 0) return Promise.reject(new Error("Cette inscription n'existe plus."));
+        if (liste[i].code !== ident.code || cle(liste[i]) !== cle(ident)) return Promise.reject(new Error("Code incorrect : seule la personne inscrite peut se retirer."));
+        liste.splice(i, 1);
+        return Promise.resolve(donnees());
+      }
+    };
+  })();
+
+  /* ---- État ---- */
+  var etat = { config: null, inscriptions: [], jour: null, moi: null, occupe: false };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function norm(s) { return String(s || "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, ""); }
+  function cle(o) { return norm(o.prenom) + "|" + norm(o.initiale) + "|" + norm(o.classe); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function elt(tag, cls, txt) { var e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; }
+
+  function lireMoi() { try { var m = JSON.parse(localStorage.getItem("brigade-moi") || "null"); return m && m.prenom ? m : null; } catch (e) { return null; } }
+  function ecrireMoi(m) { try { m ? localStorage.setItem("brigade-moi", JSON.stringify(m)) : localStorage.removeItem("brigade-moi"); } catch (e) {} }
+
+  var minuteur;
+  function toast(msg, erreur) {
+    var t = $("toast"); t.textContent = msg; t.className = "toast" + (erreur ? " erreur" : ""); t.hidden = false;
+    clearTimeout(minuteur); minuteur = setTimeout(function () { t.hidden = true; }, 3200);
+  }
+  function messageErreur(e) { return (e && e.message ? e.message : String(e)).replace(/^Error:\s*/, "").replace(/^Exception:\s*/, ""); }
+
+  /* ---- Identité ---- */
+  function afficherMoi() {
+    var m = etat.moi;
+    $("form-moi").hidden = !!m; $("aide-moi").hidden = !!m; $("resume").hidden = !m;
+    $("moi-titre").hidden = !!m;
+    if (m) $("resume-nom").textContent = cap(m.prenom) + " " + m.initiale.toUpperCase() + ". · " + m.classe.toUpperCase();
+  }
+  $("form-moi").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var m = { prenom: $("prenom").value.trim(), initiale: $("initiale").value.trim().charAt(0), classe: $("classe").value.trim(), code: $("code").value.trim() };
+    if (m.prenom.length < 2) return toast("Indique ton prénom.", true);
+    if (!/^[a-zà-ý]$/i.test(m.initiale)) return toast("Indique l'initiale de ton nom.", true);
+    if (m.classe.length < 2) return toast("Indique ta classe, par exemple 4E2.", true);
+    if (!/^\d{4}$/.test(m.code)) return toast("Ton code doit faire 4 chiffres.", true);
+    etat.moi = m; ecrireMoi(m); afficherMoi(); rendre();
+    toast("Choisis maintenant une place libre.");
+  });
+  $("changer").addEventListener("click", function () {
+    var m = etat.moi || {};
+    $("prenom").value = m.prenom || ""; $("initiale").value = m.initiale || ""; $("classe").value = m.classe || ""; $("code").value = "";
+    etat.moi = null; ecrireMoi(null); afficherMoi(); rendre(); $("prenom").focus();
+  });
+
+  /* ---- Rendu ---- */
+  function couleurPoste(nom) {
+    var i = etat.config.postes.findIndex(function (p) { return p.nom === nom; });
+    return COULEURS[Math.max(0, i) % COULEURS.length];
+  }
+
+  function rendre() {
+    var c = etat.config; if (!c) return;
+    $("titre").textContent = c.titre;
+    var ban = $("banniere");
+    if (!gas) { ban.hidden = false; ban.textContent = "Aperçu : les noms « Exemple » sont fictifs et tes essais ne sont pas enregistrés."; }
+    else if (!c.ouvert) { ban.hidden = false; ban.textContent = "Les inscriptions sont fermées pour le moment. Tu peux consulter le planning."; }
+    else ban.hidden = true;
+
+    // Légende
+    var lg = $("legende"); lg.textContent = "";
+    c.postes.forEach(function (p) { var s = elt("span"); var d = elt("i", "dot"); d.style.setProperty("--c", couleurPoste(p.nom)); s.appendChild(d); s.appendChild(document.createTextNode(p.nom)); lg.appendChild(s); });
+
+    // Onglets jours
+    var parCase = c.postes.reduce(function (a, p) { return a + p.places; }, 0);
+    var nav = $("jours"); nav.textContent = ""; nav.style.setProperty("--n", c.jours.length);
+    if (c.jours.indexOf(etat.jour) < 0) etat.jour = jourParDefaut(c.jours);
+    c.jours.forEach(function (j) {
+      var nb = etat.inscriptions.filter(function (i) { return i.jour === j; }).length;
+      var b = elt("button", "jour"); b.type = "button"; b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", j === etat.jour ? "true" : "false");
+      b.appendChild(elt("b", null, j)); b.appendChild(elt("small", null, nb + "/" + parCase * c.creneaux.length));
+      b.addEventListener("click", function () { etat.jour = j; rendre(); });
+      nav.appendChild(b);
+    });
+
+    // Créneaux du jour
+    var moiCle = etat.moi ? cle(etat.moi) : null;
+    var zone = $("creneaux"); zone.textContent = "";
+    c.creneaux.forEach(function (cr) {
+      var ici = etat.inscriptions.filter(function (i) { return i.jour === etat.jour && i.creneau === cr; });
+      var dejaLa = moiCle && ici.some(function (i) { return cle(i) === moiCle; });
+      var bloc = elt("article", "creneau");
+      var tete = elt("div", "creneau-tete");
+      tete.appendChild(elt("span", "heure", cr.replace("-", " – ")));
+      tete.appendChild(elt("span", "taux", ici.length + "/" + parCase + " places prises"));
+      bloc.appendChild(tete);
+      c.postes.forEach(function (p) {
+        var ligne = elt("div", "poste");
+        var bande = elt("div", "poste-bande"); bande.style.setProperty("--c", couleurPoste(p.nom)); ligne.appendChild(bande);
+        var corps = elt("div", "poste-corps");
+        var gens = ici.filter(function (i) { return i.poste === p.nom; });
+        var nom = elt("div", "poste-nom"); nom.appendChild(document.createTextNode(p.nom)); nom.appendChild(elt("span", null, gens.length + "/" + p.places));
+        corps.appendChild(nom);
+        var places = elt("div", "places");
+        gens.forEach(function (g) {
+          var mien = moiCle && cle(g) === moiCle;
+          var pill = elt(mien ? "button" : "span", "place" + (mien ? " moi-meme" : ""));
+          pill.appendChild(document.createTextNode(g.prenom + " " + g.initiale + "."));
+          pill.appendChild(elt("span", "classe", g.classe));
+          if (mien) {
+            pill.type = "button"; pill.setAttribute("aria-label", "Me retirer de ce poste");
+            pill.appendChild(elt("span", "x", "×"));
+            pill.addEventListener("click", function () { retirer(g); });
+          }
+          places.appendChild(pill);
+        });
+        for (var k = gens.length; k < p.places; k++) {
+          var libre = elt("button", "place libre", "+ Je prends");
+          libre.type = "button";
+          libre.disabled = !c.ouvert || etat.occupe || !!dejaLa;
+          if (dejaLa) libre.title = "Tu as déjà un poste sur ce créneau";
+          libre.addEventListener("click", (function (poste) { return function () { inscrire(cr, poste); }; })(p.nom));
+          places.appendChild(libre);
+        }
+        corps.appendChild(places);
+        ligne.appendChild(corps);
+        bloc.appendChild(ligne);
+      });
+      zone.appendChild(bloc);
+    });
+
+    // Mes créneaux
+    var mes = $("mes"); mes.textContent = "";
+    if (!etat.moi) { mes.appendChild(elt("p", "vide", "Remplis « Qui es-tu ? » pour voir tes créneaux ici.")); return; }
+    var miens = etat.inscriptions.filter(function (i) { return cle(i) === moiCle; })
+      .sort(function (a, b) { return (c.jours.indexOf(a.jour) - c.jours.indexOf(b.jour)) || (c.creneaux.indexOf(a.creneau) - c.creneaux.indexOf(b.creneau)); });
+    if (!miens.length) { mes.appendChild(elt("p", "vide", "Aucun créneau pour l'instant. Touche « + Je prends » sur une place libre.")); return; }
+    var ul = elt("ul");
+    miens.forEach(function (i) {
+      var li = elt("li");
+      var d = elt("i", "dot"); d.style.setProperty("--c", couleurPoste(i.poste)); li.appendChild(d);
+      li.appendChild(elt("strong", null, i.jour));
+      li.appendChild(elt("span", "heure", i.creneau.replace("-", " – ")));
+      li.appendChild(elt("span", null, i.poste));
+      ul.appendChild(li);
+    });
+    mes.appendChild(ul);
+  }
+
+  function jourParDefaut(jours) {
+    var noms = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    var aujourdhui = noms[new Date().getDay()];
+    return jours.indexOf(aujourdhui) >= 0 ? aujourdhui : jours[0];
+  }
+
+  /* ---- Actions ---- */
+  function exiger() {
+    if (etat.moi) return true;
+    toast("Commence par « Qui es-tu ? ».", true);
+    $("prenom").focus(); return false;
+  }
+  function inscrire(creneau, poste) {
+    if (!exiger() || etat.occupe) return;
+    etat.occupe = true; rendre();
+    var d = { jour: etat.jour, creneau: creneau, poste: poste, prenom: etat.moi.prenom, initiale: etat.moi.initiale, classe: etat.moi.classe, code: etat.moi.code };
+    appel("inscrire", d).then(function (r) {
+      etat.config = r.config; etat.inscriptions = r.inscriptions;
+      toast("Inscrit : " + etat.jour.toLowerCase() + " " + creneau.replace("-", " – ") + ", " + poste.toLowerCase() + ".");
+    }).catch(function (e) { toast(messageErreur(e), true); return charger(); })
+      .then(function () { etat.occupe = false; rendre(); });
+  }
+  function retirer(g) {
+    if (!exiger() || etat.occupe) return;
+    etat.occupe = true;
+    appel("retirer", g.id, etat.moi).then(function (r) {
+      etat.config = r.config; etat.inscriptions = r.inscriptions;
+      toast("Retiré du poste " + g.poste.toLowerCase() + ".");
+    }).catch(function (e) { toast(messageErreur(e), true); })
+      .then(function () { etat.occupe = false; rendre(); });
+  }
+  function charger() {
+    return appel("getData").then(function (r) { etat.config = r.config; etat.inscriptions = r.inscriptions; rendre(); })
+      .catch(function (e) { $("creneaux").textContent = "Impossible de charger le planning : " + messageErreur(e); });
+  }
+
+  etat.moi = lireMoi();
+  afficherMoi();
+  charger();
+  // Rafraîchit le planning toutes les 30 s pour voir les inscriptions des autres
+  setInterval(function () { if (!etat.occupe && !document.hidden) charger(); }, 30000);
+})();
+</script>
+</body>
+</html>
