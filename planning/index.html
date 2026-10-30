@@ -112,6 +112,38 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
 .toast.erreur { background: var(--danger); color: #fff; }
 .chargement { color: var(--muted); }
 .lien-affiche { color: var(--accent); font-weight: 700; font-size: .9rem; }
+
+/* Jauge de la semaine */
+.jauge { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.jauge-haut { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.jauge-haut b { font-family: var(--font-display); font-weight: 600; font-size: 1rem; }
+.jauge-haut span { font-family: var(--font-data); font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.barre { height: 12px; border-radius: 999px; background: var(--free); overflow: hidden; display: flex; }
+.barre i { display: block; height: 100%; background: var(--c); }
+@media (prefers-reduced-motion: no-preference) { .barre i { transition: width .5s ease; } }
+
+/* Icônes de poste */
+.ico { width: 18px; height: 18px; flex: none; color: var(--c); }
+.poste-nom > div { display: inline-flex; align-items: center; gap: 7px; }
+
+/* Badge */
+.badge { display: inline-flex; align-items: center; gap: 8px; background: var(--mine); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 6px; font-weight: 700; font-size: .9rem; margin-bottom: 10px; }
+.badge-rond { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--accent-fg); display: grid; place-items: center; font-family: var(--font-data); font-size: .8rem; }
+.badge small { font-weight: 400; color: var(--muted); }
+
+/* Bravo */
+.bravo { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(10, 20, 15, .45); padding: 16px; }
+.bravo-carte { background: var(--surface); color: var(--fg); border-radius: 18px; padding: 22px 20px 18px; max-width: 360px; width: 100%; text-align: center; position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
+.bravo-carte h3 { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; margin: 0; line-height: 1.05; }
+.bravo-carte p { margin: 0; color: var(--muted); }
+.bravo-carte .heure { color: var(--fg); }
+.confetti { position: absolute; top: -12px; width: 8px; height: 14px; border-radius: 2px; background: var(--c); opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .bravo-carte { animation: pop .35s cubic-bezier(.2,1.4,.4,1); }
+  .confetti { animation: tombe 1.4s ease-in forwards; }
+}
+@keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes tombe { 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: 0; transform: translateY(260px) rotate(540deg); } }
 @media (prefers-reduced-motion: no-preference) { .place, .jour { transition: background .15s, border-color .15s; } }
 </style>
 </head>
@@ -124,6 +156,11 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
   </header>
 
   <div class="banner" id="banniere" hidden></div>
+
+  <section class="jauge" aria-label="Remplissage de la semaine">
+    <div class="jauge-haut"><b id="jauge-titre">La brigade se forme</b><span id="jauge-chiffres"></span></div>
+    <div class="barre" id="barre"></div>
+  </section>
 
   <section class="moi" id="moi" aria-labelledby="moi-titre">
     <h2 id="moi-titre">Qui es-tu ?</h2>
@@ -153,6 +190,13 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
   </section>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
+<div class="bravo" id="bravo" hidden>
+  <div class="bravo-carte" role="dialog" aria-modal="true" aria-labelledby="bravo-titre">
+    <h3 id="bravo-titre"></h3>
+    <p id="bravo-texte"></p>
+    <button class="btn btn-primaire" type="button" id="bravo-ok">Super</button>
+  </div>
+</div>
 
 <script>
 (function () {
@@ -254,6 +298,44 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
     etat.moi = null; ecrireMoi(null); afficherMoi(); rendre(); $("prenom").focus();
   });
 
+  var ICONES = [
+    '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/></svg>',
+    '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5c1.5 1.5 1.5 4 0 5.5L10.5 19c-1.5 1.5-4 1.5-5.5 0z"/><path d="m9 13 2 2M12 10l2 2M15 7l2 2"/></svg>',
+    '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20c0-9 6-15 15-15 0 9-6 15-15 15z"/><path d="M5 20 13 12"/></svg>'
+  ];
+  var RANGS = [
+    { min: 1, nom: "Recrue de la brigade", suite: "Encore 2 créneaux pour devenir Pilier du self." },
+    { min: 3, nom: "Pilier du self", suite: "Encore 2 créneaux pour devenir Chef de brigade." },
+    { min: 5, nom: "Chef de brigade", suite: "Le self tourne grâce à toi." }
+  ];
+  function rang(n) { var r = null; RANGS.forEach(function (x) { if (n >= x.min) r = x; }); return r; }
+  function iconePoste(nom) {
+    var i = Math.max(0, etat.config.postes.findIndex(function (p) { return p.nom === nom; }));
+    var span = elt("span"); span.innerHTML = ICONES[i % ICONES.length]; span.firstChild.style.setProperty("--c", couleurPoste(nom)); return span.firstChild;
+  }
+
+  function bravo(creneau, poste) {
+    var miens = etat.inscriptions.filter(function (i) { return cle(i) === cle(etat.moi); }).length;
+    var r = rang(miens);
+    var nouveauRang = RANGS.some(function (x) { return x.min === miens; });
+    $("bravo-titre").textContent = nouveauRang ? r.nom + " !" : "Merci " + cap(etat.moi.prenom) + " !";
+    $("bravo-texte").textContent = "Tu es attendu(e) " + etat.jour.toLowerCase() + " " + creneau.replace("-", " – ") + " au poste " + poste.toLowerCase() + ". " + (r ? r.suite : "");
+    var carte = document.querySelector(".bravo-carte");
+    carte.querySelectorAll(".confetti").forEach(function (c) { c.remove(); });
+    var couleurs = ["var(--poste1)", "var(--poste2)", "var(--poste3)", "var(--accent)"];
+    for (var k = 0; k < 24; k++) {
+      var c = elt("i", "confetti");
+      c.style.left = (4 + Math.random() * 92) + "%";
+      c.style.setProperty("--c", couleurs[k % 4]);
+      c.style.animationDelay = (Math.random() * .4) + "s";
+      carte.appendChild(c);
+    }
+    $("bravo").hidden = false; $("bravo-ok").focus();
+  }
+  $("bravo-ok").addEventListener("click", function () { $("bravo").hidden = true; });
+  $("bravo").addEventListener("click", function (e) { if (e.target === this) this.hidden = true; });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("bravo").hidden = true; });
+
   /* ---- Rendu ---- */
   function couleurPoste(nom) {
     var i = etat.config.postes.findIndex(function (p) { return p.nom === nom; });
@@ -270,7 +352,21 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
 
     // Légende
     var lg = $("legende"); lg.textContent = "";
-    c.postes.forEach(function (p) { var s = elt("span"); var d = elt("i", "dot"); d.style.setProperty("--c", couleurPoste(p.nom)); s.appendChild(d); s.appendChild(document.createTextNode(p.nom)); lg.appendChild(s); });
+    c.postes.forEach(function (p) { var s = elt("span"); s.appendChild(iconePoste(p.nom)); s.appendChild(document.createTextNode(p.nom)); lg.appendChild(s); });
+
+
+    // Jauge de la semaine
+    var totalPlaces = c.postes.reduce(function (a, p) { return a + p.places; }, 0) * c.creneaux.length * c.jours.length;
+    var pris = etat.inscriptions.length;
+    var pct = totalPlaces ? Math.round(pris / totalPlaces * 100) : 0;
+    $("jauge-titre").textContent = pct >= 100 ? "La brigade est au complet" : pct >= 50 ? "La brigade prend forme" : "La brigade recrute";
+    $("jauge-chiffres").textContent = pris + " / " + totalPlaces + " places · " + pct + " %";
+    var barre = $("barre"); barre.textContent = "";
+    c.postes.forEach(function (p) {
+      var n = etat.inscriptions.filter(function (i) { return i.poste === p.nom; }).length;
+      var seg = elt("i"); seg.style.setProperty("--c", couleurPoste(p.nom)); seg.style.width = (totalPlaces ? n / totalPlaces * 100 : 0) + "%"; seg.title = p.nom + " : " + n;
+      barre.appendChild(seg);
+    });
 
     // Onglets jours
     var parCase = c.postes.reduce(function (a, p) { return a + p.places; }, 0);
@@ -301,7 +397,7 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
         var bande = elt("div", "poste-bande"); bande.style.setProperty("--c", couleurPoste(p.nom)); ligne.appendChild(bande);
         var corps = elt("div", "poste-corps");
         var gens = ici.filter(function (i) { return i.poste === p.nom; });
-        var nom = elt("div", "poste-nom"); nom.appendChild(document.createTextNode(p.nom)); nom.appendChild(elt("span", null, gens.length + "/" + p.places));
+        var nom = elt("div", "poste-nom"); var gauche = elt("div"); gauche.appendChild(iconePoste(p.nom)); gauche.appendChild(document.createTextNode(p.nom)); nom.appendChild(gauche); nom.appendChild(elt("span", null, gens.length + "/" + p.places));
         corps.appendChild(nom);
         var places = elt("div", "places");
         gens.forEach(function (g) {
@@ -337,6 +433,14 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
     var miens = etat.inscriptions.filter(function (i) { return cle(i) === moiCle; })
       .sort(function (a, b) { return (c.jours.indexOf(a.jour) - c.jours.indexOf(b.jour)) || (c.creneaux.indexOf(a.creneau) - c.creneaux.indexOf(b.creneau)); });
     if (!miens.length) { mes.appendChild(elt("p", "vide", "Aucun créneau pour l'instant. Touche « + Je prends » sur une place libre.")); return; }
+    var r = rang(miens.length);
+    if (r) {
+      var b = elt("div", "badge");
+      b.appendChild(elt("span", "badge-rond", String(miens.length)));
+      b.appendChild(elt("span", null, r.nom));
+      b.appendChild(elt("small", null, miens.length > 1 ? "services par semaine" : "service par semaine"));
+      mes.appendChild(b);
+    }
     var ul = elt("ul");
     miens.forEach(function (i) {
       var li = elt("li");
@@ -367,7 +471,7 @@ input:focus-visible, button:focus-visible { outline: 3px solid var(--accent); ou
     var d = { jour: etat.jour, creneau: creneau, poste: poste, prenom: etat.moi.prenom, initiale: etat.moi.initiale, classe: etat.moi.classe, code: etat.moi.code };
     appel("inscrire", d).then(function (r) {
       etat.config = r.config; etat.inscriptions = r.inscriptions;
-      toast("Inscrit : " + etat.jour.toLowerCase() + " " + creneau.replace("-", " – ") + ", " + poste.toLowerCase() + ".");
+      rendre(); bravo(creneau, poste);
     }).catch(function (e) { toast(messageErreur(e), true); return charger(); })
       .then(function () { etat.occupe = false; rendre(); });
   }
