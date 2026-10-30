@@ -24,7 +24,7 @@ const ONGLET_REGLAGES = 'Réglages';
 
 const REGLAGES_PAR_DEFAUT = [
   ['Paramètre', 'Valeur', 'Aide'],
-  ['Titre', 'Brigade cantine A.B.C.', 'Titre affiché en haut de la page'],
+  ['Titre', 'Brigade cantine Giono', 'Titre affiché en haut de la page'],
   ['Jours', 'Lundi, Mardi, Jeudi, Vendredi', 'Séparés par des virgules'],
   ['Créneaux', '11h30-12h00, 12h00-12h30, 12h30-13h00, 13h00-13h30', 'Séparés par des virgules'],
   ['Postes', 'Scan plateau:2; Pain et fruits:2; Biodéchets et emballages:2', 'Nom:nombre de places, séparés par des points-virgules'],
@@ -166,7 +166,7 @@ function lireReglages_() {
     return { nom: morceaux[0].trim(), places: Math.max(1, parseInt(morceaux[1], 10) || 1) };
   });
   return {
-    titre: brut['Titre'] || 'Brigade cantine A.B.C.',
+    titre: brut['Titre'] || 'Brigade cantine Giono',
     jours: liste(brut['Jours']),
     creneaux: liste(brut['Créneaux']),
     postes: postes,
