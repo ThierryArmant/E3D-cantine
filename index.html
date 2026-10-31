@@ -234,6 +234,7 @@
     </div>
 
     <div class="main-container">
+<style id="eco-navigation-style">#eco-navigation{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:9px 12px;margin:0 0 16px;background:#f7faf8;color:#173e30;border:1px solid #ceded5;border-radius:10px;font:600 13px/1.3 system-ui,sans-serif;flex-shrink:0}#eco-navigation a{display:block;padding:9px 12px;border-radius:7px;color:#234b3b;text-decoration:none;white-space:normal}#eco-navigation a:hover,#eco-navigation a:focus-visible{background:#e1ede5;outline:2px solid #39785a;outline-offset:1px}#eco-navigation a[aria-current="page"]{background:#215e44;color:white}.main-container>#eco-navigation{margin:0;border-radius:0;border:0;border-bottom:1px solid #ceded5}@media print{#eco-navigation{display:none!important}}@media(max-width:600px){#eco-navigation{gap:3px;padding:6px;font-size:11px}#eco-navigation a{padding:8px}}</style><nav id="eco-navigation" aria-label="Changer d’espace"><a href="https://thierryarmant.github.io/Le-coin-des-ecodelegues/">Accueil</a><a href="https://thierryarmant.github.io/Le-coin-des-ecodelegues/cantine/">Planning</a><a href="https://thierryarmant.github.io/E3D-cantine/" aria-current="page">A.B.C. Cantine Bas Carbone</a><a href="https://d-fi-carbone-haut-vaucluse-84.streamlit.app/">Enquêtes</a></nav>
         <div class="top-bar">
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <label style="font-weight: 700; font-size: 11px; color: #1b4332;">🏫 ÉTABLISSEMENT :</label>
@@ -3610,6 +3611,7 @@
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
             }).then(r => r.json()).then(res => {
                 if(res.success) {
+                    if(window.ecoMarkSaved) window.ecoMarkSaved("#view-saisie-dechets");
                     alert("✅ Pesées enregistrées pour la date du " + peseeDate + " !");
                     document.getElementById('sac-alimentaire').value = "0.00"; document.getElementById('sac-fruits').value = "0.00";
                     document.getElementById('sac-pain').value = "0.00"; document.getElementById('sac-emballages').value = "0.00";
@@ -3997,6 +3999,7 @@
             .then(r => r.json())
             .then(res => {
                 if(res.success) { 
+                    if(window.ecoMarkSaved) window.ecoMarkSaved("#view-cuisinier");
                     alert('✅ Menu validé et enregistré pour la date du ' + menuDate + ' !'); 
                     document.getElementById('entree_libre').value = "";
                     document.getElementById('plat_libre').value = "";
@@ -4042,7 +4045,8 @@
             const content = document.getElementById('gemini-ai-text-csv').innerHTML;
             if (!content || content.includes("en cours")) { alert("Veuillez d'abord lancer une analyse."); return; }
             const win = window.open('', '_blank');
-            win.document.write('<html><head><title>Audit_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;} h2{color:#1b4332;border-bottom:2px solid #1b4332;} p{margin-bottom:10px;}</style></head><body><h2>🌱 Audit - Plan Alimentaire</h2>' + content + '</body></html>');
+            win.document.write('<html><head><title>Audit_ABC</title><style>body{font-family:sans-serif;padding:30px;color:#1f2937;} h2{color:#1b4332;border-bottom:2px solid #1b4332;} p{margin-bottom:10px;}</style></head><body><h2>🌱 Audit - Plan Alimentaire</h2>' + content + '<script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
+</body></html>');
             win.document.close(); win.focus(); setTimeout(() => { win.print(); }, 300);
         }
 
