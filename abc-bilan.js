@@ -1,6 +1,7 @@
 // Bilan carbone du réseau : chiffres « Alimentation » du formulaire « Projet EPLE bas carbone ».
 // Seulement le mesuré : un jour compte s'il a un menu enregistré ; aucune projection sur l'année.
 // Facteurs (kg CO2e par repas, et par kg de déchets) recopiés de l'onglet « base emission carbone » du fichier du réseau.
+// --- CALCUL PARTAGÉ : copié tel quel dans apps_script/Code.gs (un test vérifie que les deux copies sont identiques) ---
 const BILAN_FACTEURS = { moyen: 2.25, vege: 0.51, rouge: 7.26, poisson: 2, blanche: 1.58 };
 const BILAN_FACTEUR_DECHETS = 0.0481;
 const BILAN_LIBELLES = { moyen: "Repas moyens", vege: "Repas végétariens", rouge: "Repas viande rouge", poisson: "Repas poisson", blanche: "Repas viande blanche" };
@@ -26,11 +27,6 @@ function bilanPlats(menu) {
   const parts = String(menu || "").split("|");
   if (parts.length < 2) return [];
   return parts[1].replace(/\(.*?\)/g, "").split("+").map(x => x.replace(/🧑‍🍳|🧑‍‍🍳|🧑‍‍‍🍳/g, "").trim()).filter(x => x && !/^sans plat/i.test(x));
-}
-
-function bilanAnneeScolaire() {
-  const d = new Date(), an = d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
-  return { debut: an + "-09-01", fin: d.toISOString().slice(0, 10) };
 }
 
 // Calcul pur (testable) : données du tableau de bord -> repas par catégorie, déchets, détail par jour.
@@ -84,6 +80,13 @@ function bilanCalculer(data, debut, fin) {
   return { repas: repas, dechetsKg: dechetsKg, co2Kg: Math.round(co2), jours: jours, stats: stats };
 }
 
+// --- FIN DU CALCUL PARTAGÉ ---
+
+function bilanAnneeScolaire() {
+  const d = new Date(), an = d.getMonth() >= 8 ? d.getFullYear() : d.getFullYear() - 1;
+  return { debut: an + "-09-01", fin: d.toISOString().slice(0, 10) };
+}
+
 function bilanFormat(n, dec) { return Number(n).toLocaleString("fr-FR", { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 }); }
 
 function ouvrirBilanCarbone() {
@@ -135,17 +138,38 @@ function afficherBilanCarbone() {
     <p style="font-size:11.5px; color:#475569; margin:8px 0 0;">${s.jours} jour(s) de menu comptés du ${debut} au ${fin}.</p>
     <ul style="font-size:11px; color:#64748b; margin:4px 0 0 18px; padding:0;">${notes.map(n => `<li>${n}</li>`).join("")}</ul>
     <div style="display:flex; gap:8px; align-items:center; margin-top:10px; flex-wrap:wrap;">
+      <button type="button" class="btn" id="bilan-envoyer" style="width:auto; padding:6px 12px; font-size:12px; background:#1d4ed8;">📤 Envoyer au bilan du réseau</button>
       <button type="button" class="btn" id="bilan-copier" style="width:auto; padding:6px 12px; font-size:12px; background:#047857;">📋 Copier les chiffres</button>
       <span id="bilan-copie-etat" style="font-size:11.5px; color:#047857;"></span>
     </div>
     <details style="margin-top:10px;"><summary style="font-size:12px; cursor:pointer; color:#1b4332; font-weight:700;">Détail jour par jour</summary>
       <div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:11.5px; margin-top:6px;"><thead><tr style="background:#f1f5f9; text-align:left;"><th style="${td}">Date</th><th style="${td}">Plat(s)</th><th style="${td} text-align:right;">Couverts</th><th style="${td}">Catégorie</th></tr></thead><tbody>${detail}</tbody></table></div>
     </details>`;
+  document.getElementById("bilan-envoyer").onclick = envoyerBilanCarbone;
   document.getElementById("bilan-copier").onclick = () => {
     const texte = BILAN_ORDRE.map(c => BILAN_LIBELLES[c] + "\t" + r.repas[c]).concat(["Déchets alimentaires (kg)\t" + String(r.dechetsKg).replace(".", ",")]).join("\n");
     const ok = () => { document.getElementById("bilan-copie-etat").textContent = "✅ Copié"; };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texte).then(ok, () => { document.getElementById("bilan-copie-etat").textContent = "Copie refusée par le navigateur : sélectionnez le tableau."; });
   };
+}
+
+// Envoi immédiat (sinon fait chaque soir à 19 h) : année scolaire en cours, quel que soit l'affichage.
+async function envoyerBilanCarbone() {
+  const btn = document.getElementById("bilan-envoyer"), etat = document.getElementById("bilan-copie-etat");
+  const ecole = document.getElementById("select-etablissement").value;
+  btn.disabled = true; etat.style.color = "#475569"; etat.textContent = "Envoi au bilan du réseau...";
+  try {
+    const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "envoyerBilanCarbone", ecole: ecole }) });
+    const res = await r.json();
+    if (!res.success) throw new Error(res.error || "refusé par le script");
+    const b = res.bilan || {};
+    if (!b.jours) { etat.style.color = "#b45309"; etat.textContent = "Rien à envoyer : aucun menu enregistré depuis le 1er septembre."; return; }
+    etat.style.color = b.nomBilan ? "#047857" : "#b45309";
+    etat.textContent = b.nomBilan ? `✅ Envoyé (${b.jours} jours) : ligne « ${b.nomBilan} » du bilan.` : "Envoyé, mais l'établissement n'est relié à aucune ligne du bilan : indiquer son nom en colonne B de l'onglet « Import A.B.C. ».";
+  } catch (e) {
+    etat.style.color = "#b91c1c";
+    etat.textContent = "Échec : " + e.message + (/inconnue|undefined/i.test(e.message) ? " (le script Google doit être mis à jour)" : "");
+  } finally { btn.disabled = false; }
 }
 
 if (typeof module !== "undefined") module.exports = { bilanCategorie, bilanPlats, bilanCalculer };

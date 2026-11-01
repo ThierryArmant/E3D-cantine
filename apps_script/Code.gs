@@ -332,6 +332,8 @@ function doPost(e) {
       responseOutput = handleSaveParametres(data);
     } else if (action === "analyserScansEnAttente") {
       responseOutput = handleRelancerScansEnAttenteABC(data);
+    } else if (action === "envoyerBilanCarbone") {
+      responseOutput = handleEnvoyerBilanCarboneABC(data);
     }
     return reponseJson(responseOutput);
   } catch (error) {
@@ -909,6 +911,47 @@ RÈGLE DE CALCUL ET DE FORMATAGE DE LA PARTIE 2 :
 // ==========================================================================
 // LECTURE (GET)
 // ==========================================================================
+// Données d'un établissement (menus, couverts, scans, pesées), communes au tableau de bord et au bilan carbone.
+function donneesBaseABC(sheets) {
+  const parametres = getParametres(sheets);
+
+  let dernierMenu = "Non configuré", dernierEffectif = 0;
+  const historiqueMenusMap = {}, historiqueEffectifs = {};
+  const menuRows = sheets.menus.getDataRange().getValues();
+  for (let i = 1; i < menuRows.length; i++) {
+    if (menuRows[i][1] === "CONFIGURATION_MENU" && menuRows[i][2]) {
+      const ds = dateIso(menuRows[i][0]);
+      dernierMenu = menuRows[i][2];
+      dernierEffectif = parseInt(menuRows[i][4]) || dernierEffectif;
+      if (ds) { historiqueMenusMap[ds] = menuRows[i][2]; if (parseInt(menuRows[i][4]) > 0) historiqueEffectifs[ds] = parseInt(menuRows[i][4]); }
+    }
+  }
+
+  const rawGaspillage = [];
+  const gRows = sheets.gaspillage.getDataRange().getValues();
+  for (let i = 1; i < gRows.length; i++) {
+    rawGaspillage.push({
+      date: gRows[i][0], dateRaw: dateIso(gRows[i][0]), type: gRows[i][1], commentaire: gRows[i][2],
+      entree: gRows[i][3], plat: gRows[i][4], dessert: gRows[i][5], pain: gRows[i][6],
+      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || ""
+    });
+  }
+
+  const h = { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [] };
+  const sRows = sheets.sacs.getDataRange().getValues();
+  for (let i = 1; i < sRows.length; i++) {
+    const d = new Date(sRows[i][0]);
+    h.labels.push(Utilities.formatDate(d, "Europe/Paris", "dd/MM"));
+    h.datesRaw.push(Utilities.formatDate(d, "Europe/Paris", "yyyy-MM-dd"));
+    h.alimentaire.push(parseFloat(sRows[i][1]) || 0);
+    h.fruits.push(parseFloat(sRows[i][2]) || 0);
+    h.pain.push(parseFloat(sRows[i][3]) || 0);
+    h.emballages.push(parseFloat(sRows[i][4]) || 0);
+    h.serviettes.push(parseFloat(sRows[i][5]) || 0);
+  }
+  return { parametres: parametres, dernierMenu: dernierMenu, dernierEffectif: dernierEffectif, historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, rawGaspillage: rawGaspillage, sacsHistory: h };
+}
+
 function doGet(e) {
   if (e.parameter && e.parameter.action) {
     if (e.parameter.action === "getEtablissements") {
@@ -928,42 +971,9 @@ function doGet(e) {
       const vide = { ecole: school, effectifCouverts: 0, dernierMenu: "Non configuré", historiqueMenus: {}, historiqueEffectifs: {}, parametres: {}, rawGaspillage: [], sacsHistory: { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [] } };
       try {
         const sheets = getSheetsABC(school);
-        const parametres = getParametres(sheets);
-
-        let dernierMenu = "Non configuré", dernierEffectif = 0;
-        const historiqueMenusMap = {}, historiqueEffectifs = {};
-        const menuRows = sheets.menus.getDataRange().getValues();
-        for (let i = 1; i < menuRows.length; i++) {
-          if (menuRows[i][1] === "CONFIGURATION_MENU" && menuRows[i][2]) {
-            const ds = dateIso(menuRows[i][0]);
-            dernierMenu = menuRows[i][2];
-            dernierEffectif = parseInt(menuRows[i][4]) || dernierEffectif;
-            if (ds) { historiqueMenusMap[ds] = menuRows[i][2]; if (parseInt(menuRows[i][4]) > 0) historiqueEffectifs[ds] = parseInt(menuRows[i][4]); }
-          }
-        }
-
-        const rawGaspillage = [];
-        const gRows = sheets.gaspillage.getDataRange().getValues();
-        for (let i = 1; i < gRows.length; i++) {
-          rawGaspillage.push({
-            date: gRows[i][0], dateRaw: dateIso(gRows[i][0]), type: gRows[i][1], commentaire: gRows[i][2],
-            entree: gRows[i][3], plat: gRows[i][4], dessert: gRows[i][5], pain: gRows[i][6],
-            poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || ""
-          });
-        }
-
-        const h = { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [] };
-        const sRows = sheets.sacs.getDataRange().getValues();
-        for (let i = 1; i < sRows.length; i++) {
-          const d = new Date(sRows[i][0]);
-          h.labels.push(Utilities.formatDate(d, "Europe/Paris", "dd/MM"));
-          h.datesRaw.push(Utilities.formatDate(d, "Europe/Paris", "yyyy-MM-dd"));
-          h.alimentaire.push(parseFloat(sRows[i][1]) || 0);
-          h.fruits.push(parseFloat(sRows[i][2]) || 0);
-          h.pain.push(parseFloat(sRows[i][3]) || 0);
-          h.emballages.push(parseFloat(sRows[i][4]) || 0);
-          h.serviettes.push(parseFloat(sRows[i][5]) || 0);
-        }
+        const base = donneesBaseABC(sheets);
+        const parametres = base.parametres, dernierMenu = base.dernierMenu, dernierEffectif = base.dernierEffectif;
+        const historiqueMenusMap = base.historiqueMenus, historiqueEffectifs = base.historiqueEffectifs, rawGaspillage = base.rawGaspillage, h = base.sacsHistory;
         return reponseJson({
           ecole: school, effectifCouverts: dernierEffectif || parametres.effectif_defaut, dernierMenu: dernierMenu,
           historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, parametres: parametres,
@@ -1382,8 +1392,10 @@ function analyserScansEnAttenteABC() {
   if (lireFileScansABC().length) lancerDeclencheurAnalyseABC(pause);
 }
 
-// Passage du soir : tous les plateaux encore en attente sont analysés, avec ou sans menu.
+// Passage du soir : bilan carbone du réseau mis à jour, puis tous les plateaux encore en attente
+// sont analysés, avec ou sans menu.
 function filetScansEnAttenteABC() {
+  try { envoyerBilanCarboneABC(); } catch (e) { Logger.log("Bilan carbone non envoyé : " + e); }
   const annuaire = getAnnuaire();
   Object.keys(annuaire).forEach(function (cle) {
     try {
@@ -1416,4 +1428,183 @@ function autoriserAnalyseDiffereeABC() {
   CacheService.getScriptCache().remove("abc_filet_ok");
   if (!assurerFiletScansABC()) throw new Error("Le passage du soir n'a pas pu être installé.");
   Logger.log("Analyse différée prête. Photos des plateaux dans : " + dossier.getName() + " > établissement > Plateaux. Passage du soir : 19 h.");
+}
+
+// ==========================================================================
+// BILAN CARBONE DU RÉSEAU (fichier « Projet EPLE bas carbone »)
+// Chaque soir à 19 h (et à la demande depuis l'application), A.B.C. écrit dans l'onglet « Import A.B.C. »
+// une ligne par établissement : repas par catégorie et déchets alimentaires, seulement le mesuré,
+// depuis le 1er septembre. L'onglet « bilan carbone » prend ces chiffres quand ils existent, sinon le formulaire.
+// La colonne B « Nom dans le bilan » relie l'établissement A.B.C. à sa ligne du bilan : elle n'est jamais écrasée.
+// ==========================================================================
+// --- CALCUL PARTAGÉ : copié tel quel dans apps_script/Code.gs (un test vérifie que les deux copies sont identiques) ---
+const BILAN_FACTEURS = { moyen: 2.25, vege: 0.51, rouge: 7.26, poisson: 2, blanche: 1.58 };
+const BILAN_FACTEUR_DECHETS = 0.0481;
+const BILAN_LIBELLES = { moyen: "Repas moyens", vege: "Repas végétariens", rouge: "Repas viande rouge", poisson: "Repas poisson", blanche: "Repas viande blanche" };
+const BILAN_ORDRE = ["moyen", "vege", "rouge", "poisson", "blanche"]; // ordre des questions du formulaire
+
+function bilanNorm(t) { return String(t || "").toLowerCase().replace(/œ/g, "oe").normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+
+// Catégorie d'un plat. Porc et plats mixtes (lasagnes, couscous...) : repas moyen. Inconnu : null.
+function bilanCategorie(nom) {
+  const n = bilanNorm(nom).replace(/\(.*?\)/g, " ").trim();
+  if (!n || /^sans plat/.test(n)) return null;
+  if (/vege|vegetal|vegetarien|soja|tofu|falafel|seitan/.test(n)) return "vege";
+  if (/lasagne|couscous|paella|tajine|cassoulet|choucroute|hachis|parmentier|chili|porc|saucisse|jambon|lardon|knack|chipolata|carbonara|bolognaise|raviol|cannelloni|pizza|burger|kebab|moussaka/.test(n)) return "moyen";
+  if (/poisson|colin|cabillaud|merlu|saumon|thon|lieu |hoki|sardine|maquereau|truite|dorade|limande|crevette|moule|calamar|fruits de mer|brandade|surimi|poissonnette/.test(n)) return "poisson";
+  if (/poulet|dinde|volaille|pintade|canard|lapin|cordon bleu|nugget|aiguillette/.test(n)) return "blanche";
+  if (/boeuf|steak|hache|bourguignon|agneau|veau|gardiane|taureau|merguez|boulette|daube|navarin|mouton|bavette|kefta/.test(n)) return "rouge";
+  if (/omelette|oeuf|croustillant fromager|galette|pois chiche|lentille|haricots rouges|quiche|gratin de legumes/.test(n)) return "vege";
+  return null;
+}
+
+// Plats d'un menu « entrées | plats | accompagnements | desserts » (options entre parenthèses ignorées).
+function bilanPlats(menu) {
+  const parts = String(menu || "").split("|");
+  if (parts.length < 2) return [];
+  return parts[1].replace(/\(.*?\)/g, "").split("+").map(x => x.replace(/🧑‍🍳|🧑‍‍🍳|🧑‍‍‍🍳/g, "").trim()).filter(x => x && !/^sans plat/i.test(x));
+}
+
+// Calcul pur (testable) : données du tableau de bord -> repas par catégorie, déchets, détail par jour.
+function bilanCalculer(data, debut, fin) {
+  const menus = data.historiqueMenus || {}, effectifs = data.historiqueEffectifs || {};
+  const defaut = (data.parametres && data.parametres.effectif_defaut) || 0;
+  const repas = { moyen: 0, vege: 0, rouge: 0, poisson: 0, blanche: 0 };
+  const jours = [], stats = { jours: 0, choix: 0, choixSansScan: 0, nonReconnus: 0 };
+  // Choix réellement pris par les élèves, d'après les plats lus sur les plateaux de chaque jour.
+  const prisParJour = {};
+  (data.rawGaspillage || []).forEach(s => {
+    if (s.type !== "SCAN_IA_VISION") return;
+    const d = String(s.dateRaw || "").slice(0, 10);
+    (String(s.commentaire || "").match(/\[([^\]]+)\]/g) || []).forEach(m => {
+      const c = m.slice(1, -1), sep = c.lastIndexOf(":");
+      if (sep < 0 || !/\|\s*plat\s*\|/.test(c.slice(sep))) return;
+      const cat = bilanCategorie(c.slice(0, sep).split(" - ")[0]);
+      if (cat) { const j = prisParJour[d] = prisParJour[d] || {}; j[cat] = (j[cat] || 0) + 1; }
+    });
+  });
+  Object.keys(menus).sort().forEach(d => {
+    if (d < debut || d > fin) return;
+    const couverts = parseInt(effectifs[d], 10) || defaut;
+    if (!couverts) return;
+    const plats = bilanPlats(menus[d]);
+    const cats = [];
+    let inconnu = false;
+    plats.forEach(p => { const c = bilanCategorie(p); if (!c) inconnu = true; else if (cats.indexOf(c) < 0) cats.push(c); });
+    let parts = {};
+    if (!cats.length) { parts.moyen = 1; stats.nonReconnus++; }
+    else if (cats.length === 1) parts[cats[0]] = 1;
+    else {
+      stats.choix++;
+      const pris = prisParJour[d] || {}, total = cats.reduce((t, c) => t + (pris[c] || 0), 0);
+      if (!total) stats.choixSansScan++;
+      cats.forEach(c => { parts[c] = total ? (pris[c] || 0) / total : 1 / cats.length; });
+    }
+    Object.keys(parts).forEach(c => { repas[c] += couverts * parts[c]; });
+    stats.jours++;
+    jours.push({ date: d, plats: plats.join(" + ") || "—", couverts: couverts, parts: parts, inconnu: inconnu && !cats.length });
+  });
+  BILAN_ORDRE.forEach(c => { repas[c] = Math.round(repas[c]); });
+  let dechetsKg = 0;
+  const sh = data.sacsHistory || {};
+  (sh.datesRaw || []).forEach((d, i) => {
+    if (d < debut || d > fin) return;
+    dechetsKg += (parseFloat(sh.alimentaire[i]) || 0) + (parseFloat(sh.fruits[i]) || 0) + (parseFloat(sh.pain[i]) || 0);
+  });
+  dechetsKg = Math.round(dechetsKg * 10) / 10;
+  const co2 = BILAN_ORDRE.reduce((t, c) => t + repas[c] * BILAN_FACTEURS[c], 0) + dechetsKg * BILAN_FACTEUR_DECHETS;
+  return { repas: repas, dechetsKg: dechetsKg, co2Kg: Math.round(co2), jours: jours, stats: stats };
+}
+
+// --- FIN DU CALCUL PARTAGÉ ---
+
+const BILAN_FICHIER_DEFAUT_ABC = "12fo8cluTH5DmI1dZJh2P_iJaso-NmplnEvxcyb5pS0M";
+const BILAN_ONGLET_ABC = "Import A.B.C.";
+const BILAN_ENTETES_ABC = ["Établissement (A.B.C.)", "Nom dans le bilan", "Du", "Au", "Jours mesurés", "Repas moyens", "Repas végétariens", "Repas viande rouge", "Repas viande blanche", "Repas poisson", "Déchets alimentaires (kg)", "Mis à jour le"];
+
+function periodeBilanABC() {
+  const auj = dateIso(new Date()), an = Number(auj.slice(0, 4)) - (Number(auj.slice(5, 7)) >= 9 ? 0 : 1);
+  return { debut: an + "-09-01", fin: auj };
+}
+
+function classeurBilanABC() {
+  return SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty("BILAN_CARBONE_SHEET_ID") || BILAN_FICHIER_DEFAUT_ABC);
+}
+
+function feuilleImportBilanABC(ss) {
+  let f = ss.getSheetByName(BILAN_ONGLET_ABC);
+  if (!f) {
+    f = ss.insertSheet(BILAN_ONGLET_ABC);
+    f.getRange(1, 1, 1, BILAN_ENTETES_ABC.length).setValues([BILAN_ENTETES_ABC]).setFontWeight("bold");
+    f.setFrozenRows(1);
+  }
+  return f;
+}
+
+function sansAccentsABC(t) { return normaliserNomEcole(t).normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+
+// Ligne du bilan pour un établissement A.B.C. : même nom (espaces et accents ignorés) ; sinon le seul nom
+// qui partage le plus de mots significatifs (4 lettres ou plus). Aucun nom si c'est ambigu.
+function nomBilanProbableABC(ss, nomAbc) {
+  const f = ss.getSheetByName("bilan carbone");
+  if (!f || f.getLastRow() < 3) return "";
+  const noms = f.getRange(3, 1, f.getLastRow() - 2, 1).getValues().map(function (l) { return String(l[0] || ""); }).filter(Boolean);
+  const propre = function (t) { return sansAccentsABC(t).replace(/[^A-Z0-9 ]/g, " ").replace(/\s+/g, " ").trim(); };
+  const cible = propre(nomAbc);
+  const exact = noms.filter(function (n) { return propre(n) === cible; });
+  if (exact.length === 1) return exact[0];
+  const generiques = ["COLLEGE", "LYCEE", "ECOLE", "ENSEMBLE", "SCOLAIRE", "SAINT"];
+  const mots = cible.split(" ").filter(function (m) { return m.length >= 4 && generiques.indexOf(m) < 0; });
+  if (!mots.length) return "";
+  let meilleur = 0, choix = [];
+  noms.forEach(function (n) {
+    const N = " " + propre(n) + " ";
+    const score = mots.filter(function (m) { return N.indexOf(" " + m + " ") >= 0; }).length;
+    if (score > meilleur) { meilleur = score; choix = [n]; } else if (score && score === meilleur) choix.push(n);
+  });
+  return choix.length === 1 ? choix[0] : "";
+}
+
+function ecrireBilanEtablissementABC(f, nomAbc, nomPropose, r, periode) {
+  return avecVerrouABC(20000, function () {
+    const lignes = f.getDataRange().getValues();
+    let ligne = 0, nomBilan = "";
+    for (let i = 1; i < lignes.length; i++) {
+      if (normaliserNomEcole(lignes[i][0]) === normaliserNomEcole(nomAbc)) { ligne = i + 1; nomBilan = String(lignes[i][1] || ""); break; }
+    }
+    if (!nomBilan) nomBilan = nomPropose || "";
+    const valeurs = [nomAbc, nomBilan, "'" + periode.debut, "'" + periode.fin, r.stats.jours, r.repas.moyen, r.repas.vege, r.repas.rouge, r.repas.blanche, r.repas.poisson, r.dechetsKg, new Date()];
+    if (ligne) f.getRange(ligne, 1, 1, valeurs.length).setValues([valeurs]);
+    else f.appendRow(valeurs);
+    SpreadsheetApp.flush();
+    return nomBilan;
+  });
+}
+
+// Tous les établissements (ou un seul) ; un établissement sans aucun jour mesuré n'est pas écrit.
+function envoyerBilanCarboneABC(seulementEcole) {
+  const annuaire = getAnnuaire(), periode = periodeBilanABC(), ss = classeurBilanABC(), f = feuilleImportBilanABC(ss), resultats = [];
+  Object.keys(annuaire).forEach(function (cle) {
+    const nom = annuaire[cle].nom;
+    if (seulementEcole && normaliserNomEcole(seulementEcole) !== cle) return;
+    try {
+      const r = bilanCalculer(donneesBaseABC(getSheetsABC(nom)), periode.debut, periode.fin);
+      if (!r.stats.jours) { resultats.push({ ecole: nom, jours: 0 }); return; }
+      const nomBilan = ecrireBilanEtablissementABC(f, nom, nomBilanProbableABC(ss, nom), r, periode);
+      resultats.push({ ecole: nom, nomBilan: nomBilan, jours: r.stats.jours, repas: r.repas, dechetsKg: r.dechetsKg, co2Kg: r.co2Kg });
+    } catch (e) {
+      Logger.log("Bilan carbone, " + nom + " : " + e);
+      resultats.push({ ecole: nom, erreur: String(e) });
+    }
+  });
+  return resultats;
+}
+
+function handleEnvoyerBilanCarboneABC(data) {
+  const ecole = data.ecole || data.etablissement;
+  getSheetsABC(ecole); // contrôle d'isolation : établissement connu
+  const r = envoyerBilanCarboneABC(ecole)[0];
+  if (!r) throw new Error("Établissement introuvable dans l'annuaire.");
+  if (r.erreur) throw new Error(r.erreur);
+  return { success: true, bilan: r };
 }
