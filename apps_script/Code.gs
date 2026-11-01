@@ -19,7 +19,8 @@ const PARAMETRES_DEFAUT = [
   ["portion_pain_g", 50, "Pain (g) - référence collège : 40 à 50 par repas"],
   ["portion_sauce_g", 20, "Sauce séparée : portion de travail en g, à ajuster selon le service"],
   ["effectif_defaut", 450, "Effectif attendu par défaut (couverts)"],
-  ["prix_kg_eur", 4.5, "Coût moyen de la denrée (€/kg)"]
+  ["prix_kg_eur", 4.5, "Coût moyen de la denrée (€/kg)"],
+  ["mode_analyse_scan", "automatique", "Analyse des plateaux : automatique (tout de suite si le menu du jour est enregistré, sinon après sa validation), differe (toujours après validation du menu) ou instantane (toujours tout de suite)"]
 ];
 
 // ==========================================================================
@@ -187,7 +188,8 @@ function getSheetsABC(nomEcole) {
     throw new Error("Établissement non configuré : '" + nomEcole + "'. Renseignez son nom et son ID dans Configuration.");
   }
   const sheets = initialiserClasseur(SpreadsheetApp.openById(entree.id));
-  if (!sheets.gaspillage.getRange("K1").getValue()) sheets.gaspillage.getRange("K1").setValue("Detail_Ingredients_JSON");
+  const entetes = sheets.gaspillage.getRange("K1:M1").getValues()[0];
+  if (!entetes[0] || !entetes[1] || !entetes[2]) sheets.gaspillage.getRange("K1:M1").setValues([[entetes[0] || "Detail_Ingredients_JSON", entetes[1] || "ID_Scan", entetes[2] || "Photo_Plateau"]]);
   return sheets;
 }
 
@@ -328,6 +330,8 @@ function doPost(e) {
       responseOutput = handleSaveEffectifs(data);
     } else if (action === "saveParametres") {
       responseOutput = handleSaveParametres(data);
+    } else if (action === "analyserScansEnAttente") {
+      responseOutput = handleRelancerScansEnAttenteABC(data);
     }
     return reponseJson(responseOutput);
   } catch (error) {
@@ -432,6 +436,12 @@ function handleSaveParametres(data) {
   const demandes = data.parametres || {};
   const aEcrire = {};
   Object.keys(demandes).forEach(function (cle) {
+    if (cle === "mode_analyse_scan") {
+      const m = normaliserModeScanABC(demandes[cle]);
+      if (MODES_SCAN_ABC.indexOf(String(demandes[cle])) < 0) throw new Error("Mode d'analyse inconnu : " + demandes[cle]);
+      aEcrire[cle] = m;
+      return;
+    }
     const borne = PARAMETRES_MODIFIABLES[cle];
     if (!borne) throw new Error("Paramètre non modifiable : " + cle);
     const v = parseFloat(String(demandes[cle]).replace(",", "."));
@@ -455,14 +465,19 @@ function handleLogMenu(data) {
   const ligne = [dateMenu, "CONFIGURATION_MENU", data.menu_complet || "Menu saisi", "", effectif];
 
   const lignes = sheets.menus.getDataRange().getValues();
+  let remplace = false;
   for (let i = lignes.length - 1; i >= 1; i--) {
     if (lignes[i][1] === "CONFIGURATION_MENU" && dateIso(lignes[i][0]) === iso) {
       sheets.menus.getRange(i + 1, 1, 1, 5).setValues([ligne]);
-      return { success: true, remplace: true };
+      remplace = true;
+      break;
     }
   }
-  sheets.menus.appendRow(ligne);
-  return { success: true, remplace: false };
+  if (!remplace) sheets.menus.appendRow(ligne);
+  // Menu du jour connu : les plateaux gardés en attente pour cette date partent à l'analyse (en arrière-plan).
+  const enAttente = compterScansEnAttenteABC(sheets, iso);
+  if (enAttente) programmerAnalyseScansABC(data.ecole || data.etablissement, iso);
+  return { success: true, remplace: remplace, scansEnAttente: enAttente };
 }
 
 function handleArchiverMenu(data) {
@@ -609,15 +624,16 @@ function enregistrerScanUnique(feuille, ligne, idScan) {
 }
 
 function handleLogScanImage(data) {
-  const sheets = getSheetsABC(data.etablissement || data.ecole);
+  const ecole = data.etablissement || data.ecole;
+  const sheets = getSheetsABC(ecole);
   if (!data.image_base64) throw new Error("Flux visuel manquant.");
   const avisEleve = data.avis_eleve || "Non renseigné";
-  const params = getParametres(sheets);
   const quand = horodatageScan(data.horodatage);
-  const idScan = data.scan_id ? String(data.scan_id).slice(0, 40) : "";
+  // Chaque scan a un identifiant : il retrouve sa ligne quand l'analyse est faite plus tard.
+  const idScan = data.scan_id ? String(data.scan_id).slice(0, 40) : "srv-" + Utilities.getUuid().slice(0, 12);
   // Contrôle rapide ; la vérification définitive est atomique lors de l’écriture.
   // Renvoi automatique de la borne : si ce scan est déjà enregistré, on ne le compte pas deux fois.
-  if (idScan && scanDejaEnregistre(sheets.gaspillage, idScan)) return { success: true, doublon: true };
+  if (scanDejaEnregistre(sheets.gaspillage, idScan)) return { success: true, doublon: true };
 
   if (data.image_base64 === "empty") {
     if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_IA_VISION", "Plateau Nettoyé (0% Restes)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan], idScan)) return { success: true, doublon: true };
@@ -627,11 +643,36 @@ function handleLogScanImage(data) {
   // Plus de "plateau simulé" : une image factice n'est jamais enregistrée comme une vraie mesure.
   if (cleanBase64 === "image_active_simulee") return { success: true, ignore: true, raison: "Caméra indisponible" };
 
+  // La photo du plateau est gardée dans le Drive (lien sur la ligne du scan).
+  // Un échec du Drive ne bloque jamais le scan : on analyse alors tout de suite, comme avant.
+  let photo = null;
+  try { photo = sauverPhotoPlateauABC(ecole, quand, idScan, cleanBase64); } catch (e) { photo = null; }
+
+  const mode = modeAnalyseScanABC(sheets);
+  const menuConnu = !!getMenuDuJour(sheets, dateIso(quand));
+  const differe = mode === "differe" || (mode === "automatique" && !menuConnu);
+  if (differe && photo && assurerFiletScansABC()) {
+    const attente = { en_attente: true, choix_plat: data.choix_plat || "", drive_id: photo.id, essais: 0 };
+    if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_EN_ATTENTE", "Photo du plateau gardée, analyse après validation du menu du jour", 0, 0, 0, 0, 0, 0, avisEleve, JSON.stringify(attente), idScan, photo.url], idScan)) return { success: true, doublon: true };
+    // Menu déjà validé mais mode « différé » : l'analyse part aussitôt, en arrière-plan.
+    if (menuConnu) programmerAnalyseScansABC(ecole, dateIso(quand));
+    return { success: true, en_attente: true };
+  }
+
+  const r = analyserPlateauABC(sheets, cleanBase64, quand, avisEleve, data.choix_plat);
+  if (!enregistrerScanUnique(sheets.gaspillage, r.ligne.concat([idScan, photo ? photo.url : ""]), idScan)) return { success: true, doublon: true };
+  if (r.ignore) return { success: true, ignore: true, raison: r.raison };
+  return { success: true, details: r.details };
+}
+
+// Analyse d'une photo de plateau (immédiate ou différée). Renvoie les 11 premières colonnes de la ligne de scan.
+function analyserPlateauABC(sheets, cleanBase64, quand, avisEleve, choixPlatBrut) {
+  const params = getParametres(sheets);
   // Le menu du jour vient du tableur (complet), pas du texte tronqué envoyé par la borne.
   const menuJour = getMenuDuJour(sheets, dateIso(quand)) || "Non renseigné pour cette date";
 
   const catalogueScan = lireCatalogueABC(sheets);
-  const choixPlat = ['poulet', 'poisson', 'les deux'].indexOf(data.choix_plat) >= 0 ? data.choix_plat : 'non précisé';
+  const choixPlat = ['poulet', 'poisson', 'les deux'].indexOf(choixPlatBrut) >= 0 ? choixPlatBrut : 'non précisé';
   const nomsCatalogue = catalogueScan.filter(function (x) { return x.actif && !x.fusionVers && cleCatalogueABC(menuJour).indexOf(cleCatalogueABC(x.libelle)) >= 0; }).map(function (x) { return x.libelle; });
   const referenceService=referencePhotoJourABC(sheets,dateIso(quand));
   const promptVision = `Tu es un capteur optique pour la restauration scolaire (Projet A.B.C.). Tu ne calcules AUCUN poids : tu estimes seulement, visuellement, la part de chaque aliment qui RESTE sur le plateau.
@@ -681,8 +722,7 @@ Réponds en JSON strict :
   // Plateau absent : on n'enregistre rien (évite de fausser les statistiques).
   // On garde une trace (type SCAN_ECHEC, hors statistiques) pour que ces photos ne disparaissent pas sans bruit.
   if (result.plateau_visible === false) {
-    if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_ECHEC", "Aucun plateau visible sur la photo (cadrage, lumière ou plateau déjà débarrassé)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan], idScan)) return { success: true, doublon: true };
-    return { success: true, ignore: true, raison: "Aucun plateau visible" };
+    return { ignore: true, raison: "Aucun plateau visible", ligne: [quand, "SCAN_ECHEC", "Aucun plateau visible sur la photo (cadrage, lumière ou plateau déjà débarrassé)", 0, 0, 0, 0, 0, 0, avisEleve, ""] };
   }
 
   // Validation : on écarte les aliments incohérents (reste + mangé ≠ 100) ou de composant inconnu.
@@ -718,13 +758,12 @@ Réponds en JSON strict :
   }
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
 
-  const enregistre = enregistrerScanUnique(sheets.gaspillage, [
-    quand, "SCAN_IA_VISION", note,
-    moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-    poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length }), idScan
-  ], idScan);
-  if (!enregistre) return { success: true, doublon: true };
-  return { success: true, details: { aliments: retenus, ecartes: ecartes.length } };
+  return {
+    ligne: [quand, "SCAN_IA_VISION", note,
+      moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
+      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length })],
+    details: { aliments: retenus, ecartes: ecartes.length }
+  };
 }
 
 // Analyse d'un aliment à partir de FAITS mesurés (aucun chiffre inventé : une donnée absente n'est pas un zéro)
@@ -909,7 +948,7 @@ function doGet(e) {
           rawGaspillage.push({
             date: gRows[i][0], dateRaw: dateIso(gRows[i][0]), type: gRows[i][1], commentaire: gRows[i][2],
             entree: gRows[i][3], plat: gRows[i][4], dessert: gRows[i][5], pain: gRows[i][6],
-            poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || ""
+            poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || ""
           });
         }
 
@@ -928,7 +967,7 @@ function doGet(e) {
         return reponseJson({
           ecole: school, effectifCouverts: dernierEffectif || parametres.effectif_defaut, dernierMenu: dernierMenu,
           historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, parametres: parametres,
-          rawGaspillage: rawGaspillage, sacsHistory: h, catalogueVersion: 1, catalogue: lireCatalogueABC(sheets), correctionsVersion: 1, exclusionsAnalyses: lireExclusionsAnalysesABC(sheets), peseesVersion: 1, peseesDetail: lirePeseesDetailABC(sheets)
+          rawGaspillage: rawGaspillage, sacsHistory: h, modeScan: modeAnalyseScanABC(sheets), catalogueVersion: 1, catalogue: lireCatalogueABC(sheets), correctionsVersion: 1, exclusionsAnalyses: lireExclusionsAnalysesABC(sheets), peseesVersion: 1, peseesDetail: lirePeseesDetailABC(sheets)
         });
       } catch (err) {
         vide.error = err.toString();
@@ -1127,3 +1166,254 @@ function handleValiderMenuPhotosABC(data){
  const sheets=getSheetsABC(data.ecole),date=datePhotosABC(data.date);feuilleReferencesPhotosABC(sheets);const lock=LockService.getScriptLock();lock.waitLock(30000);try{const photos=photosJourABC(sheets,date);if(!photos.length)throw Error('Aucune photo pour ce service.');const identifications=identificationsPhotosABC(sheets,date),signature=signatureMenuPhotosABC(photos,identifications);if(signature!==data.signature)throw Error('Le service a changé sur un autre appareil. Rechargez les photos.');const contenu=composerMenuPhotosABC(photos,identifications,data.pain===true);if(data.essai===true)return {success:true,photosVersion:1,menuPhotosVersion:2,essai:true,menu:contenu.menu,reference:contenu.reference};if((getMenuDuJour(sheets,date)||'')!==String(data.menuPrecedent||''))throw Error('Le menu a été modifié ailleurs. Rechargez avant de remplacer.');handleLogMenu({ecole:data.ecole,date_menu:date,effectif:data.effectif,menu_complet:contenu.menu});feuilleReferencesPhotosABC(sheets).appendRow([date,signature,contenu.menu,contenu.reference,new Date(),'CONFIRMEE_V2']);return {success:true,photosVersion:1,menuPhotosVersion:2,menu:contenu.menu,reference:contenu.reference};}finally{lock.releaseLock();}
 }
 function handleRetirerPhotoMenuABC(data){const sheets=getSheetsABC(data.ecole),date=datePhotosABC(data.date);photoServiceAutoriseeABC(sheets,date,data.photo_id);const lock=LockService.getScriptLock();lock.waitLock(30000);try{const sh=feuillePhotosABC(sheets),rows=sh.getDataRange().getValues();for(let i=1;i<rows.length;i++)if(dateIso(rows[i][0])===date&&String(rows[i][2])===String(data.photo_id))sh.getRange(i+1,5,1,1).setValues([[false]]);}finally{lock.releaseLock();}return reponseMenuPhotosABC(sheets,date);}
+
+// ==========================================================================
+// PHOTOS DES PLATEAUX ET ANALYSE DIFFÉRÉE
+// Réglage « mode_analyse_scan » (onglet Parametres, ou roue crantée de l'application) :
+//  - automatique : analyse immédiate si le menu du jour est déjà enregistré ; sinon la photo est gardée
+//                  et analysée dès que le menu du jour est validé ;
+//  - differe     : photo toujours gardée, analysée après validation du menu ;
+//  - instantane  : analyse immédiate, comme avant (photo gardée aussi).
+// Dans tous les cas la photo du plateau est rangée dans le Drive : Photos > établissement > Plateaux > date,
+// avec un lien en colonne M de Suivi_Gaspillage.
+// Filet de sécurité : chaque soir à 19 h, les plateaux encore en attente sont analysés avec le menu connu
+// (ou sans menu). Une ligne SCAN_EN_ATTENTE ne compte dans aucune statistique tant qu'elle n'est pas analysée.
+// ▶️ Après la mise à jour du script : exécuter UNE FOIS autoriserAnalyseDiffereeABC() depuis l'éditeur.
+// ==========================================================================
+const MODES_SCAN_ABC = ["automatique", "differe", "instantane"];
+const CLE_FILE_SCANS_ABC = "ABC_SCANS_A_ANALYSER";
+const CLE_ANALYSE_PREVUE_ABC = "ABC_ANALYSE_PREVUE";
+const ESSAIS_MAX_SCAN_ABC = 3;
+
+function normaliserModeScanABC(v) {
+  const t = String(v || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+  if (t.indexOf("diff") === 0) return "differe";
+  if (t.indexOf("inst") === 0) return "instantane";
+  return "automatique";
+}
+
+function modeAnalyseScanABC(sheets) {
+  const lignes = sheets.parametres.getDataRange().getValues();
+  for (let i = 1; i < lignes.length; i++) {
+    if (String(lignes[i][0]).trim() === "mode_analyse_scan") return normaliserModeScanABC(lignes[i][1]);
+  }
+  return "automatique";
+}
+
+// Verrou du script, sans le reprendre s'il est déjà tenu par l'appel en cours (validation du menu).
+function avecVerrouABC(attenteMs, fn) {
+  const verrou = LockService.getScriptLock(), tenu = verrou.hasLock();
+  if (!tenu && !verrou.tryLock(attenteMs)) throw new Error("Tableur momentanément indisponible (verrou occupé).");
+  try { return fn(); } finally { if (!tenu) verrou.releaseLock(); }
+}
+
+function dossierPlateauxABC(ecole, date) {
+  const cache = CacheService.getScriptCache();
+  const cle = "plateaux_" + Utilities.base64EncodeWebSafe(normaliserNomEcole(ecole)).slice(0, 120) + "_" + date;
+  const connu = cache.get(cle);
+  if (connu) { try { return DriveApp.getFolderById(connu); } catch (e) {} }
+  return avecVerrouABC(15000, function () {
+    const root = DriveApp.getFolderById(PropertiesService.getScriptProperties().getProperty("PHOTOS_SERVICE_FOLDER_ID") || ABC_PHOTOS_DOSSIER);
+    const dossierEcole = sousDossierPhotosABC(root, String(ecole).replace(/[\/\\]/g, "-"));
+    const dossier = sousDossierPhotosABC(sousDossierPhotosABC(dossierEcole, "Plateaux"), date);
+    try { cache.put(cle, dossier.getId(), 21600); } catch (e) {}
+    return dossier;
+  });
+}
+
+// Fichier privé (les autorisations du dossier ne sont jamais modifiées).
+function sauverPhotoPlateauABC(ecole, quand, idScan, base64) {
+  const date = dateIso(quand);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Date de scan invalide.");
+  const nom = Utilities.formatDate(new Date(quand), "Europe/Paris", "HH'h'mm'm'ss") + "_" + String(idScan).replace(/[^A-Za-z0-9_-]/g, "") + ".jpg";
+  const fichier = dossierPlateauxABC(ecole, date).createFile(Utilities.newBlob(Utilities.base64Decode(base64), "image/jpeg", nom));
+  return { id: fichier.getId(), url: fichier.getUrl() };
+}
+
+// Passage du soir : installé automatiquement au premier scan mis en attente.
+// Renvoie false si les déclencheurs ne sont pas autorisés : la borne analyse alors tout de suite, comme avant.
+function assurerFiletScansABC() {
+  const cache = CacheService.getScriptCache();
+  if (cache.get("abc_filet_ok")) return true;
+  try {
+    avecVerrouABC(10000, function () {
+      const existe = ScriptApp.getProjectTriggers().some(function (t) { return t.getHandlerFunction() === "filetScansEnAttenteABC"; });
+      if (!existe) ScriptApp.newTrigger("filetScansEnAttenteABC").timeBased().everyDays(1).atHour(19).inTimezone("Europe/Paris").create();
+    });
+    cache.put("abc_filet_ok", "1", 21600);
+    return true;
+  } catch (e) {
+    Logger.log("Analyse différée indisponible (exécuter autoriserAnalyseDiffereeABC) : " + e);
+    return false;
+  }
+}
+
+function lireFileScansABC() {
+  try {
+    const f = JSON.parse(PropertiesService.getScriptProperties().getProperty(CLE_FILE_SCANS_ABC) || "[]");
+    return Array.isArray(f) ? f : [];
+  } catch (e) { return []; }
+}
+
+function memeTacheABC(t, ecole, date) { return normaliserNomEcole(t.ecole) === normaliserNomEcole(ecole) && t.date === date; }
+
+function ajouterFileScansABC(ecole, date) {
+  avecVerrouABC(20000, function () {
+    const f = lireFileScansABC();
+    if (!f.some(function (t) { return memeTacheABC(t, ecole, date); })) f.push({ ecole: String(ecole), date: date });
+    PropertiesService.getScriptProperties().setProperty(CLE_FILE_SCANS_ABC, JSON.stringify(f));
+  });
+}
+
+function retirerFileScansABC(ecole, date) {
+  avecVerrouABC(20000, function () {
+    const f = lireFileScansABC().filter(function (t) { return !memeTacheABC(t, ecole, date); });
+    PropertiesService.getScriptProperties().setProperty(CLE_FILE_SCANS_ABC, JSON.stringify(f));
+  });
+}
+
+// Un seul passage programmé à la fois ; un passage resté bloqué plus de 15 min est remplacé.
+function lancerDeclencheurAnalyseABC(delaiMs) {
+  const d = Math.max(60000, delaiMs || 60000);
+  const props = PropertiesService.getScriptProperties();
+  const prevu = Number(props.getProperty(CLE_ANALYSE_PREVUE_ABC) || 0);
+  const existants = ScriptApp.getProjectTriggers().filter(function (t) { return t.getHandlerFunction() === "analyserScansEnAttenteABC"; });
+  if (existants.length && prevu && Date.now() < prevu + 15 * 60000) return;
+  existants.forEach(function (t) { ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger("analyserScansEnAttenteABC").timeBased().after(d).create();
+  props.setProperty(CLE_ANALYSE_PREVUE_ABC, String(Date.now() + d));
+}
+
+// Appelé après l'enregistrement du menu du jour : ne bloque jamais la validation du menu.
+function programmerAnalyseScansABC(ecole, date) {
+  try {
+    ajouterFileScansABC(ecole, date);
+    lancerDeclencheurAnalyseABC(60000);
+    return true;
+  } catch (e) {
+    Logger.log("Analyse différée non programmée (" + ecole + ", " + date + ") : " + e);
+    return false;
+  }
+}
+
+function compterScansEnAttenteABC(sheets, date) {
+  const lignes = sheets.gaspillage.getDataRange().getValues();
+  let n = 0;
+  for (let i = 1; i < lignes.length; i++) if (lignes[i][1] === "SCAN_EN_ATTENTE" && (!date || dateIso(lignes[i][0]) === date)) n++;
+  return n;
+}
+
+function erreurPassagereABC(e) { return /HTTP (429|500|503)|indisponible|temporairement|Service invoked too many times/i.test(String(e)); }
+
+// Remplace une ligne SCAN_EN_ATTENTE par son résultat (colonnes B à K), ou met à jour son suivi (colonne K).
+// L'horodatage du scan (A), son identifiant (L) et le lien de la photo (M) ne changent pas.
+function remplacerScanEnAttenteABC(feuille, idScan, ligne, info) {
+  return avecVerrouABC(20000, function () {
+    const derniere = feuille.getLastRow();
+    if (derniere < 2) return false;
+    const ids = feuille.getRange(2, 12, derniere - 1, 1).getValues();
+    for (let i = ids.length - 1; i >= 0; i--) {
+      if (String(ids[i][0]) !== String(idScan)) continue;
+      const r = i + 2;
+      if (feuille.getRange(r, 2).getValue() !== "SCAN_EN_ATTENTE") return false;
+      if (ligne) feuille.getRange(r, 2, 1, 10).setValues([ligne.slice(1, 11)]);
+      else feuille.getRange(r, 11).setValue(JSON.stringify(info));
+      SpreadsheetApp.flush();
+      return true;
+    }
+    return false;
+  });
+}
+
+// Analyse les plateaux en attente d'un établissement pour une date, jusqu'à la limite de temps.
+// Renvoie true quand il ne reste rien à tenter pour cette date.
+function traiterScansEnAttenteABC(ecole, date, limite) {
+  const sheets = getSheetsABC(ecole);
+  const lignes = sheets.gaspillage.getDataRange().getValues();
+  const aFaire = [];
+  for (let i = 1; i < lignes.length; i++) {
+    if (lignes[i][1] !== "SCAN_EN_ATTENTE" || dateIso(lignes[i][0]) !== date) continue;
+    let info = {};
+    try { info = JSON.parse(lignes[i][10] || "{}"); } catch (e) { info = {}; }
+    if ((info.essais || 0) >= ESSAIS_MAX_SCAN_ABC || !info.drive_id) continue;
+    aFaire.push({ quand: lignes[i][0], avis: lignes[i][9], info: info, id: String(lignes[i][11]) });
+  }
+  for (let k = 0; k < aFaire.length; k++) {
+    if (Date.now() > limite - 40000) return false;
+    const s = aFaire[k];
+    try {
+      const image = Utilities.base64Encode(DriveApp.getFileById(s.info.drive_id).getBlob().getBytes());
+      const r = analyserPlateauABC(sheets, image, new Date(s.quand), s.avis || "Non renseigné", s.info.choix_plat);
+      remplacerScanEnAttenteABC(sheets.gaspillage, s.id, r.ligne, null);
+    } catch (e) {
+      if (erreurPassagereABC(e)) throw e;
+      s.info.essais = (s.info.essais || 0) + 1;
+      s.info.derniere_erreur = String(e).slice(0, 200);
+      remplacerScanEnAttenteABC(sheets.gaspillage, s.id, null, s.info);
+    }
+  }
+  return true;
+}
+
+// Passage en arrière-plan (déclencheur) : traite la file par paquets de 4 min 30 environ.
+function analyserScansEnAttenteABC() {
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === "analyserScansEnAttenteABC") ScriptApp.deleteTrigger(t); });
+  PropertiesService.getScriptProperties().deleteProperty(CLE_ANALYSE_PREVUE_ABC);
+  const verrou = LockService.getUserLock();
+  if (!verrou.tryLock(1000)) { lancerDeclencheurAnalyseABC(5 * 60000); return; }
+  const limite = Date.now() + 270000;
+  let pause = 60000;
+  try {
+    while (Date.now() < limite - 40000) {
+      const file = lireFileScansABC();
+      if (!file.length) break;
+      const tache = file[0];
+      let fini = true;
+      try {
+        fini = traiterScansEnAttenteABC(tache.ecole, tache.date, limite);
+      } catch (e) {
+        if (erreurPassagereABC(e)) { Logger.log("Analyse différée en pause : " + e); pause = 10 * 60000; fini = false; }
+        else Logger.log("Analyse différée abandonnée pour " + tache.ecole + " (" + tache.date + ") : " + e);
+      }
+      if (!fini) break;
+      retirerFileScansABC(tache.ecole, tache.date);
+    }
+  } finally { verrou.releaseLock(); }
+  if (lireFileScansABC().length) lancerDeclencheurAnalyseABC(pause);
+}
+
+// Passage du soir : tous les plateaux encore en attente sont analysés, avec ou sans menu.
+function filetScansEnAttenteABC() {
+  const annuaire = getAnnuaire();
+  Object.keys(annuaire).forEach(function (cle) {
+    try {
+      const sheets = getSheetsABC(annuaire[cle].nom), dates = {};
+      sheets.gaspillage.getDataRange().getValues().slice(1).forEach(function (l) { if (l[1] === "SCAN_EN_ATTENTE") dates[dateIso(l[0])] = true; });
+      Object.keys(dates).forEach(function (d) { if (d) ajouterFileScansABC(annuaire[cle].nom, d); });
+    } catch (e) { Logger.log("Passage du soir, " + annuaire[cle].nom + " : " + e); }
+  });
+  if (lireFileScansABC().length) analyserScansEnAttenteABC();
+}
+
+// Bouton « Analyser maintenant » de l'application : tous les plateaux en attente de l'établissement.
+function handleRelancerScansEnAttenteABC(data) {
+  const ecole = data.ecole || data.etablissement, sheets = getSheetsABC(ecole), dates = {};
+  let n = 0;
+  sheets.gaspillage.getDataRange().getValues().slice(1).forEach(function (l) {
+    if (l[1] !== "SCAN_EN_ATTENTE") return;
+    n++; dates[dateIso(l[0])] = true;
+  });
+  Object.keys(dates).forEach(function (d) { if (d) ajouterFileScansABC(ecole, d); });
+  if (n) lancerDeclencheurAnalyseABC(60000);
+  return { success: true, enAttente: n };
+}
+
+// ▶️ À exécuter UNE FOIS depuis l'éditeur après la mise à jour : Google demande l'autorisation des passages
+// en arrière-plan, puis le passage du soir est installé. Sans cela, la borne continue d'analyser tout de suite.
+function autoriserAnalyseDiffereeABC() {
+  const dossier = DriveApp.getFolderById(PropertiesService.getScriptProperties().getProperty("PHOTOS_SERVICE_FOLDER_ID") || ABC_PHOTOS_DOSSIER);
+  ScriptApp.getProjectTriggers();
+  CacheService.getScriptCache().remove("abc_filet_ok");
+  if (!assurerFiletScansABC()) throw new Error("Le passage du soir n'a pas pu être installé.");
+  Logger.log("Analyse différée prête. Photos des plateaux dans : " + dossier.getName() + " > établissement > Plateaux. Passage du soir : 19 h.");
+}

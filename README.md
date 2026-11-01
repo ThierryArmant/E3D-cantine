@@ -47,7 +47,13 @@ Le dispositif de capture est le fruit d'une réalisation pratique et concrète m
 2. **Clé Gemini** : exécuter une fois `configurerCle()` après avoir collé la clé dans la variable `MA_CLE`, puis effacer la clé du code. Elle est stockée dans les propriétés du script, jamais dans le dépôt.
 3. **Annuaire des établissements** : exécuter `creerAnnuaireCentral()` (crée le tableur « Annuaire » : Etablissement | ID | Actif). Pour ajouter un établissement : `creerEtablissement("Nom")` crée son tableur avec les 4 onglets et ses paramètres.
 4. **Publier une nouvelle version** du déploiement (même URL).
+   Après la mise à jour qui ajoute l'analyse différée : exécuter **une fois** `autoriserAnalyseDiffereeABC()` depuis l'éditeur et accepter l'autorisation demandée par Google (passages en arrière-plan). Tant que ce n'est pas fait, la borne analyse les plateaux tout de suite, comme avant.
 5. L'onglet `Parametres` de chaque tableur règle les portions de référence (g), l'effectif par défaut et le prix au kg utilisés par le calcul.
+6. **Analyse des plateaux** (ligne `mode_analyse_scan` de l'onglet `Parametres`, ou roue crantée ⚙️ de l'application) :
+   * `automatique` (par défaut) : analyse immédiate si le menu du jour est déjà enregistré ; sinon la photo est gardée et analysée dès que le menu du jour est validé ;
+   * `differe` : photo toujours gardée, analyse après validation du menu ;
+   * `instantane` : analyse immédiate, même sans menu (démonstration en direct).
+   Chaque photo de plateau est rangée dans le Drive (dossier des photos > établissement > Plateaux > date) avec un lien en colonne M de `Suivi_Gaspillage`. Une ligne `SCAN_EN_ATTENTE` ne compte dans aucune statistique avant son analyse. Chaque soir à 19 h, les plateaux encore en attente sont analysés avec le menu connu, ou sans menu.
 
 ## 🧮 Méthode de calcul (résumé)
 L'IA ne donne que des pourcentages de restes par aliment. Les poids viennent des balances sous les poubelles, répartis entre aliments selon ces restes et des portions de référence ; la bibliothèque d'inévitables sépare évitable et inévitable ; les facteurs carbone viennent d'Agribalyse 3.2 (ADEME/INRAE, août 2025), chacun relié à sa ligne source dans le code. Le détail, avec les valeurs réellement utilisées, est affiché dans le bouton « Transparence & Audit des calculs ».

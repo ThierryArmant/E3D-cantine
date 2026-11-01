@@ -866,6 +866,20 @@
             </div>
             <p style="font-size:11.5px; color:#64748b; margin:0 0 10px;">Ces valeurs servent aux calculs de poids, d'écarts et de pertes de <strong id="param-ecole">cet établissement</strong>. Par défaut : grammages officiels collège du plan alimentaire.</p>
             <div id="param-champs"></div>
+            <div style="margin-top:12px; padding-top:10px; border-top:1px solid #e2e8f0;">
+                <label style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:#1e293b; font-weight:700;">📸 Analyse des plateaux
+                    <select id="param-mode-scan" style="padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px;">
+                        <option value="automatique">Automatique</option>
+                        <option value="differe">Toujours différée</option>
+                        <option value="instantane">Toujours instantanée</option>
+                    </select>
+                </label>
+                <p id="param-mode-aide" style="font-size:11px; color:#64748b; margin:4px 0 0;"></p>
+                <div style="display:flex; gap:8px; align-items:center; margin-top:6px; flex-wrap:wrap;">
+                    <button type="button" id="param-analyser" class="btn" onclick="analyserPlateauxEnAttente()" style="width:auto; padding:5px 10px; font-size:11.5px; background:#1d4ed8;">▶️ Analyser maintenant les plateaux en attente</button>
+                    <span id="param-attente" style="font-size:11px; color:#475569;"></span>
+                </div>
+            </div>
             <div style="display:flex; gap:8px; align-items:center; margin-top:12px; flex-wrap:wrap;">
                 <button type="button" id="param-save" class="btn" onclick="enregistrerParametres()" style="width:auto; padding:7px 14px; font-size:12px; background:#047857;">💾 Enregistrer</button>
                 <button type="button" class="btn" onclick="remplirParametres(true)" style="width:auto; padding:7px 14px; font-size:12px; background:#64748b;">↺ Valeurs officielles</button>
@@ -1560,6 +1574,8 @@
                 }
             }
             if (nbJoursPesee === 0) html += `<span>⚠️ Aucune pesée de poubelles sur la période.</span>`;
+            const nbAttente = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => x.type === "SCAN_EN_ATTENTE").length;
+            if (nbAttente > 0) html += `<span style="color:#1d4ed8;" title="Photos de plateaux gardées dans le Drive : elles seront analysées dès que le menu du jour sera validé (ou ce soir à 19 h). Elles ne comptent pas encore dans les statistiques.">📦 ${nbAttente} plateau(x) en attente d'analyse</span>`;
             const nbEchec = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => x.type === "SCAN_ECHEC").length;
             if (nbEchec > 0) html += `<span style="color:#b45309;" title="Photos sans plateau visible : elles ne comptent pas dans les statistiques. Voir l'onglet Suivi_Gaspillage (type SCAN_ECHEC).">👁️ ${nbEchec} scan(s) sans plateau visible (écartés des statistiques)</span>`;
             const sansDetail = cal.scansLegacy + cal.scansSansDetail;
@@ -2504,6 +2520,36 @@
                 const v = officiel ? c[2] : (cur[c[0]] !== undefined ? cur[c[0]] : c[2]);
                 return `<label style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:#1e293b; margin:6px 0;">${c[1]}<input type="number" step="${c[0] === "prix_kg_eur" ? "0.1" : "1"}" min="${c[4]}" max="${c[5]}" id="param-${c[0]}" value="${v}" style="width:90px; padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; text-align:right;"></label>`;
             }).join("");
+            const sel = document.getElementById('param-mode-scan');
+            if (sel) {
+                sel.value = officiel ? "automatique" : ((globalRawData && globalRawData.modeScan) || "automatique");
+                sel.onchange = majAideModeScan; majAideModeScan();
+            }
+            const nb = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => x.type === "SCAN_EN_ATTENTE").length;
+            const att = document.getElementById('param-attente');
+            if (att) att.innerText = nb ? `${nb} plateau(x) en attente` : "Aucun plateau en attente";
+        }
+        const AIDES_MODE_SCAN = {
+            automatique: "Tout de suite si le menu du jour est déjà enregistré ; sinon la photo est gardée et analysée dès la validation du menu (ou ce soir à 19 h).",
+            differe: "La photo est toujours gardée ; l'analyse se fait après la validation du menu du jour (ou ce soir à 19 h). Plus de chiffres en direct pendant le service.",
+            instantane: "Analyse tout de suite, comme avant, même sans menu enregistré (moins précis). Pour une démonstration en direct."
+        };
+        function majAideModeScan() {
+            const sel = document.getElementById('param-mode-scan'), aide = document.getElementById('param-mode-aide');
+            if (sel && aide) aide.innerText = AIDES_MODE_SCAN[sel.value] || "";
+        }
+        async function analyserPlateauxEnAttente() {
+            const btn = document.getElementById('param-analyser'), att = document.getElementById('param-attente');
+            const ecole = document.getElementById('select-etablissement').value;
+            btn.disabled = true; att.innerText = "Envoi de la demande...";
+            try {
+                const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyserScansEnAttente", ecole: ecole }) });
+                const res = await r.json();
+                if (!res.success) throw new Error(res.error || "refusé par le script");
+                att.innerText = res.enAttente ? `✅ ${res.enAttente} plateau(x) : analyse lancée en arrière-plan, résultats d'ici quelques minutes.` : "Aucun plateau en attente.";
+            } catch (e) {
+                att.innerText = "Échec : " + e.message + (/inconnue|undefined/i.test(e.message) ? " (le script Google doit être mis à jour)" : "");
+            } finally { btn.disabled = false; }
         }
         async function enregistrerParametres() {
             const etat = document.getElementById('param-etat'), btn = document.getElementById('param-save');
@@ -2513,13 +2559,16 @@
                 if (isNaN(v) || v < c[4] || v > c[5]) { etat.innerHTML = `<span style="color:#b91c1c;">${c[1]} : valeur entre ${c[4]} et ${c[5]}.</span>`; return; }
                 params[c[0]] = v;
             }
+            const selMode = document.getElementById('param-mode-scan');
+            // Seulement si le script Google connaît ce réglage (sinon l'enregistrement des portions serait refusé).
+            if (selMode && globalRawData && globalRawData.modeScan) params.mode_analyse_scan = selMode.value;
             const ecole = document.getElementById('select-etablissement').value;
             btn.disabled = true; etat.innerText = "Enregistrement...";
             try {
                 const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "saveParametres", ecole: ecole, parametres: params }) });
                 const res = await r.json();
                 if (!res.success) throw new Error(res.error || "refusé par le script");
-                if (globalRawData) globalRawData.parametres = Object.assign({}, globalRawData.parametres || {}, params);
+                if (globalRawData) { globalRawData.parametres = Object.assign({}, globalRawData.parametres || {}, params); if (params.mode_analyse_scan) globalRawData.modeScan = params.mode_analyse_scan; }
                 etat.innerHTML = '<span style="color:#047857; font-weight:700;">✅ Enregistré dans le tableur</span>';
                 if (typeof applyCustomDateFilter === 'function') applyCustomDateFilter();
             } catch (e) {
@@ -2996,8 +3045,10 @@
             
             const r = zoomRegion(video);
             const canvas = document.createElement('canvas');
-            canvas.width = Math.round(r.sw); 
-            canvas.height = Math.round(r.sh);
+            // Photo ramenée à 1280 px de large au plus : envoi plus rapide, même précision d'analyse.
+            const echelle = Math.min(1, 1280 / Math.max(1, r.sw));
+            canvas.width = Math.round(r.sw * echelle);
+            canvas.height = Math.round(r.sh * echelle);
             const ctx = canvas.getContext('2d'); 
             
             const brightness = document.getElementById('cam-brightness') ? document.getElementById('cam-brightness').value : 100;
@@ -3012,7 +3063,7 @@
         // ===== FILE D'ATTENTE DES SCANS : une photo n'est jamais perdue en silence =====
         // Chaque scan est gardé dans le navigateur (IndexedDB) jusqu'à ce que le script Google confirme l'enregistrement ;
         // en cas d'erreur (clé IA, quota, réseau) il est renvoyé automatiquement et l'erreur s'affiche sur la borne.
-        const SCAN_Q = { items: [], enVol: 0, ok: 0, nonVisible: 0, camera: 0, derniereErreur: "", db: null };
+        const SCAN_Q = { items: [], enVol: 0, ok: 0, attente: 0, nonVisible: 0, camera: 0, derniereErreur: "", db: null };
         function scanDbOuvrir() {
             return new Promise(res => {
                 try {
@@ -3054,7 +3105,7 @@
                 if (res && res.success) {
                     SCAN_Q.items = SCAN_Q.items.filter(x => x !== it);
                     scanDbOp("readwrite", st => st.delete(it.id));
-                    if (res.ignore) SCAN_Q.nonVisible++; else SCAN_Q.ok++;
+                    if (res.ignore) SCAN_Q.nonVisible++; else if (res.en_attente) SCAN_Q.attente++; else SCAN_Q.ok++;
                     SCAN_Q.derniereErreur = "";
                 } else {
                     throw new Error((res && res.error) ? String(res.error) : "réponse vide du script");
@@ -3075,6 +3126,7 @@
             if (!el) return;
             const att = SCAN_Q.items.length;
             let h = `📤 <strong>${SCAN_Q.ok}</strong> enregistré(s)`;
+            if (SCAN_Q.attente) h += ` · 📦 <strong>${SCAN_Q.attente}</strong> gardé(s), analyse après validation du menu`;
             if (att) h += ` · ⏳ <strong>${att}</strong> en attente`;
             const fragiles=SCAN_Q.items.filter(x=>!x.sauvegarde).length;
             if(fragiles)h+=`<br><strong style="color:#b91c1c">⚠️ ${fragiles} scan(s) sans sauvegarde locale confirmée. Gardez cette page ouverte jusqu’à leur enregistrement.</strong>`;
