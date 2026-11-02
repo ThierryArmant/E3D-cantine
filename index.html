@@ -681,7 +681,7 @@
                         </div>
                         
                         <div style="margin-top: 14px; margin-bottom: 14px;">
-                            <button class="btn" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">💾 Enregistrer les pesées & Afficher le bilan</button>
+                            <button class="btn" id="btn-pesees" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">💾 Enregistrer les pesées & Afficher le bilan</button>
                         </div>
 
                         <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
@@ -3826,17 +3826,24 @@
             const tauxInev = menuAct ? getTauxInevitablesPourTexte(menuAct) : 0.30;
             renderBilanEleves(alim * (1 - tauxInev), fruits, pain, effectif);
 
+            // Un seul envoi à la fois : le bouton reste grisé jusqu'à la réponse (évite la pesée en double).
+            const btn = document.getElementById('btn-pesees');
+            if (btn && btn.disabled) return;
+            const texteBtn = btn ? btn.innerHTML : '';
+            if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.innerHTML = '⏳ Enregistrement en cours…'; }
+            const finEnvoi = () => { if (btn) { btn.disabled = false; btn.style.opacity = ''; btn.innerHTML = texteBtn; } };
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(payload) 
             }).then(r => r.json()).then(res => {
+                finEnvoi();
                 if(res.success) {
                     if(window.ecoMarkSaved) window.ecoMarkSaved("#view-saisie-dechets");
-                    alert("✅ Pesées enregistrées pour la date du " + peseeDate + " !");
+                    alert(res.doublon ? "ℹ️ Ces pesées étaient déjà enregistrées pour le " + peseeDate + " : rien n'a été ajouté." : "✅ Pesées enregistrées pour la date du " + peseeDate + " !");
                     document.getElementById('sac-alimentaire').value = "0.00"; document.getElementById('sac-fruits').value = "0.00";
                     document.getElementById('sac-pain').value = "0.00"; document.getElementById('sac-emballages').value = "0.00";
                     document.getElementById('sac-serviettes').value = "0.00"; loadLiveData(); 
                 } else { alert("❌ Erreur du serveur Google : " + res.error); }
-            }).catch(() => alert("❌ Erreur réseau. Les données n'ont pas pu être envoyées."));
+            }).catch(() => { finEnvoi(); alert("❌ Pas de réponse du serveur. Avant de renvoyer, vérifiez dans l'onglet Pesees_Sacs si la ligne a été ajoutée (le renvoi d'une pesée identique ne crée plus de doublon)."); });
         }
 
         function getCurrentCheckedMenu() {

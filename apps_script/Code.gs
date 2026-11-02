@@ -501,16 +501,26 @@ function handleLogBagWeights(data) {
     }
   }
 
-  sheets.sacs.appendRow([
-    datePesee, 
-    parseFloat(data.sac_alimentaire) || 0, 
-    parseFloat(data.sac_fruits) || 0, 
-    parseFloat(data.sac_pain) || 0, 
-    parseFloat(data.sac_emballages) || 0, 
+  const ligne = [
+    datePesee,
+    parseFloat(data.sac_alimentaire) || 0,
+    parseFloat(data.sac_fruits) || 0,
+    parseFloat(data.sac_pain) || 0,
+    parseFloat(data.sac_emballages) || 0,
     parseFloat(data.sac_serviettes) || 0
-  ]);
-  actualiserComparaisonPesees(sheets);
-  return { success: true };
+  ];
+  // Double envoi (double clic, renvoi après une réponse perdue) : une pesée identique pour la même date
+  // n'est pas ajoutée une seconde fois. Des pesées différentes le même jour (plusieurs bacs) restent possibles.
+  const doublon = avecVerrouABC(20000, function () {
+    const iso = dateIso(datePesee);
+    const existe = sheets.sacs.getDataRange().getValues().slice(1).some(function (l) {
+      return dateIso(l[0]) === iso && [1, 2, 3, 4, 5].every(function (k) { return Math.abs((parseFloat(l[k]) || 0) - ligne[k]) < 0.005; });
+    });
+    if (!existe) { sheets.sacs.appendRow(ligne); SpreadsheetApp.flush(); }
+    return existe;
+  });
+  if (!doublon) actualiserComparaisonPesees(sheets);
+  return { success: true, doublon: doublon };
 }
 
 // Comparaison expérimentale : les masses de référence de l’IA ne sont pas des pesées.
