@@ -683,6 +683,7 @@
                         <div style="margin-top: 14px; margin-bottom: 14px;">
                             <button class="btn" id="btn-pesees" onclick="saveBagWeights()" style="background-color: #047857; font-size: 14px; padding: 12px 20px; border-radius: 8px;">💾 Enregistrer les pesées & Afficher le bilan</button>
                         </div>
+                        <div id="abc-comparaison-bacs"></div>
 
                         <div id="bilan-eleves-container" class="bilan-eleves-wrapper">
                             <div class="bilan-header-box" id="bilan-header-color">
@@ -3642,6 +3643,7 @@
                 renderControleFrequences();
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
                 globalRawData = data; 
+                if (typeof majComparaisonBacs === 'function') { try { majComparaisonBacs(); } catch (e) { console.error(e); } }
                 
                 let activeBtn = document.querySelector('.btn-period.active') || document.querySelectorAll('.btn-period')[0];
                 if (activeBtn) {
@@ -4401,6 +4403,7 @@
 <script src="abc-qrcode.js?v=1"></script>
 <script src="abc-photos.js?v=20261021-aide-etapes-1"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
+<script src="abc-bacs.js?v=20261102-1"></script>
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
 </body>
 </html>

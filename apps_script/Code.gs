@@ -20,6 +20,15 @@ const PARAMETRES_DEFAUT = [
   ["portion_sauce_g", 20, "Sauce séparée : portion de travail en g, à ajuster selon le service"],
   ["effectif_defaut", 450, "Effectif attendu par défaut (couverts)"],
   ["prix_kg_eur", 4.5, "Coût moyen de la denrée (€/kg)"],
+  ["poids_pot_g", 6, "Pot vide (compote, yaourt, crème) en g : estimation du bac emballages"],
+  ["poids_opercule_g", 1, "Opercule ou couvercle en g"],
+  ["poids_film_g", 2, "Film ou sachet plastique en g"],
+  ["poids_brique_g", 10, "Brique ou bouteille vide en g"],
+  ["poids_barquette_g", 8, "Barquette ou boîte vide en g"],
+  ["poids_emballage_autre_g", 3, "Autre emballage en g"],
+  ["poids_serviette_g", 3, "Serviette en papier en g"],
+  ["poids_epluchure_g", 25, "Épluchure, trognon, peau de fruit en g (bac fruits)"],
+  ["poids_os_g", 15, "Os, arête, partie non comestible de viande ou de poisson en g (biodéchets)"],
   ["mode_analyse_scan", "automatique", "Analyse des plateaux : automatique (tout de suite si le menu du jour est enregistré, sinon après sa validation), differe (toujours après validation du menu) ou instantane (toujours tout de suite)"]
 ];
 
@@ -334,6 +343,8 @@ function doPost(e) {
       responseOutput = handleRelancerScansEnAttenteABC(data);
     } else if (action === "envoyerBilanCarbone") {
       responseOutput = handleEnvoyerBilanCarboneABC(data);
+    } else if (action === "reanalyserJour") {
+      responseOutput = handleReanalyserJourABC(data);
     }
     return reponseJson(responseOutput);
   } catch (error) {
@@ -431,7 +442,9 @@ function handleSaveEffectifs(data) {
 // Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
 const PARAMETRES_MODIFIABLES = {
   portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
-  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100]
+  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
+  poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
+  poids_emballage_autre_g: [0, 50], poids_serviette_g: [0, 20], poids_epluchure_g: [0, 200], poids_os_g: [0, 200]
 };
 function handleSaveParametres(data) {
   const sheets = getSheetsABC(data.ecole || data.etablissement);
@@ -603,6 +616,38 @@ function portionReference(composant, aliment, p) {
   return p.portion_plat_g;
 }
 
+// Poubelle de chaque reste, comme la saisie des déchets : biodéchets, fruits, pain, emballages, serviettes (grammes).
+// Un aliment resté dans son propre emballage (pot, film) part avec lui au bac emballages, contenu compris.
+const OBJETS_PLATEAU_ABC = { pot: ["poids_pot_g", "emballages"], opercule: ["poids_opercule_g", "emballages"], film: ["poids_film_g", "emballages"],
+  brique: ["poids_brique_g", "emballages"], barquette: ["poids_barquette_g", "emballages"], autre_emballage: ["poids_emballage_autre_g", "emballages"],
+  serviette: ["poids_serviette_g", "serviettes"], epluchure: ["poids_epluchure_g", "fruits"], os: ["poids_os_g", "biodechets"] };
+const POIDS_OBJETS_DEFAUT_ABC = { poids_pot_g: 6, poids_opercule_g: 1, poids_film_g: 2, poids_brique_g: 10, poids_barquette_g: 8, poids_emballage_autre_g: 3, poids_serviette_g: 3, poids_epluchure_g: 25, poids_os_g: 15 };
+function estFruitFraisABC(nom) {
+  const n = String(nom || "").toLowerCase();
+  if (/pommes? de terre|compote|yaourt|tarte|g[âa]teau|cr[èe]me|jus|sirop|confiture/.test(n)) return false;
+  return /(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|p[êe]che|abricot|prune|raisin|melon|past[èe]que|fraise|pamplemousse|nectarine|fruit)/.test(n);
+}
+function trierDechetsPlateauABC(retenus, objetsBruts, params) {
+  const bacs = { biodechets: 0, fruits: 0, pain: 0, emballages: 0, serviettes: 0 }, objets = {};
+  (retenus || []).forEach(function (i) {
+    const g = i.reste_g_ref || 0;
+    if (i.dans_emballage) bacs.emballages += g;
+    else if (i.composant === "pain") bacs.pain += g;
+    else if (estFruitFraisABC(i.aliment)) bacs.fruits += g;
+    else bacs.biodechets += g;
+  });
+  (Array.isArray(objetsBruts) ? objetsBruts : []).forEach(function (o) {
+    const type = String(o && o.type || "").toLowerCase().trim(), def = OBJETS_PLATEAU_ABC[type];
+    const n = Math.max(0, Math.min(10, Math.round(Number(o && o.nombre) || 0)));
+    if (!def || !n) return;
+    objets[type] = (objets[type] || 0) + n;
+    const unite = params && params[def[0]] !== undefined ? params[def[0]] : POIDS_OBJETS_DEFAUT_ABC[def[0]];
+    bacs[def[1]] += n * unite;
+  });
+  Object.keys(bacs).forEach(function (k) { bacs[k] = Math.round(bacs[k]); });
+  return { bacs: bacs, objets: objets };
+}
+
 // Heure d'origine du scan (envoyée par la borne) si elle est plausible, sinon maintenant.
 function horodatageScan(brut) {
   const d = brut ? new Date(brut) : null;
@@ -711,6 +756,9 @@ RÈGLES
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
 - N'utilise ni deux-points, ni crochets, ni barre verticale dans les champs texte.
+TRI DES DÉCHETS (pour estimer chaque poubelle)
+- Pour chaque aliment, "dans_emballage" vaut true si l'aliment est servi dans son propre emballage individuel (pot de compote, de yaourt ou de crème, muffin ou gâteau sous film, fromage en portion emballée, brique) ; false s'il est dans une assiette, un ramequin ou un bol de la cantine. Un produit jamais ouvert : dans_emballage true et reste_pct 100.
+- "objets" compte tout ce qui n'est pas de la nourriture et qui sera jeté : pots, opercules, films ou sachets, briques ou bouteilles, barquettes, serviettes en papier, épluchures ou trognons ou peaux de fruit, os ou arêtes. Compte chaque objet visible une fois, y compris les pots vides. N'invente aucun objet caché.
 
 Réponds en JSON strict :
 {
@@ -718,7 +766,10 @@ Réponds en JSON strict :
   "nb_plateaux": 1,
   "resume_comportement": "Phrase courte (ex. a trié les légumes mais mangé la viande).",
   "aliments": [
-    {"composant": "entree|plat|accompagnement|dessert|pain", "aliment": "Nom court", "forme": "entier, morceaux, rondelles, râpé, haché, purée...", "preparation": "cuisson et sauce visibles", "etat_reste": "aucun|intact|entamé|trié|émietté", "reste_pct": 0, "mange_pct": 100, "confiance": "haute|moyenne|faible"}
+    {"composant": "entree|plat|accompagnement|dessert|pain", "aliment": "Nom court", "forme": "entier, morceaux, rondelles, râpé, haché, purée...", "preparation": "cuisson et sauce visibles", "etat_reste": "aucun|intact|entamé|trié|émietté", "reste_pct": 0, "mange_pct": 100, "dans_emballage": false, "confiance": "haute|moyenne|faible"}
+  ],
+  "objets": [
+    {"type": "pot|opercule|film|brique|barquette|serviette|epluchure|os|autre_emballage", "nombre": 1}
   ]
 }`;
 
@@ -751,7 +802,8 @@ Réponds en JSON strict :
     retenus.push({
       catalogue_id: fiche ? fiche.id : "", aliment_brut: alimentBrut, composant: composant, aliment: aliment, forme: nettoyerTexte(a.forme) || "?", preparation: nettoyerTexte(a.preparation) || "?",
       etat_reste: nettoyerTexte(a.etat_reste), reste_pct: Math.round(reste), portion_ref_g: portion,
-      reste_g_ref: Math.round(portion * reste / 100), confiance: nettoyerTexte(a.confiance) || "moyenne"
+      reste_g_ref: Math.round(portion * reste / 100), confiance: nettoyerTexte(a.confiance) || "moyenne",
+      dans_emballage: a.dans_emballage === true
     });
   });
 
@@ -769,12 +821,13 @@ Réponds en JSON strict :
     }).join(" ");
   }
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
+  const tri = trierDechetsPlateauABC(retenus, result.objets, params);
 
   return {
     ligne: [quand, "SCAN_IA_VISION", note,
       moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length })],
-    details: { aliments: retenus, ecartes: ecartes.length }
+      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, bacs: tri.bacs, objets: tri.objets })],
+    details: { aliments: retenus, ecartes: ecartes.length, bacs: tri.bacs }
   };
 }
 
@@ -921,6 +974,12 @@ RÈGLE DE CALCUL ET DE FORMATAGE DE LA PARTIE 2 :
 // ==========================================================================
 // LECTURE (GET)
 // ==========================================================================
+// Grammes par poubelle d'un scan (colonne K), ou null pour les scans antérieurs à cette répartition.
+function bacsDuDetailABC(texte) {
+  if (!texte || String(texte).indexOf('"bacs"') < 0) return null;
+  try { const b = JSON.parse(texte).bacs; return b && typeof b === "object" ? b : null; } catch (e) { return null; }
+}
+
 // Données d'un établissement (menus, couverts, scans, pesées), communes au tableau de bord et au bilan carbone.
 function donneesBaseABC(sheets) {
   const parametres = getParametres(sheets);
@@ -943,7 +1002,7 @@ function donneesBaseABC(sheets) {
     rawGaspillage.push({
       date: gRows[i][0], dateRaw: dateIso(gRows[i][0]), type: gRows[i][1], commentaire: gRows[i][2],
       entree: gRows[i][3], plat: gRows[i][4], dessert: gRows[i][5], pain: gRows[i][6],
-      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || ""
+      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || "", bacs: bacsDuDetailABC(gRows[i][10])
     });
   }
 
@@ -1617,4 +1676,53 @@ function handleEnvoyerBilanCarboneABC(data) {
   if (!r) throw new Error("Établissement introuvable dans l'annuaire.");
   if (r.erreur) throw new Error(r.erreur);
   return { success: true, bilan: r };
+}
+
+// ==========================================================================
+// RÉANALYSE D'UNE JOURNÉE À PARTIR DES PHOTOS GARDÉES
+// Les scans de la date qui ont une photo (colonne M) repassent « en attente » et sont analysés à nouveau
+// en arrière-plan, avec la méthode actuelle (tri par poubelle compris). L'ancien résultat de chaque scan
+// est d'abord recopié dans l'onglet « Historique_Analyses » : rien n'est perdu.
+// ▶️ Depuis l'éditeur : reanalyserJourABC("COLLEGE  J. GIONO", "2026-11-02") ; ou bouton de la saisie des déchets.
+// ==========================================================================
+function idDrivePhotoABC(url) { const m = String(url || "").match(/\/d\/([A-Za-z0-9_-]{10,})/); return m ? m[1] : ""; }
+
+function reanalyserJourABC(ecole, date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date || ""))) throw new Error("Date invalide (AAAA-MM-JJ).");
+  if (date > dateIso(new Date())) throw new Error("Date future.");
+  const sheets = getSheetsABC(ecole);
+  if (!assurerFiletScansABC()) throw new Error("Autorisation des passages en arrière-plan manquante : exécuter autoriserAnalyseDiffereeABC().");
+  const n = avecVerrouABC(30000, function () {
+    const f = sheets.gaspillage, derniere = f.getLastRow();
+    if (derniere < 2) return 0;
+    const lignes = f.getRange(2, 1, derniere - 1, 13).getValues();
+    const ss = sheets.menus.getParent();
+    let hist = ss.getSheetByName("Historique_Analyses");
+    if (!hist) { hist = ss.insertSheet("Historique_Analyses"); hist.appendRow(["Réanalysé le", "Date du scan", "ID scan", "Type", "Note", "Entrée %", "Plat %", "Dessert %", "Pain %", "Poids g", "Perte €", "Détail JSON"]); }
+    const archive = [], cibles = [];
+    lignes.forEach(function (l, i) {
+      if (dateIso(l[0]) !== date || ["SCAN_IA_VISION", "SCAN_ECHEC"].indexOf(l[1]) < 0) return;
+      const driveId = idDrivePhotoABC(l[12]);
+      if (!driveId || !l[11]) return;
+      archive.push([new Date(), date, String(l[11]), l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], String(l[10] || "").slice(0, 45000)]);
+      cibles.push({ ligne: i + 2, valeurs: ["SCAN_EN_ATTENTE", "Réanalyse en cours (méthode actuelle) : ancien résultat dans Historique_Analyses", 0, 0, 0, 0, 0, 0, l[9],
+        JSON.stringify({ en_attente: true, choix_plat: "", drive_id: driveId, essais: 0, reanalyse: true })] });
+    });
+    if (!cibles.length) return 0;
+    hist.getRange(hist.getLastRow() + 1, 1, archive.length, archive[0].length).setValues(archive);
+    // Écriture en un seul bloc, de la première à la dernière ligne concernée (les autres lignes sont réécrites à l'identique).
+    const premiere = cibles[0].ligne, fin = cibles[cibles.length - 1].ligne;
+    const bloc = f.getRange(premiere, 2, fin - premiere + 1, 10).getValues();
+    cibles.forEach(function (c) { bloc[c.ligne - premiere] = c.valeurs; });
+    f.getRange(premiere, 2, bloc.length, 10).setValues(bloc);
+    SpreadsheetApp.flush();
+    return cibles.length;
+  });
+  if (n) { ajouterFileScansABC(ecole, date); lancerDeclencheurAnalyseABC(60000); }
+  return n;
+}
+
+function handleReanalyserJourABC(data) {
+  const n = reanalyserJourABC(data.ecole || data.etablissement, String(data.date || ""));
+  return { success: true, plateaux: n };
 }
