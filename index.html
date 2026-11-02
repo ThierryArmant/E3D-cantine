@@ -3312,6 +3312,16 @@
                 SCAN_Q.camera++; scanMajPuce(); if (b) { b.innerText = "📷 CAMÉRA NON DISPONIBLE"; setTimeout(() => { b.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; }, 2500); }
                 return;
             }
+            // Image toute noire (caméra figée après une veille, cache fermé) : rien n'est envoyé,
+            // la caméra est relancée tout de suite et le bandeau explique quoi faire.
+            if (luminositeCamera() < 8) {
+                const b = document.getElementById('instruction-text');
+                SCAN_Q.camera++; scanMajPuce();
+                if (b) { b.innerText = "📷 IMAGE NOIRE : CAMÉRA EN COURS DE REDÉMARRAGE"; setTimeout(() => { b.innerText = "🤖 DÉPOSE TON PLATEAU ET CLIQUE SUR TON AVIS"; }, 2500); }
+                afficherEtatCamera("Image noire : redémarrage de la caméra…");
+                if (!CAM_ETAT.enCours) initCamera();
+                return;
+            }
             if (Date.now() - dernierScanTs < 3000) return; // anti-rebond entre deux élèves
             dernierScanTs = Date.now();
             isScanningProcess = true;
