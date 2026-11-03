@@ -1096,7 +1096,7 @@ function donneesBaseABC(sheets) {
     rawGaspillage.push({
       date: gRows[i][0], dateRaw: dateIso(gRows[i][0]), type: gRows[i][1], commentaire: gRows[i][2],
       entree: gRows[i][3], plat: gRows[i][4], dessert: gRows[i][5], pain: gRows[i][6],
-      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || "", bacs: bacsDuDetailABC(gRows[i][10]), emb: embDuDetailABC(gRows[i][10])
+      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", detail: gRows[i][10] || "", id_scan: gRows[i][11] || "", photo: gRows[i][12] || "", bacs: bacsDuDetailABC(gRows[i][10]), emb: embDuDetailABC(gRows[i][10])
     });
   }
 
