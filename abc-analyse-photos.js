@@ -12,7 +12,8 @@ let current=[];
 function refresh(){
  const data=(typeof globalRawData!=='undefined'&&globalRawData)||{};
  const raw=Array.isArray(data.rawGaspillage)?data.rawGaspillage:[];
- const records=raw.map((s,i)=>({...s,ordre:i+1,jour:date(s.dateRaw||s.date),avis:avis(s.avis_eleve),reste:reste(s),drive:idDrive(s.photo)})).sort((a,b)=>String(a.dateRaw||a.date).localeCompare(String(b.dateRaw||b.date))||a.ordre-b.ordre);
+ const records=raw.map((s,i)=>({...s,ordre:i+1,jour:date(s.dateRaw||s.date),avis:avis(s.avis_eleve),reste:reste(s),drive:idDrive(s.photo)})).sort((a,b)=>a.jour.localeCompare(b.jour)||String(a.dateRaw||a.date).localeCompare(String(b.dateRaw||b.date))||a.ordre-b.ordre);
+ const compteJour={};records.forEach(s=>{compteJour[s.jour]=(compteJour[s.jour]||0)+1;s.ordre=compteJour[s.jour]});
  const day=$('abc-photo-date').value, a=$('abc-photo-avis').value, status=$('abc-photo-statut').value, r=$('abc-photo-restes').value, q=$('abc-photo-search').value.toLocaleLowerCase('fr').trim();
  current=records.filter(s=>(!day||s.jour===day)&&(!a||s.avis===a)&&(!status||s.type===status)&&(!q||[s.commentaire,s.detail,s.avis_eleve,s.photo].join(' ').toLocaleLowerCase('fr').includes(q))&&(!r||(s.reste!==null&&(r==='0'?s.reste===0:r==='1'?s.reste>0&&s.reste<30:r==='30'?s.reste>=30&&s.reste<60:s.reste>=60))));
  const avecPhoto=current.filter(s=>s.drive);
