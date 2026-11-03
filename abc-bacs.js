@@ -16,7 +16,12 @@ function majComparaisonBacs() {
   if (!zone) return;
   const d = typeof globalRawData !== "undefined" ? globalRawData : null;
   const date = (document.getElementById("input-pesee-date") || {}).value || "";
-  if (!d || !date) { zone.innerHTML = ""; return; }
+  if (!date) { zone.innerHTML = ""; return; }
+  if (!d) {
+    // Le tableau de bord met 10 à 15 s à charger : on montre le cadre tout de suite.
+    zone.innerHTML = `<div style="margin:6px 0 16px; padding:12px 14px; border:1px solid #cbd5e1; border-left:5px solid #1d4ed8; border-radius:10px; background:#f8fafc; font-size:12.5px; color:#1e3a8a;">📸 <strong>Pesée estimée d'après les plateaux scannés</strong> · chargement des plateaux du jour (10 à 15 secondes)…</div>`;
+    return;
+  }
   const scans = (d.rawGaspillage || []).filter(s => normalizeDate(s.dateRaw) === date);
   const vus = scans.filter(s => s.type === "SCAN_IA_VISION");
   const avecBacs = vus.filter(s => s.bacs);
@@ -87,4 +92,5 @@ async function reanalyserJourBacs(date, n, limite) {
 document.addEventListener("DOMContentLoaded", () => {
   const champ = document.getElementById("input-pesee-date");
   if (champ) champ.addEventListener("change", majComparaisonBacs);
+  majComparaisonBacs();
 });
