@@ -246,7 +246,7 @@ function getMenuDuJour(sheets, isoJour) {
 function appelerGeminiParRequete(payloadData) {
   const maxTentatives = 3;
   let delaiMs = 2000;
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + NOM_MODELE_GEMINI + ":generateContent";
+  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + modeleGeminiABC() + ":generateContent";
   const options = {
     method: "post",
     contentType: "application/json",
@@ -1917,4 +1917,60 @@ function niveauReflexionScanABC() {
   try { v = String(PropertiesService.getScriptProperties().getProperty("NIVEAU_REFLEXION_SCAN") || "").trim().toLowerCase(); } catch (e) {}
   if (v === "defaut" || v === "défaut") return "";
   return ["minimal", "low", "medium", "high"].indexOf(v) >= 0 ? v : "low";
+}
+
+// Modèle utilisé : propriété du script MODELE_GEMINI (ex. gemini-3.1-flash-lite) pour en changer sans toucher au code.
+let MODELE_FORCE_ABC = "";
+function modeleGeminiABC() {
+  if (MODELE_FORCE_ABC) return MODELE_FORCE_ABC;
+  let v = "";
+  try { v = String(PropertiesService.getScriptProperties().getProperty("MODELE_GEMINI") || "").trim(); } catch (e) {}
+  return /^[a-z0-9.\-]{3,60}$/i.test(v) ? v : NOM_MODELE_GEMINI;
+}
+
+// ===================================================================================
+// BANC D'ESSAI : 39 plateaux de référence de Giono (02/11/2026), relus à la main.
+// Analyse ces photos avec un autre modèle SANS rien changer aux statistiques ; résultats dans l'onglet Comparaison_Modeles.
+// ▶️ Depuis l'éditeur : comparerModeleABC()  (Flash-Lite, réflexion par défaut du modèle)
+//    comparerModeleActuelABC()  (modèle actuel, réflexion courte)
+// ===================================================================================
+const PLATEAUX_REFERENCE_ABC = ["1iTYyblL5XW2Pbo2ziC1rSw0SGXhbzhWD", "19YTbtjNXjZvhg7iKexHlauLnCZFroEB_", "17BqvoZYkhOywjAMFEkmIafWF3Mevrrw9", "1Sx_Rk9HPdQrlonw27_Oq53H1bhPksL36", "15XF9YI3-QHLPKinTEF92EGzFKC2aLlwn", "1Cs2jxjaDU9dHG8MnNqhFAnDgZmZ8O_rL", "1R4iDfDHWBlwfrJ_yVJQenneqS4lex7fk", "19zmqarcfIojqofFrYPCzKjnJT-eCXGGr", "1xnTNVfoW5VC90VjJOT2besPeT3pDgvPo", "1pLREU7qtFebvYXOzH8hHCLZzifLbOMfJ", "12JGeV6n924OrYd6zxwCAlg4_lxyS0AL2", "18DjXAEUKESkQYHkn72hEGQFXFkrWHT0w", "1RCLT1Vrr5BbI-BlnOnTCrfAJWgTzSUHy", "1asP6grZltdJ9-6VtssV_k2KayeWYpmFA", "1B4UU8CYPMAIy4D99TenXvmTG5nzcZg5m", "1JTx7bRLj-UoMErMexaCcA7h0Yy0lvNSL", "1NPr6jO6GjWJG975Ks361x0fXN42QTJqj", "1RyfGq0D9ToDSOyxP7ZU-n5izWuutrdDl", "1_KZ6yrv19TWmFxd0lszdgMTGbtxfkxd9", "1OxvhdRJt63aYOpSG8fLbRJVYYLCLu8de", "1LK8HXzL4wwL19m1BLPgvn5SoiAnTWwhp", "1swSZAL_S_f_57Eu0nGv4mbH6EG-fJrUO", "1caq4EeoVuFBYPUhh167NCS2cdYgEXilW", "1W8nBD4fYuzgbAR8-waJkkvcUPUUBQFlD", "1PZljHtq-qa1KjpFDna_5bZgJQrUlUoNh", "1-jUdudFBJLQQkmdp116roKhhHDmXjEKg", "1_BM147b7sL3SLbeid3O-2jrZC9c6jMcO", "1dRy4PcAAnxGEWmJ-L3zX5uowWkRM9Q05", "10plxsq6Tf1ZZLPKDOQt5wurNakKFfUEN", "1WFO7PQlun-hrozCi1jIX5EIsOqWmTUvK", "11ZAKyKVT1YL01Tao9XgezRukbnMNZbWD", "1DWQWlw-DayKe09wg5e8bCcrsAxYnFTtI", "14XmzNuHkwig1JePAKGNvhnbGTeRlFa0-", "1DJeyIzZ06FEF-dzAwdiiyinW5i_NEvx5", "1i9Ifb6Lx0GEopBrGfqsNpx2ggpkZWgBl", "1WbRYxy1yXp-KxwYr-u3HVwPCc_gFAQWh", "1dU90-Nu50toIE6QOdeNdylCCkZe0UKWZ", "1F5Gj_VkXGJVnLup2q-e68N5qkUrrCvf4", "1ySaVub2udAoGURBt3i3eC2290LItzr_i"];
+
+function comparerModeleActuelABC() { return comparerModeleABC(NOM_MODELE_GEMINI, "low"); }
+
+function comparerModeleABC(modele, niveau) {
+  modele = modele || "gemini-3.1-flash-lite";
+  const ecole = "COLLEGE  J. GIONO", date = "2026-11-02";
+  const sheets = getSheetsABC(ecole);
+  const ss = SpreadsheetApp.openById(getAnnuaire()[normaliserNomEcole(ecole)].id);
+  const onglet = ss.getSheetByName("Comparaison_Modeles") || ss.insertSheet("Comparaison_Modeles");
+  if (onglet.getLastRow() === 0) onglet.appendRow(["Testé le", "Modèle", "Réflexion", "N°", "Photo", "Résultat", "Jetons entrée", "Jetons réflexion", "Jetons sortie", "Erreur"]);
+  const props = PropertiesService.getScriptProperties();
+  const ancienNiveau = props.getProperty("NIVEAU_REFLEXION_SCAN");
+  props.setProperty("NIVEAU_REFLEXION_SCAN", niveau || "defaut");
+  MODELE_FORCE_ABC = modele;
+  const debut = Date.now(), lignes = [];
+  try {
+    for (let k = 0; k < PLATEAUX_REFERENCE_ABC.length; k++) {
+      if (Date.now() - debut > 300000) break;
+      const id = PLATEAUX_REFERENCE_ABC[k];
+      const base = [new Date(), modele, niveau || "défaut du modèle", k + 1, "https://drive.google.com/file/d/" + id + "/view"];
+      try {
+        const image = Utilities.base64Encode(DriveApp.getFileById(id).getBlob().getBytes());
+        const r = analyserPlateauABC(sheets, image, Utilities.parseDate(date + " 12:30:00", "Europe/Paris", "yyyy-MM-dd HH:mm:ss"), "Non renseigné", "");
+        let j = {};
+        try { j = JSON.parse(r.ligne[10] || "{}").jetons || {}; } catch (e) {}
+        lignes.push(base.concat([r.ligne[2], j.entree || "", j.reflexion || "", j.sortie || "", ""]));
+      } catch (e) {
+        lignes.push(base.concat(["", "", "", "", String(e).slice(0, 300)]));
+        if (/HTTP (400|404)/.test(String(e))) break; // modèle inconnu : inutile d'insister
+      }
+    }
+  } finally {
+    MODELE_FORCE_ABC = "";
+    if (ancienNiveau) props.setProperty("NIVEAU_REFLEXION_SCAN", ancienNiveau); else props.deleteProperty("NIVEAU_REFLEXION_SCAN");
+  }
+  if (lignes.length) onglet.getRange(onglet.getLastRow() + 1, 1, lignes.length, 10).setValues(lignes);
+  Logger.log(modele + " : " + lignes.length + " plateaux testés, résultats dans l'onglet Comparaison_Modeles de Giono.");
+  return lignes.length;
 }
