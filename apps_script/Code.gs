@@ -1828,6 +1828,7 @@ function recupererPhotosPlateauxABC(ecole, date) {
     (parScan[id] = parScan[id] || { heure: m[1] + ":" + m[2] + ":" + m[3], fichiers: [] }).fichiers.push(f);
   }
   let copies = 0;
+  const debut = Date.now();
   const lignes = avecVerrouABC(30000, function () {
     const derniere = sheets.gaspillage.getLastRow();
     const connus = {};
@@ -1838,8 +1839,6 @@ function recupererPhotosPlateauxABC(ecole, date) {
     Object.keys(parScan).forEach(function (id) {
       const s = parScan[id];
       s.fichiers.sort(function (a, b) { return a.getDateCreated() - b.getDateCreated(); });
-      // Copies en double (renvois de l'appareil) : à la corbeille, récupérables 30 jours.
-      s.fichiers.slice(1).forEach(function (f) { try { f.setTrashed(true); copies++; } catch (e) {} });
       if (connus[id]) return;
       const garde = s.fichiers[0];
       const quand = Utilities.parseDate(date + " " + s.heure, "Europe/Paris", "yyyy-MM-dd HH:mm:ss");
@@ -1852,6 +1851,14 @@ function recupererPhotosPlateauxABC(ecole, date) {
       SpreadsheetApp.flush();
     }
     return nouvelles.length;
+  });
+  // Ensuite seulement, les copies en double (renvois de l'appareil) vont à la corbeille (récupérables 30 jours),
+  // dans la limite du temps : une nouvelle exécution termine le ménage sans rien recréer.
+  Object.keys(parScan).forEach(function (id) {
+    parScan[id].fichiers.slice(1).forEach(function (f) {
+      if (Date.now() - debut > 240000) return;
+      try { f.setTrashed(true); copies++; } catch (e) {}
+    });
   });
   const menuConnu = !!getMenuDuJour(sheets, date);
   if (lignes && menuConnu) programmerAnalyseScansABC(ecole, date);
