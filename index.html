@@ -203,7 +203,7 @@
         .prec-kpi { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 12px; }
         .prec-kpi .v { font-size:20px; font-weight:900; color:#1b4332; }
         .prec-kpi .l { font-size:11px; color:#64748b; }
-</style>
+.abc-photo-panel{background:#f8fcf9;padding:14px;border-radius:12px;color:#163f2b}.abc-photo-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:12px 0}.abc-photo-filters label{display:flex;flex-direction:column;font-size:12px;font-weight:700}.abc-photo-filters input,.abc-photo-filters select{padding:8px;max-width:100%;border:1px solid #b5cebe;border-radius:6px}.abc-photo-stats{display:flex;flex-wrap:wrap;gap:8px}.abc-photo-stat{padding:8px;background:#e4f1e8;border-radius:7px;font-size:12px}.abc-photo-stat b{font-size:18px}.abc-photo-flow{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}.abc-photo-flow span{background:#e4f1e8;padding:7px;border-radius:6px;font-size:12px}.abc-photo-chart{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin:10px 0}.abc-photo-chart-item{background:#eaf3ec;padding:8px;font-size:12px;border-radius:7px}.abc-photo-track{height:7px;background:#cfddd3;border-radius:6px;overflow:hidden;margin-top:6px}.abc-photo-fill{height:100%;background:#2f855a}.abc-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:7px}.abc-photo-tile{position:relative;padding:0;text-align:left;background:#e6ede7;border:1px solid #cddacf;border-radius:7px;overflow:hidden;cursor:pointer;min-width:0}.abc-photo-tile img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.abc-photo-meta{font-size:10px;padding:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.abc-photo-pill{position:absolute;right:4px;top:4px;background:#fff;border-radius:12px;padding:3px 6px;font-size:10px;font-weight:700}.abc-photo-dialog{border:0;border-radius:12px;padding:16px;max-width:min(720px,95vw);max-height:90vh;overflow:auto}.abc-photo-dialog::backdrop{background:#001b13bb}.abc-photo-dialog img{width:100%;max-height:52vh;object-fit:contain}@media(max-width:600px){.abc-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}</style>
 <link rel="stylesheet" href="abc-mobile.css?v=20261103-2">
 </head>
 <body>
@@ -223,6 +223,7 @@
 
             <li class="menu-item" id="menu-view-cuisinier" onclick="switchView('view-cuisinier')">📝 Saisie des menus</li>
             <li class="menu-item" id="menu-view-borne" onclick="switchView('view-borne')">📸 Borne & Smartphone</li>
+            <li class="menu-item" id="menu-view-analyse-photos" onclick="switchView('view-analyse-photos')">🔎 Analyse photos</li>
             <li class="menu-item" id="menu-view-saisie-dechets" onclick="switchView('view-saisie-dechets')">⚖ Saisie des déchets</li>
             <li style="padding:14px 15px 4px;font-size:10px;color:#86efac;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin-top:10px;border-top:1px solid #2d6a4f;">Espace cuisine</li>
             <li class="menu-item" id="menu-view-rapport" onclick="switchView('view-rapport')">🥗 Conformité Plan Alimentaire</li>
@@ -248,7 +249,7 @@
 
         <div class="content-area">
             <!-- PÔLE 1 : DASHBOARD -->
-            <div id="view-dashboard" class="view-section active">
+            <section id="view-analyse-photos" class="view-section"><div class="abc-photo-panel"><h2>📸 Analyse photos</h2><p>Consultation des analyses existantes, sans appel Gemini.</p><div class="abc-photo-filters"><label>Date <input id="abc-photo-date" type="date"></label><label>Avis <select id="abc-photo-avis"><option value="">Tous</option><option>pas aimé</option><option>plus faim</option><option>pas le temps</option><option>tout fini</option></select></label><label>Restes <select id="abc-photo-restes"><option value="">Tous</option><option value="0">Aucun</option><option value="1">1–29 %</option><option value="30">30–59 %</option><option value="60">60 % et plus</option></select></label><label>Statut <select id="abc-photo-statut"><option value="">Tous</option><option value="SCAN_IA_VISION">Analysés</option><option value="SCAN_EN_ATTENTE">En attente</option><option value="SCAN_ECHEC">Écartés</option></select></label><label>Recherche <input id="abc-photo-search" type="search" placeholder="Aliment, commentaire…"></label></div><div id="abc-photo-stats"></div><div id="abc-photo-flow"></div><div id="abc-photo-chart"></div><p id="abc-photo-info"></p><div id="abc-photo-grid"></div></div><dialog id="abc-photo-detail"><button type="button" id="abc-photo-close">Fermer ✕</button><div id="abc-photo-detail-content"></div></dialog></section><div id="view-dashboard" class="view-section active">
                 <div class="dashboard-wrapper">
                     <div id="dashboard-error-banner" style="display: none; background: #fee2e2; border-left: 4px solid #ef4444; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 10px;"></div>
 
@@ -3642,6 +3643,7 @@
             if (viewId === 'view-dashboard' || viewId === 'view-saisie-dechets' || viewId === 'view-rapport' || viewId === 'view-borne') {
                 loadLiveData(); 
             }
+            if (viewId === 'view-analyse-photos' && typeof abcPhotosRefresh === 'function') abcPhotosRefresh();
             if (viewId === 'view-precision') { try { renderPrecision(); } catch (e) { console.error(e); } }
             if (viewId === 'view-cuisinier') renderLocalFavorites();
         }
@@ -4489,6 +4491,7 @@
 <script src="abc-catalogue.js?v=20261021-stat-noms-uniques-1"></script>
 <script src="abc-qrcode.js?v=1"></script>
 <script src="abc-photos.js?v=20261103-qr-4"></script>
+<script src="abc-analyse-photos.js?v=20261103-1"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
 <script src="abc-defi.js?v=20261103-2"></script>
 <script src="abc-bacs.js?v=20261103-4"></script>
