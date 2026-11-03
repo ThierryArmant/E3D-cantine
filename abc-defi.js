@@ -31,8 +31,18 @@ function alimentsJeteJourABC(date) {
   });
   const couverts = (d.historiqueEffectifs || {})[date] || scans.length;
   const facteur = Math.max(1, couverts / scans.length);
-  const liste = Object.values(parAliment).map(a => Object.assign(a, { kg: a.g * facteur / 1000 })).sort((x, y) => y.g - x.g);
-  return liste.length ? { liste: liste, scans: scans.length, couverts: couverts } : null;
+  // Même calcul que le tableau des ingrédients : quand la poubelle est pesée, son poids réel est réparti
+  // entre les aliments selon leur part dans les restes vus sur les plateaux.
+  const h = d.sacsHistory || {}, pese = { alim: 0, fruits: 0, pain: 0 };
+  (h.datesRaw || []).forEach((x, i) => { if (normalizeDate(x) === date) { pese.alim += +h.alimentaire[i] || 0; pese.fruits += +h.fruits[i] || 0; pese.pain += +h.pain[i] || 0; } });
+  const bac = a => /^pain$/i.test(a.nom) ? "pain" : (defiEstFruit(a.nom) ? "fruits" : "alim");
+  const totaux = { alim: 0, fruits: 0, pain: 0 };
+  Object.values(parAliment).forEach(a => { totaux[bac(a)] += a.g; });
+  const liste = Object.values(parAliment).map(a => {
+    const b = bac(a);
+    return Object.assign(a, { kg: pese[b] > 0 && totaux[b] > 0 ? pese[b] * a.g / totaux[b] : a.g * facteur / 1000 });
+  }).sort((x, y) => y.kg - x.kg);
+  return liste.length ? { liste: liste, scans: scans.length, couverts: couverts, pese: pese.alim + pese.fruits + pese.pain > 0 } : null;
 }
 function defiKg(v) { return v.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " kg"; }
 
@@ -48,7 +58,7 @@ function majDefiDuJourABC() {
   }
   const [a, b, c] = r.liste;
   const entiers = r.liste.filter(x => x.entiers >= 3).sort((x, y) => y.entiers - x.entiers)[0];
-  diag.innerHTML = `D'après <strong>${r.scans}</strong> plateau(x) analysé(s) : <strong>${a.nom}</strong> est l'aliment le plus jeté (≈ ${defiKg(a.kg)}, laissé sur ${a.plateaux} plateaux)`
+  diag.innerHTML = `D'après <strong>${r.scans}</strong> plateau(x) analysé(s)${r.pese ? " et la pesée du jour" : ""} : <strong>${a.nom}</strong> est l'aliment le plus jeté (≈ ${defiKg(a.kg)}, laissé sur ${a.plateaux} plateaux)`
     + (b ? `, devant ${b.nom} (≈ ${defiKg(b.kg)})` : "") + (c ? ` et ${c.nom} (≈ ${defiKg(c.kg)})` : "") + "."
     + (entiers ? ` ${entiers.entiers} ${entiers.nom.toLowerCase()} ont été jetés sans être entamés.` : "");
   defi.innerHTML = `🎯 <strong>Défi du jour :</strong> moins de ${a.nom.toLowerCase()} laissé dans les assiettes au prochain service`
