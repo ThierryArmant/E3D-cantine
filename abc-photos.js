@@ -258,7 +258,7 @@ async function abcValiderMenuPhotos(){
  const informer=()=>{const message='⏳ Enregistrement du menu sur le serveur · '+Math.floor((Date.now()-debut)/1000)+' s. Attendez la confirmation.';abcPhotoStatut(message);if(progression)progression.textContent=message;};
  informer();const attente=setInterval(informer,1000);const essai=document.getElementById('abc-photo-essai')?.checked===true;
  try{
-  const res=await abcAPIPhotoMenu('validatePhotoMenu',{...ctx,signature:abcSignaturePhotoClient(),menuPrecedent:ABC_PHOTOS.menu,pain:document.getElementById('abc-photo-pain').checked,essai,effectif:Number(document.getElementById('convives-total')?.value)||0});
+  const res=await abcAPIPhotoMenu('validatePhotoMenu',{...ctx,signature:abcSignaturePhotoClient(),menuPrecedent:ABC_PHOTOS.menu,pain:document.getElementById('abc-photo-pain').checked,essai,effectif:(typeof effectifPourDate==='function'?effectifPourDate(ctx.date):Number(document.getElementById('convives-total')?.value))||0});
   if(JSON.stringify(ctx)!==JSON.stringify(abcPhotoContexte()))return;
   clearInterval(attente);
   if(!essai){ABC_PHOTOS.menu=res.menu;ABC_PHOTOS.reference=res.reference;ABC_CATALOGUE.menus[ctx.date]=res.menu;}

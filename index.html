@@ -460,7 +460,16 @@
                             <input type="date" id="input-menu-date" class="input-date" style="padding: 4px 8px; font-weight: bold; background: white;">
                         </div>
                         <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 12px; border-radius: 6px; color: #0369a1; font-weight: 800; font-size: 13px;">
-                            🤖 Plateaux analysés aujourd'hui : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
+                            🤖 Plateaux analysés <span id="compteur-scans-quand">aujourd'hui</span> : <span id="compteur-scans-jour" style="font-size: 16px;">0</span>
+                        </div>
+                        <div title="Tous les plateaux passés devant la borne aujourd'hui : analysés, en attente d'analyse et photos écartées (aucun plateau visible)." style="background: #ecfdf5; border: 1px solid #6ee7b7; padding: 6px 12px; border-radius: 6px; color: #047857; font-weight: 800; font-size: 13px;">
+                            📸 Réellement scannés : <span id="compteur-scans-reels" style="font-size: 16px;">0</span> <span id="compteur-scans-detail" style="font-weight: 600; font-size: 11px; color: #065f46;"></span>
+                        </div>
+                        <div title="Nombre affiché par l'écran des plateaux sortis en cuisine, en fin de service. Il devient le nombre de couverts du jour pour tous les calculs (taux de scan, estimation des poubelles, bilan carbone)." style="background: #fff7ed; border: 1px solid #fdba74; padding: 4px 8px; border-radius: 6px; color: #9a3412; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            🍽️ Plateaux sortis (écran cuisine) :
+                            <input type="number" id="plateaux-sortis" min="1" max="5000" inputmode="numeric" style="width: 80px; padding: 4px 6px; border: 1px solid #fdba74; border-radius: 4px; font-weight: 800; font-size: 14px;">
+                            <button type="button" id="btn-plateaux-sortis" onclick="enregistrerPlateauxSortis()" style="padding: 4px 10px; border: 0; border-radius: 4px; background: #c2410c; color: #fff; font-weight: 800; cursor: pointer;">💾</button>
+                            <span id="plateaux-sortis-etat" style="font-weight: 600; font-size: 11px;"></span>
                         </div>
                     </div>
 
@@ -950,6 +959,57 @@
         function normaliserNomAliment(txt) { return String(txt || "").toLowerCase().replace(/[’‘]/g, "'").trim(); }
 
         // Nom court d'un aliment : "Tomates - En dés - Mozzarella" devient "Tomates"
+        // Compteurs de la saisie des menus, pour la date choisie (aujourd'hui par défaut) :
+        // plateaux analysés / couverts, et plateaux réellement passés devant la borne (analysés + en attente + écartés).
+        function majCompteursScans() {
+            if (!globalRawData) return;
+            const aujourdhui = typeof abcJour === 'function' ? abcJour() : new Date().toISOString().split('T')[0];
+            const choix = (document.getElementById('input-menu-date') || {}).value || aujourdhui;
+            const duJour = (globalRawData.rawGaspillage || []).filter(s => normalizeDate(s.dateRaw) === choix);
+            const analyses = duJour.filter(s => s.type === "SCAN_IA_VISION").length;
+            const attente = duJour.filter(s => s.type === "SCAN_EN_ATTENTE").length;
+            const ecartes = duJour.filter(s => s.type === "SCAN_ECHEC").length;
+            const couverts = (globalRawData.historiqueEffectifs || {})[choix] || (globalRawData.parametres || {}).effectif_defaut || parseInt((document.getElementById('convives-total') || {}).value) || 0;
+            const quand = document.getElementById('compteur-scans-quand');
+            if (quand) quand.innerText = choix === aujourdhui ? "aujourd'hui" : "le " + choix.split("-").reverse().join("/");
+            const el = document.getElementById('compteur-scans-jour'); if (el) el.innerText = `${analyses} / ${couverts}`;
+            const reels = document.getElementById('compteur-scans-reels'); if (reels) reels.innerText = String(analyses + attente + ecartes);
+            const detail = document.getElementById('compteur-scans-detail');
+            if (detail) detail.innerText = [attente ? attente + " en attente" : "", ecartes ? ecartes + " écarté(s)" : ""].filter(Boolean).join(" · ");
+            const champ = document.getElementById('plateaux-sortis');
+            if (champ && document.activeElement !== champ) champ.value = plateauxSortisMemorises(choix) || "";
+        }
+
+        function clePlateauxSortis(date) { return 'plateauxSortis-' + document.getElementById('select-etablissement').value + '-' + date; }
+        function plateauxSortisMemorises(date) { try { return parseInt(localStorage.getItem(clePlateauxSortis(date))) || 0; } catch (e) { return 0; } }
+        // Couverts à envoyer avec le menu d'une date : les plateaux sortis s'ils ont été saisis, sinon l'effectif prévu.
+        function effectifPourDate(date) { return plateauxSortisMemorises(date) || parseInt((document.getElementById('convives-total') || {}).value) || 450; }
+
+        // Enregistre les plateaux sortis comme couverts du jour (même ligne que le menu de la date, menu inchangé).
+        async function enregistrerPlateauxSortis() {
+            const etat = document.getElementById('plateaux-sortis-etat'), btn = document.getElementById('btn-plateaux-sortis');
+            const n = parseInt(document.getElementById('plateaux-sortis').value);
+            const aujourdhui = typeof abcJour === 'function' ? abcJour() : new Date().toISOString().split('T')[0];
+            const date = (document.getElementById('input-menu-date') || {}).value || aujourdhui;
+            const menu = globalRawData && (globalRawData.historiqueMenus || {})[date];
+            if (!(n > 0 && n <= 5000)) { etat.innerText = "Nombre entre 1 et 5000."; return; }
+            if (!menu) { etat.innerText = "Enregistrez d'abord le menu de ce jour."; return; }
+            btn.disabled = true; etat.innerText = "Enregistrement…";
+            try {
+                const school = document.getElementById('select-etablissement').value;
+                const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "logMenu", ecole: school, date_menu: date, effectif: n, menu_complet: menu }) });
+                const res = await r.json();
+                if (!res.success) throw new Error(res.error || "refusé par le script");
+                memoriserOptionABC(clePlateauxSortis(date), String(n));
+                globalRawData.historiqueEffectifs = Object.assign({}, globalRawData.historiqueEffectifs, { [date]: n });
+                etat.innerText = "✅ " + n + " couverts le " + date.split("-").reverse().join("/");
+                majCompteursScans();
+                if (typeof applyCustomDateFilter === 'function') applyCustomDateFilter();
+            } catch (e) {
+                etat.innerText = "Échec : " + String(e.message || e).replace(/^Error:\s*/, "");
+            } finally { btn.disabled = false; }
+        }
+
         function getCleanItemShortName(raw) { return String(raw || "").split(" - ")[0].trim(); }
 
         function estFruit(nom) {
@@ -1321,6 +1381,7 @@
         }
 
         document.getElementById('input-menu-date')?.addEventListener('change', renderLocalFavorites);
+        document.getElementById('input-menu-date')?.addEventListener('change', () => { try { majCompteursScans(); } catch (e) {} });
 
         function setQuickPeriod(type, btnElem) {
             document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
@@ -1529,13 +1590,7 @@
                 });
             }
 
-            let totalScansToday = 0;
-            const todayIsoStr = new Date().toISOString().split('T')[0];
-            if (globalRawData.rawGaspillage) {
-                totalScansToday = globalRawData.rawGaspillage.filter(s => normalizeDate(s.dateRaw) === todayIsoStr && s.type === "SCAN_IA_VISION").length;
-            }
-            let compteurScanElem = document.getElementById('compteur-scans-jour');
-            if (compteurScanElem) compteurScanElem.innerText = `${totalScansToday} / ${effectifs[todayIsoStr] || params.effectif_defaut || effectifSaisi}`;
+            majCompteursScans();
 
             document.getElementById('report-school-name').innerText = school;
             document.getElementById('rep-kpi-avg').innerText = `${avgGrams.toFixed(1)} g`;
@@ -3689,7 +3744,7 @@
         function reinitialiserAffichageEtablissement() {
             const compteurs = { 'kpi-avg': '0 g', 'kpi-total': '0.0 kg', 'kpi-money': '0.00 €', 'kpi-impact': '0.0 kg',
                 'rep-kpi-avg': '0 g', 'rep-kpi-total': '0.0 kg', 'rep-kpi-money': '0.00 €',
-                'biodiff-total': 'Total : 0 kg', 'compteur-scans-jour': '0' };
+                'biodiff-total': 'Total : 0 kg', 'compteur-scans-jour': '0', 'compteur-scans-reels': '0', 'compteur-scans-detail': '' };
             Object.keys(compteurs).forEach(id => { const el = document.getElementById(id); if (el) el.innerText = compteurs[id]; });
             const menuBorne = document.getElementById('borne-menu-active');
             if (menuBorne) menuBorne.innerText = 'Menu non chargé';
@@ -4222,7 +4277,7 @@
 
             fetch(ADRESSE_SHEET_OFFICIELLE, { 
                 method: "POST", headers: { "Content-Type": "text/plain" },
-                body: JSON.stringify({ action: "logMenu", ecole: school, date_menu: menuDate, effectif: effectifSaisi, menu_complet: menuFinal }) 
+                body: JSON.stringify({ action: "logMenu", ecole: school, date_menu: menuDate, effectif: effectifPourDate(menuDate), menu_complet: menuFinal }) 
             })
             .then(r => r.json())
             .then(res => {
@@ -4401,7 +4456,7 @@
     </script>
 <script src="abc-catalogue.js?v=20261021-stat-noms-uniques-1"></script>
 <script src="abc-qrcode.js?v=1"></script>
-<script src="abc-photos.js?v=20261021-aide-etapes-1"></script>
+<script src="abc-photos.js?v=20261103-plateaux-1"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
 <script src="abc-bacs.js?v=20261103-2"></script>
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
