@@ -55,7 +55,8 @@ function majComparaisonBacs() {
   }
   const anciens = vus.length - avecBacs.length;
   if (anciens > 0) html += `<p style="margin:8px 0 0; font-size:12px; color:#92400e;">${anciens} plateau(x) de ce jour ont été analysés avant la répartition par poubelle${avecBacs.length ? " et ne comptent pas dans l'estimation" : ""}.</p>`;
-  if (attente) html += `<p style="margin:6px 0 0; font-size:12px; color:#1d4ed8;">⏳ ${attente} plateau(x) en cours d'analyse : actualisez dans quelques minutes.</p>`;
+  if (attente) html += `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;"><span style="font-size:12px; color:#1d4ed8;">⏳ ${attente} plateau(x) en attente d'analyse : actualisez dans quelques minutes.</span>
+      <button type="button" class="btn" id="btn-bacs-analyser" style="width:auto; padding:6px 11px; font-size:12px; background:#1d4ed8;">▶️ Analyser maintenant</button><span id="bacs-analyser-etat" style="font-size:11.5px; color:#475569;"></span></div>`;
   // Seuls les plateaux qui ont une photo peuvent être réanalysés. Essai conseillé d'abord sur 30 plateaux.
   const avecPhoto = scans.filter(s => (s.type === "SCAN_IA_VISION" && !s.bacs || s.type === "SCAN_ECHEC") && s.photo).length;
   if (anciens > 0 && !attente && avecPhoto) {
@@ -69,6 +70,23 @@ function majComparaisonBacs() {
   const b1 = document.getElementById("btn-reanalyser-essai"), b2 = document.getElementById("btn-reanalyser-tout");
   if (b1) b1.addEventListener("click", () => reanalyserJourBacs(date, Math.min(30, avecPhoto), 30));
   if (b2) b2.addEventListener("click", () => reanalyserJourBacs(date, avecPhoto, 0));
+  const b3 = document.getElementById("btn-bacs-analyser");
+  if (b3) b3.addEventListener("click", () => relancerAttenteBacs(b3));
+}
+
+// Même action que « Analyser maintenant » des réglages, placée ici à côté des autres analyses.
+async function relancerAttenteBacs(btn) {
+  const etat = document.getElementById("bacs-analyser-etat");
+  btn.disabled = true; etat.textContent = "Envoi de la demande…";
+  try {
+    const ecole = document.getElementById("select-etablissement").value;
+    const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "analyserScansEnAttente", ecole: ecole }) });
+    const res = await r.json();
+    if (!res.success) throw new Error(res.error || "refusé par le script");
+    etat.textContent = res.enAttente ? `✅ ${res.enAttente} plateau(x) : analyse lancée en arrière-plan.` : "Aucun plateau en attente.";
+  } catch (e) {
+    btn.disabled = false; etat.textContent = "Échec : " + String(e.message || e).replace(/^Error:\s*/, "");
+  }
 }
 
 async function reanalyserJourBacs(date, n, limite) {
