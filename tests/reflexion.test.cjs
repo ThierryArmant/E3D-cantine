@@ -1,0 +1,22 @@
+// Analyse d'un plateau : réflexion courte demandée, repli sans ce réglage si le modèle le refuse, jetons notés.
+const fs = require('fs'), vm = require('vm'), assert = require('assert/strict');
+const c = vm.createContext({ Logger: { log() {} }, PropertiesService: { getScriptProperties: () => ({ getProperty: () => null }) } });
+vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8'), c);
+c.getParametres = () => ({ portion_entree_g: 80, portion_plat_g: 100, portion_garniture_g: 150, portion_dessert_g: 100, portion_fruit_g: 150, portion_pain_g: 50, portion_sauce_g: 20, prix_kg_eur: 4.5 });
+c.getMenuDuJour = () => 'Salade | Poulet | Riz | Yaourt';
+c.lireCatalogueABC = () => [];
+c.referencePhotoJourABC = () => '';
+c.dateIso = () => '2026-11-03';
+const appels = [];
+const reponse = { candidates: [{ content: { parts: [{ text: JSON.stringify({ plateau_visible: true, resume_comportement: 'ok', aliments: [{ aliment: 'Riz', composant: 'accompagnement', reste_pct: 20, confiance: 'haute' }], objets: [] }) }] } }], usageMetadata: { promptTokenCount: 4000, thoughtsTokenCount: 300, candidatesTokenCount: 200 } };
+c.appelerGeminiParRequete = p => {
+  appels.push(JSON.parse(JSON.stringify(p.generationConfig)));
+  if (p.generationConfig.thinkingConfig) throw new Error('Erreur HTTP 400 : thinking_level is not supported');
+  return { getContentText: () => JSON.stringify(reponse) };
+};
+const r = c.analyserPlateauABC({}, 'AAAA', new Date('2026-11-03T12:00:00Z'), 'x', '');
+assert.equal(appels.length, 2);
+assert.equal(appels[0].thinkingConfig.thinkingLevel, 'low');
+assert.equal(appels[1].thinkingConfig, undefined, 'repli sans réglage');
+assert.deepEqual(JSON.parse(r.ligne[10]).jetons, { entree: 4000, reflexion: 300, sortie: 200 });
+console.log('OK : réflexion courte, repli si refusée, jetons notés.');

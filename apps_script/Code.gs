@@ -841,8 +841,23 @@ Réponds en JSON strict :
     contents: [{ parts: [{ text: promptVision }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }],
     generationConfig: { responseMimeType: "application/json", temperature: 0 }
   };
-  const response = appelerGeminiParRequete(payloadData);
+  // Coût : par défaut le modèle « réfléchit » longuement (niveau high), et cette réflexion est facturée au prix fort.
+  // Pour lire un plateau, une réflexion courte suffit. Propriété du script NIVEAU_REFLEXION_SCAN pour changer
+  // (minimal, low, medium, high ; « defaut » = réglage du modèle).
+  const niveau = niveauReflexionScanABC();
+  if (niveau) payloadData.generationConfig.thinkingConfig = { thinkingLevel: niveau };
+  let response;
+  try {
+    response = appelerGeminiParRequete(payloadData);
+  } catch (e) {
+    // Modèle qui refuse ce réglage : on refait l'appel sans, pour ne jamais bloquer un scan.
+    if (!niveau || !/HTTP 400/.test(String(e)) || !/think/i.test(String(e))) throw e;
+    delete payloadData.generationConfig.thinkingConfig;
+    response = appelerGeminiParRequete(payloadData);
+  }
   const jsonResp = JSON.parse(response.getContentText());
+  const usage = jsonResp.usageMetadata || {};
+  const jetons = { entree: usage.promptTokenCount || 0, reflexion: usage.thoughtsTokenCount || 0, sortie: usage.candidatesTokenCount || 0 };
   if (!jsonResp.candidates || !jsonResp.candidates[0].content) throw new Error("Réponse invalide de l'API Gemini pour le scan.");
   const result = JSON.parse(jsonResp.candidates[0].content.parts[0].text.replace(/```json/gi, "").replace(/```/g, "").trim());
 
@@ -892,7 +907,7 @@ Réponds en JSON strict :
   return {
     ligne: [quand, "SCAN_IA_VISION", note,
       moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, bacs: tri.bacs, objets: tri.objets })],
+      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, bacs: tri.bacs, objets: tri.objets, jetons: jetons })],
     details: { aliments: retenus, ecartes: ecartes.length, bacs: tri.bacs }
   };
 }
@@ -1895,4 +1910,11 @@ function completerAvisScanABC(feuille, idScan, avis) {
       return;
     }
   } catch (e) {}
+}
+
+function niveauReflexionScanABC() {
+  let v = "";
+  try { v = String(PropertiesService.getScriptProperties().getProperty("NIVEAU_REFLEXION_SCAN") || "").trim().toLowerCase(); } catch (e) {}
+  if (v === "defaut" || v === "défaut") return "";
+  return ["minimal", "low", "medium", "high"].indexOf(v) >= 0 ? v : "low";
 }
