@@ -1428,7 +1428,9 @@ function traiterScansEnAttenteABC(ecole, date, limite) {
       if (erreurPassagereABC(e)) throw e;
       s.info.essais = (s.info.essais || 0) + 1;
       s.info.derniere_erreur = String(e).slice(0, 200);
-      remplacerScanEnAttenteABC(sheets.gaspillage, s.id, null, s.info);
+      // Réanalyse impossible après 3 essais : l'ancien résultat du plateau reprend sa place.
+      if (s.info.essais >= ESSAIS_MAX_SCAN_ABC && Array.isArray(s.info.avant) && s.info.avant.length === 10) remplacerScanEnAttenteABC(sheets.gaspillage, s.id, [null].concat(s.info.avant), null);
+      else remplacerScanEnAttenteABC(sheets.gaspillage, s.id, null, s.info);
     }
   }
   return true;
@@ -1687,7 +1689,8 @@ function handleEnvoyerBilanCarboneABC(data) {
 // ==========================================================================
 function idDrivePhotoABC(url) { const m = String(url || "").match(/\/d\/([A-Za-z0-9_-]{10,})/); return m ? m[1] : ""; }
 
-function reanalyserJourABC(ecole, date) {
+// limite : nombre de plateaux à réanalyser, répartis sur tout le service (0 = tous). Commencer par un petit essai.
+function reanalyserJourABC(ecole, date, limite) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date || ""))) throw new Error("Date invalide (AAAA-MM-JJ).");
   if (date > dateIso(new Date())) throw new Error("Date future.");
   const sheets = getSheetsABC(ecole);
@@ -1699,15 +1702,24 @@ function reanalyserJourABC(ecole, date) {
     const ss = sheets.menus.getParent();
     let hist = ss.getSheetByName("Historique_Analyses");
     if (!hist) { hist = ss.insertSheet("Historique_Analyses"); hist.appendRow(["Réanalysé le", "Date du scan", "ID scan", "Type", "Note", "Entrée %", "Plat %", "Dessert %", "Pain %", "Poids g", "Perte €", "Détail JSON"]); }
-    const archive = [], cibles = [];
+    const archive = [];
+    let cibles = [];
     lignes.forEach(function (l, i) {
       if (dateIso(l[0]) !== date || ["SCAN_IA_VISION", "SCAN_ECHEC"].indexOf(l[1]) < 0) return;
       const driveId = idDrivePhotoABC(l[12]);
       if (!driveId || !l[11]) return;
-      archive.push([new Date(), date, String(l[11]), l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], String(l[10] || "").slice(0, 45000)]);
-      cibles.push({ ligne: i + 2, valeurs: ["SCAN_EN_ATTENTE", "Réanalyse en cours (méthode actuelle) : ancien résultat dans Historique_Analyses", 0, 0, 0, 0, 0, 0, l[9],
-        JSON.stringify({ en_attente: true, choix_plat: "", drive_id: driveId, essais: 0, reanalyse: true })] });
+      const info = { en_attente: true, choix_plat: "", drive_id: driveId, essais: 0, reanalyse: true };
+      const avant = l.slice(1, 11);
+      if (JSON.stringify(avant).length < 40000) info.avant = avant; // remis en place si la réanalyse échoue
+      cibles.push({ ligne: i + 2, l: l, valeurs: ["SCAN_EN_ATTENTE", "Réanalyse en cours (méthode actuelle) : ancien résultat dans Historique_Analyses", 0, 0, 0, 0, 0, 0, l[9], JSON.stringify(info)] });
     });
+    const max = Math.max(0, Math.round(Number(limite) || 0));
+    if (max && cibles.length > max) {
+      const pas = cibles.length / max, choix = [];
+      for (let k = 0; k < max; k++) choix.push(cibles[Math.floor(k * pas)]);
+      cibles = choix;
+    }
+    cibles.forEach(function (c) { const l = c.l; archive.push([new Date(), date, String(l[11]), l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], String(l[10] || "").slice(0, 45000)]); });
     if (!cibles.length) return 0;
     hist.getRange(hist.getLastRow() + 1, 1, archive.length, archive[0].length).setValues(archive);
     // Écriture en un seul bloc, de la première à la dernière ligne concernée (les autres lignes sont réécrites à l'identique).
@@ -1723,6 +1735,6 @@ function reanalyserJourABC(ecole, date) {
 }
 
 function handleReanalyserJourABC(data) {
-  const n = reanalyserJourABC(data.ecole || data.etablissement, String(data.date || ""));
+  const n = reanalyserJourABC(data.ecole || data.etablissement, String(data.date || ""), data.limite);
   return { success: true, plateaux: n };
 }

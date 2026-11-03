@@ -108,7 +108,7 @@ assert.equal(t.objets.film, 10, 'nombre plafonné à 10 par plateau');
 assert.equal(c.estFruitFraisABC('Compote pomme pêche'), false); assert.equal(c.estFruitFraisABC('Clémentine'), true); assert.equal(c.estFruitFraisABC('Pommes de terre'), false);
 
 // 2. Scan analysé tout de suite : la répartition est enregistrée dans le détail (colonne K) et relue par le tableau de bord.
-const midi = new Date(); midi.setUTCHours(11, 35, 0, 0);
+const midi = new Date(Math.floor((Date.now() - 3600000) / 1000) * 1000); // toujours dans le passé (une heure future est refusée)
 const jour = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Paris' }).format(midi);
 c.handleLogMenu({ ecole: 'Giono', date_menu: jour, menu_complet: 'Salade | Poulet | Riz | Compote' });
 const IMG = 'data:image/jpeg;base64,' + Buffer.from('plateau').toString('base64');
@@ -136,7 +136,20 @@ assert.equal(appelsGemini, avant + 2);
 assert.throws(() => c.reanalyserJourABC('Giono', '2099-01-01'), /future/);
 assert.throws(() => c.reanalyserJourABC('Giono', '02/11/2026'), /invalide/);
 
-// 4. Réglages : les poids des objets sont modifiables, dans leurs limites.
+// 3b. Essai sur un échantillon réparti, et retour de l'ancien résultat si la réanalyse échoue définitivement.
+const veille = new Date(midi.getTime() - 86400000), jourVeille = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Paris' }).format(veille);
+const photoOk = sheets.gaspillage.rows.find(l => l[11] === 'b1')[12];
+for (let k = 0; k < 10; k++) sheets.gaspillage.rows.push([veille, 'SCAN_IA_VISION', 'ANCIEN ' + k, 10, 20, 30, 40, 50, 0.2, 'avis' + k, '{"retenus":[]}', 'v' + k, k === 0 ? 'https://drive.google.com/file/d/photo-introuvable-xx/view' : photoOk]);
+assert.equal(c.handleReanalyserJourABC({ ecole: 'Giono', date: jourVeille, limite: 3 }).plateaux, 3, 'échantillon de 3');
+const pris = sheets.gaspillage.rows.filter(l => /^v\d$/.test(l[11]) && l[1] === 'SCAN_EN_ATTENTE').map(l => l[11]);
+assert.deepEqual(pris, ['v0', 'v3', 'v6'], 'échantillon réparti sur le service');
+for (let k = 0; k < 4; k++) { c.handleRelancerScansEnAttenteABC({ ecole: 'Giono' }); c.analyserScansEnAttenteABC(); }
+const v0 = sheets.gaspillage.rows.find(l => l[11] === 'v0');
+assert.equal(v0[1], 'SCAN_IA_VISION'); assert.equal(v0[2], 'ANCIEN 0', 'photo introuvable : ancien résultat remis en place'); assert.equal(v0[7], 50);
+assert.ok(c.bacsDuDetailABC(sheets.gaspillage.rows.find(l => l[11] === 'v3')[10]), 'réanalysé avec la nouvelle méthode');
+assert.equal(sheets.gaspillage.rows.find(l => l[11] === 'v1')[2], 'ANCIEN 1', 'hors échantillon : intact');
+
+
 c.handleSaveParametres({ ecole: 'Giono', parametres: { poids_pot_g: 8 } });
 assert.throws(() => c.handleSaveParametres({ ecole: 'Giono', parametres: { poids_pot_g: 900 } }), /hors limites/);
 

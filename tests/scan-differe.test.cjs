@@ -77,7 +77,7 @@ c.appelerGeminiParRequete = payload => {
 };
 
 const IMG = 'data:image/jpeg;base64,' + Buffer.from('photo-plateau').toString('base64');
-const midi = new Date(); midi.setUTCHours(11, 35, 0, 0);
+const midi = new Date(Math.floor((Date.now() - 3600000) / 1000) * 1000); // toujours dans le passé (une heure future est refusée)
 const jour = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Paris' }).format(midi);
 const scan = (id, extra = {}) => c.handleLogScanImage(Object.assign({ etablissement: 'Giono', image_base64: IMG, avis_eleve: '🟢 J\'ai tout fini', scan_id: id, horodatage: midi.toISOString(), choix_plat: 'poulet' }, extra));
 

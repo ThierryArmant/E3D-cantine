@@ -51,27 +51,35 @@ function majComparaisonBacs() {
   const anciens = vus.length - avecBacs.length;
   if (anciens > 0) html += `<p style="margin:8px 0 0; font-size:12px; color:#92400e;">${anciens} plateau(x) de ce jour ont été analysés avant la répartition par poubelle${avecBacs.length ? " et ne comptent pas dans l'estimation" : ""}.</p>`;
   if (attente) html += `<p style="margin:6px 0 0; font-size:12px; color:#1d4ed8;">⏳ ${attente} plateau(x) en cours d'analyse : actualisez dans quelques minutes.</p>`;
-  if (anciens > 0 && !attente) html += `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
-      <button type="button" class="btn" id="btn-reanalyser-jour" style="width:auto; padding:7px 12px; font-size:12px; background:#1d4ed8;">🔁 Réanalyser les plateaux de ce jour à partir des photos</button>
-      <span id="reanalyse-etat" style="font-size:11.5px; color:#475569;">Environ ${Math.ceil(anciens * 6 / 60)} min en arrière-plan. L'ancien résultat est conservé dans l'onglet Historique_Analyses.</span></div>`;
+  // Seuls les plateaux qui ont une photo peuvent être réanalysés. Essai conseillé d'abord sur 30 plateaux.
+  const avecPhoto = scans.filter(s => (s.type === "SCAN_IA_VISION" && !s.bacs || s.type === "SCAN_ECHEC") && s.photo).length;
+  if (anciens > 0 && !attente && avecPhoto) {
+    const essai = Math.min(30, avecPhoto);
+    html += `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
+      <button type="button" class="btn" id="btn-reanalyser-essai" style="width:auto; padding:7px 12px; font-size:12px; background:#1d4ed8;">🧪 Essai : réanalyser ${essai} plateaux</button>
+      ${avecPhoto > essai ? `<button type="button" class="btn" id="btn-reanalyser-tout" style="width:auto; padding:7px 12px; font-size:12px; background:#64748b;">🔁 Tout réanalyser (${avecPhoto})</button>` : ""}
+      <span id="reanalyse-etat" style="font-size:11.5px; color:#475569;">À partir des photos gardées, en arrière-plan (environ 6 s par plateau). Pendant ce temps, ces plateaux sortent des statistiques ; si l'un échoue, son ancien résultat reprend sa place. L'ancien résultat de chacun reste dans l'onglet Historique_Analyses.</span></div>`;
+  }
   zone.innerHTML = html + "</div>";
-  const b = document.getElementById("btn-reanalyser-jour");
-  if (b) b.addEventListener("click", () => reanalyserJourBacs(date, anciens));
+  const b1 = document.getElementById("btn-reanalyser-essai"), b2 = document.getElementById("btn-reanalyser-tout");
+  if (b1) b1.addEventListener("click", () => reanalyserJourBacs(date, Math.min(30, avecPhoto), 30));
+  if (b2) b2.addEventListener("click", () => reanalyserJourBacs(date, avecPhoto, 0));
 }
 
-async function reanalyserJourBacs(date, n) {
-  const b = document.getElementById("btn-reanalyser-jour"), etat = document.getElementById("reanalyse-etat");
-  if (!window.confirm(`Réanalyser les ${n} plateau(x) du ${date.split("-").reverse().join("/")} à partir de leurs photos ? Ils sortent des statistiques le temps de l'analyse (environ ${Math.ceil(n * 6 / 60)} min).`)) return;
-  b.disabled = true; etat.textContent = "Envoi de la demande…";
+async function reanalyserJourBacs(date, n, limite) {
+  const boutons = ["btn-reanalyser-essai", "btn-reanalyser-tout"].map(id => document.getElementById(id)).filter(Boolean), etat = document.getElementById("reanalyse-etat");
+  const minutes = Math.max(1, Math.ceil(n * 6 / 60));
+  if (!window.confirm(`Réanalyser ${n} plateau(x) du ${date.split("-").reverse().join("/")} à partir de leurs photos ?\n\nDurée : environ ${minutes} min en arrière-plan. Ces plateaux sortent des statistiques le temps de l'analyse.`)) return;
+  boutons.forEach(b => { b.disabled = true; }); etat.textContent = "Envoi de la demande…";
   try {
     const ecole = document.getElementById("select-etablissement").value;
-    const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "reanalyserJour", ecole: ecole, date: date }) });
+    const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "reanalyserJour", ecole: ecole, date: date, limite: limite }) });
     const res = await r.json();
     if (!res.success) throw new Error(res.error || "refusé par le script");
     etat.textContent = `✅ ${res.plateaux} plateau(x) remis en analyse. Actualisez dans quelques minutes.`;
     if (typeof loadLiveData === "function") setTimeout(loadLiveData, 4000);
   } catch (e) {
-    b.disabled = false;
+    boutons.forEach(b => { b.disabled = false; });
     etat.textContent = "Échec : " + String(e.message || e).replace(/^Error:\s*/, "") + (/inconnue|undefined/i.test(String(e.message)) ? " (le script Google doit être mis à jour)" : "");
   }
 }
