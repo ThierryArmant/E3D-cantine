@@ -231,3 +231,5 @@ body.abc-borne-plein{overflow:hidden!important}
 .abc-mode-photos .main-container,.abc-mode-photos .content-area,.abc-mode-photos #view-photos-service{min-width:0!important;max-width:100vw;overflow-x:hidden;box-sizing:border-box}
 .abc-mode-photos #abc-photos-service{overflow-wrap:anywhere;box-sizing:border-box;max-width:100%}
 .abc-mode-photos #abc-photos-grille>div{min-width:0}
+/* Saisie des menus : le parcours photos s'ouvre par le gros bouton du haut ; le bloc n'est plus répété dans la page. */
+#view-cuisinier #abc-photos-service{display:none!important}
