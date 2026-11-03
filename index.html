@@ -1093,6 +1093,36 @@
         const CORRECTIONS_OBSERVATIONS_ABC = [
             { ecole: 'COLLEGE J. GIONO', date: '2026-10-16', aliment: 'poisson curry', motif: 'Poisson curry renommé Poisson — correction confirmée par le responsable' }
         ];
+        // État « tel que servi » d'un aliment pour une journée. L'IA décrivait souvent l'aspect du reste
+        // (morceaux, demi, purée…) : on regroupe par sauce du menu, sinon par préparation la plus fréquente du jour.
+        const ETATS_SERVIS_CACHE = {};
+        function etatServiJour(date, nomBrut, etatBrut, prepa) {
+            const jour = normalizeDate(date), cle = cleAlimentStat(nomBrut);
+            if (!jour || !cle) return etatBrut;
+            const menu = String((globalRawData?.historiqueMenus || {})[jour] || '');
+            const sauces = [];
+            (menu.match(/\(([^)]*)\)/g) || []).forEach(g => g.replace(/[()]/g, '').split(',').forEach(x => {
+                const lib = x.trim(), mots = cleAlimentStat(lib).split(' ').filter(m => m.length > 3 && m !== 'sauce');
+                if (lib && mots.length) sauces.push({ lib: lib.charAt(0).toLowerCase() + lib.slice(1), mot: mots[mots.length - 1] });
+            }));
+            const sauceDe = t => { const c = cleAlimentStat(t); const s = sauces.find(x => c.includes(x.mot)); return s ? s.lib : ''; };
+            const normal = t => cleAlimentStat(t).replace(/\b(avec|en|de|du|des|la|le|les|une?)\b/g, ' ').replace(/\s+/g, ' ').trim();
+            const k = jour + '|' + cle;
+            if (!(k in ETATS_SERVIS_CACHE)) {
+                const compte = {};
+                (globalRawData?.rawGaspillage || []).forEach(sc => {
+                    if (sc.type !== 'SCAN_IA_VISION' || normalizeDate(sc.dateRaw) !== jour) return;
+                    parseScanItems(sc.commentaire).forEach(it => {
+                        if (cleAlimentStat(it.nom) !== cle || sauceDe(it.prepa || it.etat)) return;
+                        const n = normal(it.prepa || '');
+                        if (n) compte[n] = compte[n] || { n: 0, lib: it.prepa.toLowerCase() }, compte[n].n++;
+                    });
+                });
+                const top = Object.values(compte).sort((x, y) => y.n - x.n)[0];
+                ETATS_SERVIS_CACHE[k] = top ? top.lib : 'nature';
+            }
+            return sauceDe(prepa || etatBrut) || ETATS_SERVIS_CACHE[k];
+        }
         function itemsStatistiques(commentaire, date) {
             if (/photo noire|inexploitable/i.test(commentaire || '')) return [];
             const bannis = listeExclusionsStat(date);
@@ -1116,7 +1146,7 @@
                 const preparations = { 'poisson curry': ['Poisson', 'sauce curry'], 'poisson pane': ['Poisson', 'pané'],
                     'poulet roti': ['Poulet', 'rôti'], 'poulet roti cuisse': ['Poulet', 'rôti, cuisse'], 'poulet tex mex': ['Poulet', 'tex-mex'] };
                 const preparation = preparations[cle];
-                let etat = it.etat;
+                let etat = etatServiJour(date, it.nom, it.etat, it.prepa);
                 if (preparation) { nom = preparation[0]; etat = [it.etat === 'non précisé' ? '' : it.etat, preparation[1]].filter(Boolean).join(', '); }
                 if (typeof abcNomCatalogue === 'function') nom = abcNomCatalogue(nom, it.composant);
                 const incertain = generique || it.confiance === 'faible' || it.confiance === 'basse' || /non identifi/.test(cle);
@@ -3696,7 +3726,7 @@
                 menusHistorique = data.historiqueMenus || {};
                 renderControleFrequences();
                 if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
-                globalRawData = data; 
+                globalRawData = data; for (const k in ETATS_SERVIS_CACHE) delete ETATS_SERVIS_CACHE[k];
                 if (typeof majComparaisonBacs === 'function') { try { majComparaisonBacs(); } catch (e) { console.error(e); } }
                 
                 let activeBtn = document.querySelector('.btn-period.active') || document.querySelectorAll('.btn-period')[0];
