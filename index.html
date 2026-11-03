@@ -1610,34 +1610,14 @@
             }
         }
 
-        // Bandeau « scannés vs attendus » et indicateur d'écart balance / scans
+        // Bandeau du tableau de bord : un seul chiffre, les plateaux scannés depuis le début (tous types confondus).
+        // La comparaison avec la balance se fait bac par bac dans « Saisie des déchets ».
         function majBandeauCouverture(cal, nbJoursPesee) {
             const box = document.getElementById('bandeau-couverture');
             if (!box) return;
-            const couv = cal.attendusJoursScannes > 0 ? 100 * cal.scansDetail / cal.attendusJoursScannes : null;
-            let html = "";
-            if (cal.scansDetail === 0) {
-                html += `<span>📊 <strong>Aucun scan détaillé</strong> sur la période : les poids par aliment apparaîtront dès les premiers scans au nouveau format.</span>`;
-            } else {
-                const coul = couv === null ? "#475569" : (couv >= 30 ? "#047857" : (couv >= 10 ? "#b45309" : "#b91c1c"));
-                html += `<span>📊 Plateaux scannés (détail par aliment) : <strong>${cal.scansDetail}</strong>` +
-                        (couv !== null ? ` / <strong>${cal.attendusJoursScannes}</strong> attendus · couverture <strong style="color:${coul};">${couv.toFixed(0)} %</strong>` : "") + `</span>`;
-                const ratio = cal.predictedKg > 0 ? cal.measuredKg / cal.predictedKg : null;
-                if (ratio !== null) {
-                    const ok = ratio >= 0.7 && ratio <= 1.4;
-                    html += `<span title="Poids réellement pesé dans les poubelles (alimentaire, fruits, pain affectés aux aliments scannés) divisé par ce que l'échantillon scanné, extrapolé aux attendus, laisse prévoir. Proche de 1 : l'échantillon est représentatif. Loin de 1 : les plateaux non scannés jettent plus ou moins que ceux qui scannent.">⚖️ Écart balance / scans : <strong style="color:${ok ? "#047857" : "#b91c1c"};">× ${ratio.toFixed(2)}</strong>${ok ? "" : " ⚠️ échantillon peu représentatif"}</span>`;
-                } else {
-                    html += `<span>⚖️ Écart balance / scans : <em>pas de pesée correspondante</em></span>`;
-                }
-            }
-            if (nbJoursPesee === 0) html += `<span>⚠️ Aucune pesée de poubelles sur la période.</span>`;
-            const nbAttente = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => x.type === "SCAN_EN_ATTENTE").length;
-            if (nbAttente > 0) html += `<span style="color:#1d4ed8;" title="Photos de plateaux gardées dans le Drive : elles seront analysées dès que le menu du jour sera validé (ou ce soir à 19 h). Elles ne comptent pas encore dans les statistiques.">📦 ${nbAttente} plateau(x) en attente d'analyse</span>`;
-            const nbEchec = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => x.type === "SCAN_ECHEC").length;
-            if (nbEchec > 0) html += `<span style="color:#b45309;" title="Photos sans plateau visible : elles ne comptent pas dans les statistiques. Voir l'onglet Suivi_Gaspillage (type SCAN_ECHEC).">👁️ ${nbEchec} scan(s) sans plateau visible (écartés des statistiques)</span>`;
-            const sansDetail = cal.scansLegacy + cal.scansSansDetail;
-            if (sansDetail > 0) html += `<span style="color:#64748b;">ℹ️ ${sansDetail} ancien(s) scan(s) sans détail par aliment : non utilisés pour les poids.</span>`;
-            box.innerHTML = html;
+            const tous = ((globalRawData && globalRawData.rawGaspillage) || []).filter(x => ["SCAN_IA_VISION", "SCAN_EN_ATTENTE", "SCAN_ECHEC"].indexOf(x.type) >= 0);
+            const jours = new Set(tous.map(x => normalizeDate(x.dateRaw)).filter(Boolean)).size;
+            box.innerHTML = `<span title="Tous les plateaux passés devant la borne : analysés, en attente d'analyse et photos écartées.">📸 Plateaux scannés depuis le début : <strong>${tous.length.toLocaleString('fr-FR')}</strong>${jours ? ` <span style="color:#64748b; font-weight:400;">(sur ${jours} jour${jours > 1 ? "s" : ""} de service)</span>` : ""}</span>`;
         }
 
         function updateHistoryMode(mode, tauxInévitableOverride = 0.30) {
