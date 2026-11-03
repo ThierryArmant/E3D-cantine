@@ -1916,7 +1916,9 @@ function niveauReflexionScanABC() {
   let v = "";
   try { v = String(PropertiesService.getScriptProperties().getProperty("NIVEAU_REFLEXION_SCAN") || "").trim().toLowerCase(); } catch (e) {}
   if (v === "defaut" || v === "défaut") return "";
-  return ["minimal", "low", "medium", "high"].indexOf(v) >= 0 ? v : "low";
+  // Par défaut : réglage du modèle. Essai du 03/11 : « low » ne baisse presque pas le coût de 3.5 Flash
+  // (la photo et les consignes pèsent l'essentiel) et laisse 3 plateaux sur 39 sans détail.
+  return ["minimal", "low", "medium", "high"].indexOf(v) >= 0 ? v : "";
 }
 
 // Modèle utilisé : propriété du script MODELE_GEMINI (ex. gemini-3.1-flash-lite) pour en changer sans toucher au code.

@@ -11,12 +11,12 @@ const appels = [];
 const reponse = { candidates: [{ content: { parts: [{ text: JSON.stringify({ plateau_visible: true, resume_comportement: 'ok', aliments: [{ aliment: 'Riz', composant: 'accompagnement', reste_pct: 20, confiance: 'haute' }], objets: [] }) }] } }], usageMetadata: { promptTokenCount: 4000, thoughtsTokenCount: 300, candidatesTokenCount: 200 } };
 c.appelerGeminiParRequete = p => {
   appels.push(JSON.parse(JSON.stringify(p.generationConfig)));
-  if (p.generationConfig.thinkingConfig) throw new Error('Erreur HTTP 400 : thinking_level is not supported');
+
   return { getContentText: () => JSON.stringify(reponse) };
 };
 const r = c.analyserPlateauABC({}, 'AAAA', new Date('2026-11-03T12:00:00Z'), 'x', '');
-assert.equal(appels.length, 2);
-assert.equal(appels[0].thinkingConfig.thinkingLevel, 'low');
-assert.equal(appels[1].thinkingConfig, undefined, 'repli sans réglage');
+assert.equal(appels.length, 1);
+assert.equal(appels[0].thinkingConfig, undefined, "réglage du modèle par défaut");
+
 assert.deepEqual(JSON.parse(r.ligne[10]).jetons, { entree: 4000, reflexion: 300, sortie: 200 });
 console.log('OK : réflexion courte, repli si refusée, jetons notés.');
