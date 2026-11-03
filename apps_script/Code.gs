@@ -871,7 +871,9 @@ Réponds en JSON strict :
   const retenus = [], ecartes = [];
   (Array.isArray(result.aliments) ? result.aliments : []).forEach(function (a) {
     const reste = parseFloat(a.reste_pct), mange = parseFloat(a.mange_pct);
-    const composant = String(a.composant || "").toLowerCase();
+    let composant = String(a.composant || "").toLowerCase();
+    // Le pain figure dans la rubrique « accompagnement » du menu : il reste du pain (portion 50 g, bac pain).
+    if (/^pain\b/i.test(String(a.aliment || "").trim())) composant = "pain";
     const incoherent = isNaN(reste) || isNaN(mange) || Math.abs(reste + mange - 100) > 15 || reste < 0 || reste > 100;
     if (incoherent || COMPOSANTS_VALIDES.indexOf(composant) === -1 || !nettoyerTexte(a.aliment)) { ecartes.push(a); return; }
     const alimentBrut = nettoyerTexte(a.aliment);
@@ -1975,4 +1977,39 @@ function comparerModeleABC(modele, niveau) {
   if (lignes.length) onglet.getRange(onglet.getLastRow() + 1, 1, lignes.length, 10).setValues(lignes);
   Logger.log(modele + " : " + lignes.length + " plateaux testés, résultats dans l'onglet Comparaison_Modeles de Giono.");
   return lignes.length;
+}
+
+// Recalcule le tri par poubelle d'une journée à partir des résultats déjà enregistrés, SANS nouvel appel à l'IA (gratuit).
+// Corrige le pain rangé en « accompagnement » (portion 50 g, bac pain). L'ancien détail reste dans Historique_Analyses.
+// ▶️ Depuis l'éditeur : recalculerBacsGiono0211ABC()  ou  recalculerBacsJourABC("COLLEGE  J. GIONO", "2026-11-02")
+function recalculerBacsGiono0211ABC() { return recalculerBacsJourABC("COLLEGE  J. GIONO", "2026-11-02"); }
+
+function recalculerBacsJourABC(ecole, date) {
+  const sheets = getSheetsABC(ecole), params = getParametres(sheets);
+  return avecVerrouABC(30000, function () {
+    const derniere = sheets.gaspillage.getLastRow();
+    if (derniere < 2) return 0;
+    const plage = sheets.gaspillage.getRange(2, 1, derniere - 1, 11), v = plage.getValues();
+    let n = 0;
+    const k = v.map(function (l) {
+      if (l[1] !== "SCAN_IA_VISION" || dateIso(l[0]) !== date) return [l[10]];
+      let j;
+      try { j = JSON.parse(l[10] || "{}"); } catch (e) { return [l[10]]; }
+      if (!Array.isArray(j.retenus) || !j.bacs) return [l[10]];
+      j.retenus.forEach(function (i) {
+        if (/^pain\b/i.test(String(i.aliment || "")) && i.composant !== "pain") {
+          i.composant = "pain"; i.portion_ref_g = portionReference("pain", i.aliment, params);
+          i.reste_g_ref = Math.round(i.portion_ref_g * (i.reste_pct || 0) / 100);
+        }
+      });
+      const objets = Object.keys(j.objets || {}).map(function (t) { return { type: t, nombre: j.objets[t] }; });
+      const tri = trierDechetsPlateauABC(j.retenus, objets, params);
+      j.bacs = tri.bacs; j.objets = tri.objets; n++;
+      return [JSON.stringify(j)];
+    });
+    sheets.gaspillage.getRange(2, 11, k.length, 1).setValues(k);
+    SpreadsheetApp.flush();
+    Logger.log(ecole + " " + date + " : " + n + " plateaux recalculés.");
+    return n;
+  });
 }

@@ -20,3 +20,9 @@ assert.equal(appels[0].thinkingConfig, undefined, "réglage du modèle par défa
 
 assert.deepEqual(JSON.parse(r.ligne[10]).jetons, { entree: 4000, reflexion: 300, sortie: 200 });
 console.log('OK : réflexion courte, repli si refusée, jetons notés.');
+// Pain rangé par l'IA en « accompagnement » : remis en pain (50 g, bac pain).
+const rep2 = { candidates: [{ content: { parts: [{ text: JSON.stringify({ plateau_visible: true, resume_comportement: 'ok', aliments: [{ aliment: 'Pain', composant: 'accompagnement', reste_pct: 100, mange_pct: 0, confiance: 'haute' }], objets: [] }) }] } }] };
+c.appelerGeminiParRequete = () => ({ getContentText: () => JSON.stringify(rep2) });
+const r2 = JSON.parse(c.analyserPlateauABC({}, 'AAAA', new Date('2026-11-03T12:00:00Z'), 'x', '').ligne[10]);
+assert.equal(r2.retenus[0].composant, 'pain'); assert.equal(r2.retenus[0].portion_ref_g, 50); assert.equal(r2.bacs.pain, 50); assert.equal(r2.bacs.biodechets, 0);
+console.log('OK : pain remis dans le bac pain.');
