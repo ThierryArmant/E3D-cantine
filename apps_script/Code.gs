@@ -613,7 +613,8 @@ function portionReference(composant, aliment, p) {
   if (composant === "entree") return p.portion_entree_g;
   if (composant === "plat") return p.portion_plat_g;
   if (composant === "accompagnement") return p.portion_garniture_g;
-  if (composant === "dessert") return /pomme|poire|banane|fruit|raisin|orange|clémentine|mandarine|kiwi|pêche|abricot|prune|fraise|melon|pastèque/.test(a) ? p.portion_fruit_g : p.portion_dessert_g;
+  // Une compote « pomme pêche » est un dessert (100 g), pas un fruit frais (150 g).
+  if (composant === "dessert") return estFruitFraisABC(a) ? p.portion_fruit_g : p.portion_dessert_g;
   return p.portion_plat_g;
 }
 
@@ -802,7 +803,7 @@ RÈGLES
 - Ne déduis pas le nom d’un aliment entièrement consommé de son emballage, d’os, de traces ou du menu : sans indice visuel distinctif, son identité reste inconnue.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste.
-- CONTENANT OU CONTENU : ne confonds jamais un emballage vide avec l'aliment qu'il contenait. Une caissette en papier plissé vue de dessus, au fond plat taché de gras ou de miettes, SANS gâteau bombé dedans, est une caissette VIDE : le gâteau a été mangé (reste 0 %). Un gâteau réellement présent a un dessus bombé, une épaisseur, une texture de mie et souvent des pépites ou des morceaux visibles. De même, un pot vide, un opercule, un film plastique froissé ou un papier aluminium déplié ne sont pas des aliments restants. En cas de doute entre caissette vide et gâteau entier, regarde le relief et l'ombre : sans relief, c'est une caissette vide.
+- CONTENANT OU CONTENU : ne confonds jamais un emballage vide avec l'aliment qu'il contenait. Une caissette en papier plissé vue de dessus, au fond plat taché de gras ou de miettes, SANS gâteau bombé dedans, est une caissette VIDE : le gâteau a été mangé (reste 0 %). Un gâteau réellement présent a un dessus bombé, une épaisseur, une texture de mie et souvent des pépites ou des morceaux visibles. De même, un pot vide, un opercule, un film plastique froissé ou un papier aluminium déplié ne sont pas des aliments restants. En cas de doute entre caissette vide et gâteau entier, regarde le relief et l'ombre : sans relief, c'est une caissette vide. Un pot de compote ou de yaourt NON OUVERT a son opercule plat, intact et scellé tout autour, avec l'impression bien lisible : il est jeté plein (reste 100 %, dans_emballage true). Si l'opercule est arraché, replié, déchiré ou enfoncé dans le pot, le pot a été ouvert : estime seulement le contenu visible, et 0 % s'il n'y a plus de compote visible.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
 - N'utilise ni deux-points, ni crochets, ni barre verticale dans les champs texte.
