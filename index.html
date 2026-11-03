@@ -1648,7 +1648,7 @@
                 if (isoDate < startDate || isoDate > endDate) continue;
 
                 let timeKey = mode === 'day' ? labelDate : (mode === 'month' ? isoDate.substring(5, 7) + "/" + isoDate.substring(0, 4) : isoDate.substring(0, 4));
-                if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0 };
+                if (!mapAccumulator[timeKey]) mapAccumulator[timeKey] = { alim: 0, fruits: 0, pain: 0, emb: 0, serv: 0, iso: isoDate };
                 
                 let alimBrute = parseFloat(cache.alimentaire[i]) || 0;
                 mapAccumulator[timeKey].alim += alimBrute * (1 - tauxInévitableOverride); 
@@ -1675,6 +1675,10 @@
                 ];
                 items.sort((a, b) => b.val - a.val);
                 let topItem = items[0];
+                // Jour avec des plateaux scannés : l'aliment le plus jeté plutôt que la poubelle la plus lourde.
+                if (mode === 'day' && typeof alimentsJeteJourABC === 'function') {
+                    try { const r = alimentsJeteJourABC(data.iso); if (r) topItem = { name: r.liste[0].nom + " (scans)", val: r.liste[0].kg, icon: "🍽️" }; } catch (e) {}
+                }
 
                 const card = document.createElement('div');
                 card.className = "history-day-card";
@@ -4453,7 +4457,8 @@
 <script src="abc-qrcode.js?v=1"></script>
 <script src="abc-photos.js?v=20261103-qr-4"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
-<script src="abc-bacs.js?v=20261103-3"></script>
+<script src="abc-defi.js?v=20261103-1"></script>
+<script src="abc-bacs.js?v=20261103-4"></script>
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
 </body>
 </html>

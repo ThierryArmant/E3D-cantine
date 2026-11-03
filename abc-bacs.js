@@ -12,6 +12,7 @@ const BACS_ABC = [
 function bacsFormatKg(g) { return (g / 1000).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " kg"; }
 
 function majComparaisonBacs() {
+  if (typeof majDefiDuJourABC === "function") { try { majDefiDuJourABC(); } catch (e) {} }
   const zone = document.getElementById("abc-comparaison-bacs");
   if (!zone) return;
   const d = typeof globalRawData !== "undefined" ? globalRawData : null;
