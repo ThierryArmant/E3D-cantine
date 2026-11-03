@@ -1063,6 +1063,12 @@ RÈGLE DE CALCUL ET DE FORMATAGE DE LA PARTIE 2 :
 // LECTURE (GET)
 // ==========================================================================
 // Grammes par poubelle d'un scan (colonne K), ou null pour les scans antérieurs à cette répartition.
+// Aliments vus dans leur emballage (pot fermé, muffin sous film…) : ils partent dans la poubelle à emballages.
+function embDuDetailABC(texte) {
+  if (!texte || String(texte).indexOf('"dans_emballage":true') < 0) return [];
+  try { return (JSON.parse(texte).retenus || []).filter(function (i) { return i.dans_emballage && i.reste_pct > 0; }).map(function (i) { return i.aliment; }); } catch (e) { return []; }
+}
+
 function bacsDuDetailABC(texte) {
   if (!texte || String(texte).indexOf('"bacs"') < 0) return null;
   try { const b = JSON.parse(texte).bacs; return b && typeof b === "object" ? b : null; } catch (e) { return null; }
@@ -1090,7 +1096,7 @@ function donneesBaseABC(sheets) {
     rawGaspillage.push({
       date: gRows[i][0], dateRaw: dateIso(gRows[i][0]), type: gRows[i][1], commentaire: gRows[i][2],
       entree: gRows[i][3], plat: gRows[i][4], dessert: gRows[i][5], pain: gRows[i][6],
-      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || "", bacs: bacsDuDetailABC(gRows[i][10])
+      poids: gRows[i][7], perte: gRows[i][8], avis_eleve: gRows[i][9] || "", photo: gRows[i][12] || "", bacs: bacsDuDetailABC(gRows[i][10]), emb: embDuDetailABC(gRows[i][10])
     });
   }
 

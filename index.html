@@ -1491,9 +1491,12 @@
                     if (items.some(it => !it.composant)) res.scansComposantDevine = (res.scansComposantDevine || 0) + 1;
                     if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
                     jour.scansDetail++;
+                    // Aliments restés dans leur emballage : poubelle à emballages, hors des poubelles pesées alimentaire / fruits / pain.
+                    const dansEmb = new Set((s.emb || []).map(cleAlimentStat));
                     detail.forEach(it => {
+                        if (dansEmb.size && (dansEmb.has(cleAlimentStat(it.nomBrut || it.nom)) || dansEmb.has(cleAlimentStat(it.nom)))) return;
                         const portion = portionPour(it, portions);
-                        const bin = it.composant === "pain" ? "pain" : (estFruit(it.nom) ? "fruits" : "alim");
+                        const bin = it.composant === "pain" || /^pain\b/i.test(it.nom) ? "pain" : (estFruit(it.nom) ? "fruits" : "alim");
                         const o = brut[it.nom] = brut[it.nom] || { nom: it.nom, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0 };
                         o.count++; o.resteG += portion * it.restePct / 100; o.portionG += portion;
                         // Estimation sans pesée : portion de référence × reste, inévitable déduit par la bibliothèque
