@@ -346,6 +346,8 @@ function doPost(e) {
       responseOutput = handleEnvoyerBilanCarboneABC(data);
     } else if (action === "reanalyserJour") {
       responseOutput = handleReanalyserJourABC(data);
+    } else if (action === "recupererPhotosPlateaux") {
+      responseOutput = { success: true, recuperation: recupererPhotosPlateauxABC(data.ecole || data.etablissement, String(data.date || "")) };
     }
     return reponseJson(responseOutput);
   } catch (error) {
@@ -1802,4 +1804,67 @@ function reanalyserJourABC(ecole, date, limite) {
 function handleReanalyserJourABC(data) {
   const n = reanalyserJourABC(data.ecole || data.etablissement, String(data.date || ""), data.limite);
   return { success: true, plateaux: n };
+}
+
+// ===================================================================================
+// RÉCUPÉRATION DES PLATEAUX DEPUIS LE DRIVE
+// Un scan dont la photo est dans le Drive mais qui n'a pas de ligne (analyse refusée, appareil vidé…)
+// reçoit une ligne « en attente », puis il est analysé. Une seule ligne par numéro de scan : un renvoi
+// ultérieur de l'appareil est reconnu comme doublon. Les copies en double de la même photo vont à la corbeille.
+// ▶️ Depuis l'éditeur : recupererPhotosAujourdhuiABC()  (tous les établissements, date du jour)
+//    ou recupererPhotosPlateauxABC("COLLEGE G PHILIPPE AVIGNON", "2026-11-03")
+// ===================================================================================
+function recupererPhotosPlateauxABC(ecole, date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Date invalide (format AAAA-MM-JJ).");
+  const sheets = getSheetsABC(ecole);
+  const dossier = dossierPlateauxABC(ecole, date);
+  const parScan = {};
+  const it = dossier.getFiles();
+  while (it.hasNext()) {
+    const f = it.next();
+    const m = /^(\d{2})h(\d{2})m(\d{2})_([A-Za-z0-9_-]{4,40})\.jpe?g$/i.exec(f.getName());
+    if (!m) continue;
+    const id = m[4];
+    (parScan[id] = parScan[id] || { heure: m[1] + ":" + m[2] + ":" + m[3], fichiers: [] }).fichiers.push(f);
+  }
+  let copies = 0;
+  const lignes = avecVerrouABC(30000, function () {
+    const derniere = sheets.gaspillage.getLastRow();
+    const connus = {};
+    if (derniere >= 2 && sheets.gaspillage.getLastColumn() >= 12) {
+      sheets.gaspillage.getRange(2, 12, derniere - 1, 1).getValues().forEach(function (r) { connus[String(r[0])] = true; });
+    }
+    const nouvelles = [];
+    Object.keys(parScan).forEach(function (id) {
+      const s = parScan[id];
+      s.fichiers.sort(function (a, b) { return a.getDateCreated() - b.getDateCreated(); });
+      // Copies en double (renvois de l'appareil) : à la corbeille, récupérables 30 jours.
+      s.fichiers.slice(1).forEach(function (f) { try { f.setTrashed(true); copies++; } catch (e) {} });
+      if (connus[id]) return;
+      const garde = s.fichiers[0];
+      const quand = Utilities.parseDate(date + " " + s.heure, "Europe/Paris", "yyyy-MM-dd HH:mm:ss");
+      const info = { en_attente: true, choix_plat: "", drive_id: garde.getId(), essais: 0, recupere: true };
+      nouvelles.push([quand, "SCAN_EN_ATTENTE", "Photo du plateau récupérée dans le Drive, analyse en attente", 0, 0, 0, 0, 0, 0, "Non renseigné", JSON.stringify(info), id, garde.getUrl()]);
+    });
+    nouvelles.sort(function (a, b) { return a[0] - b[0]; });
+    if (nouvelles.length) {
+      sheets.gaspillage.getRange(sheets.gaspillage.getLastRow() + 1, 1, nouvelles.length, 13).setValues(nouvelles);
+      SpreadsheetApp.flush();
+    }
+    return nouvelles.length;
+  });
+  const menuConnu = !!getMenuDuJour(sheets, date);
+  if (lignes && menuConnu) programmerAnalyseScansABC(ecole, date);
+  const bilan = { ecole: ecole, date: date, plateaux: Object.keys(parScan).length, lignes_creees: lignes, copies_a_la_corbeille: copies, analyse: lignes ? (menuConnu ? "lancée" : "après validation du menu du jour") : "rien à faire" };
+  Logger.log(JSON.stringify(bilan));
+  return bilan;
+}
+
+function recupererPhotosAujourdhuiABC() {
+  const date = Utilities.formatDate(new Date(), "Europe/Paris", "yyyy-MM-dd");
+  const annuaire = getAnnuaire();
+  return Object.keys(annuaire).map(function (cle) {
+    try { return recupererPhotosPlateauxABC(annuaire[cle].nom, date); }
+    catch (e) { Logger.log(annuaire[cle].nom + " : " + e); return { ecole: annuaire[cle].nom, erreur: String(e) }; }
+  });
 }
