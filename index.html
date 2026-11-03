@@ -453,6 +453,8 @@
             <!-- PÔLE 3 : ESPACE ÉCO-DÉLÉGUÉS -->
             <div id="view-cuisinier" class="view-section">
                 <div style="background: white; padding: 18px; border-radius: 8px; max-width: 1050px; margin: 0;">
+                    <!-- Accès direct pour les éco-délégués : photos du menu en plein écran, sans chercher plus bas -->
+                    <button type="button" id="btn-photos-menu-direct" onclick="ouvrirPhotosMenuDirect()" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; margin:0 0 14px; padding:16px 14px; border:0; border-radius:12px; background:#1b4332; color:#fff; font:800 clamp(17px,4.5vw,22px)/1.2 system-ui,sans-serif; cursor:pointer; box-shadow:0 4px 12px rgba(27,67,50,.25);">📸 Photographier le menu du jour</button>
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                         <h3 style="font-size: 16px; color: #1b4332; font-weight: 800;">🌿 Espace Éco-Délégués : Configuration du Menu</h3>
                         <div style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px 10px; border-radius: 6px; border: 1.5px solid #2d6a4f;">
@@ -978,6 +980,13 @@
             if (detail) detail.innerText = [attente ? attente + " en attente" : "", ecartes ? ecartes + " écarté(s)" : ""].filter(Boolean).join(" · ");
             const champ = document.getElementById('plateaux-sortis');
             if (champ && document.activeElement !== champ) champ.value = plateauxSortisMemorises(choix) || "";
+        }
+
+        // Bouton du haut : ouvre directement le parcours « photos du service » (plein écran, gros boutons).
+        function ouvrirPhotosMenuDirect() {
+            if (typeof abcActiverParcoursPhoto !== 'function') return;
+            abcActiverParcoursPhoto();
+            if (typeof abcChargerPhotos === 'function') abcChargerPhotos();
         }
 
         function clePlateauxSortis(date) { return 'plateauxSortis-' + document.getElementById('select-etablissement').value + '-' + date; }
