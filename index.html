@@ -204,7 +204,7 @@
         .prec-kpi .v { font-size:20px; font-weight:900; color:#1b4332; }
         .prec-kpi .l { font-size:11px; color:#64748b; }
 </style>
-<link rel="stylesheet" href="abc-mobile.css?v=20261021-photo-directe-1">
+<link rel="stylesheet" href="abc-mobile.css?v=20261103-1">
 </head>
 <body>
 <div id="tip-flottant"></div>
@@ -4445,7 +4445,7 @@
     </script>
 <script src="abc-catalogue.js?v=20261021-stat-noms-uniques-1"></script>
 <script src="abc-qrcode.js?v=1"></script>
-<script src="abc-photos.js?v=20261103-ordre-1"></script>
+<script src="abc-photos.js?v=20261103-ordre-2"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
 <script src="abc-bacs.js?v=20261103-2"></script>
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>

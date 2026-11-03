@@ -227,3 +227,7 @@ body.abc-borne-plein{overflow:hidden!important}
 #abc-photos-service .abc-photo-validee{margin:6px 0;border:1px solid #b7d9c6;border-radius:8px;background:#f0fdf4}
 #abc-photos-service .abc-photo-validee>summary{padding:10px;cursor:pointer;color:#14532d;font-weight:700;font-size:14px}
 #abc-photos-service [hidden]{display:none!important}
+/* Mode photos sur téléphone : rien ne dépasse de l'écran, même avec une grande taille de police */
+.abc-mode-photos .main-container,.abc-mode-photos .content-area,.abc-mode-photos #view-photos-service{min-width:0!important;max-width:100vw;overflow-x:hidden;box-sizing:border-box}
+.abc-mode-photos #abc-photos-service{overflow-wrap:anywhere;box-sizing:border-box;max-width:100%}
+.abc-mode-photos #abc-photos-grille>div{min-width:0}
