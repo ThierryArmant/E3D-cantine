@@ -760,7 +760,18 @@ function handleLogScanImage(data) {
     return { success: true, en_attente: true };
   }
 
-  const r = analyserPlateauABC(sheets, cleanBase64, quand, avisEleve, data.choix_plat);
+  let r;
+  try {
+    r = analyserPlateauABC(sheets, cleanBase64, quand, avisEleve, data.choix_plat);
+  } catch (e) {
+    // Analyse impossible (crédit épuisé, service saturé…) : la photo est gardée, le plateau passe en attente
+    // et sera analysé dès que possible. La borne n'a rien à renvoyer et la file d'attente n'est pas gênée.
+    if (!photo || !assurerFiletScansABC()) throw e;
+    const attente = { en_attente: true, choix_plat: data.choix_plat || "", drive_id: photo.id, essais: 0, derniere_erreur: String(e).slice(0, 200) };
+    if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_EN_ATTENTE", "Photo du plateau gardée, analyse reportée (service d'analyse indisponible)", 0, 0, 0, 0, 0, 0, avisEleve, JSON.stringify(attente), idScan, photo.url], idScan)) return { success: true, doublon: true };
+    try { programmerAnalyseScansABC(ecole, dateIso(quand)); } catch (err) {}
+    return { success: true, en_attente: true };
+  }
   if (!enregistrerScanUnique(sheets.gaspillage, r.ligne.concat([idScan, photo ? photo.url : ""]), idScan)) return { success: true, doublon: true };
   if (r.ignore) return { success: true, ignore: true, raison: r.raison };
   return { success: true, details: r.details };
@@ -1435,7 +1446,8 @@ function compterScansEnAttenteABC(sheets, date) {
   return n;
 }
 
-function erreurPassagereABC(e) { return /HTTP (429|500|503)|indisponible|temporairement|Service invoked too many times/i.test(String(e)); }
+// 402 = crédit de la clé épuisé : on attend la recharge sans compter d'essai (le plateau garde sa place).
+function erreurPassagereABC(e) { return /HTTP (402|429|500|503)|indisponible|temporairement|Service invoked too many times/i.test(String(e)); }
 
 // Remplace une ligne SCAN_EN_ATTENTE par son résultat (colonnes B à K), ou met à jour son suivi (colonne K).
 // L'horodatage du scan (A), son identifiant (L) et le lien de la photo (M) ne changent pas.
