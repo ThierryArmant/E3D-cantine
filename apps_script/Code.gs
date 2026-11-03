@@ -23,6 +23,7 @@ const PARAMETRES_DEFAUT = [
   ["poids_pot_g", 6, "Pot vide (compote, yaourt, crème) en g : estimation du bac emballages"],
   ["poids_opercule_g", 1, "Opercule ou couvercle en g"],
   ["poids_film_g", 2, "Film ou sachet plastique en g"],
+  ["poids_caissette_g", 1, "Caissette en papier de gâteau ou de muffin, vide, en g"],
   ["poids_brique_g", 10, "Brique ou bouteille vide en g"],
   ["poids_barquette_g", 8, "Barquette ou boîte vide en g"],
   ["poids_emballage_autre_g", 3, "Autre emballage en g"],
@@ -443,7 +444,7 @@ function handleSaveEffectifs(data) {
 const PARAMETRES_MODIFIABLES = {
   portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
   portion_fruit_g: [10, 500], portion_pain_g: [5, 300], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
-  poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
+  poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_caissette_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
   poids_emballage_autre_g: [0, 50], poids_serviette_g: [0, 20], poids_epluchure_g: [0, 200], poids_os_g: [0, 200]
 };
 function handleSaveParametres(data) {
@@ -618,10 +619,10 @@ function portionReference(composant, aliment, p) {
 
 // Poubelle de chaque reste, comme la saisie des déchets : biodéchets, fruits, pain, emballages, serviettes (grammes).
 // Un aliment resté dans son propre emballage (pot, film) part avec lui au bac emballages, contenu compris.
-const OBJETS_PLATEAU_ABC = { pot: ["poids_pot_g", "emballages"], opercule: ["poids_opercule_g", "emballages"], film: ["poids_film_g", "emballages"],
+const OBJETS_PLATEAU_ABC = { pot: ["poids_pot_g", "emballages"], opercule: ["poids_opercule_g", "emballages"], film: ["poids_film_g", "emballages"], caissette: ["poids_caissette_g", "emballages"],
   brique: ["poids_brique_g", "emballages"], barquette: ["poids_barquette_g", "emballages"], autre_emballage: ["poids_emballage_autre_g", "emballages"],
   serviette: ["poids_serviette_g", "serviettes"], epluchure: ["poids_epluchure_g", "fruits"], os: ["poids_os_g", "biodechets"] };
-const POIDS_OBJETS_DEFAUT_ABC = { poids_pot_g: 6, poids_opercule_g: 1, poids_film_g: 2, poids_brique_g: 10, poids_barquette_g: 8, poids_emballage_autre_g: 3, poids_serviette_g: 3, poids_epluchure_g: 25, poids_os_g: 15 };
+const POIDS_OBJETS_DEFAUT_ABC = { poids_pot_g: 6, poids_opercule_g: 1, poids_film_g: 2, poids_caissette_g: 1, poids_brique_g: 10, poids_barquette_g: 8, poids_emballage_autre_g: 3, poids_serviette_g: 3, poids_epluchure_g: 25, poids_os_g: 15 };
 function estFruitFraisABC(nom) {
   const n = String(nom || "").toLowerCase();
   if (/pommes? de terre|compote|yaourt|tarte|g[âa]teau|cr[èe]me|jus|sirop|confiture/.test(n)) return false;
@@ -753,12 +754,13 @@ RÈGLES
 - Ne déduis pas le nom d’un aliment entièrement consommé de son emballage, d’os, de traces ou du menu : sans indice visuel distinctif, son identité reste inconnue.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste.
+- CONTENANT OU CONTENU : ne confonds jamais un emballage vide avec l'aliment qu'il contenait. Une caissette en papier plissé vue de dessus, au fond plat taché de gras ou de miettes, SANS gâteau bombé dedans, est une caissette VIDE : le gâteau a été mangé (reste 0 %). Un gâteau réellement présent a un dessus bombé, une épaisseur, une texture de mie et souvent des pépites ou des morceaux visibles. De même, un pot vide, un opercule, un film plastique froissé ou un papier aluminium déplié ne sont pas des aliments restants. En cas de doute entre caissette vide et gâteau entier, regarde le relief et l'ombre : sans relief, c'est une caissette vide.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
 - N'utilise ni deux-points, ni crochets, ni barre verticale dans les champs texte.
 TRI DES DÉCHETS (pour estimer chaque poubelle)
 - Pour chaque aliment, "dans_emballage" vaut true si l'aliment est servi dans son propre emballage individuel (pot de compote, de yaourt ou de crème, muffin ou gâteau sous film, fromage en portion emballée, brique) ; false s'il est dans une assiette, un ramequin ou un bol de la cantine. Un produit jamais ouvert : dans_emballage true et reste_pct 100.
-- "objets" compte tout ce qui n'est pas de la nourriture et qui sera jeté : pots, opercules, films ou sachets, briques ou bouteilles, barquettes, serviettes en papier, épluchures ou trognons ou peaux de fruit, os ou arêtes. Compte chaque objet visible une fois, y compris les pots vides. N'invente aucun objet caché.
+- "objets" compte tout ce qui n'est pas de la nourriture et qui sera jeté : pots, opercules, films ou sachets, caissettes en papier vides, briques ou bouteilles, barquettes, serviettes en papier, épluchures ou trognons ou peaux de fruit, os ou arêtes. Compte chaque objet visible une fois, y compris les pots vides. N'invente aucun objet caché.
 
 Réponds en JSON strict :
 {
@@ -769,7 +771,7 @@ Réponds en JSON strict :
     {"composant": "entree|plat|accompagnement|dessert|pain", "aliment": "Nom court", "forme": "entier, morceaux, rondelles, râpé, haché, purée...", "preparation": "cuisson et sauce visibles", "etat_reste": "aucun|intact|entamé|trié|émietté", "reste_pct": 0, "mange_pct": 100, "dans_emballage": false, "confiance": "haute|moyenne|faible"}
   ],
   "objets": [
-    {"type": "pot|opercule|film|brique|barquette|serviette|epluchure|os|autre_emballage", "nombre": 1}
+    {"type": "pot|opercule|film|caissette|brique|barquette|serviette|epluchure|os|autre_emballage", "nombre": 1}
   ]
 }`;
 
