@@ -17,6 +17,7 @@ c.appelerGeminiParRequete = p => {
 const r = c.analyserPlateauABC({}, 'AAAA', new Date('2026-11-03T12:00:00Z'), 'x', '');
 assert.equal(appels.length, 1);
 assert.equal(appels[0].thinkingConfig, undefined, "réglage du modèle par défaut");
+assert.equal(appels[0].mediaResolution, 'MEDIA_RESOLUTION_HIGH', 'photo lue en haute résolution');
 
 assert.deepEqual(JSON.parse(r.ligne[10]).jetons, { entree: 4000, reflexion: 300, sortie: 200 });
 console.log('OK : réflexion courte, repli si refusée, jetons notés.');

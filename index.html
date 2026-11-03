@@ -395,6 +395,8 @@
                                 <input type="range" id="zoom-x" min="0" max="100" value="50" oninput="zoomMaj()" style="width:70px;">
                                 <label style="font-size:10px; font-weight:bold; color:#1b4332;">↕</label>
                                 <input type="range" id="zoom-y" min="0" max="100" value="50" oninput="zoomMaj()" style="width:70px;">
+                                <label style="font-size:10px; font-weight:bold; color:#1b4332;" title="Rogne les côtés : pour un plateau plus haut que large">⇤⇥ Largeur</label>
+                                <input type="range" id="zoom-l" min="30" max="100" value="100" oninput="zoomMaj()" style="width:70px;" title="Rogne les côtés : pour un plateau plus haut que large">
                                 <button type="button" class="btn-period" onclick="zoomRaz()" style="font-size:10.5px; padding:4px 8px;">↺ Plein champ</button>
                                 <span style="font-size:10px; color:#64748b;">Cadre le plateau : l'IA ne reçoit que cette zone.</span>
                             </div>
@@ -3180,7 +3182,9 @@
             const px = (parseInt((document.getElementById('zoom-x') || {}).value, 10) || 50) / 100;
             const py = (parseInt((document.getElementById('zoom-y') || {}).value, 10) || 50) / 100;
             const vw = video.videoWidth || 640, vh = video.videoHeight || 480;
-            const cw = vw / z, ch = vh / z;
+            // Largeur : rogne les côtés sans réduire la hauteur (plateau plus haut que large).
+            const l = Math.min(100, Math.max(30, parseInt((document.getElementById('zoom-l') || {}).value, 10) || 100)) / 100;
+            const cw = vw / z * l, ch = vh / z;
             return { sx: (vw - cw) * px, sy: (vh - ch) * py, sw: cw, sh: ch };
         }
         let zoomBoucle = null;
@@ -3196,7 +3200,8 @@
             const z = (parseInt(document.getElementById('zoom-niveau').value, 10) || 100) / 100;
             document.getElementById('zoom-val').innerText = '×' + z.toFixed(1).replace('.', ',');
             const cv = document.getElementById('camera-zoom');
-            if (z > 1) {
+            const l = parseInt((document.getElementById('zoom-l') || {}).value, 10) || 100;
+            if (z > 1 || l < 100) {
                 cv.style.display = 'block';
                 if (!zoomBoucle) zoomBoucle = setInterval(zoomDessiner, 66);
                 zoomDessiner();
@@ -3204,10 +3209,11 @@
                 cv.style.display = 'none';
                 if (zoomBoucle) { clearInterval(zoomBoucle); zoomBoucle = null; }
             }
-            try { localStorage.setItem('abc-zoom', JSON.stringify({ z: document.getElementById('zoom-niveau').value, x: document.getElementById('zoom-x').value, y: document.getElementById('zoom-y').value })); } catch (e) {}
+            try { localStorage.setItem('abc-zoom', JSON.stringify({ z: document.getElementById('zoom-niveau').value, x: document.getElementById('zoom-x').value, y: document.getElementById('zoom-y').value, l: (document.getElementById('zoom-l') || {}).value || 100 })); } catch (e) {}
         }
         function zoomRaz() {
             document.getElementById('zoom-niveau').value = 100; document.getElementById('zoom-x').value = 50; document.getElementById('zoom-y').value = 50;
+            if (document.getElementById('zoom-l')) document.getElementById('zoom-l').value = 100;
             zoomMaj();
         }
         (function zoomRestaurer() {
@@ -3215,7 +3221,7 @@
                 const s = JSON.parse(localStorage.getItem('abc-zoom') || 'null');
                 if (!s) return;
                 const ok = () => document.getElementById('zoom-niveau');
-                const go = () => { if (!ok()) return setTimeout(go, 200); ok().value = s.z; document.getElementById('zoom-x').value = s.x; document.getElementById('zoom-y').value = s.y; zoomMaj(); };
+                const go = () => { if (!ok()) return setTimeout(go, 200); ok().value = s.z; document.getElementById('zoom-x').value = s.x; document.getElementById('zoom-y').value = s.y; if (s.l && document.getElementById('zoom-l')) document.getElementById('zoom-l').value = s.l; zoomMaj(); };
                 go();
             } catch (e) {}
         })();
@@ -3226,8 +3232,8 @@
             
             const r = zoomRegion(video);
             const canvas = document.createElement('canvas');
-            // Photo ramenée à 1280 px de large au plus : envoi plus rapide, même précision d'analyse.
-            const echelle = Math.min(1, 1280 / Math.max(1, r.sw));
+            // Plus grand côté limité à 1600 px : garde toute la finesse du plateau cadré (caméra 1080p) sans photo trop lourde.
+            const echelle = Math.min(1, 1600 / Math.max(1, r.sw, r.sh));
             canvas.width = Math.round(r.sw * echelle);
             canvas.height = Math.round(r.sh * echelle);
             const ctx = canvas.getContext('2d'); 
@@ -3238,7 +3244,7 @@
             ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
             
             ctx.drawImage(video, r.sx, r.sy, r.sw, r.sh, 0, 0, canvas.width, canvas.height);
-            return canvas.toDataURL('image/jpeg', 0.85); 
+            return canvas.toDataURL('image/jpeg', 0.9); 
         }
 
         // ===== FILE D'ATTENTE DES SCANS : une photo n'est jamais perdue en silence =====

@@ -846,13 +846,18 @@ Réponds en JSON strict :
   // (minimal, low, medium, high ; « defaut » = réglage du modèle).
   const niveau = niveauReflexionScanABC();
   if (niveau) payloadData.generationConfig.thinkingConfig = { thinkingLevel: niveau };
+  // Photo lue en haute résolution : petits objets (muffin sous film, pot scellé, morceau de fromage) mieux vus.
+  // Surcoût de quelques centaines de jetons. Propriété RESOLUTION_IMAGE_SCAN = « defaut » pour revenir au réglage du modèle.
+  const resolution = resolutionImageScanABC();
+  if (resolution) payloadData.generationConfig.mediaResolution = resolution;
   let response;
   try {
     response = appelerGeminiParRequete(payloadData);
   } catch (e) {
-    // Modèle qui refuse ce réglage : on refait l'appel sans, pour ne jamais bloquer un scan.
-    if (!niveau || !/HTTP 400/.test(String(e)) || !/think/i.test(String(e))) throw e;
+    // Modèle qui refuse un de ces réglages : on refait l'appel sans, pour ne jamais bloquer un scan.
+    if (!(niveau || resolution) || !/HTTP 400/.test(String(e)) || !/think|media|resolution/i.test(String(e))) throw e;
     delete payloadData.generationConfig.thinkingConfig;
+    delete payloadData.generationConfig.mediaResolution;
     response = appelerGeminiParRequete(payloadData);
   }
   const jsonResp = JSON.parse(response.getContentText());
@@ -2012,4 +2017,11 @@ function recalculerBacsJourABC(ecole, date) {
     Logger.log(ecole + " " + date + " : " + n + " plateaux recalculés.");
     return n;
   });
+}
+
+function resolutionImageScanABC() {
+  let v = "";
+  try { v = String(PropertiesService.getScriptProperties().getProperty("RESOLUTION_IMAGE_SCAN") || "").trim().toLowerCase(); } catch (e) {}
+  if (v === "defaut" || v === "défaut") return "";
+  return { low: "MEDIA_RESOLUTION_LOW", medium: "MEDIA_RESOLUTION_MEDIUM", high: "MEDIA_RESOLUTION_HIGH" }[v] || "MEDIA_RESOLUTION_HIGH";
 }
