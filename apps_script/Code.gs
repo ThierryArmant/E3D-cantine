@@ -736,7 +736,7 @@ function handleLogScanImage(data) {
   const idScan = data.scan_id ? String(data.scan_id).slice(0, 40) : "srv-" + Utilities.getUuid().slice(0, 12);
   // Contrôle rapide ; la vérification définitive est atomique lors de l’écriture.
   // Renvoi automatique de la borne : si ce scan est déjà enregistré, on ne le compte pas deux fois.
-  if (scanDejaEnregistre(sheets.gaspillage, idScan)) return { success: true, doublon: true };
+  if (scanDejaEnregistre(sheets.gaspillage, idScan)) { completerAvisScanABC(sheets.gaspillage, idScan, avisEleve); return { success: true, doublon: true }; }
 
   if (data.image_base64 === "empty") {
     if (!enregistrerScanUnique(sheets.gaspillage, [quand, "SCAN_IA_VISION", "Plateau Nettoyé (0% Restes)", 0, 0, 0, 0, 0, 0, avisEleve, "", idScan], idScan)) return { success: true, doublon: true };
@@ -749,7 +749,7 @@ function handleLogScanImage(data) {
   // La photo du plateau est gardée dans le Drive (lien sur la ligne du scan).
   // Un échec du Drive ne bloque jamais le scan : on analyse alors tout de suite, comme avant.
   let photo = null;
-  try { photo = sauverPhotoPlateauABC(ecole, quand, idScan, cleanBase64); } catch (e) { photo = null; }
+  try { photo = sauverPhotoPlateauABC(ecole, quand, idScan, cleanBase64, { avis: avisEleve, choix_plat: data.choix_plat || "" }); } catch (e) { photo = null; }
 
   const mode = modeAnalyseScanABC(sheets);
   const menuConnu = !!getMenuDuJour(sheets, dateIso(quand));
@@ -1367,11 +1367,13 @@ function dossierPlateauxABC(ecole, date) {
 }
 
 // Fichier privé (les autorisations du dossier ne sont jamais modifiées).
-function sauverPhotoPlateauABC(ecole, quand, idScan, base64) {
+function sauverPhotoPlateauABC(ecole, quand, idScan, base64, extra) {
   const date = dateIso(quand);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Date de scan invalide.");
   const nom = Utilities.formatDate(new Date(quand), "Europe/Paris", "HH'h'mm'm'ss") + "_" + String(idScan).replace(/[^A-Za-z0-9_-]/g, "") + ".jpg";
   const fichier = dossierPlateauxABC(ecole, date).createFile(Utilities.newBlob(Utilities.base64Decode(base64), "image/jpeg", nom));
+  // Avis de l'élève et choix du plat gardés avec la photo : une récupération depuis le Drive les retrouve.
+  if (extra) { try { fichier.setDescription(JSON.stringify(extra).slice(0, 500)); } catch (e) {} }
   return { id: fichier.getId(), url: fichier.getUrl() };
 }
 
@@ -1842,8 +1844,10 @@ function recupererPhotosPlateauxABC(ecole, date) {
       if (connus[id]) return;
       const garde = s.fichiers[0];
       const quand = Utilities.parseDate(date + " " + s.heure, "Europe/Paris", "yyyy-MM-dd HH:mm:ss");
-      const info = { en_attente: true, choix_plat: "", drive_id: garde.getId(), essais: 0, recupere: true };
-      nouvelles.push([quand, "SCAN_EN_ATTENTE", "Photo du plateau récupérée dans le Drive, analyse en attente", 0, 0, 0, 0, 0, 0, "Non renseigné", JSON.stringify(info), id, garde.getUrl()]);
+      let extra = {};
+      s.fichiers.some(function (f) { try { extra = JSON.parse(f.getDescription() || "{}"); return !!extra.avis; } catch (err) { return false; } });
+      const info = { en_attente: true, choix_plat: extra.choix_plat || "", drive_id: garde.getId(), essais: 0, recupere: true };
+      nouvelles.push([quand, "SCAN_EN_ATTENTE", "Photo du plateau récupérée dans le Drive, analyse en attente", 0, 0, 0, 0, 0, 0, extra.avis || "Non renseigné", JSON.stringify(info), id, garde.getUrl()]);
     });
     nouvelles.sort(function (a, b) { return a[0] - b[0]; });
     if (nouvelles.length) {
@@ -1874,4 +1878,21 @@ function recupererPhotosAujourdhuiABC() {
     try { return recupererPhotosPlateauxABC(annuaire[cle].nom, date); }
     catch (e) { Logger.log(annuaire[cle].nom + " : " + e); return { ecole: annuaire[cle].nom, erreur: String(e) }; }
   });
+}
+
+// Un scan récupéré depuis le Drive n'a pas l'avis de l'élève ; si l'appareil renvoie ce scan plus tard,
+// l'avis est complété sur la ligne existante (sans rien compter deux fois).
+function completerAvisScanABC(feuille, idScan, avis) {
+  if (!avis || avis === "Non renseigné") return;
+  try {
+    const derniere = feuille.getLastRow();
+    if (derniere < 2 || feuille.getLastColumn() < 12) return;
+    const debut = Math.max(2, derniere - 499);
+    const v = feuille.getRange(debut, 10, derniere - debut + 1, 3).getValues();
+    for (let i = v.length - 1; i >= 0; i--) {
+      if (String(v[i][2]) !== String(idScan)) continue;
+      if (!v[i][0] || v[i][0] === "Non renseigné") feuille.getRange(debut + i, 10).setValue(avis);
+      return;
+    }
+  } catch (e) {}
 }
