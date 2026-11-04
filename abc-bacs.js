@@ -59,8 +59,9 @@ function majComparaisonBacs() {
   if (attente) html += `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px;"><span style="font-size:12px; color:#1d4ed8;">⏳ ${attente} plateau(x) en attente d'analyse : actualisez dans quelques minutes.</span>
       <button type="button" class="btn" id="btn-bacs-analyser" style="width:auto; padding:6px 11px; font-size:12px; background:#1d4ed8;">▶️ Analyser maintenant</button><span id="bacs-analyser-etat" style="font-size:11.5px; color:#475569;"></span></div>`;
   // Seuls les plateaux qui ont une photo peuvent être réanalysés. Essai conseillé d'abord sur 30 plateaux.
-  const avecPhoto = scans.filter(s => (s.type === "SCAN_IA_VISION" && !s.bacs || s.type === "SCAN_ECHEC") && s.photo).length;
-  if (anciens > 0 && !attente && avecPhoto) {
+  // Tous les plateaux avec photo peuvent être repris avec la méthode actuelle (le serveur les réanalyse tous).
+  const avecPhoto = scans.filter(s => (s.type === "SCAN_IA_VISION" || s.type === "SCAN_ECHEC") && s.photo).length;
+  if (!attente && avecPhoto) {
     const essai = Math.min(30, avecPhoto);
     html += `<div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px;">
       <button type="button" class="btn" id="btn-reanalyser-essai" style="width:auto; padding:7px 12px; font-size:12px; background:#1d4ed8;">🧪 Essai : réanalyser ${essai} plateaux</button>
