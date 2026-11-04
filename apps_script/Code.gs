@@ -2082,10 +2082,20 @@ const SEUIL_RESIDU_PCT_ABC = 5;
 
 // Desserts : chaque dessert pris par l'élève (vu sur le plateau, même mangé ou vide d'emballage) compte dans le repas
 // de référence ; deux desserts = deux portions (un fruit compte sa portion de fruit). Au moins un dessert.
+// Famille d'un dessert : deux produits de la même famille (2 yaourts, 2 fruits) ne font qu'un dessert ;
+// deux familles différentes (yaourt + fruit, yaourt + gâteau) font deux desserts.
+function familleDessertABC(nom) {
+  const n = String(nom || "").toLowerCase();
+  if (/yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|fromage blanc|ortolan/.test(n)) return "laitage";
+  if (estFruitFraisABC(n)) return "fruit";
+  return "dessert";
+}
 function repasReferenceABC(retenus, params) {
   const desserts = (retenus || []).filter(function (i) { return i.composant === "dessert"; });
-  const dessertG = Math.max(Number(params.portion_dessert_g) || 0, desserts.reduce(function (t, i) { return t + (Number(i.portion_ref_g) || 0); }, 0));
-  const portions = { entree: params.portion_entree_g, plat: params.portion_plat_g, garniture: params.portion_garniture_g, dessert: dessertG, desserts_vus: desserts.length, pain: params.portion_pain_g };
+  const parFamille = {};
+  desserts.forEach(function (i) { const f = familleDessertABC(i.aliment); parFamille[f] = Math.max(parFamille[f] || 0, Number(i.portion_ref_g) || 0); });
+  const dessertG = Math.max(Number(params.portion_dessert_g) || 0, Object.keys(parFamille).reduce(function (t, f) { return t + parFamille[f]; }, 0));
+  const portions = { entree: params.portion_entree_g, plat: params.portion_plat_g, garniture: params.portion_garniture_g, dessert: dessertG, familles_dessert: Object.keys(parFamille), pain: params.portion_pain_g };
   const ref = ["entree", "plat", "garniture", "dessert", "pain"].reduce(function (t, k) { return t + (Number(portions[k]) || 0); }, 0);
   const restes = (retenus || []).reduce(function (t, i) { return t + (Number(i.reste_g_ref) || 0); }, 0);
   return { ref_g: ref, portions: portions, restes_g: Math.round(restes), pct: ref > 0 ? Math.min(100, Math.round(100 * restes / ref)) : null };

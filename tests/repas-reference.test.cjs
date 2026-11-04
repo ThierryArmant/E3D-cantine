@@ -23,5 +23,13 @@ assert.equal(r.restes_pct_repas, 31);
 console.log('OK : sauce seule et traces négligées, % du repas de référence (480 g), méthode et portions enregistrées.');
 // Deux desserts pris (muffin + compote entiers) : repas de référence 580 g, 200 g restants = 34 %.
 r = analyse([al('Muffin aux pépites de chocolat', 'dessert', 100), al('Compote pomme pêche', 'dessert', 100), al('Riz blanc', 'accompagnement', 0)]);
-assert.equal(r.repas_ref_g, 580); assert.equal(r.restes_g, 200); assert.equal(r.restes_pct_repas, 34); assert.equal(r.portions_ref.desserts_vus, 2);
-console.log('OK : deux desserts = deux portions dans le repas de référence.');
+assert.equal(r.repas_ref_g, 480, 'muffin + compote : même famille dessert'); 
+r = analyse([al('Yaourt aromatisé', 'dessert', 100), al('Banane', 'dessert', 0)]);
+assert.equal(r.repas_ref_g, 80 + 100 + 150 + 100 + 150 + 50, 'yaourt + fruit = 2 desserts');
+r = analyse([al('Yaourt aromatisé', 'dessert', 100), al('Muffin aux pépites de chocolat', 'dessert', 0)]);
+assert.equal(r.repas_ref_g, 580, 'yaourt + gâteau = 2 desserts');
+r = analyse([al('Yaourt aromatisé', 'dessert', 100), al('Yaourt nature', 'dessert', 0)]);
+assert.equal(r.repas_ref_g, 480, '2 yaourts = 1 dessert');
+r = analyse([al('Banane', 'dessert', 0), al('Pomme', 'dessert', 0)]);
+assert.equal(r.repas_ref_g, 80 + 100 + 150 + 150 + 50, '2 fruits = 1 dessert (portion fruit)');
+console.log('OK : une portion par famille de dessert (fruit, laitage, dessert).');

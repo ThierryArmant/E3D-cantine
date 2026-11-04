@@ -110,5 +110,5 @@ Commit de cette entrée. Serveur `apps_script/Code.gs` et galerie `abc-analyse-p
 - **Galerie** : affiche le % du repas de référence ; pour une analyse ancienne, le recalcul avec les réglages actuels est signalé comme tel. Filtre « Restes du repas ».
 - **Test** `tests/repas-reference.test.cjs` : plateau n° 5 (sauce + traces) → 0 % ; n° 108 (une tranche + muffin 3/4) → 21 % ; riz entier → 31 %.
 - **Inchangé** : modèle (propriété `MODELE_GEMINI`, Flash-Lite), sauvegarde Drive, file de reprise, anti-doublons, gestion réseau/crédit.
-- **Desserts (validé par Thierry)** : chaque dessert pris compte une portion dans le repas de référence (2 desserts = ×2, un fruit = sa portion de fruit, au moins 1 dessert).
+- **Desserts (validé par Thierry)** : une portion par FAMILLE de dessert prise. Familles : fruit frais, laitage (yaourt, fromage…), dessert (pâtisserie, compote, crème…). Yaourt + fruit = 2 ; yaourt + gâteau = 2 ; 2 yaourts = 1 ; 2 fruits = 1. Au moins 1 dessert. Compote classée « dessert » (à confirmer).
 - **Reste ouvert** : un film vide pris pour un muffin ne peut être corrigé que par la vision (consigne renforcée, à vérifier sur les plateaux témoins avant toute réanalyse massive).
