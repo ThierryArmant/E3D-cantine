@@ -32,4 +32,6 @@ r = analyse([al('Yaourt aromatisé', 'dessert', 100), al('Yaourt nature', 'desse
 assert.equal(r.repas_ref_g, 480, '2 yaourts = 1 dessert');
 r = analyse([al('Banane', 'dessert', 0), al('Pomme', 'dessert', 0)]);
 assert.equal(r.repas_ref_g, 80 + 100 + 150 + 150 + 50, '2 fruits = 1 dessert (portion fruit)');
-console.log('OK : une portion par famille de dessert (fruit, laitage, dessert).');
+r = analyse([al('Banane', 'dessert', 0), al('Muffin aux pépites de chocolat', 'dessert', 100)]);
+assert.equal(r.repas_ref_g, 80 + 100 + 150 + 150 + 50, 'fruit + gâteau = 1 dessert');
+console.log('OK : deux desserts seulement pour un laitage + un autre dessert.');

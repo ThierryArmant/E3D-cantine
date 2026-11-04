@@ -21,8 +21,8 @@ const reste=s=>{
  if(!items.length)return null;
  // Deux desserts pris = deux portions de dessert dans le repas de référence.
  const portionItem=x=>/^pain\b/i.test(x.nom)?P.pain:(x.comp==='dessert'&&/(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|raisin|fruit)/i.test(x.nom)&&!/compote|yaourt|muffin|g[âa]teau|tarte/i.test(x.nom)?P.fruit:(P[x.comp]||P.plat));
- // Une portion par famille de dessert : 2 yaourts ou 2 fruits = 1 dessert ; yaourt + fruit ou yaourt + gâteau = 2.
- const famille=n=>/yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|ortolan/i.test(n)?'laitage':(portionItem({nom:n,comp:'dessert'})===P.fruit?'fruit':'dessert');
+ // Deux desserts seulement pour un laitage + un autre dessert ; 2 yaourts, 2 fruits ou fruit + gâteau = 1.
+ const famille=n=>/yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|ortolan/i.test(n)?'laitage':'autre';
  const fam={};items.filter(x=>x.comp==='dessert'&&!SAUCE.test(String(x.nom||''))).forEach(x=>{const f=famille(String(x.nom||''));fam[f]=Math.max(fam[f]||0,portionItem(x))});
  const dessertG=Math.max(P.dessert,Object.values(fam).reduce((t,v)=>t+v,0));
  const ref=P.entree+P.plat+P.accompagnement+dessertG+P.pain;

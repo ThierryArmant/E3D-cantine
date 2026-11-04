@@ -2082,13 +2082,11 @@ const SEUIL_RESIDU_PCT_ABC = 5;
 
 // Desserts : chaque dessert pris par l'élève (vu sur le plateau, même mangé ou vide d'emballage) compte dans le repas
 // de référence ; deux desserts = deux portions (un fruit compte sa portion de fruit). Au moins un dessert.
-// Famille d'un dessert : deux produits de la même famille (2 yaourts, 2 fruits) ne font qu'un dessert ;
-// deux familles différentes (yaourt + fruit, yaourt + gâteau) font deux desserts.
+// Deux desserts seulement quand l'élève a pris un LAITAGE (yaourt, fromage…) ET un autre dessert (fruit, gâteau, compote…).
+// 2 yaourts = 1 ; 2 fruits = 1 ; fruit + gâteau = 1 ; yaourt + fruit = 2 ; yaourt + gâteau = 2.
 function familleDessertABC(nom) {
   const n = String(nom || "").toLowerCase();
-  if (/yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|fromage blanc|ortolan/.test(n)) return "laitage";
-  if (estFruitFraisABC(n)) return "fruit";
-  return "dessert";
+  return /yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|ortolan/.test(n) ? "laitage" : "autre";
 }
 function repasReferenceABC(retenus, params) {
   const desserts = (retenus || []).filter(function (i) { return i.composant === "dessert"; });
