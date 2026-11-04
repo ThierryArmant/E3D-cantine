@@ -14,12 +14,16 @@ const portionsActuelles=()=>{const p=((typeof globalRawData!=='undefined'&&globa
 const reste=s=>{
  let d=null;try{d=typeof s.detail==='string'&&s.detail?JSON.parse(s.detail):s.detail}catch(e){}
  if(d&&typeof d.restes_pct_repas==='number')return {pct:d.restes_pct_repas,g:d.restes_g,ref:d.repas_ref_g,methode:'enregistrée'};
- const P=portionsActuelles(),ref=P.entree+P.plat+P.accompagnement+P.dessert+P.pain;
+ const P=portionsActuelles();
  let items=[];
  if(d&&Array.isArray(d.retenus)&&d.retenus.length)items=d.retenus.map(x=>({nom:x.aliment,comp:x.composant,pct:Number(x.reste_pct)||0}));
  else if(typeof parseScanItems==='function')items=parseScanItems(s.commentaire).map(x=>({nom:x.nom,comp:x.composant,pct:x.restePct}));
  if(!items.length)return null;
- const g=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5).reduce((t,x)=>t+(/^pain\b/i.test(x.nom)?P.pain:(P[x.comp]||P.plat))*x.pct/100,0);
+ // Deux desserts pris = deux portions de dessert dans le repas de référence.
+ const portionItem=x=>/^pain\b/i.test(x.nom)?P.pain:(x.comp==='dessert'&&/(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|raisin|fruit)/i.test(x.nom)&&!/compote|yaourt|muffin|g[âa]teau|tarte/i.test(x.nom)?P.fruit:(P[x.comp]||P.plat));
+ const dessertG=Math.max(P.dessert,items.filter(x=>x.comp==='dessert'&&!SAUCE.test(String(x.nom||''))).reduce((t,x)=>t+portionItem(x),0));
+ const ref=P.entree+P.plat+P.accompagnement+dessertG+P.pain;
+ const g=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5).reduce((t,x)=>t+portionItem(x)*x.pct/100,0);
  return {pct:Math.min(100,Math.round(100*g/ref)),g:Math.round(g),ref:ref,methode:'recalculée'};
 };
 const pctReste=s=>s.reste?s.reste.pct:null;

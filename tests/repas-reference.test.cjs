@@ -21,3 +21,7 @@ assert.equal(r.restes_g, 100); assert.equal(r.restes_pct_repas, 21);
 r = analyse([al('Riz blanc', 'accompagnement', 100), al('Salade verte', 'entree', 0), al('Boulettes de viande', 'plat', 0)]);
 assert.equal(r.restes_pct_repas, 31);
 console.log('OK : sauce seule et traces négligées, % du repas de référence (480 g), méthode et portions enregistrées.');
+// Deux desserts pris (muffin + compote entiers) : repas de référence 580 g, 200 g restants = 34 %.
+r = analyse([al('Muffin aux pépites de chocolat', 'dessert', 100), al('Compote pomme pêche', 'dessert', 100), al('Riz blanc', 'accompagnement', 0)]);
+assert.equal(r.repas_ref_g, 580); assert.equal(r.restes_g, 200); assert.equal(r.restes_pct_repas, 34); assert.equal(r.portions_ref.desserts_vus, 2);
+console.log('OK : deux desserts = deux portions dans le repas de référence.');
