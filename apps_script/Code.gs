@@ -16,7 +16,9 @@ const PARAMETRES_DEFAUT = [
   ["portion_garniture_g", 150, "Garniture (g) - référence collège : féculents cuits 150 à 180, légumes cuits 100 à 120"],
   ["portion_dessert_g", 100, "Dessert ou laitage (g) - référence collège : pâtisserie 80 à 100, compote 100 à 120, yaourt 125"],
   ["portion_fruit_g", 150, "Fruit frais (g) - référence collège : 150 à 180"],
-  ["portion_pain_g", 50, "Pain (g) - référence collège : 40 à 50 par repas"],
+  ["portion_pain_g", 50, "Pain (g) - calculé : tranches par élève × poids d'une tranche"],
+  ["pain_tranches", 2, "Tranches de pain servies à chaque élève dès le départ"],
+  ["poids_tranche_pain_g", 25, "Poids d'une tranche de pain (g)"],
   ["portion_sauce_g", 20, "Sauce séparée : portion de travail en g, à ajuster selon le service"],
   ["effectif_defaut", 450, "Effectif attendu par défaut (couverts)"],
   ["prix_kg_eur", 4.5, "Coût moyen de la denrée (€/kg)"],
@@ -212,6 +214,8 @@ function getParametres(sheets) {
     const v = parseFloat(String(l[1]).replace(",", "."));
     if (l[0] && !isNaN(v)) p[String(l[0])] = v;
   });
+  // Pain du repas de référence : nombre de tranches servies × poids d'une tranche.
+  if (p.pain_tranches > 0 && p.poids_tranche_pain_g > 0) p.portion_pain_g = Math.round(p.pain_tranches * p.poids_tranche_pain_g);
   return p;
 }
 
@@ -445,7 +449,7 @@ function handleSaveEffectifs(data) {
 // Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
 const PARAMETRES_MODIFIABLES = {
   portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
-  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
+  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], pain_tranches: [1, 6], poids_tranche_pain_g: [5, 100], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
   poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_caissette_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
   poids_emballage_autre_g: [0, 50], poids_serviette_g: [0, 20], poids_epluchure_g: [0, 200], poids_os_g: [0, 200]
 };
@@ -799,6 +803,8 @@ MENU DU JOUR (options possibles ; sépare les aliments par "+", les rubriques pa
 
 RÉFÉRENCE VISUELLE DU SERVICE (description produite une fois depuis les photos avant service ; aide indicative, jamais preuve qu’un aliment est sur le plateau) : ${referenceService || 'Aucune référence visuelle disponible.'}
 Les noms confirmés par l’utilisateur priment sur une ancienne proposition IA. La photo du plateau reste prioritaire pour déterminer ce qui est réellement présent. N’invente aucun reste d’après cette référence.
+
+PAIN : chaque élève reçoit ${params.pain_tranches || 2} tranche(s) de pain au départ. Pour le pain, reste_pct est la part de ces ${params.pain_tranches || 2} tranches laissée sur le plateau (avec 2 tranches : une tranche entière laissée = 50 %, les deux = 100 %, quelques croûtes = 10 %).
 
 PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « ${choixPlat} ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste.
 NOMS DU MENU DU JOUR (confirmés par l'équipe) : ${listeMenu || 'aucun'}. Quand un aliment correspond à l'un d'eux, écris EXACTEMENT ce nom, jamais un nom générique (« Gâteau », « Dessert », « Plat ») ni une variante.
