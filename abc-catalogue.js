@@ -1018,7 +1018,7 @@ function abcInstallerOngletCorrection() {
     const analyses=document.getElementById('abc-corrections-analyses');if(analyses){analyses.open=true;fond.append(analyses);}
     const pesees=document.getElementById('abc-corrections-pesees');if(pesees)fond.append(pesees);
     document.querySelector('.content-area').append(vue);
-    const nav=abcEl('li','✏️ Corrections','menu-item');nav.id='menu-view-corrections';nav.addEventListener('click',()=>{switchView('view-corrections');abcReprendreMenu(false);abcActualiserCorrections();loadLiveData();});document.getElementById('menu-view-rapport').insertAdjacentElement('beforebegin',nav);
+    const nav=abcEl('li','✏️ Corrections','menu-item');nav.id='menu-view-corrections';nav.addEventListener('click',()=>{switchView('view-corrections');abcReprendreMenu(false);abcActualiserCorrections();loadLiveData();});document.getElementById('menu-view-analyse-photos').insertAdjacentElement('afterend',nav);
 }
 
 function abcInitialiserInterface() {
