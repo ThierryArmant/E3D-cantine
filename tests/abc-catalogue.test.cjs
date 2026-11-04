@@ -66,7 +66,7 @@ vm.runInContext(calSrc,c);const cal=c.calculerCalibrage('2026-10-16','2026-10-16
 assert.equal(Object.keys(cal.items).length,1);assert.equal(cal.items['Carottes râpées'].totalKg,8);
 assert.equal(cal.jours['2026-10-16'].evitableKg+cal.jours['2026-10-16'].inevitableKg,8);
 assert.ok(html.includes('for (const d of Object.keys(peseesParJour))'));
-const order=['menu-view-dashboard',"L'Espace des Éco-Délégués",'menu-view-cuisinier','menu-view-borne','menu-view-saisie-dechets','Espace cuisine','menu-view-rapport','menu-view-precision','menu-audit'].map(x=>html.indexOf(x));
+const order=['menu-view-dashboard',"L'Espace des Éco-Délégués",'menu-view-cuisinier','menu-view-borne','menu-view-saisie-dechets','Espace cuisine','menu-view-rapport','Réseau','menu-bilan-carbone','Contrôle des analyses','menu-view-analyse-photos','menu-audit','menu-view-precision'].map(x=>html.indexOf(x));
 assert.ok(order.every((x,i)=>!i||x>order[i-1]));
 // Reprise du menu du 16 : les anciennes préparations sont reconstituées en bases et options.
 const front=vm.createContext({renderLocalFavorites(){},getCurrentCheckedMenu(){},document:{addEventListener(){}},Intl});
