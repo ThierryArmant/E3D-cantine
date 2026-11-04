@@ -1966,31 +1966,57 @@ const PLATEAUX_REFERENCE_ABC = ["1iTYyblL5XW2Pbo2ziC1rSw0SGXhbzhWD", "19YTbtjNXj
 
 function comparerModeleActuelABC() { return comparerModeleABC(NOM_MODELE_GEMINI, "low"); }
 
-function comparerModeleABC(modele, niveau) {
+// Plateaux témoins vérifiés à l'œil par Thierry (02/11/2026, Giono) : résultat attendu en regard.
+const PLATEAUX_TEMOINS_ABC = [
+  ["1CYOGSsj2v0E06CJ9roKkP3X7zvR9Z-lu", "n° 5 : sauce étalée et film vide → 0 % du repas"],
+  ["1DcOTaHVSxHfPMMxNpBeO_rnDIKTjsnWi", "n° 108 : une tranche de pain et un muffin entamé"],
+  ["1Xd_nwunln3uerrE2rM-fUD4ly1_vNfkj", "n° 201 : muffin sous film et pot de compote, vérifier s'ils sont pleins"],
+  ["15rjfBXawlznSHYpmTNW4JtNik-tj2qTF", "12 h 55 : muffin entier sous film (en bas à gauche)"],
+  ["1gYgXSgoISV2n-G9J29mQBkRX7muTpGiq", "12 h 57 : muffin dans l'assiette (en bas à gauche)"],
+  ["1zqi3bdCWMwd9jKZW3iFZZ_XMvkfPKkub", "13 h 01 : muffin entamé (en haut à droite)"],
+  ["1eU_ePJZaRAFC5NtFe12YmKNWmt_PFc4E", "13 h 19 : muffin aux 3/4 (en bas) et muffin à droite"],
+  ["1YECk9GKXgbtXXPINFye1-qk6udt0T1cz", "13 h 22 : muffin aux 3/4 (au centre)"],
+  ["1cKjwSQECzmYGcg2uv1ybonASmuk-dqoP", "13 h 22 m 50 : muffin entier sous film (en haut à gauche)"],
+  ["15XF9YI3-QHLPKinTEF92EGzFKC2aLlwn", "Caissette et film vides : PAS de muffin"],
+  ["12JGeV6n924OrYd6zxwCAlg4_lxyS0AL2", "Fond de caissette vide : PAS de muffin"],
+  ["18DjXAEUKESkQYHkn72hEGQFXFkrWHT0w", "Film froissé avec miettes : PAS de muffin"],
+  ["1NPr6jO6GjWJG975Ks361x0fXN42QTJqj", "Caissette vide sur l'assiette : PAS de muffin"],
+  ["1QwXzRvnyFmNjrK9CSyalmBIJIVYSyw2H", "11 h 58 : deux demi-œufs laissés"],
+  ["10XW2epW3LQ6c1jW2GgCo52mkYLORTmoU", "12 h 04 : un reste d'œuf"],
+  ["1PQoZ5BMvIdjCNT6M5Ess-NGVVKlMsML-", "13 h 10 : un petit bout d'œuf"]
+];
+// ▶️ Depuis l'éditeur : comparerPlateauxTemoinsABC()  (modèle réglé dans MODELE_GEMINI, environ 16 plateaux, quelques centimes)
+function comparerPlateauxTemoinsABC() {
+  return comparerModeleABC(modeleGeminiABC(), "", PLATEAUX_TEMOINS_ABC.map(function (x) { return x[0]; }), PLATEAUX_TEMOINS_ABC.map(function (x) { return x[1]; }));
+}
+
+function comparerModeleABC(modele, niveau, liste, attendus) {
   modele = modele || "gemini-3.1-flash-lite";
+  liste = liste || PLATEAUX_REFERENCE_ABC; attendus = attendus || [];
   const ecole = "COLLEGE  J. GIONO", date = "2026-11-02";
   const sheets = getSheetsABC(ecole);
   const ss = SpreadsheetApp.openById(getAnnuaire()[normaliserNomEcole(ecole)].id);
   const onglet = ss.getSheetByName("Comparaison_Modeles") || ss.insertSheet("Comparaison_Modeles");
-  if (onglet.getLastRow() === 0) onglet.appendRow(["Testé le", "Modèle", "Réflexion", "N°", "Photo", "Résultat", "Jetons entrée", "Jetons réflexion", "Jetons sortie", "Erreur"]);
+  if (onglet.getLastRow() === 0) onglet.appendRow(["Testé le", "Modèle", "Réflexion", "N°", "Photo", "Résultat", "Jetons entrée", "Jetons réflexion", "Jetons sortie", "Erreur", "Restes du repas (%)", "Attendu (vérifié à l'œil)"]);
   const props = PropertiesService.getScriptProperties();
   const ancienNiveau = props.getProperty("NIVEAU_REFLEXION_SCAN");
   props.setProperty("NIVEAU_REFLEXION_SCAN", niveau || "defaut");
   MODELE_FORCE_ABC = modele;
   const debut = Date.now(), lignes = [];
   try {
-    for (let k = 0; k < PLATEAUX_REFERENCE_ABC.length; k++) {
+    for (let k = 0; k < liste.length; k++) {
       if (Date.now() - debut > 300000) break;
-      const id = PLATEAUX_REFERENCE_ABC[k];
+      const id = liste[k];
       const base = [new Date(), modele, niveau || "défaut du modèle", k + 1, "https://drive.google.com/file/d/" + id + "/view"];
       try {
         const image = Utilities.base64Encode(DriveApp.getFileById(id).getBlob().getBytes());
         const r = analyserPlateauABC(sheets, image, Utilities.parseDate(date + " 12:30:00", "Europe/Paris", "yyyy-MM-dd HH:mm:ss"), "Non renseigné", "");
-        let j = {};
-        try { j = JSON.parse(r.ligne[10] || "{}").jetons || {}; } catch (e) {}
-        lignes.push(base.concat([r.ligne[2], j.entree || "", j.reflexion || "", j.sortie || "", ""]));
+        let det = {};
+        try { det = JSON.parse(r.ligne[10] || "{}"); } catch (e) {}
+        const j = det.jetons || {};
+        lignes.push(base.concat([r.ligne[2], j.entree || "", j.reflexion || "", j.sortie || "", "", det.restes_pct_repas === undefined ? "" : det.restes_pct_repas, attendus[k] || ""]));
       } catch (e) {
-        lignes.push(base.concat(["", "", "", "", String(e).slice(0, 300)]));
+        lignes.push(base.concat(["", "", "", "", String(e).slice(0, 300), "", attendus[k] || ""]));
         if (/HTTP (400|404)/.test(String(e))) break; // modèle inconnu : inutile d'insister
       }
     }
@@ -1998,7 +2024,7 @@ function comparerModeleABC(modele, niveau) {
     MODELE_FORCE_ABC = "";
     if (ancienNiveau) props.setProperty("NIVEAU_REFLEXION_SCAN", ancienNiveau); else props.deleteProperty("NIVEAU_REFLEXION_SCAN");
   }
-  if (lignes.length) onglet.getRange(onglet.getLastRow() + 1, 1, lignes.length, 10).setValues(lignes);
+  if (lignes.length) onglet.getRange(onglet.getLastRow() + 1, 1, lignes.length, 12).setValues(lignes);
   Logger.log(modele + " : " + lignes.length + " plateaux testés, résultats dans l'onglet Comparaison_Modeles de Giono.");
   return lignes.length;
 }
