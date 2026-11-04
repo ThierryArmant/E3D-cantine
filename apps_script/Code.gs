@@ -632,7 +632,8 @@ function nomsMenuJourABC(menu) {
   String(menu || "").split("|").slice(0, 4).forEach(function (groupe, i) {
     const options = (groupe.match(/\(([^)]*)\)/g) || []).map(function (o) { return o.slice(1, -1); }).join(",").split(",");
     groupe.replace(/\([^)]*\)/g, "").split("+").concat(options).forEach(function (n) {
-      const nom = nettoyerTexte(String(n).replace(/[\u{1F300}-\u{1FAFF}\u200D\uFE0F]/gu, ""));
+      // « ×5 » = nombre de pièces servies (consigne de comptage), pas une partie du nom.
+      const nom = nettoyerTexte(String(n).replace(/[\u{1F300}-\u{1FAFF}\u200D\uFE0F]/gu, "").replace(/\s*[×x]\s*\d+\s*$/i, ""));
       if (nom && !/^sans /i.test(nom) && out[rubriques[i]].indexOf(nom) < 0) out[rubriques[i]].push(nom);
     });
   });
@@ -805,7 +806,7 @@ MENU DU JOUR (options possibles ; sépare les aliments par "+", les rubriques pa
 RÉFÉRENCE VISUELLE DU SERVICE (description produite une fois depuis les photos avant service ; aide indicative, jamais preuve qu’un aliment est sur le plateau) : ${referenceService || 'Aucune référence visuelle disponible.'}
 Les noms confirmés par l’utilisateur priment sur une ancienne proposition IA. La photo du plateau reste prioritaire pour déterminer ce qui est réellement présent. N’invente aucun reste d’après cette référence.
 
-PORTIONS SERVIES À CHAQUE ÉLÈVE (réglées par la cuisine) : entrée ${params.portion_entree_g} g, plat protidique ${params.portion_plat_g} g, garniture ${params.portion_garniture_g} g (une portion de féculent ou de légume occupe environ la moitié d'une assiette plate), dessert ${params.portion_dessert_g} g. Un nombre entre parenthèses après un aliment du menu est le nombre de pièces servies par élève (ex. « Boulettes de viande (5) » = 5 boulettes).
+PORTIONS SERVIES À CHAQUE ÉLÈVE (réglées par la cuisine) : entrée ${params.portion_entree_g} g, plat protidique ${params.portion_plat_g} g, garniture ${params.portion_garniture_g} g (une portion de féculent ou de légume occupe environ la moitié d'une assiette plate), dessert ${params.portion_dessert_g} g. Un « ×N » après un aliment du menu est le nombre de pièces servies par élève (ex. « Boulettes de viande ×5 » = 5 boulettes).
 COMMENT ESTIMER reste_pct :
 - Aliment en PIÈCES (boulettes, nuggets, saucisses, filets, demi-œufs, tranches, fruits) : COMPTE les pièces restantes et rapporte-les au nombre servi (5 boulettes servies, 5 restantes = 100 % ; 2 restantes = 40 %). Une pièce entamée compte pour la part qui reste.
 - Aliment en VRAC (riz, pâtes, purée, légumes) : compare la surface et l'épaisseur restantes à une portion pleine (environ la moitié de l'assiette). Un tas net, non creusé, aux bords réguliers = 85 à 100 %.
@@ -1990,7 +1991,8 @@ const PLATEAUX_TEMOINS_ABC = [
   ["1NPr6jO6GjWJG975Ks361x0fXN42QTJqj", "Caissette vide sur l'assiette : PAS de muffin"],
   ["1QwXzRvnyFmNjrK9CSyalmBIJIVYSyw2H", "11 h 58 : deux demi-œufs laissés"],
   ["10XW2epW3LQ6c1jW2GgCo52mkYLORTmoU", "12 h 04 : un reste d'œuf"],
-  ["1PQoZ5BMvIdjCNT6M5Ess-NGVVKlMsML-", "13 h 10 : un petit bout d'œuf"]
+  ["1PQoZ5BMvIdjCNT6M5Ess-NGVVKlMsML-", "13 h 10 : un petit bout d'œuf"],
+  ["1F5Gj_VkXGJVnLup2q-e68N5qkUrrCvf4", "n° 479 : 5 boulettes et riz presque entiers → environ 55 % du repas"]
 ];
 // ▶️ Depuis l'éditeur : comparerPlateauxTemoinsABC()  (modèle réglé dans MODELE_GEMINI, environ 16 plateaux, quelques centimes)
 function comparerPlateauxTemoinsABC() {
