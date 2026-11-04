@@ -811,7 +811,7 @@ COMMENT ESTIMER reste_pct :
 - Aliment en PIÈCES (boulettes, nuggets, saucisses, filets, demi-œufs, tranches, fruits) : COMPTE les pièces restantes et rapporte-les au nombre servi (5 boulettes servies, 5 restantes = 100 % ; 2 restantes = 40 %). Une pièce entamée compte pour la part qui reste.
 - Aliment en VRAC (riz, pâtes, purée, légumes) : compare la surface et l'épaisseur restantes à une portion pleine (environ la moitié de l'assiette). Un tas net, non creusé, aux bords réguliers = 85 à 100 %.
 - FORME INTACTE : pièces entières non touchées, tas de garniture non entamé, sauce lisse non étalée par la fourchette = l'aliment n'a pas été mangé (90 à 100 %). Ne réponds pas « en partie mangé » par défaut : une assiette à peine touchée est une assiette laissée.
-PAIN : chaque élève reçoit ${params.pain_tranches || 2} tranche(s) de pain au départ. Pour le pain, reste_pct est la part de ces ${params.pain_tranches || 2} tranches laissée sur le plateau (avec 2 tranches : une tranche entière laissée = 50 %, les deux = 100 %, quelques croûtes = 10 %).
+PAIN : chaque élève reçoit ${params.pain_tranches || 2} tranche(s) de pain au départ. Pour l'aliment « Pain », COMPTE les morceaux réellement visibles et ajoute "morceaux_pain": {"tranches": nombre de tranches entières ou presque, "demi": nombre de demi-tranches, "quignons": nombre de petits morceaux, croûtes ou quignons}. Les miettes ne comptent pas. Ne donne pas 50 % par habitude : un petit quignon n'est PAS une tranche. reste_pct = part des ${params.pain_tranches || 2} tranches laissée (indicatif, le serveur recalcule d'après les morceaux).
 
 PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « ${choixPlat} ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste.
 NOMS DU MENU DU JOUR (confirmés par l'équipe) : ${listeMenu || 'aucun'}. Quand un aliment correspond à l'un d'eux, écris EXACTEMENT ce nom, jamais un nom générique (« Gâteau », « Dessert », « Plat ») ni une variante.
@@ -889,10 +889,12 @@ Réponds en JSON strict :
   // Validation : on écarte les aliments incohérents (reste + mangé ≠ 100) ou de composant inconnu.
   const retenus = [], ecartes = [], residus = [];
   (Array.isArray(result.aliments) ? result.aliments : []).forEach(function (a) {
-    const reste = parseFloat(a.reste_pct), mange = parseFloat(a.mange_pct);
+    let reste = parseFloat(a.reste_pct), mange = parseFloat(a.mange_pct);
     let composant = String(a.composant || "").toLowerCase();
     // Le pain figure dans la rubrique « accompagnement » du menu : il reste du pain (portion 50 g, bac pain).
     if (/^pain\b/i.test(String(a.aliment || "").trim())) composant = "pain";
+    // Pain : les morceaux comptés par l'IA l'emportent sur son pourcentage (souvent « 50 % » par défaut).
+    if (composant === "pain") { const pp = pctPainMorceauxABC(a.morceaux_pain, params); if (pp !== null) { reste = pp; mange = 100 - pp; } }
     const incoherent = isNaN(reste) || isNaN(mange) || Math.abs(reste + mange - 100) > 15 || reste < 0 || reste > 100;
     if (incoherent || COMPOSANTS_VALIDES.indexOf(composant) === -1 || !nettoyerTexte(a.aliment)) { ecartes.push(a); return; }
     const alimentBrut = nettoyerTexte(a.aliment);
@@ -2086,6 +2088,14 @@ function resolutionImageScanABC() {
 // Repas de référence = entrée + plat + garniture + dessert + pain (pain toujours compté), d'après la roue crantée.
 // Les portions et la méthode sont enregistrées avec chaque analyse : un changement de réglage ne modifie pas l'historique.
 // ===================================================================================
+// Morceaux de pain restants → % des tranches servies. Tranche entière = 1, demi-tranche = 0,5, quignon / croûte = 0,2, miettes = 0.
+function pctPainMorceauxABC(m, params) {
+  if (!m || typeof m !== "object") return null;
+  const n = function (v) { const x = parseFloat(v); return isNaN(x) || x < 0 ? 0 : Math.min(x, 10); };
+  const tranches = n(m.tranches) + 0.5 * n(m.demi) + 0.2 * n(m.quignons);
+  const servies = Math.max(1, Number((params || {}).pain_tranches) || 2);
+  return Math.min(100, Math.round(100 * tranches / servies));
+}
 const METHODE_ANALYSE_ABC = "repas-reference-1";
 const SEUIL_RESIDU_PCT_ABC = 5;
 
