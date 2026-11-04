@@ -805,6 +805,11 @@ MENU DU JOUR (options possibles ; sépare les aliments par "+", les rubriques pa
 RÉFÉRENCE VISUELLE DU SERVICE (description produite une fois depuis les photos avant service ; aide indicative, jamais preuve qu’un aliment est sur le plateau) : ${referenceService || 'Aucune référence visuelle disponible.'}
 Les noms confirmés par l’utilisateur priment sur une ancienne proposition IA. La photo du plateau reste prioritaire pour déterminer ce qui est réellement présent. N’invente aucun reste d’après cette référence.
 
+PORTIONS SERVIES À CHAQUE ÉLÈVE (réglées par la cuisine) : entrée ${params.portion_entree_g} g, plat protidique ${params.portion_plat_g} g, garniture ${params.portion_garniture_g} g (une portion de féculent ou de légume occupe environ la moitié d'une assiette plate), dessert ${params.portion_dessert_g} g. Un nombre entre parenthèses après un aliment du menu est le nombre de pièces servies par élève (ex. « Boulettes de viande (5) » = 5 boulettes).
+COMMENT ESTIMER reste_pct :
+- Aliment en PIÈCES (boulettes, nuggets, saucisses, filets, demi-œufs, tranches, fruits) : COMPTE les pièces restantes et rapporte-les au nombre servi (5 boulettes servies, 5 restantes = 100 % ; 2 restantes = 40 %). Une pièce entamée compte pour la part qui reste.
+- Aliment en VRAC (riz, pâtes, purée, légumes) : compare la surface et l'épaisseur restantes à une portion pleine (environ la moitié de l'assiette). Un tas net, non creusé, aux bords réguliers = 85 à 100 %.
+- FORME INTACTE : pièces entières non touchées, tas de garniture non entamé, sauce lisse non étalée par la fourchette = l'aliment n'a pas été mangé (90 à 100 %). Ne réponds pas « en partie mangé » par défaut : une assiette à peine touchée est une assiette laissée.
 PAIN : chaque élève reçoit ${params.pain_tranches || 2} tranche(s) de pain au départ. Pour le pain, reste_pct est la part de ces ${params.pain_tranches || 2} tranches laissée sur le plateau (avec 2 tranches : une tranche entière laissée = 50 %, les deux = 100 %, quelques croûtes = 10 %).
 
 PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « ${choixPlat} ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste.
