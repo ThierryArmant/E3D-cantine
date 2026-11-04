@@ -811,7 +811,8 @@ NOMS DU MENU DU JOUR (confirmés par l'équipe) : ${listeMenu || 'aucun'}. Quand
 NOMS DU CATALOGUE (seulement si l'aliment n'est pas dans le menu du jour) : ${nomsCatalogue.join(', ')}.
 - UN PRODUIT = UN ALIMENT : les pépites, le glaçage, la garniture ou la croûte d'un gâteau font partie du gâteau ; ne les liste jamais comme un aliment séparé (pas de « Chocolat » à côté d'un muffin aux pépites de chocolat).
 RÈGLES
-- Décris séparément la base, sa forme et sa préparation : aliment « Poisson », préparation « sauce curry ». Une sauce adhérente ne constitue pas une deuxième portion. Une sauce ne peut être listée séparément que si elle est réellement distincte et visible.
+- Décris séparément la base, sa forme et sa préparation : aliment « Poisson », préparation « sauce curry ». Une sauce, un assaisonnement, du beurre ou des aromates font partie de l'aliment préparé : décris-les dans « preparation », ne les liste JAMAIS comme un aliment séparé (pas de ligne « Sauce tomate », « Mayonnaise »…). S'il ne reste qu'une couche de sauce étalée ou des traces, l'aliment a été mangé : liste-le à 0 % s'il est identifiable, sinon ne liste rien. Ne déduis jamais l'aliment mangé de la seule couleur d'une sauce.
+- RÉSIDUS NÉGLIGEABLES : traces, miettes, quelques grains épars, croûtes infimes = 0 % de restes. Une garniture de présentation servie DANS le même ramequin qu'un autre aliment (lit de salade sous un œuf, persil, rondelle de citron) fait partie de ce plat : ne la liste pas comme une entrée séparée.
 - Ne crée jamais un aliment à 0 % de restes d'après le seul menu ou l'avis « tout fini » ; l'absence d'un aliment ne prouve pas qu'il a été pris.
 - En cas d'ambiguïté poulet/poisson, utilise la précision de l'élève uniquement pour une identification compatible avec l'image ; sans preuve suffisante, écris « Aliment non identifié » avec une confiance faible.
 - Inventorie CHAQUE aliment visible séparément, même hors menu. Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu’un plat a été servi.
@@ -879,7 +880,7 @@ Réponds en JSON strict :
   }
 
   // Validation : on écarte les aliments incohérents (reste + mangé ≠ 100) ou de composant inconnu.
-  const retenus = [], ecartes = [];
+  const retenus = [], ecartes = [], residus = [];
   (Array.isArray(result.aliments) ? result.aliments : []).forEach(function (a) {
     const reste = parseFloat(a.reste_pct), mange = parseFloat(a.mange_pct);
     let composant = String(a.composant || "").toLowerCase();
@@ -892,11 +893,15 @@ Réponds en JSON strict :
     const nomMenu = rapprocherNomMenuABC(alimentBrut, composant, menuNoms);
     const fiche = identifierCatalogueABC(nomMenu || alimentBrut, composant, catalogueScan);
     const aliment = nomMenu || (fiche ? fiche.libelle : alimentBrut);
+    // Sauce ou condiment seul : attribut d'une préparation, jamais une portion jetée.
+    if (/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che)\b/i.test(aliment)) { residus.push(aliment); return; }
     const portion = portionReference(composant, aliment, params);
+    // Traces et miettes : négligeables (convention A.B.C.).
+    const resteRetenu = reste <= SEUIL_RESIDU_PCT_ABC ? 0 : reste;
     retenus.push({
       catalogue_id: fiche ? fiche.id : "", aliment_brut: alimentBrut, composant: composant, aliment: aliment, forme: nettoyerTexte(a.forme) || "?", preparation: nettoyerTexte(a.preparation) || "?",
-      etat_reste: nettoyerTexte(a.etat_reste), reste_pct: Math.round(reste), portion_ref_g: portion,
-      reste_g_ref: Math.round(portion * reste / 100), confiance: nettoyerTexte(a.confiance) || "moyenne",
+      etat_reste: nettoyerTexte(a.etat_reste), reste_pct: Math.round(resteRetenu), portion_ref_g: portion,
+      reste_g_ref: Math.round(portion * resteRetenu / 100), confiance: nettoyerTexte(a.confiance) || "moyenne",
       dans_emballage: a.dans_emballage === true
     });
   });
@@ -916,11 +921,13 @@ Réponds en JSON strict :
   }
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
   const tri = trierDechetsPlateauABC(retenus, result.objets, params);
+  const repas = repasReferenceABC(retenus, params);
 
   return {
     ligne: [quand, "SCAN_IA_VISION", note,
       moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, bacs: tri.bacs, objets: tri.objets, jetons: jetons })],
+      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, residus: residus, bacs: tri.bacs, objets: tri.objets, jetons: jetons,
+        methode: METHODE_ANALYSE_ABC, modele: modeleGeminiABC(), repas_ref_g: repas.ref_g, portions_ref: repas.portions, restes_g: repas.restes_g, restes_pct_repas: repas.pct })],
     details: { aliments: retenus, ecartes: ecartes.length, bacs: tri.bacs }
   };
 }
@@ -2036,4 +2043,20 @@ function resolutionImageScanABC() {
   try { v = String(PropertiesService.getScriptProperties().getProperty("RESOLUTION_IMAGE_SCAN") || "").trim().toLowerCase(); } catch (e) {}
   if (v === "defaut" || v === "défaut") return "";
   return { low: "MEDIA_RESOLUTION_LOW", medium: "MEDIA_RESOLUTION_MEDIUM", high: "MEDIA_RESOLUTION_HIGH" }[v] || "MEDIA_RESOLUTION_HIGH";
+}
+
+// ===================================================================================
+// REPAS DE RÉFÉRENCE (méthode validée le 04/11/2026)
+// restes (%) = 100 × grammes comestibles restants / grammes du repas de référence.
+// Repas de référence = entrée + plat + garniture + dessert + pain (pain toujours compté), d'après la roue crantée.
+// Les portions et la méthode sont enregistrées avec chaque analyse : un changement de réglage ne modifie pas l'historique.
+// ===================================================================================
+const METHODE_ANALYSE_ABC = "repas-reference-1";
+const SEUIL_RESIDU_PCT_ABC = 5;
+
+function repasReferenceABC(retenus, params) {
+  const portions = { entree: params.portion_entree_g, plat: params.portion_plat_g, garniture: params.portion_garniture_g, dessert: params.portion_dessert_g, pain: params.portion_pain_g };
+  const ref = Object.keys(portions).reduce(function (t, k) { return t + (Number(portions[k]) || 0); }, 0);
+  const restes = (retenus || []).reduce(function (t, i) { return t + (Number(i.reste_g_ref) || 0); }, 0);
+  return { ref_g: ref, portions: portions, restes_g: Math.round(restes), pct: ref > 0 ? Math.min(100, Math.round(100 * restes / ref)) : null };
 }

@@ -7,7 +7,22 @@ const date=s=>{const x=String(s||'');const f=x.match(/^(\d{2})\/(\d{2})\/(\d{4})
 const avis=s=>{const x=String(s||'').toLowerCase();if(x.includes('plus faim')||x.includes('🟡'))return 'plus faim';if(x.includes('tout fini')||x.includes('🟢'))return 'tout fini';if(x.includes('temps')||x.includes('🟠'))return 'pas le temps';if(x.includes('aimé')||x.includes('aime')||x.includes('🔴'))return 'pas aimé';return 'non renseigné'};
 const emoji=x=>({'pas aimé':'🔴','plus faim':'🟡','pas le temps':'🟠','tout fini':'🟢'}[x]||'⚪');
 const idDrive=url=>{const x=String(url||'');return (x.match(/\/file\/d\/([\w-]+)/)||x.match(/[?&]id=([\w-]+)/)||[])[1]||''};
-const reste=s=>{try{const d=typeof s.detail==='string'?JSON.parse(s.detail):s.detail;const a=d&&d.retenus;if(Array.isArray(a)&&a.length){const total=a.reduce((v,x)=>v+(Number(x.portion_ref_g)||0),0);return total?Math.round(a.reduce((v,x)=>v+(Number(x.reste_g_ref)||0),0)/total*100):null}}catch(e){}if(typeof parseScanItems==='function'){const items=parseScanItems(s.commentaire);if(items.length)return Math.round(items.reduce((total,item)=>total+item.restePct,0)/items.length)}return null};
+// Restes du REPAS DE RÉFÉRENCE (entrée + plat + garniture + dessert + pain, roue crantée) : 100 × grammes restants / grammes du repas.
+// Analyse récente : valeur enregistrée avec ses portions. Analyse ancienne : recalcul affiché comme tel (pas de modification des données).
+const SAUCE=/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement)\b/i;
+const portionsActuelles=()=>{const p=((typeof globalRawData!=='undefined'&&globalRawData)||{}).parametres||{};return {entree:p.portion_entree_g||80,plat:p.portion_plat_g||100,accompagnement:p.portion_garniture_g||150,dessert:p.portion_dessert_g||100,fruit:p.portion_fruit_g||150,pain:p.portion_pain_g||50}};
+const reste=s=>{
+ let d=null;try{d=typeof s.detail==='string'&&s.detail?JSON.parse(s.detail):s.detail}catch(e){}
+ if(d&&typeof d.restes_pct_repas==='number')return {pct:d.restes_pct_repas,g:d.restes_g,ref:d.repas_ref_g,methode:'enregistrée'};
+ const P=portionsActuelles(),ref=P.entree+P.plat+P.accompagnement+P.dessert+P.pain;
+ let items=[];
+ if(d&&Array.isArray(d.retenus)&&d.retenus.length)items=d.retenus.map(x=>({nom:x.aliment,comp:x.composant,pct:Number(x.reste_pct)||0}));
+ else if(typeof parseScanItems==='function')items=parseScanItems(s.commentaire).map(x=>({nom:x.nom,comp:x.composant,pct:x.restePct}));
+ if(!items.length)return null;
+ const g=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5).reduce((t,x)=>t+(/^pain\b/i.test(x.nom)?P.pain:(P[x.comp]||P.plat))*x.pct/100,0);
+ return {pct:Math.min(100,Math.round(100*g/ref)),g:Math.round(g),ref:ref,methode:'recalculée'};
+};
+const pctReste=s=>s.reste?s.reste.pct:null;
 let current=[];
 function refresh(){
  const data=(typeof globalRawData!=='undefined'&&globalRawData)||{};
@@ -15,14 +30,14 @@ function refresh(){
  const records=raw.map((s,i)=>({...s,ordre:i+1,jour:date(s.dateRaw||s.date),avis:avis(s.avis_eleve),reste:reste(s),drive:idDrive(s.photo)})).sort((a,b)=>a.jour.localeCompare(b.jour)||String(a.dateRaw||a.date).localeCompare(String(b.dateRaw||b.date))||a.ordre-b.ordre);
  const compteJour={};records.forEach(s=>{compteJour[s.jour]=(compteJour[s.jour]||0)+1;s.ordre=compteJour[s.jour]});
  const day=$('abc-photo-date').value, a=$('abc-photo-avis').value, status=$('abc-photo-statut').value, r=$('abc-photo-restes').value, q=$('abc-photo-search').value.toLocaleLowerCase('fr').trim();
- current=records.filter(s=>(!day||s.jour===day)&&(!a||s.avis===a)&&(!status||s.type===status)&&(!q||[s.commentaire,s.detail,s.avis_eleve,s.photo].join(' ').toLocaleLowerCase('fr').includes(q))&&(!r||(s.reste!==null&&(r==='0'?s.reste===0:r==='1'?s.reste>0&&s.reste<30:r==='30'?s.reste>=30&&s.reste<60:s.reste>=60))));
+ current=records.filter(s=>(!day||s.jour===day)&&(!a||s.avis===a)&&(!status||s.type===status)&&(!q||[s.commentaire,s.detail,s.avis_eleve,s.photo].join(' ').toLocaleLowerCase('fr').includes(q))&&(!r||(pctReste(s)!==null&&(r==='0'?pctReste(s)===0:r==='1'?pctReste(s)>0&&pctReste(s)<30:r==='30'?pctReste(s)>=30&&pctReste(s)<60:pctReste(s)>=60))));
  const avecPhoto=current.filter(s=>s.drive);
  const stat=$('abc-photo-stats');stat.className='abc-photo-stats';
- stat.innerHTML=[['Scans',current.length],['Photos liées',avecPhoto.length],['Analysés',current.filter(s=>s.type==='SCAN_IA_VISION').length],['Aliments visibles ≥ 60 %',current.filter(s=>s.reste!==null&&s.reste>=60).length]].map(([n,v])=>'<div class="abc-photo-stat">'+escape(n)+'<br><b>'+v+'</b></div>').join('');
+ stat.innerHTML=[['Scans',current.length],['Photos liées',avecPhoto.length],['Analysés',current.filter(s=>s.type==='SCAN_IA_VISION').length],['Plateaux ≥ 30 % du repas',current.filter(s=>pctReste(s)!==null&&pctReste(s)>=30).length]].map(([n,v])=>'<div class="abc-photo-stat">'+escape(n)+'<br><b>'+v+'</b></div>').join('');
  $('abc-photo-flow').className='abc-photo-flow';$('abc-photo-flow').innerHTML=['Photos Drive','ID scan + heure','Avis élève','Analyse existante','Filtres & détails'].map((x,i)=>'<span>'+escape(x)+'</span>'+(i<4?' → ':'')).join('');
  const counts=['pas aimé','plus faim','pas le temps','tout fini','non renseigné'].map(x=>[x,current.filter(s=>s.avis===x).length]);
  $('abc-photo-chart').className='abc-photo-chart';$('abc-photo-chart').innerHTML=counts.map(([x,n])=>'<div class="abc-photo-chart-item">'+emoji(x)+' '+escape(x)+' · <b>'+n+'</b><div class="abc-photo-track"><div class="abc-photo-fill" style="width:'+(current.length?100*n/current.length:0)+'%"></div></div></div>').join('');
- $('abc-photo-info').textContent=avecPhoto.length+' photo(s) disponibles pour la mosaïque. Les plateaux sans photo liée restent comptés dans les statistiques. Le pourcentage est la moyenne des restes des seuls aliments identifiés. La part restante du repas complet est inconnue sans connaître les portions prises au départ.';
+ $('abc-photo-info').textContent=avecPhoto.length+' photo(s) disponibles pour la mosaïque. Les plateaux sans photo liée restent comptés dans les statistiques. Le pourcentage est la part du repas de référence laissée sur le plateau (grammes restants / entrée + plat + garniture + dessert + pain réglés dans la roue crantée). Sauces seules, traces et miettes sont négligées.';
  const grid=$('abc-photo-grid');grid.className='abc-photo-grid';grid.replaceChildren();
  if(!avecPhoto.length){const message=document.createElement('p');message.textContent='Aucune photo ne correspond aux filtres sélectionnés.';grid.append(message)}
  avecPhoto.slice(0,300).forEach(s=>{
@@ -38,7 +53,7 @@ function detail(s){
  const dialog=$('abc-photo-detail'),root=$('abc-photo-detail-content');
  const url='https://drive.google.com/file/d/'+encodeURIComponent(s.drive)+'/view';
  const safeComment=escape(s.commentaire||'Aucun commentaire enregistré');
- root.innerHTML='<h3>Plateau · '+escape(s.avis)+' '+emoji(s.avis)+'</h3><p>Ordre dans les données chargées : '+s.ordre+' · '+escape(s.dateRaw||s.date||'')+'</p><img alt="Photographie du plateau" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w1200"><p><b>ID scan :</b> '+escape(s.id_scan||s.idScan||'non transmis')+'</p><p><b>Repas complet restant :</b> indéterminable avec cette seule photo.</p><p><b>Moyenne des restes des aliments identifiés :</b> '+(s.reste===null?'Non disponibles':s.reste+' %')+'</p><p><b>Commentaire :</b> '+safeComment+'</p><p><a href="'+url+'" target="_blank" rel="noopener noreferrer">Ouvrir l’original dans Drive</a></p>';
+ root.innerHTML='<h3>Plateau · '+escape(s.avis)+' '+emoji(s.avis)+'</h3><p>Ordre dans les données chargées : '+s.ordre+' · '+escape(s.dateRaw||s.date||'')+'</p><img alt="Photographie du plateau" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w1200"><p><b>ID scan :</b> '+escape(s.id_scan||s.idScan||'non transmis')+'</p><p><b>Restes du repas de référence :</b> '+(s.reste===null?'non disponibles':s.reste.pct+' % ('+s.reste.g+' g sur '+s.reste.ref+' g'+(s.reste.methode==='recalculée'?', recalculé d’après une analyse ancienne avec les réglages actuels':'')+')')+'</p><p><b>Commentaire :</b> '+safeComment+'</p><p><a href="'+url+'" target="_blank" rel="noopener noreferrer">Ouvrir l’original dans Drive</a></p>';
  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
 }
 window.abcPhotosRefresh=refresh;

@@ -98,3 +98,16 @@ Aucune modification du serveur Apps Script, aucune réanalyse et aucun appel IA 
 ### Prochaine livraison attendue
 
 Une correction complète du calcul et de l’analyse, testée sur les exemples, accompagnée de l’état exact du déploiement Apps Script. Le plateau n° 5 doit ressortir à 0 % de restes significatifs selon la convention validée. Les cas avec aliments réellement présents doivent conserver une estimation proportionnée au repas complet.
+
+## 4 novembre 2026 (matin) — Livraison Claude : repas de référence
+
+Commit de cette entrée. Serveur `apps_script/Code.gs` et galerie `abc-analyse-photos.js`.
+
+- **Pain** : réglé dans la roue crantée en tranches par élève (2 par défaut) × poids d'une tranche (25 g par défaut) ; `portion_pain_g` en découle. Consigne IA : une tranche entière laissée sur 2 = 50 %.
+- **Calcul** : `restes_pct_repas = 100 × restes_g / repas_ref_g`, repas de référence = entrée + plat + garniture + dessert + pain (roue crantée). Enregistrés dans le détail de chaque nouvelle analyse avec `methode: "repas-reference-1"`, `modele`, `portions_ref`, `repas_ref_g`, `restes_g`. Aucun recalcul de l'historique côté serveur.
+- **Contrôle déterministe** : un aliment nommé sauce / mayonnaise / vinaigrette / ketchup / moutarde / huile / jus / assaisonnement n'est jamais une portion (liste `residus`). Restes ≤ 5 % = 0 (traces, miettes).
+- **Consignes IA** : sauce et aromates = attributs de la préparation ; sauce étalée seule = aliment mangé ; garniture de présentation dans le même ramequin (lit de salade sous un œuf) = partie du plat ; fond de caissette / film froissé ≠ muffin (dôme, pépites ou mie exigés) ; forme et préparation = telles que servies.
+- **Galerie** : affiche le % du repas de référence ; pour une analyse ancienne, le recalcul avec les réglages actuels est signalé comme tel. Filtre « Restes du repas ».
+- **Test** `tests/repas-reference.test.cjs` : plateau n° 5 (sauce + traces) → 0 % ; n° 108 (une tranche + muffin 3/4) → 21 % ; riz entier → 31 %.
+- **Inchangé** : modèle (propriété `MODELE_GEMINI`, Flash-Lite), sauvegarde Drive, file de reprise, anti-doublons, gestion réseau/crédit.
+- **Reste ouvert** : règle dessert + fruit + laitage dans le repas de référence (1 dessert compté pour l'instant) ; un film vide pris pour un muffin ne peut être corrigé que par la vision (consigne renforcée, à vérifier sur les plateaux témoins avant toute réanalyse massive).
