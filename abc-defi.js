@@ -20,7 +20,7 @@ function alimentsJeteJourABC(date) {
   scans.forEach(s => {
     const re = /\[([^\]]+?) - [^\]]*?: (\d+)% restes \| (\w+)/g; let m;
     while ((m = re.exec(String(s.commentaire || "")))) {
-      let nom = m[1].trim(); const pct = +m[2]; let comp = m[3];
+      let nom = m[1].trim(); const pct = +m[2] <= 5 ? 0 : +m[2]; let comp = m[3];
       if (/^aliment non identifi/i.test(nom) || /^sauce\b/i.test(nom) || !pct) continue;
       if (/^pain\b/i.test(nom)) { comp = "pain"; nom = "Pain"; }
       const portion = comp === "dessert" && defiEstFruit(nom) ? por.fruit : (por[comp] || por.plat);

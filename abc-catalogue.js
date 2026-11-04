@@ -616,6 +616,8 @@ function abcStockerSelection(cle,texte) {
 function abcSelection() { try { return JSON.parse(abcLireSelection(abcSelectionKey()) || '[]'); } catch(e) { return []; } }
 function abcSauverSelection() {
     const valeurs=Array.from(document.querySelectorAll('[data-catalogue-id]:checked')).map(e=>e.dataset.catalogueId+(e.dataset.maison ? ':maison' : ''));
+    // Nombre de pièces servies (boulettes ×5, nuggets ×6…) : « id:xN ».
+    document.querySelectorAll('input[data-pieces-id]').forEach(e=>{const n=parseInt(e.value,10);if(n>0)valeurs.push(e.dataset.piecesId+':x'+n);});
     abcStockerSelection(abcSelectionKey(),JSON.stringify(valeurs));
 }
 function abcFicheFinale(item) {
@@ -734,7 +736,15 @@ function abcAfficherCatalogue() {
                 else label.append(abcEl('span',(nature==='option'?'+ ':'')+x.libelle));
                 if(nature==='base'){
                     const fm=abcEl('input');fm.type='checkbox';fm.name='fait_maison';fm.dataset.catalogueId=x.id;fm.dataset.maison='1';fm.checked=selected.has(x.id+':maison');fm.setAttribute('aria-label',x.libelle+' fait maison');fm.addEventListener('change',abcSauverSelection);
-                    const span=abcEl('span');span.style.marginLeft='auto';span.append(fm,document.createTextNode(' 🧑‍🍳'));label.append(span);
+                    const span=abcEl('span');span.style.cssText='margin-left:auto;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;';
+                    // Pièces servies par élève (boulettes, nuggets, beignets…) : l’analyse compte les pièces restantes.
+                    const nb=abcEl('input');nb.type='number';nb.min='0';nb.max='30';nb.step='1';nb.inputMode='numeric';nb.placeholder='×';nb.dataset.piecesId=x.id;
+                    const deja=Array.from(selected).find(v=>v.startsWith(x.id+':x'));if(deja)nb.value=deja.slice(x.id.length+2);
+                    nb.title='Nombre de pièces servies par élève (ex. 5 boulettes). Laisser vide si ce n’est pas compté en pièces.';nb.setAttribute('aria-label','Nombre de pièces servies : '+x.libelle);
+                    nb.style.cssText='width:46px;padding:3px 4px;border:1px solid #cbd5e1;border-radius:4px;font-size:14px;text-align:center;';
+                    nb.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();nb.focus();});
+                    nb.addEventListener('input',()=>{const n=parseInt(nb.value,10);if(n>0&&!cb.checked)cb.checked=true;abcSauverSelection();});
+                    span.append(abcEl('span','×'),nb,fm,document.createTextNode(' 🧑‍🍳'));label.append(span);
                 }
                 groupe.append(label);
             });
@@ -757,7 +767,9 @@ function abcMenuCourant() {
     const parts=Object.keys(ABC_RUBRIQUES).map(type=>{
         const bases=Array.from(document.querySelectorAll('[data-abc-rubrique="'+type+'"] input[data-catalogue-id]:checked')).filter(e=>!e.dataset.maison).map(e=>ABC_CATALOGUE.items.find(x=>x.id===e.dataset.catalogueId)).filter(Boolean);
         const noms=bases.filter(x=>x.nature==='base').map(x=>{
-            const fm=Array.from(document.querySelectorAll('[data-maison]:checked')).some(e=>e.dataset.catalogueId===x.id);return x.libelle+(fm?' 🧑‍🍳':'');
+            const fm=Array.from(document.querySelectorAll('[data-maison]:checked')).some(e=>e.dataset.catalogueId===x.id);
+            const n=parseInt(Array.from(document.querySelectorAll('input[data-pieces-id]')).find(e=>e.dataset.piecesId===x.id)?.value,10);
+            return x.libelle+(n>0?' ×'+n:'')+(fm?' 🧑‍🍳':'');
         });
         const libre=document.getElementById(type+'_libre')?.value.trim();if(libre)noms.push(libre);
         const opts=bases.filter(x=>x.nature==='option').map(x=>x.libelle);if(noms.length)present=true;
@@ -855,8 +867,9 @@ function abcLireMenuEnregistre(texte) {
         }
         base.split(/\s+\+\s+/).forEach(morceau=>{
             const maison=/🧑|fait maison/i.test(morceau);let nom=morceau.replace(/\(Fait Maison\)/ig,'').replace(/[\p{Extended_Pictographic}\u200d\ufe0f]/gu,'').trim();
+            const pieces=nom.match(/\s*[×x]\s*(\d+)\s*$/i);if(pieces)nom=nom.slice(0,pieces.index).trim();
             const prep=type==='plat'?preparation[abcCle(nom)]:null;
-            const x=choisir(prep?prep[0]:nom,'base');if(x&&maison)ids.push(x.id+':maison');
+            const x=choisir(prep?prep[0]:nom,'base');if(x&&maison)ids.push(x.id+':maison');if(x&&pieces&&+pieces[1]>0)ids.push(x.id+':x'+(+pieces[1]));
             if(prep)prep.slice(1).forEach(n=>choisir(n,'option'));
         });
     });
@@ -973,11 +986,11 @@ function abcAfficherMenuCorrection() {
     const liste=document.getElementById('abc-correction-menu-items');if(!liste)return;
     const date=document.getElementById('input-menu-date').value;
     const resume=document.getElementById('abc-correction-menu-summary');if(resume)resume.textContent=(ABC_CATALOGUE.menus||{})[date]?'Menu enregistré pour le '+date+' · modifiez les éléments puis validez.':'Aucun menu enregistré pour le '+date+' · vous pouvez en composer un.';
-    liste.replaceChildren();const ids=abcSelection().filter(id=>!id.endsWith(':maison'));
+    liste.replaceChildren();const ids=abcSelection().filter(id=>!id.endsWith(':maison')&&!/:x\d+$/.test(id));
     ids.forEach(id=>{const x=ABC_CATALOGUE.items.find(x=>x.id===id);if(!x||!x.actif)return;
         const ligne=abcEl('div');ligne.style.cssText='display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #e2e8f0;';
         const moins=abcEl('button','− Retirer');moins.type='button';moins.style.cssText='cursor:pointer;min-height:38px;padding:6px 10px;border:1px solid #fca5a5;border-radius:6px;background:#fff1f2;color:#991b1b;';
-        moins.addEventListener('click',()=>{const selection=abcSelection().filter(v=>v!==id&&v!==id+':maison');abcStockerSelection(abcSelectionKey(),JSON.stringify(selection));abcAfficherCatalogue();abcAfficherMenuCorrection();});
+        moins.addEventListener('click',()=>{const selection=abcSelection().filter(v=>v!==id&&v!==id+':maison'&&!v.startsWith(id+':x'));abcStockerSelection(abcSelectionKey(),JSON.stringify(selection));abcAfficherCatalogue();abcAfficherMenuCorrection();});
         ligne.append(moins,abcEl('span',x.libelle+' · '+ABC_RUBRIQUES[x.rubrique]+(x.nature==='option'?' · option':'')));liste.append(ligne);
     });
     if(!ids.length)liste.append(abcEl('p','Aucun aliment sélectionné pour ce menu.'));
