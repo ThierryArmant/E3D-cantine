@@ -5,7 +5,7 @@
 //  - Annuaire écoles : colonnes A (nom) et B (ID Google Sheets), onglet Configuration de Giono.
 //  - CONFIGURATION_SHEET_ID / CONFIGURATION_ONGLET dans les propriétés permettent de déplacer cette liste.
 // ==========================================================================
-const NOM_MODELE_GEMINI = "gemini-3.5-flash";
+const NOM_MODELE_GEMINI = "gemini-3.1-flash-lite"; // Flash-Lite choisi le 03/11 (coût ÷ 5). La propriété MODELE_GEMINI reste prioritaire.
 const URL_REFERENTIEL = "https://raw.githubusercontent.com/ThierryArmant/E3D-cantine/main/plan_alimentaire_reference.txt";
 
 // Valeurs par défaut des paramètres de chaque établissement (modifiables dans l'onglet "Parametres" de son tableur)

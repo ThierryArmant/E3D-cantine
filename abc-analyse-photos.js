@@ -13,12 +13,12 @@ const SAUCE=/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonn
 const portionsActuelles=()=>{const p=((typeof globalRawData!=='undefined'&&globalRawData)||{}).parametres||{};return {entree:p.portion_entree_g||80,plat:p.portion_plat_g||100,accompagnement:p.portion_garniture_g||150,dessert:p.portion_dessert_g||100,fruit:p.portion_fruit_g||150,pain:p.portion_pain_g||50}};
 const reste=s=>{
  let d=null;try{d=typeof s.detail==='string'&&s.detail?JSON.parse(s.detail):s.detail}catch(e){}
- if(d&&typeof d.restes_pct_repas==='number')return {pct:d.restes_pct_repas,g:d.restes_g,ref:d.repas_ref_g,methode:'enregistrée'};
  const P=portionsActuelles();
  let items=[];
  if(d&&Array.isArray(d.retenus)&&d.retenus.length)items=d.retenus.map(x=>({nom:x.aliment,comp:x.composant,pct:Number(x.reste_pct)||0}));
  else if(typeof parseScanItems==='function')items=parseScanItems(s.commentaire).map(x=>({nom:x.nom,comp:x.composant,pct:x.restePct}));
  if(!items.length)return null;
+ items.forEach(x=>{if(/^pain\b/i.test(String(x.nom||'')))x.comp='pain'});
  // Deux desserts pris = deux portions de dessert dans le repas de référence.
  const portionItem=x=>/^pain\b/i.test(x.nom)?P.pain:(x.comp==='dessert'&&/(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|raisin|fruit)/i.test(x.nom)&&!/compote|yaourt|muffin|g[âa]teau|tarte/i.test(x.nom)?P.fruit:(P[x.comp]||P.plat));
  // Deux desserts seulement pour un laitage + un autre dessert ; 2 yaourts, 2 fruits ou fruit + gâteau = 1.
@@ -31,8 +31,17 @@ const reste=s=>{
  const fam={};items.filter(x=>x.comp==='dessert'&&!x.accomp&&!SAUCE.test(String(x.nom||''))).forEach(x=>{const f=famille(String(x.nom||''));fam[f]=Math.max(fam[f]||0,portionItem(x))});
  const dessertG=Math.max(P.dessert,Object.values(fam).reduce((t,v)=>t+v,0));
  const ref=P.entree+P.plat+P.accompagnement+dessertG+P.pain;
- const g=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5).reduce((t,x)=>t+(x.accomp?pg:portionItem(x))*x.pct/100,0);
- return {pct:Math.min(100,Math.round(100*g/ref)),g:Math.round(g),ref:ref,methode:'recalculée'};
+ const utiles=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5);
+ const g=utiles.reduce((t,x)=>t+(x.accomp?pg:portionItem(x))*x.pct/100,0);
+ // 4 zones + pain : % restant de chaque zone servie (grammes restants / portion de la zone).
+ const refZone={entree:P.entree,plat:P.plat,accompagnement:P.accompagnement,dessert:dessertG,pain:P.pain};
+ const zones={};Object.keys(refZone).forEach(z=>{
+  const presents=items.filter(x=>x.comp===z&&!SAUCE.test(String(x.nom||'')));if(!presents.length)return;
+  const gz=utiles.filter(x=>x.comp===z).reduce((t,x)=>t+(x.accomp?pg:portionItem(x))*x.pct/100,0);
+  zones[z]=Math.min(100,Math.round(100*gz/refZone[z]));
+ });
+ if(d&&typeof d.restes_pct_repas==='number')return {pct:d.restes_pct_repas,g:d.restes_g,ref:d.repas_ref_g,methode:'enregistrée',zones};
+ return {pct:Math.min(100,Math.round(100*g/ref)),g:Math.round(g),ref:ref,methode:'recalculée',zones};
 };
 const pctReste=s=>s.reste?s.reste.pct:null;
 let current=[];
@@ -46,6 +55,7 @@ function refresh(){
  const avecPhoto=current.filter(s=>s.drive);
  const stat=$('abc-photo-stats');stat.className='abc-photo-stats';
  stat.innerHTML=[['Scans',current.length],['Photos liées',avecPhoto.length],['Analysés',current.filter(s=>s.type==='SCAN_IA_VISION').length],['Plateaux ≥ 30 % du repas',current.filter(s=>pctReste(s)!==null&&pctReste(s)>=30).length]].map(([n,v])=>'<div class="abc-photo-stat">'+escape(n)+'<br><b>'+v+'</b></div>').join('');
+ afficherZones(current);
  $('abc-photo-flow').className='abc-photo-flow';$('abc-photo-flow').innerHTML=['Photos Drive','ID scan + heure','Avis élève','Analyse existante','Filtres & détails'].map((x,i)=>'<span>'+escape(x)+'</span>'+(i<4?' → ':'')).join('');
  const counts=['pas aimé','plus faim','pas le temps','tout fini','non renseigné'].map(x=>[x,current.filter(s=>s.avis===x).length]);
  $('abc-photo-chart').className='abc-photo-chart';$('abc-photo-chart').innerHTML=counts.map(([x,n])=>'<div class="abc-photo-chart-item">'+emoji(x)+' '+escape(x)+' · <b>'+n+'</b><div class="abc-photo-track"><div class="abc-photo-fill" style="width:'+(current.length?100*n/current.length:0)+'%"></div></div></div>').join('');
@@ -61,11 +71,32 @@ function refresh(){
  });
  if(avecPhoto.length>300){const p=document.createElement('p');p.textContent='Affichage limité aux 300 premières photos : affinez les filtres.';grid.append(p)}
 }
+const ZONES=[['entree','🥗 Entrée'],['plat','🍖 Plat'],['accompagnement','🍚 Garniture'],['dessert','🍰 Dessert'],['pain','🥖 Pain']];
+// Comparatif : moyenne des restes de chaque zone sur les plateaux analysés où la zone a été servie.
+// Une zone repérée ce jour-là mais absente d’un plateau compte 0 % (mangée entièrement).
+function zonesComparatif(liste){
+ const analyses=liste.filter(s=>s.reste&&s.reste.zones);
+ const parJour={};analyses.forEach(s=>{const j=parJour[s.jour]=parJour[s.jour]||new Set();Object.keys(s.reste.zones).forEach(z=>j.add(z))});
+ return ZONES.map(([z,nom])=>{
+  const v=analyses.filter(s=>parJour[s.jour].has(z)).map(s=>s.reste.zones[z]??0);
+  return {z,nom,n:v.length,moy:v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null,lourds:v.filter(x=>x>=50).length};
+ }).filter(x=>x.n);
+}
+function afficherZones(liste){
+ let box=$('abc-photo-zones');
+ if(!box){box=document.createElement('div');box.id='abc-photo-zones';box.style.cssText='margin:10px 0;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;';const st=$('abc-photo-stats');if(!st)return;st.after(box)}
+ const z=zonesComparatif(liste);
+ if(!z.length){box.innerHTML='<b>Comparatif par zone</b><p style="margin:4px 0;font-size:13px;">Aucun plateau analysé pour ces filtres.</p>';return}
+ const max=Math.max(...z.map(x=>x.moy));
+ box.innerHTML='<b>Comparatif par zone</b> <span style="font-size:12px;color:#475569;">(part de chaque zone servie laissée sur le plateau, moyenne des plateaux analysés)</span>'+
+  z.map(x=>'<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:14px;"><span style="width:110px;flex:none;">'+x.nom+'</span><div style="flex:1;height:14px;background:#e2e8f0;border-radius:7px;overflow:hidden;"><div style="height:100%;width:'+x.moy+'%;background:'+(x.moy===max&&max>0?'#dc2626':'#2d6a4f')+';"></div></div><b style="width:48px;text-align:right;">'+x.moy+' %</b><span style="font-size:12px;color:#475569;width:150px;flex:none;">'+x.n+' plateaux · '+x.lourds+' à ≥ 50 %</span></div>').join('')+
+  (max>0?'<p style="margin:6px 0 0;font-size:13px;">Zone la plus laissée : <b>'+z.find(x=>x.moy===max).nom+'</b>.</p>':'');
+}
 function detail(s){
  const dialog=$('abc-photo-detail'),root=$('abc-photo-detail-content');
  const url='https://drive.google.com/file/d/'+encodeURIComponent(s.drive)+'/view';
  const safeComment=escape(s.commentaire||'Aucun commentaire enregistré');
- root.innerHTML='<h3>Plateau · '+escape(s.avis)+' '+emoji(s.avis)+'</h3><p>Ordre dans les données chargées : '+s.ordre+' · '+escape(s.dateRaw||s.date||'')+'</p><img alt="Photographie du plateau" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w1200"><p><b>ID scan :</b> '+escape(s.id_scan||s.idScan||'non transmis')+'</p><p><b>Restes du repas de référence :</b> '+(s.reste===null?'non disponibles':s.reste.pct+' % ('+s.reste.g+' g sur '+s.reste.ref+' g'+(s.reste.methode==='recalculée'?', recalculé d’après une analyse ancienne avec les réglages actuels':'')+')')+'</p><p><b>Commentaire :</b> '+safeComment+'</p><p><a href="'+url+'" target="_blank" rel="noopener noreferrer">Ouvrir l’original dans Drive</a></p>';
+ root.innerHTML='<h3>Plateau · '+escape(s.avis)+' '+emoji(s.avis)+'</h3><p>Ordre dans les données chargées : '+s.ordre+' · '+escape(s.dateRaw||s.date||'')+'</p><img alt="Photographie du plateau" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w1200"><p><b>ID scan :</b> '+escape(s.id_scan||s.idScan||'non transmis')+'</p><p><b>Restes du repas de référence :</b> '+(s.reste===null?'non disponibles':s.reste.pct+' % ('+s.reste.g+' g sur '+s.reste.ref+' g'+(s.reste.methode==='recalculée'?', recalculé d’après une analyse ancienne avec les réglages actuels':'')+')'+(s.reste.zones&&Object.keys(s.reste.zones).length?'<br>'+ZONES.filter(([z])=>z in s.reste.zones).map(([z,n])=>n+' : '+s.reste.zones[z]+' %').join(' · '):''))+'</p><p><b>Commentaire :</b> '+safeComment+'</p><p><a href="'+url+'" target="_blank" rel="noopener noreferrer">Ouvrir l’original dans Drive</a></p>';
  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
 }
 window.abcPhotosRefresh=refresh;
