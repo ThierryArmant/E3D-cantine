@@ -7,7 +7,7 @@ const date=s=>{const x=String(s||'');const f=x.match(/^(\d{2})\/(\d{2})\/(\d{4})
 const avis=s=>{const x=String(s||'').toLowerCase();if(x.includes('plus faim')||x.includes('🟡'))return 'plus faim';if(x.includes('tout fini')||x.includes('🟢'))return 'tout fini';if(x.includes('temps')||x.includes('🟠'))return 'pas le temps';if(x.includes('aimé')||x.includes('aime')||x.includes('🔴'))return 'pas aimé';return 'non renseigné'};
 const emoji=x=>({'pas aimé':'🔴','plus faim':'🟡','pas le temps':'🟠','tout fini':'🟢'}[x]||'⚪');
 const idDrive=url=>{const x=String(url||'');return (x.match(/\/file\/d\/([\w-]+)/)||x.match(/[?&]id=([\w-]+)/)||[])[1]||''};
-const reste=s=>{try{const d=typeof s.detail==='string'?JSON.parse(s.detail):s.detail;const a=d&&d.retenus;if(Array.isArray(a)&&a.length){const total=a.reduce((v,x)=>v+(Number(x.portion_ref_g)||0),0);return total?Math.round(a.reduce((v,x)=>v+(Number(x.reste_g_ref)||0),0)/total*100):null}}catch(e){}return null};
+const reste=s=>{try{const d=typeof s.detail==='string'?JSON.parse(s.detail):s.detail;const a=d&&d.retenus;if(Array.isArray(a)&&a.length){const total=a.reduce((v,x)=>v+(Number(x.portion_ref_g)||0),0);return total?Math.round(a.reduce((v,x)=>v+(Number(x.reste_g_ref)||0),0)/total*100):null}}catch(e){}if(typeof parseScanItems==='function'){const items=parseScanItems(s.commentaire);if(items.length)return Math.round(items.reduce((total,item)=>total+item.restePct,0)/items.length)}return null};
 let current=[];
 function refresh(){
  const data=(typeof globalRawData!=='undefined'&&globalRawData)||{};
@@ -24,6 +24,7 @@ function refresh(){
  $('abc-photo-chart').className='abc-photo-chart';$('abc-photo-chart').innerHTML=counts.map(([x,n])=>'<div class="abc-photo-chart-item">'+emoji(x)+' '+escape(x)+' · <b>'+n+'</b><div class="abc-photo-track"><div class="abc-photo-fill" style="width:'+(current.length?100*n/current.length:0)+'%"></div></div></div>').join('');
  $('abc-photo-info').textContent=avecPhoto.length+' photo(s) disponibles pour la mosaïque. Les plateaux sans photo liée restent comptés dans les statistiques. Les pourcentages de restes sont des estimations issues des analyses existantes.';
  const grid=$('abc-photo-grid');grid.className='abc-photo-grid';grid.replaceChildren();
+ if(!avecPhoto.length){const message=document.createElement('p');message.textContent='Aucune photo ne correspond aux filtres sélectionnés.';grid.append(message)}
  avecPhoto.slice(0,300).forEach(s=>{
  const button=document.createElement('button');button.type='button';button.className='abc-photo-tile';button.title='Afficher le détail du scan '+(s.id_scan||s.idScan||'');
  const img=document.createElement('img');img.loading='lazy';img.alt='Plateau photographié';img.src='https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w400';
@@ -41,8 +42,9 @@ function detail(s){
  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
 }
 window.abcPhotosRefresh=refresh;
-document.addEventListener('DOMContentLoaded',()=>{
- ['abc-photo-date','abc-photo-avis','abc-photo-statut','abc-photo-restes','abc-photo-search'].forEach(id=>$(id)?.addEventListener('input',refresh));
+function initialiserFiltres(){
+ ['abc-photo-date','abc-photo-avis','abc-photo-statut','abc-photo-restes','abc-photo-search'].forEach(id=>$(id)?.addEventListener(id==='abc-photo-search'?'input':'change',refresh));
  $('abc-photo-close')?.addEventListener('click',()=>$('abc-photo-detail').close());
-});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialiserFiltres,{once:true});else initialiserFiltres();
 })();
