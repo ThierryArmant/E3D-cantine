@@ -23,10 +23,15 @@ const reste=s=>{
  const portionItem=x=>/^pain\b/i.test(x.nom)?P.pain:(x.comp==='dessert'&&/(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|raisin|fruit)/i.test(x.nom)&&!/compote|yaourt|muffin|g[âa]teau|tarte/i.test(x.nom)?P.fruit:(P[x.comp]||P.plat));
  // Deux desserts seulement pour un laitage + un autre dessert ; 2 yaourts, 2 fruits ou fruit + gâteau = 1.
  const famille=n=>/yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|ortolan/i.test(n)?'laitage':'autre';
- const fam={};items.filter(x=>x.comp==='dessert'&&!SAUCE.test(String(x.nom||''))).forEach(x=>{const f=famille(String(x.nom||''));fam[f]=Math.max(fam[f]||0,portionItem(x))});
+ // Petit gâteau servi avec une compote ou un fruit : même dessert, ses restes comptent pour son vrai poids.
+ const petit=n=>/muffin|madeleine|biscuit|cookie|g[âa]teau individuel|petit g[âa]teau|brownie|financier|gaufrette/i.test(n);
+ const pg=(((typeof globalRawData!=='undefined'&&globalRawData)||{}).parametres||{}).portion_gateau_accompagnement_g||40;
+ const avecAutre=items.some(x=>x.comp==='dessert'&&!petit(String(x.nom||''))&&famille(String(x.nom||''))==='autre');
+ if(avecAutre)items.forEach(x=>{if(x.comp==='dessert'&&petit(String(x.nom||'')))x.accomp=true});
+ const fam={};items.filter(x=>x.comp==='dessert'&&!x.accomp&&!SAUCE.test(String(x.nom||''))).forEach(x=>{const f=famille(String(x.nom||''));fam[f]=Math.max(fam[f]||0,portionItem(x))});
  const dessertG=Math.max(P.dessert,Object.values(fam).reduce((t,v)=>t+v,0));
  const ref=P.entree+P.plat+P.accompagnement+dessertG+P.pain;
- const g=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5).reduce((t,x)=>t+portionItem(x)*x.pct/100,0);
+ const g=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5).reduce((t,x)=>t+(x.accomp?pg:portionItem(x))*x.pct/100,0);
  return {pct:Math.min(100,Math.round(100*g/ref)),g:Math.round(g),ref:ref,methode:'recalculée'};
 };
 const pctReste=s=>s.reste?s.reste.pct:null;

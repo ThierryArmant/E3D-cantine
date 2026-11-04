@@ -18,6 +18,7 @@ const PARAMETRES_DEFAUT = [
   ["portion_fruit_g", 150, "Fruit frais (g) - référence collège : 150 à 180"],
   ["portion_pain_g", 50, "Pain (g) - calculé : tranches par élève × poids d'une tranche"],
   ["pain_tranches", 2, "Tranches de pain servies à chaque élève dès le départ"],
+  ["portion_gateau_accompagnement_g", 40, "Petit gâteau servi avec une compote ou un fruit (g) : même dessert, consommation suivie à part"],
   ["poids_tranche_pain_g", 25, "Poids d'une tranche de pain (g)"],
   ["portion_sauce_g", 20, "Sauce séparée : portion de travail en g, à ajuster selon le service"],
   ["effectif_defaut", 450, "Effectif attendu par défaut (couverts)"],
@@ -449,7 +450,7 @@ function handleSaveEffectifs(data) {
 // Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
 const PARAMETRES_MODIFIABLES = {
   portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
-  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], pain_tranches: [1, 6], poids_tranche_pain_g: [5, 100], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
+  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], pain_tranches: [1, 6], poids_tranche_pain_g: [5, 100], portion_gateau_accompagnement_g: [5, 150], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
   poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_caissette_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
   poids_emballage_autre_g: [0, 50], poids_serviette_g: [0, 20], poids_epluchure_g: [0, 200], poids_os_g: [0, 200]
 };
@@ -920,6 +921,7 @@ Réponds en JSON strict :
     }).join(" ");
   }
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
+  marquerGateauAccompagnementABC(retenus, params);
   const tri = trierDechetsPlateauABC(retenus, result.objets, params);
   const repas = repasReferenceABC(retenus, params);
 
@@ -2089,7 +2091,8 @@ function familleDessertABC(nom) {
   return /yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|ortolan/.test(n) ? "laitage" : "autre";
 }
 function repasReferenceABC(retenus, params) {
-  const desserts = (retenus || []).filter(function (i) { return i.composant === "dessert"; });
+  // Le petit gâteau servi avec une compote ou un fruit fait partie de ce dessert : pas de portion en plus.
+  const desserts = (retenus || []).filter(function (i) { return i.composant === "dessert" && !i.accompagnement; });
   const parFamille = {};
   desserts.forEach(function (i) { const f = familleDessertABC(i.aliment); parFamille[f] = Math.max(parFamille[f] || 0, Number(i.portion_ref_g) || 0); });
   const dessertG = Math.max(Number(params.portion_dessert_g) || 0, Object.keys(parFamille).reduce(function (t, f) { return t + parFamille[f]; }, 0));
@@ -2097,4 +2100,18 @@ function repasReferenceABC(retenus, params) {
   const ref = ["entree", "plat", "garniture", "dessert", "pain"].reduce(function (t, k) { return t + (Number(portions[k]) || 0); }, 0);
   const restes = (retenus || []).reduce(function (t, i) { return t + (Number(i.reste_g_ref) || 0); }, 0);
   return { ref_g: ref, portions: portions, restes_g: Math.round(restes), pct: ref > 0 ? Math.min(100, Math.round(100 * restes / ref)) : null };
+}
+
+// Petit gâteau (muffin, madeleine, biscuit, gâteau individuel) servi AVEC une compote ou un fruit : un seul dessert
+// dans le repas de référence, mais sa consommation reste analysée à part (un gâteau donné et non mangé doit interpeller).
+// Ses restes comptent pour son vrai poids (réglage « Petit gâteau d'accompagnement »).
+function estPetitGateauABC(nom) { return /muffin|madeleine|biscuit|cookie|g[âa]teau individuel|petit g[âa]teau|brownie|financier|quatre[- ]quarts|gaufrette/i.test(String(nom || "")); }
+function marquerGateauAccompagnementABC(retenus, params) {
+  const avecAutre = (retenus || []).some(function (i) { return i.composant === "dessert" && !estPetitGateauABC(i.aliment) && familleDessertABC(i.aliment) === "autre"; });
+  if (!avecAutre) return;
+  const g = Number(params.portion_gateau_accompagnement_g) || 40;
+  retenus.forEach(function (i) {
+    if (i.composant !== "dessert" || !estPetitGateauABC(i.aliment)) return;
+    i.accompagnement = true; i.portion_ref_g = g; i.reste_g_ref = Math.round(g * (Number(i.reste_pct) || 0) / 100);
+  });
 }

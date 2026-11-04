@@ -34,4 +34,12 @@ r = analyse([al('Banane', 'dessert', 0), al('Pomme', 'dessert', 0)]);
 assert.equal(r.repas_ref_g, 80 + 100 + 150 + 150 + 50, '2 fruits = 1 dessert (portion fruit)');
 r = analyse([al('Banane', 'dessert', 0), al('Muffin aux pépites de chocolat', 'dessert', 100)]);
 assert.equal(r.repas_ref_g, 80 + 100 + 150 + 150 + 50, 'fruit + gâteau = 1 dessert');
-console.log('OK : deux desserts seulement pour un laitage + un autre dessert.');
+// Compote + petit gâteau : un seul dessert (480 g) ; muffin entier laissé = 40 g, suivi à part.
+params.portion_gateau_accompagnement_g = 40;
+r = analyse([al('Compote pomme pêche', 'dessert', 0), al('Muffin aux pépites de chocolat', 'dessert', 100)]);
+assert.equal(r.repas_ref_g, 480); assert.equal(r.restes_g, 40); assert.equal(r.restes_pct_repas, 8);
+assert.equal(r.retenus.find(i => /Muffin/.test(i.aliment)).accompagnement, true);
+// Muffin seul (sans compote ni fruit) : vrai dessert, portion 100 g.
+r = analyse([al('Muffin aux pépites de chocolat', 'dessert', 100)]);
+assert.equal(r.restes_g, 100);
+console.log('OK : deux desserts seulement pour un laitage + un autre dessert ; petit gâteau avec compote = même dessert, suivi à part.');
