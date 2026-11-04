@@ -18,11 +18,11 @@ function refresh(){
  current=records.filter(s=>(!day||s.jour===day)&&(!a||s.avis===a)&&(!status||s.type===status)&&(!q||[s.commentaire,s.detail,s.avis_eleve,s.photo].join(' ').toLocaleLowerCase('fr').includes(q))&&(!r||(s.reste!==null&&(r==='0'?s.reste===0:r==='1'?s.reste>0&&s.reste<30:r==='30'?s.reste>=30&&s.reste<60:s.reste>=60))));
  const avecPhoto=current.filter(s=>s.drive);
  const stat=$('abc-photo-stats');stat.className='abc-photo-stats';
- stat.innerHTML=[['Scans',current.length],['Photos liées',avecPhoto.length],['Analysés',current.filter(s=>s.type==='SCAN_IA_VISION').length],['Restes ≥ 60 %',current.filter(s=>s.reste!==null&&s.reste>=60).length]].map(([n,v])=>'<div class="abc-photo-stat">'+escape(n)+'<br><b>'+v+'</b></div>').join('');
+ stat.innerHTML=[['Scans',current.length],['Photos liées',avecPhoto.length],['Analysés',current.filter(s=>s.type==='SCAN_IA_VISION').length],['Aliments visibles ≥ 60 %',current.filter(s=>s.reste!==null&&s.reste>=60).length]].map(([n,v])=>'<div class="abc-photo-stat">'+escape(n)+'<br><b>'+v+'</b></div>').join('');
  $('abc-photo-flow').className='abc-photo-flow';$('abc-photo-flow').innerHTML=['Photos Drive','ID scan + heure','Avis élève','Analyse existante','Filtres & détails'].map((x,i)=>'<span>'+escape(x)+'</span>'+(i<4?' → ':'')).join('');
  const counts=['pas aimé','plus faim','pas le temps','tout fini','non renseigné'].map(x=>[x,current.filter(s=>s.avis===x).length]);
  $('abc-photo-chart').className='abc-photo-chart';$('abc-photo-chart').innerHTML=counts.map(([x,n])=>'<div class="abc-photo-chart-item">'+emoji(x)+' '+escape(x)+' · <b>'+n+'</b><div class="abc-photo-track"><div class="abc-photo-fill" style="width:'+(current.length?100*n/current.length:0)+'%"></div></div></div>').join('');
- $('abc-photo-info').textContent=avecPhoto.length+' photo(s) disponibles pour la mosaïque. Les plateaux sans photo liée restent comptés dans les statistiques. Les pourcentages de restes sont des estimations issues des analyses existantes.';
+ $('abc-photo-info').textContent=avecPhoto.length+' photo(s) disponibles pour la mosaïque. Les plateaux sans photo liée restent comptés dans les statistiques. Le pourcentage est la moyenne des restes des seuls aliments identifiés. La part restante du repas complet est inconnue sans connaître les portions prises au départ.';
  const grid=$('abc-photo-grid');grid.className='abc-photo-grid';grid.replaceChildren();
  if(!avecPhoto.length){const message=document.createElement('p');message.textContent='Aucune photo ne correspond aux filtres sélectionnés.';grid.append(message)}
  avecPhoto.slice(0,300).forEach(s=>{
@@ -38,7 +38,7 @@ function detail(s){
  const dialog=$('abc-photo-detail'),root=$('abc-photo-detail-content');
  const url='https://drive.google.com/file/d/'+encodeURIComponent(s.drive)+'/view';
  const safeComment=escape(s.commentaire||'Aucun commentaire enregistré');
- root.innerHTML='<h3>Plateau · '+escape(s.avis)+' '+emoji(s.avis)+'</h3><p>Ordre dans les données chargées : '+s.ordre+' · '+escape(s.dateRaw||s.date||'')+'</p><img alt="Photographie du plateau" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w1200"><p><b>ID scan :</b> '+escape(s.id_scan||s.idScan||'non transmis')+'</p><p><b>Restes estimés :</b> '+(s.reste===null?'Non disponibles':s.reste+' %')+'</p><p><b>Commentaire :</b> '+safeComment+'</p><p><a href="'+url+'" target="_blank" rel="noopener noreferrer">Ouvrir l’original dans Drive</a></p>';
+ root.innerHTML='<h3>Plateau · '+escape(s.avis)+' '+emoji(s.avis)+'</h3><p>Ordre dans les données chargées : '+s.ordre+' · '+escape(s.dateRaw||s.date||'')+'</p><img alt="Photographie du plateau" src="https://drive.google.com/thumbnail?id='+encodeURIComponent(s.drive)+'&sz=w1200"><p><b>ID scan :</b> '+escape(s.id_scan||s.idScan||'non transmis')+'</p><p><b>Repas complet restant :</b> indéterminable avec cette seule photo.</p><p><b>Moyenne des restes des aliments identifiés :</b> '+(s.reste===null?'Non disponibles':s.reste+' %')+'</p><p><b>Commentaire :</b> '+safeComment+'</p><p><a href="'+url+'" target="_blank" rel="noopener noreferrer">Ouvrir l’original dans Drive</a></p>';
  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
 }
 window.abcPhotosRefresh=refresh;
