@@ -64,6 +64,14 @@ const calSrc=html.slice(html.indexOf('        function calculerCalibrage('),html
 c.facteurCarboneEtat=()=>1;c.estFruit=()=>false;c.globalRawData={sacsHistory:{datesRaw:['2026-10-16','2026-10-16'],alimentaire:[3,5],fruits:[0,0],pain:[0,0]},rawGaspillage:[{type:'SCAN_IA_VISION',dateRaw:'2026-10-16',commentaire:scan('Carottes rapées')},{type:'SCAN_IA_VISION',dateRaw:'2026-10-16',commentaire:scan('Carottes râpées')}],parametres:{effectif_defaut:10}};
 vm.runInContext(calSrc,c);const cal=c.calculerCalibrage('2026-10-16','2026-10-16');
 assert.equal(Object.keys(cal.items).length,1);assert.equal(cal.items['Carottes râpées'].totalKg,8);
+// Portions réelles d'un jour : l'estimé suit la portion saisie par le cuisinier.
+const pjSrc=html.slice(html.indexOf('        function portionJourABC('),html.indexOf('        function portionPour('));vm.runInContext(pjSrc,c);
+const avant=cal.jours['2026-10-16'].predictedKg;
+c.globalRawData.portionsJour={'2026-10-16':{'Carottes rapees':160}};
+const cal2=c.calculerCalibrage('2026-10-16','2026-10-16');
+assert.ok(Math.abs(cal2.jours['2026-10-16'].predictedKg-avant*160/cal.jours['2026-10-16'].items['Carottes râpées'].portionG)<1e-9);
+assert.ok(cal2.jours['2026-10-16'].items['Carottes râpées'].portionAjustee);
+delete c.globalRawData.portionsJour;
 assert.equal(cal.jours['2026-10-16'].evitableKg+cal.jours['2026-10-16'].inevitableKg,8);
 assert.ok(html.includes('for (const d of Object.keys(peseesParJour))'));
 const order=['menu-view-dashboard',"L'Espace des Éco-Délégués",'menu-view-cuisinier','menu-view-borne','menu-view-saisie-dechets','Espace cuisine','menu-view-rapport','Réseau','menu-bilan-carbone','Contrôle des analyses','menu-view-analyse-photos','menu-audit','menu-view-precision'].map(x=>html.indexOf(x));

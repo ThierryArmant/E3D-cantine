@@ -1169,6 +1169,14 @@
             };
         }
 
+        // Portions réelles d'un jour (onglet Portions_Jour), saisies depuis « Précision scan / balance ».
+        function portionJourABC(date, nom) {
+            const pj = ((globalRawData && globalRawData.portionsJour) || {})[date];
+            if (!pj) return 0;
+            const cle = cleAlimentStat(nom);
+            for (const k in pj) if (cleAlimentStat(k) === cle) return Number(pj[k]) || 0;
+            return 0;
+        }
         function portionPour(item, portions) {
             if (/^sauce\b/i.test(item.nom)) return portions.sauce || 20;
             if (item.composant === "dessert" && estFruit(item.nom)) return portions.fruit;
@@ -1499,7 +1507,8 @@
                     const dansEmb = new Set((s.emb || []).map(cleAlimentStat));
                     detail.forEach(it => {
                         if (dansEmb.size && (dansEmb.has(cleAlimentStat(it.nomBrut || it.nom)) || dansEmb.has(cleAlimentStat(it.nom)))) return;
-                        const portion = portionPour(it, portions);
+                        // Portion réelle saisie après coup pour ce jour (cuisinier), sinon portion de référence.
+                        const portion = portionJourABC(d, it.nom) || portionPour(it, portions);
                         const bin = it.composant === "pain" || /^pain\b/i.test(it.nom) ? "pain" : (estFruit(it.nom) ? "fruits" : "alim");
                         const o = brut[it.nom] = brut[it.nom] || { nom: it.nom, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0 };
                         o.count++; o.resteG += portion * it.restePct / 100; o.portionG += portion;
@@ -1544,7 +1553,7 @@
                             carbKg += c;
                             etats[nomEtat] = { count: o.etats[nomEtat].count, totalKg: totalKg * part, evitKg: ev, inevKg: inevKg * part, carboneKg: c };
                         });
-                        jour.items[o.nom] = { totalKg: totalKg, evitKg: evitKg, inevKg: inevKg, carboneKg: carbKg, etats: etats };
+                        jour.items[o.nom] = { totalKg: totalKg, evitKg: evitKg, inevKg: inevKg, carboneKg: carbKg, etats: etats, portionG: o.count ? o.portionG / o.count : 0, portionAjustee: !!portionJourABC(d, o.nom), vus: o.count, resteG: o.resteG };
                         jour.evitableKg += evitKg; jour.inevitableKg += inevKg; jour.carboneKg += carbKg;
                         jour.predictedKg += o.resteG / n * E / 1000;
                         jour.predictedBins[o.bin] += o.resteG / n * E / 1000;
@@ -3586,7 +3595,48 @@
             h += "</table><strong>Poids pesé réparti par aliment</strong> <span class=\"info-tip\" data-tip=\"Le poids de chaque poubelle est réparti entre les aliments en proportion de ce que l'IA a vu comme restes sur les photos.\">ⓘ</span><br>";
             h += Object.keys(l.items).sort((a, b) => l.items[b].totalKg - l.items[a].totalKg).map(k => `${k} : ${f2(l.items[k].totalKg)} kg`).join(" · ");
             if (!l.effectifSaisi) h += `<br><span style="color:#b45309;">⚠️ Effectif non saisi ce jour-là : ${l.attendus} convives par défaut. Cela fausse directement l'estimé.</span>`;
-            return h + "</div>";
+            return h + portionsJourEditeurHtml(l) + "</div>";
+        }
+        // Réglage des portions réellement servies ce jour-là (cuisinier ou équipe), après coup.
+        function portionsJourEditeurHtml(l) {
+            const noms = Object.keys(l.items).filter(k => !/^sauce\b/i.test(k)).sort((a, b) => l.items[b].vus - l.items[a].vus);
+            if (!noms.length) return "";
+            const esc = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+            let h = `<div style="margin-top:12px; padding:10px 12px; border:1px solid #cbd5e1; border-left:4px solid #b45309; border-radius:8px; background:#fffbeb;" onclick="event.stopPropagation()">
+                <strong>⚖️ Portions réellement servies le ${dateFR(l.date)}</strong> <span class="info-tip" data-tip="Le cuisinier (ou toute l'équipe) peut corriger ici le poids servi par élève pour chaque aliment de ce jour-là, par exemple 250 g pour un plat unique de pâtes. L'estimé se recalcule aussitôt. Les analyses des plateaux ne sont pas modifiées : seule cette comparaison avec la balance utilise ces portions.">ⓘ</span>
+                <div style="font-size:11.5px; color:#475569; margin:3px 0 8px;">Grammes servis à un élève. Laisser la valeur de référence si elle est juste. Les cases en orange ont déjà été corrigées.</div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:6px 14px;">`;
+            noms.forEach(k => {
+                const it = l.items[k], g = Math.round(it.portionG || 0);
+                h += `<label style="display:flex; align-items:center; gap:6px; font-size:12px;"><span style="flex:1; min-width:0;">${esc(k)} <span style="color:#64748b;">(${it.vus} plat.)</span></span>
+                    <input type="number" min="1" max="1000" step="5" value="${g}" data-portion-jour="${esc(k)}" data-ref="${g}" style="width:70px; padding:4px; border:1px solid ${it.portionAjustee ? "#f59e0b" : "#cbd5e1"}; background:${it.portionAjustee ? "#fef3c7" : "#fff"}; border-radius:5px; text-align:right;"> g</label>`;
+            });
+            h += `</div><div style="display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap;">
+                <button type="button" class="btn-period" style="font-size:12px; padding:6px 12px; background:#1b4332; color:#fff;" onclick="enregistrerPortionsJour('${l.date}', this)">💾 Enregistrer et recalculer</button>
+                <span class="portions-jour-etat" style="font-size:11.5px; color:#475569;"></span></div></div>`;
+            return h;
+        }
+        async function enregistrerPortionsJour(date, bouton) {
+            const bloc = bouton.closest("div[onclick]"), etat = bloc.querySelector(".portions-jour-etat");
+            const portions = {};
+            const actuelles = ((globalRawData && globalRawData.portionsJour) || {})[date] || {};
+            bloc.querySelectorAll("input[data-portion-jour]").forEach(inp => {
+                const g = Math.round(parseFloat(inp.value)), nom = inp.dataset.portionJour;
+                // On n'enregistre que ce qui diffère de la référence, ou ce qui avait déjà été corrigé.
+                if (g > 0 && (g !== Math.round(parseFloat(inp.dataset.ref)) || portionJourABC(date, nom))) portions[nom] = g;
+            });
+            Object.keys(actuelles).forEach(k => { if (!(k in portions) && !Array.from(bloc.querySelectorAll("input[data-portion-jour]")).some(i => cleAlimentStat(i.dataset.portionJour) === cleAlimentStat(k))) portions[k] = actuelles[k]; });
+            const ecole = (globalRawData && globalRawData.ecole) || (document.getElementById("select-etablissement") || {}).value;
+            bouton.disabled = true; etat.textContent = "Enregistrement…";
+            try {
+                const r = await fetch(ADRESSE_SHEET_OFFICIELLE, { method: "POST", headers: { "Content-Type": "text/plain" }, body: JSON.stringify({ action: "savePortionsJour", ecole: ecole, date: date, portions: portions }) });
+                const data = await r.json();
+                if (!data.success || data.portionsJourVersion !== 1) throw new Error(data.error || "Cette fonction nécessite le dernier GS et son redéploiement (Nouvelle version).");
+                if (globalRawData && globalRawData.ecole === ecole) { globalRawData.portionsJour = data.portionsJour || {}; }
+                renderPrecision();
+                const i = precisionLignes.findIndex(x => x.date === date);
+                if (i >= 0) precisionDetail(i);
+            } catch (e) { etat.textContent = "⚠️ " + e.message; bouton.disabled = false; }
         }
         function precisionDetail(i) {
             const r = document.getElementById("precision-detail-" + i);

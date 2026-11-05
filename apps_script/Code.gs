@@ -345,6 +345,8 @@ function doPost(e) {
       responseOutput = handleSaveEffectifs(data);
     } else if (action === "saveParametres") {
       responseOutput = handleSaveParametres(data);
+    } else if (action === "savePortionsJour") {
+      responseOutput = handleSavePortionsJourABC(data);
     } else if (action === "analyserScansEnAttente") {
       responseOutput = handleRelancerScansEnAttenteABC(data);
     } else if (action === "envoyerBilanCarbone") {
@@ -445,6 +447,50 @@ function handleSaveEffectifs(data) {
   if (!(n > 0)) throw new Error("Effectif invalide.");
   setParametre(sheets, "effectif_defaut", n);
   return { success: true, effectif: n };
+}
+
+// ==========================================================================
+// PORTIONS RÉELLES D'UN JOUR (onglet « Portions_Jour »)
+// Le cuisinier ou l'équipe corrige après coup le poids servi d'un aliment pour une date donnée
+// (ex. tortellinis 250 g). Seules les comparaisons scan / balance et la répartition des pesées l'utilisent :
+// les analyses enregistrées des plateaux ne sont pas modifiées.
+// ==========================================================================
+function feuillePortionsJourABC(sheets, creer) {
+  const ss = sheets.menus.getParent();
+  let f = ss.getSheetByName("Portions_Jour");
+  if (!f && creer) { f = ss.insertSheet("Portions_Jour"); f.appendRow(["Date", "Aliment", "Portion servie (g)", "Modifié le"]); }
+  return f;
+}
+function lirePortionsJourABC(sheets) {
+  const f = feuillePortionsJourABC(sheets, false), res = {};
+  if (!f || f.getLastRow() < 2) return res;
+  f.getRange(2, 1, f.getLastRow() - 1, 3).getValues().forEach(function (l) {
+    const d = dateIso(l[0]), nom = String(l[1] || "").trim(), g = parseFloat(l[2]);
+    if (d && nom && g > 0) (res[d] = res[d] || {})[nom] = Math.round(g);
+  });
+  return res;
+}
+function handleSavePortionsJourABC(data) {
+  const sheets = getSheetsABC(data.ecole || data.etablissement);
+  const date = String(data.date || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error("Date invalide (AAAA-MM-JJ).");
+  const demandes = data.portions || {}, lignes = [];
+  Object.keys(demandes).slice(0, 60).forEach(function (nom) {
+    const n = nettoyerTexte(nom).slice(0, 80), g = Math.round(parseFloat(demandes[nom]));
+    if (!n || !(g > 0)) return;
+    if (g > 1000) throw new Error("Portion trop grande pour " + n + " (1000 g au plus).");
+    lignes.push([new Date(date + "T12:00:00"), n, g, new Date()]);
+  });
+  avecVerrouABC(30000, function () {
+    const f = feuillePortionsJourABC(sheets, true);
+    // On remplace les portions de cette date, sans toucher aux autres jours.
+    const autres = f.getLastRow() > 1 ? f.getRange(2, 1, f.getLastRow() - 1, 4).getValues().filter(function (l) { return dateIso(l[0]) !== date; }) : [];
+    const toutes = autres.concat(lignes);
+    if (f.getLastRow() > 1) f.getRange(2, 1, f.getLastRow() - 1, 4).clearContent();
+    if (toutes.length) f.getRange(2, 1, toutes.length, 4).setValues(toutes);
+    f.getRange(2, 1, Math.max(1, toutes.length), 1).setNumberFormat("dd/MM/yyyy");
+  });
+  return { success: true, portionsJourVersion: 1, portionsJour: lirePortionsJourABC(sheets) };
 }
 
 // Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
@@ -1163,7 +1209,7 @@ function doGet(e) {
         return reponseJson({
           ecole: school, effectifCouverts: dernierEffectif || parametres.effectif_defaut, dernierMenu: dernierMenu,
           historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, parametres: parametres,
-          rawGaspillage: rawGaspillage, sacsHistory: h, modeScan: modeAnalyseScanABC(sheets), catalogueVersion: 1, catalogue: lireCatalogueABC(sheets), correctionsVersion: 1, exclusionsAnalyses: lireExclusionsAnalysesABC(sheets), peseesVersion: 1, peseesDetail: lirePeseesDetailABC(sheets)
+          rawGaspillage: rawGaspillage, sacsHistory: h, modeScan: modeAnalyseScanABC(sheets), catalogueVersion: 1, catalogue: lireCatalogueABC(sheets), correctionsVersion: 1, exclusionsAnalyses: lireExclusionsAnalysesABC(sheets), peseesVersion: 1, peseesDetail: lirePeseesDetailABC(sheets), portionsJourVersion: 1, portionsJour: lirePortionsJourABC(sheets)
         });
       } catch (err) {
         vide.error = err.toString();
