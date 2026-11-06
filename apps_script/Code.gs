@@ -575,7 +575,9 @@ function handleLogBagWeights(data) {
     parseFloat(data.sac_fruits) || 0,
     parseFloat(data.sac_pain) || 0,
     parseFloat(data.sac_emballages) || 0,
-    parseFloat(data.sac_serviettes) || 0
+    parseFloat(data.sac_serviettes) || 0,
+    // Établissements qui jettent les fruits avec les biodéchets : la poubelle fruits n'existe pas ce jour-là.
+    data.fruits_dans_biodechets === true || data.fruits_dans_biodechets === "true" ? "OUI" : ""
   ];
   // Double envoi (double clic, renvoi après une réponse perdue) : une pesée identique pour la même date
   // n'est pas ajoutée une seconde fois. Des pesées différentes le même jour (plusieurs bacs) restent possibles.
@@ -584,7 +586,10 @@ function handleLogBagWeights(data) {
     const existe = sheets.sacs.getDataRange().getValues().slice(1).some(function (l) {
       return dateIso(l[0]) === iso && [1, 2, 3, 4, 5].every(function (k) { return Math.abs((parseFloat(l[k]) || 0) - ligne[k]) < 0.005; });
     });
-    if (!existe) { sheets.sacs.appendRow(ligne); SpreadsheetApp.flush(); }
+    if (!existe) {
+      if (String(sheets.sacs.getRange(1, 7).getValue() || "") === "") sheets.sacs.getRange(1, 7).setValue("Fruits_dans_biodechets");
+      sheets.sacs.appendRow(ligne); SpreadsheetApp.flush();
+    }
     return existe;
   });
   if (!doublon) actualiserComparaisonPesees(sheets);
@@ -1173,7 +1178,7 @@ function donneesBaseABC(sheets) {
     });
   }
 
-  const h = { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [] };
+  const h = { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [], fruitsDansBio: [] };
   const sRows = sheets.sacs.getDataRange().getValues();
   for (let i = 1; i < sRows.length; i++) {
     const d = new Date(sRows[i][0]);
@@ -1184,6 +1189,7 @@ function donneesBaseABC(sheets) {
     h.pain.push(parseFloat(sRows[i][3]) || 0);
     h.emballages.push(parseFloat(sRows[i][4]) || 0);
     h.serviettes.push(parseFloat(sRows[i][5]) || 0);
+    h.fruitsDansBio.push(/^(oui|true|vrai|x)$/i.test(String(sRows[i][6] || "").trim()));
   }
   return { parametres: parametres, dernierMenu: dernierMenu, dernierEffectif: dernierEffectif, historiqueMenus: historiqueMenusMap, historiqueEffectifs: historiqueEffectifs, rawGaspillage: rawGaspillage, sacsHistory: h };
 }
@@ -1323,7 +1329,7 @@ function handleCorrectionAlimentABC(data) {
 }
 function lirePeseesDetailABC(sheets) {
   return sheets.sacs.getDataRange().getValues().slice(1).map(function(l,i){
-    return {ligne:i+2,date:dateIso(l[0]),revision:JSON.stringify(l.slice(0,6)),alimentaire:Number(l[1])||0,fruits:Number(l[2])||0,pain:Number(l[3])||0,emballages:Number(l[4])||0,serviettes:Number(l[5])||0};
+    return {ligne:i+2,date:dateIso(l[0]),revision:JSON.stringify(l.slice(0,6)),alimentaire:Number(l[1])||0,fruits:Number(l[2])||0,pain:Number(l[3])||0,emballages:Number(l[4])||0,serviettes:Number(l[5])||0,fruitsDansBio:/^(oui|true|vrai|x)$/i.test(String(l[6]||'').trim())};
   });
 }
 function handleCorrigerPeseeABC(data) {

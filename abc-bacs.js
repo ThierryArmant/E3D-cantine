@@ -30,6 +30,8 @@ function majComparaisonBacs() {
   const couverts = (d.historiqueEffectifs || {})[date] || (d.parametres || {}).effectif_defaut || 0;
   const pesees = (d.peseesDetail || []).filter(p => p.date === date);
   const pese = {}; BACS_ABC.forEach(([, cle]) => { pese[cle] = pesees.reduce((t, p) => t + (Number(p[cle]) || 0), 0); });
+  // Fruits jetés avec les biodéchets (case cochée à la pesée) : estimation fruits ajoutée aux biodéchets.
+  const fruitsBio = pesees.some(p => p.fruitsDansBio);
   let html = `<div style="margin:6px 0 16px; padding:12px 14px; border:1px solid #cbd5e1; border-left:5px solid #1d4ed8; border-radius:10px; background:#f8fafc;">
     <h3 style="margin:0 0 4px; font-size:14px; color:#1e3a8a; font-weight:800;">📸 Pesée estimée d'après les plateaux scannés · ${date.split("-").reverse().join("/")}</h3>`;
   if (!scans.length) {
@@ -38,6 +40,7 @@ function majComparaisonBacs() {
   }
   if (avecBacs.length) {
     const somme = {}; BACS_ABC.forEach(([bac]) => { somme[bac] = avecBacs.reduce((t, s) => t + (Number(s.bacs[bac]) || 0), 0); });
+    if (fruitsBio) { somme.biodechets += somme.fruits; somme.fruits = 0; }
     const facteur = couverts && avecBacs.length ? couverts / avecBacs.length : 1;
     const td = "padding:5px 8px; border-bottom:1px solid #e2e8f0;", num = td + " text-align:right; font-variant-numeric:tabular-nums;";
     const lignes = BACS_ABC.map(([bac, cle, nom]) => {
@@ -47,7 +50,8 @@ function majComparaisonBacs() {
         const e = Math.round(100 * (est - p) / p), coul = Math.abs(e) <= 15 ? "#047857" : Math.abs(e) <= 35 ? "#b45309" : "#b91c1c";
         ecart = `<strong style="color:${coul};">${e > 0 ? "+" : ""}${e} %</strong>`;
       }
-      return `<tr><td style="${td}">${nom}</td><td style="${num}">${p > 0 ? bacsFormatKg(p) : "—"}</td><td style="${num} font-weight:800;">${bacsFormatKg(est)}</td><td style="${num}">${ecart}</td></tr>`;
+      if (fruitsBio && bac === "fruits") return `<tr><td style="${td}">${nom}</td><td colspan="3" style="${td} color:#713f12; font-style:italic;">jetés avec les biodéchets ce jour-là : comptés dans la ligne biodéchets</td></tr>`;
+      return `<tr><td style="${td}">${nom}${fruitsBio && bac === "biodechets" ? " <span style=\"font-size:11px; color:#713f12;\">+ fruits</span>" : ""}</td><td style="${num}">${p > 0 ? bacsFormatKg(p) : "—"}</td><td style="${num} font-weight:800;">${bacsFormatKg(est)}</td><td style="${num}">${ecart}</td></tr>`;
     }).join("");
     html += `<p style="margin:0 0 8px; font-size:11.5px; color:#475569;">${avecBacs.length} plateau(x) analysé(s) par poubelle, ramené(s) à <strong>${couverts}</strong> couverts. Un écart fort sur un bac peut venir d'un sac changé en cours de service, d'un bac oublié ou des couverts du jour à corriger.</p>
       <div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:12.5px;">
