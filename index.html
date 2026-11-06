@@ -655,7 +655,7 @@
 
                         <div class="form-grid">
                             <div class="waste-control-card" style="background-color: #ffe5d9; border: 1px solid #ffcad4;">
-                                <label>🍖 Déchets Alimentaires [kg]</label>
+                                <label id="label-sac-alimentaire">🍖 Déchets Alimentaires [kg]</label>
                                 <div class="spinner-container">
                                     <div style="display: flex; flex-direction: column; gap: 3px;"><button type="button" class="btn-spinner btn-kg" title="Ajouter 1 kg" aria-label="Ajouter 1 kg" onclick="adjustWeight('sac-alimentaire', 1.00)">▲</button><button type="button" class="btn-spinner btn-down" title="Retirer 1 kg" aria-label="Retirer 1 kg" onclick="adjustWeight('sac-alimentaire', -1.00)">▼</button></div>
                                     <input type="number" id="sac-alimentaire" class="input-center" title="Réglage fin : ± 10 g" aria-label="Poids en kg — petites flèches : plus ou moins 10 grammes" placeholder="0.00" value="0.00" step="0.01" min="0">
@@ -1675,7 +1675,8 @@
             updateHistoryMode('day', getTauxInevitablesPourTexte(menuActifActuel));
 
             if (nbJours > 0) {
-                renderBilanEleves(poidsTotalEvitablePeriode / nbJours, totalFruitsKg / nbJours, totalPainKg / nbJours, effectifSaisi);
+                // Même définition que la carte « Moyenne / convive » : gaspillage évitable (pain compris) ÷ convives de chaque jour.
+                renderBilanEleves(poidsTotalEvitablePeriode / nbJours, totalPainKg / nbJours, avgGrams, prixKg);
             } else {
                 document.getElementById('bilan-eleves-container').style.display = "none";
             }
@@ -3963,16 +3964,18 @@
             }).catch(() => alert("Erreur réseau lors de la sauvegarde."));
         }
 
-        function renderBilanEleves(alimKg, fruitsKg, painKg, effectif) {
+        // Bilan élèves : gaspillage ÉVITABLE moyen par jour (pain compris, fruits et épluchures non comptés),
+        // g / convive identique à la carte « Moyenne / convive » du tableau de bord.
+        function renderBilanEleves(evitableKgJour, painKgJour, gramsParConvive, prixKg) {
             const card = document.getElementById('bilan-eleves-container');
             const header = document.getElementById('bilan-header-color');
             const pill = document.getElementById('bilan-score-pill');
             const val = document.getElementById('bilan-score-val');
             
-            const totalKg = alimKg + fruitsKg + painKg;
-            if (totalKg <= 0 || !effectif || effectif <= 0) { card.style.display = "none"; return; }
+            const totalKg = evitableKgJour, painKg = painKgJour;
+            if (!(totalKg > 0) || !(gramsParConvive > 0)) { card.style.display = "none"; return; }
 
-            const gramsPerPupil = Math.round((totalKg * 1000) / effectif);
+            const gramsPerPupil = Math.round(gramsParConvive);
             val.innerText = `${gramsPerPupil} g / convive`;
 
             header.className = "bilan-header-box";
@@ -3983,7 +3986,7 @@
 
             document.getElementById('bilan-eq-pain').innerText = `${Math.round((painKg * 1000) / 200)}`;
             document.getElementById('bilan-eq-repas').innerText = `${Math.round((totalKg * 1000) / 450)}`;
-            document.getElementById('bilan-eq-euros').innerText = `${(totalKg * 2.30).toFixed(2)} €`;
+            document.getElementById('bilan-eq-euros').innerText = `${(totalKg * (prixKg || 4.5)).toFixed(2)} €`;
             document.getElementById('bilan-eq-monde').innerText = `${Math.round((totalKg * 1000) / 200)}`;
             card.style.display = "block";
         }
@@ -3993,8 +3996,9 @@
             const c = document.getElementById('fruits-dans-bio'), f = document.getElementById('sac-fruits');
             if (!c || !f) return;
             const carte = f.closest('.waste-control-card');
-            if (c.checked) { f.value = "0.00"; f.disabled = true; if (carte) carte.style.opacity = "0.45"; }
-            else { f.disabled = false; if (carte) carte.style.opacity = ""; }
+            const lab = document.getElementById('label-sac-alimentaire');
+            if (c.checked) { f.value = "0.00"; f.disabled = true; if (carte) carte.style.opacity = "0.45"; if (lab) lab.textContent = "🍖 Biodéchets, fruits compris [kg]"; }
+            else { f.disabled = false; if (carte) carte.style.opacity = ""; if (lab) lab.textContent = "🍖 Déchets Alimentaires [kg]"; }
             try { const ecole = (document.getElementById('select-etablissement') || {}).value; if (ecole) localStorage.setItem('fruitsDansBio-' + ecole, c.checked ? '1' : '0'); } catch (e) {}
         }
         function restaurerFruitsDansBio() {
@@ -4011,14 +4015,11 @@
             const pain = parseFloat(document.getElementById('sac-pain').value) || 0;
             const emb = parseFloat(document.getElementById('sac-emballages').value) || 0;
             const serv = parseFloat(document.getElementById('sac-serviettes').value) || 0;
-            const effectif = parseInt(localStorage.getItem(`totalConvives-${school}`)) || 450;
 
             const fruitsBio = !!(document.getElementById('fruits-dans-bio') || {}).checked;
             const payload = { action: "logBagWeights", etablissement: school, date_pesee: peseeDate, sac_alimentaire: alim.toFixed(2), sac_fruits: (fruitsBio ? 0 : fruits).toFixed(2), sac_pain: pain.toFixed(2), sac_emballages: emb.toFixed(2), sac_serviettes: serv.toFixed(2), fruits_dans_biodechets: fruitsBio };
             
-            const menuAct = localStorage.getItem(`menuActive-${school}`) || "";
-            const tauxInev = menuAct ? getTauxInevitablesPourTexte(menuAct) : 0.30;
-            renderBilanEleves(alim * (1 - tauxInev), fruits, pain, effectif);
+            // Le bilan est recalculé après l'enregistrement, avec la même méthode que le tableau de bord.
 
             // Un seul envoi à la fois : le bouton reste grisé jusqu'à la réponse (évite la pesée en double).
             const btn = document.getElementById('btn-pesees');
@@ -4598,6 +4599,7 @@
 <script src="abc-bilan.js?v=20261101-1"></script>
 <script src="abc-defi.js?v=20261106-pates-1"></script>
 <script src="abc-bacs.js?v=20261106-fruits-bio-1"></script>
+    <script src="abc-pesees.js?v=20261106-2"></script>
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
 </body>
 </html>

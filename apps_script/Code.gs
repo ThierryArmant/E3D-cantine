@@ -320,6 +320,8 @@ function doPost(e) {
       responseOutput = handleAnalyserPhotosServiceABC(data);
     } else if (action === "saveCorrectionAliment") {
       responseOutput = handleCorrectionAlimentABC(data);
+    } else if (action === "deleteBagWeights") {
+      responseOutput = handleSupprimerPeseeABC(data);
     } else if (action === "correctBagWeights") {
       responseOutput = handleCorrigerPeseeABC(data);
     } else if (action === "saveCatalogue") {
@@ -579,6 +581,7 @@ function handleLogBagWeights(data) {
     // Établissements qui jettent les fruits avec les biodéchets : la poubelle fruits n'existe pas ce jour-là.
     data.fruits_dans_biodechets === true || data.fruits_dans_biodechets === "true" ? "OUI" : ""
   ];
+  if ([1, 2, 3, 4, 5].every(function (k) { return !(ligne[k] > 0); })) throw new Error("Aucun poids saisi : rien n'a été enregistré.");
   // Double envoi (double clic, renvoi après une réponse perdue) : une pesée identique pour la même date
   // n'est pas ajoutée une seconde fois. Des pesées différentes le même jour (plusieurs bacs) restent possibles.
   const doublon = avecVerrouABC(20000, function () {
@@ -1342,7 +1345,33 @@ function handleCorrigerPeseeABC(data) {
     const valeurs=sheets.sacs.getDataRange().getValues();const ancien=valeurs[ligne-1];
     if(!ancien||JSON.stringify(ancien.slice(0,6))!==data.revision)throw new Error('Cette pesée a été modifiée. Rechargez avant de corriger.');
     // La date et les autres lignes ne sont pas modifiées ; seule cette pesée est remplacée.
-    sheets.sacs.getRange(ligne,2,1,5).setValues([poids]);SpreadsheetApp.flush();
+    sheets.sacs.getRange(ligne,2,1,5).setValues([poids]);
+    // Mode « fruits jetés avec les biodéchets » : mis à jour seulement s'il est transmis.
+    if(data.fruits_dans_biodechets!==undefined){
+      if(String(sheets.sacs.getRange(1,7).getValue()||'')==='')sheets.sacs.getRange(1,7).setValue('Fruits_dans_biodechets');
+      sheets.sacs.getRange(ligne,7).setValue(data.fruits_dans_biodechets===true||data.fruits_dans_biodechets==='true'?'OUI':'');
+    }
+    SpreadsheetApp.flush();
+  }finally{lock.releaseLock();}
+  actualiserComparaisonPesees(sheets);
+  return {success:true,peseesVersion:1,peseesDetail:lirePeseesDetailABC(sheets)};
+}
+
+// Suppression d'une pesée saisie par erreur, à la demande et après confirmation.
+// La ligne est d'abord recopiée dans l'onglet « Pesees_Supprimees » (rien n'est perdu), puis retirée de Pesees_Sacs.
+function handleSupprimerPeseeABC(data) {
+  const sheets=getSheetsABC(data.ecole||data.etablissement);
+  const ligne=Number(data.ligne);
+  if(!Number.isInteger(ligne)||ligne<2||!data.revision)throw new Error('Sélectionnez une pesée existante.');
+  const lock=LockService.getScriptLock();lock.waitLock(30000);
+  try{
+    const valeurs=sheets.sacs.getDataRange().getValues();const ancien=valeurs[ligne-1];
+    if(!ancien||JSON.stringify(ancien.slice(0,6))!==data.revision)throw new Error('Cette pesée a été modifiée entre-temps. Rechargez avant de supprimer.');
+    const ss=sheets.sacs.getParent();let archive=ss.getSheetByName('Pesees_Supprimees');
+    if(!archive){archive=ss.insertSheet('Pesees_Supprimees');archive.appendRow(['Horodatage','Sac_Alimentaire_kg','Sac_Fruits_kg','Sac_Pain_kg','Sac_Emballages_kg','Sac_Serviettes_kg','Fruits_dans_biodechets','Supprimée le','Ligne d\'origine']);}
+    const copie=ancien.slice(0,7);while(copie.length<7)copie.push('');
+    archive.appendRow(copie.concat([new Date(),ligne]));
+    sheets.sacs.deleteRow(ligne);SpreadsheetApp.flush();
   }finally{lock.releaseLock();}
   actualiserComparaisonPesees(sheets);
   return {success:true,peseesVersion:1,peseesDetail:lirePeseesDetailABC(sheets)};

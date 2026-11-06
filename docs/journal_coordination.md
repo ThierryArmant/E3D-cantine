@@ -114,3 +114,57 @@ Commit de cette entrée. Serveur `apps_script/Code.gs` et galerie `abc-analyse-p
 - **Reste ouvert** : un film vide pris pour un muffin ne peut être corrigé que par la vision (consigne renforcée, à vérifier sur les plateaux témoins avant toute réanalyse massive).
 - **Petit gâteau d'accompagnement (validé par Thierry)** : un muffin, une madeleine, un biscuit ou un gâteau individuel servi AVEC une compote ou un fruit fait partie de ce dessert (pas de portion en plus dans le repas de référence). Sa consommation reste analysée à part (fiche aliment, Défi du jour) car un gâteau donné et non mangé doit interpeller. Ses restes comptent pour son poids réel : réglage « Petit gâteau servi avec compote ou fruit (g) », 40 g par défaut (`portion_gateau_accompagnement_g`), champ `accompagnement: true` dans le détail.
 - **Estimation des quantités (04/11)** : pas d'assiette témoin (trop de combinaisons pour le chef). L'IA reçoit les portions de la roue crantée, compte les pièces (nombre servi indiqué au menu avec « ×N », ex. « Boulettes de viande ×5 ») et applique la règle « forme intacte = 90 à 100 % ». Cas témoin : plateau n° 479 du 02/11 (5 boulettes et riz presque entier, annoncé 20 % / 40 % par l'ancienne analyse ; attendu ≈ 100 % / 85-90 %, environ 55 % du repas).
+
+---
+
+## 6 novembre 2026 (soir) — Livraison Claude : pesées, fruits mélangés, cohérence des indicateurs
+
+Réponse à la mission « Fiabilisation des pesées et des indicateurs » (retour de Mme Briançon). Giono reste la référence.
+
+### 1. Ce qui existait déjà
+- `handleCorrigerPeseeABC` (remplacement d'une ligne, contrôle de révision) existait, mais son écran était caché dans **✏️ Corrections** : depuis « Saisie des déchets », une correction ajoutait une nouvelle ligne.
+- Anti double envoi : bouton grisé pendant l'envoi et refus serveur d'une pesée identique le même jour (déjà en place).
+- Option `fruits_dans_biodechets` (colonne G de Pesees_Sacs) : en place depuis l'après-midi ; Giono l'utilise (06/11 : 49,95 kg « OUI »).
+
+### 2. Diagnostic des trois problèmes
+**Pesées qui s'additionnent.** Constaté à Gérard Philippe : le 02/11 compte 5 lignes (10,35/0,8/1,02 ; une ligne à zéro ; 10,35/4,41/1,02 ; 8,53/4,41/1,02 ; 10,35/4,4/1,02), le 03/11 trois lignes (dont une à zéro). Ce sont des tentatives de correction enregistrées comme sacs supplémentaires. Aucune ligne n'a été modifiée : les bonnes valeurs doivent être confirmées par l'établissement, qui peut maintenant les corriger ou les supprimer lui-même (voir 3).
+
+**Fruits.** En mode mélangé, le champ fruits est mis à 0 et grisé ; le poids des fruits est dans les biodéchets ; rien n'est ajouté. Les comparatifs scan/balance rangent les fruits vus sur les plateaux dans la ligne biodéchets ces jours-là.
+
+**Pourcentages différents pour une même pesée.** Trois calculs différents coexistaient :
+| Écran | Avant | Après |
+|---|---|---|
+| Carte « Moyenne / convive » | évitable (pain compris) ÷ convives de chaque jour | inchangé (référence) |
+| « Bilan élèves » (niveau 1 à 4) | (évitable + fruits + pain) ÷ effectif d'aujourd'hui : le pain était compté deux fois, les fruits (inévitables) ajoutés, mauvais effectif | même valeur que la carte « Moyenne / convive » |
+| Bilan affiché au moment d'enregistrer | biodéchets × (1 − taux du menu actif, 0,30 par défaut) + fruits + pain ÷ effectif mémorisé (450 par défaut) | supprimé : le bilan est recalculé après l'enregistrement par la méthode du tableau de bord |
+| Équivalent € du bilan | 2,30 €/kg en dur | prix_kg_eur de l'établissement (comme la carte « Pertes ») |
+Restent volontairement distincts (définitions différentes, affichées comme telles) : « Restes du repas » d'un plateau (galerie, % du repas de référence) et « Précision scan / balance » (estimation photo comparée à la pesée, jamais présentée comme une pesée).
+
+**Scans et analyses (Giono, 06/11).** 600 scans enregistrés, 600 photos sauvegardées sur Drive, 599 analyses terminées, 0 en attente, 1 impossible (aucun plateau visible). Les compteurs du site : « réellement scannés » = analysés + en attente + écartés ; « analysés » = terminés seulement. Un scan encore dans la file de la tablette n'est pas encore sur le serveur : il apparaît dans la puce de la borne (« en attente »). Aucune réanalyse n'est lancée pour afficher la galerie ou recalculer un indicateur.
+
+### 3. Modifications (ciblées)
+- `abc-pesees.js` (nouveau) : dans « Saisie des déchets », tableau des pesées déjà enregistrées pour la date choisie (lignes + total), boutons **✏️ Modifier cette pesée** (le formulaire se remplit, le bouton devient « Enregistrer la modification (remplace la pesée) », envoi `correctBagWeights` avec révision) et **🗑️ Supprimer** (confirmation). S'il existe déjà une pesée ce jour-là, le bouton devient « Ajouter un sac supplémentaire » et demande confirmation. Mode fruits par défaut = celui de la dernière pesée de l'établissement.
+- Code.gs : `deleteBagWeights` → `handleSupprimerPeseeABC` (révision vérifiée ; la ligne est recopiée dans **Pesees_Supprimees** avant d'être retirée) ; `handleCorrigerPeseeABC` met aussi à jour la colonne G quand elle est transmise ; une pesée entièrement à zéro est refusée.
+- index.html : libellé « Biodéchets, fruits compris » en mode mélangé ; bilan élèves aligné sur « Moyenne / convive ».
+
+### 4. Tests (tests/pesees-correction.test.cjs + navigateur)
+| Test | Résultat |
+|---|---|
+| Saisie initiale 12 kg | 12 kg ✓ |
+| Correction 12 → 8 kg | 8 kg, aucune nouvelle ligne ✓ |
+| Révision périmée | refusée ✓ |
+| Ajout volontaire 3 kg | 11 kg ✓ ; renvoi identique : pas de doublon ✓ |
+| Suppression du sac de 3 kg | 8 kg, copie dans Pesees_Supprimees ✓ |
+| Fruits inclus | drapeau OUI, 0 kg fruits ajouté ✓ |
+| Fruits pesés à part | 10 + 1,5 = 11,5 kg, sans double comptage ✓ |
+| Correction d'une pesée ancienne | autres jours inchangés, drapeau conservé ✓ |
+| Navigateur : liste, Modifier, Supprimer, Ajouter avec confirmation | requêtes correctes, aucune erreur JS ✓ |
+| Pesée vide | refusée ✓ |
+Tous les autres tests du dépôt passent.
+
+### 5. Déploiement
+- GitHub Pages : publié (commit de ce soir).
+- Apps Script : **à coller et redéployer (Nouvelle version)**. Sans cela, « Modifier » fonctionne (fonction existante) mais **« Supprimer » renverra un message demandant le dernier Code.gs**. La version publiée côté Google n'est pas visible depuis le dépôt : Thierry doit confirmer le déploiement.
+
+### 6. À faire par l'établissement
+Gérard Philippe : dans Saisie des déchets, dates 02/11 et 03/11, garder la bonne pesée et supprimer les autres (elles restent archivées). Les valeurs justes sont à confirmer par Mme Briançon.
