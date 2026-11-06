@@ -1352,6 +1352,13 @@
             setInterval(() => {
                 const schoolSelect = document.getElementById('select-etablissement');
                 if (schoolSelect && schoolSelect.value && schoolSelect.value !== "Chargement...") {
+                    // Borne en service : l'actualisation complète (tous les plateaux de l'année) fige la tablette
+                    // plusieurs secondes. Elle n'a lieu qu'au plus toutes les 15 minutes, et jamais juste après un scan.
+                    const borne = document.getElementById('view-borne');
+                    if (borne && borne.classList.contains('active')) {
+                        const calme = Date.now() - (typeof dernierScanTs !== 'undefined' ? dernierScanTs : 0) > 45000;
+                        if (!calme || Date.now() - (window.ABC_DERNIERE_ACTU || 0) < 15 * 60000) return;
+                    }
                     loadLiveData();
                 }
             }, 60000);
@@ -3365,6 +3372,23 @@
             }
         }
         function scanForcerEnvoi() { SCAN_Q.items.forEach(x => { x.prochain = 0; }); scanPomper(); }
+        // Mouchard de gels : si la page ne répond plus pendant plus d'une seconde, on note l'heure, la durée et la cause probable
+        // (actualisation du tableau de bord sur la tablette, ou envoi réseau en cours). Visible sous la borne.
+        const ABC_GELS = [];
+        (function surveillerGels() {
+            let attendu = performance.now() + 250;
+            setInterval(() => {
+                const maintenant = performance.now(), retard = maintenant - attendu;
+                attendu = maintenant + 250;
+                if (retard < 1000) return;
+                const borne = document.getElementById('view-borne');
+                if (!borne || !borne.classList.contains('active')) return;
+                const cause = window.ABC_ACTU_EN_COURS && Date.now() - window.ABC_ACTU_EN_COURS < 60000 ? "tablette (actualisation des données)" : (typeof SCAN_Q !== 'undefined' && SCAN_Q.items.some(x => x.enVol) ? "envoi en cours" : "tablette");
+                ABC_GELS.push({ heure: new Date().toLocaleTimeString('fr-FR'), duree: (retard / 1000).toFixed(1), cause: cause });
+                if (ABC_GELS.length > 50) ABC_GELS.shift();
+                if (typeof scanMajPuce === 'function') scanMajPuce();
+            }, 250);
+        })();
         function scanMajPuce() {
             const el = document.getElementById("scan-statut");
             if (!el) return;
@@ -3376,6 +3400,8 @@
             if(fragiles)h+=`<br><strong style="color:#b91c1c">⚠️ ${fragiles} scan(s) sans sauvegarde locale confirmée. Gardez cette page ouverte jusqu’à leur enregistrement.</strong>`;
             if (SCAN_Q.nonVisible) h += ` · 👁️ ${SCAN_Q.nonVisible} sans plateau visible`;
             if (SCAN_Q.camera) h += ` · 📷 ${SCAN_Q.camera} refusé(s) (caméra)`;
+            if (ABC_GELS.length) { const g = ABC_GELS[ABC_GELS.length - 1], max = Math.max(...ABC_GELS.map(x => +x.duree)); h += `<br><span style="color:#92400e;" title="${ABC_GELS.map(x => x.heure + ' : ' + x.duree + ' s (' + x.cause + ')').join('\n')}">🧊 ${ABC_GELS.length} gel(s) de l'écran (max ${String(max).replace('.', ',')} s) · dernier à ${g.heure}, cause : ${g.cause}</span>`; }
+            if (window.ABC_ACTU_RESEAU_MS) h += ` <span style="color:#64748b;">· réseau : ${(window.ABC_ACTU_RESEAU_MS / 1000).toFixed(1).replace('.', ',')} s pour charger les données</span>`;
             if (SCAN_Q.derniereErreur) h += `<br><span style="color:#b91c1c; font-weight:700;">⚠️ ${SCAN_Q.derniereErreur.replace(/</g, "&lt;")}</span> <span style="color:#64748b;">(nouvel essai automatique, clic = relancer)</span>`;
             el.style.borderColor = SCAN_Q.derniereErreur ? "#ef4444" : "#cbd5e1";
             el.innerHTML = h;
@@ -3743,14 +3769,15 @@
         }
 
         function loadLiveData() {
+            window.ABC_DERNIERE_ACTU = Date.now(); window.ABC_ACTU_EN_COURS = Date.now();
             const school = document.getElementById('select-etablissement').value;
             const errBanner = document.getElementById('dashboard-error-banner');
             const requete = ++requeteDashboardABC;
             let donneesRecuesABC = false;
 
             fetch(`${ADRESSE_SHEET_OFFICIELLE}?action=getDashboard&ecole=${encodeURIComponent(school)}`)
-            .then(response => response.json()).then(data => {
-                donneesRecuesABC = true;
+            .then(response => { window.ABC_ACTU_RESEAU_MS = Date.now() - window.ABC_ACTU_EN_COURS; return response.json(); }).then(data => {
+                donneesRecuesABC = true; setTimeout(() => { window.ABC_ACTU_EN_COURS = 0; }, 0);
                 // Réponse d'un établissement qu'on a quitté entre-temps : on l'ignore
                 if (requete !== requeteDashboardABC || document.getElementById('select-etablissement').value !== school) return;
                 if (!data || data.ecole !== school) {
