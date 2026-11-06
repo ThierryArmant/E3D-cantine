@@ -16,6 +16,7 @@ const PARAMETRES_DEFAUT = [
   ["portion_garniture_g", 150, "Garniture (g) - référence collège : féculents cuits 150 à 180, légumes cuits 100 à 120"],
   ["portion_dessert_g", 100, "Dessert ou laitage (g) - référence collège : pâtisserie 80 à 100, compote 100 à 120, yaourt 125"],
   ["portion_fruit_g", 150, "Fruit frais (g) - référence collège : 150 à 180"],
+  ["portion_pates_g", 200, "Pâtes (g), en plat ou en garniture : pâtes, tortellinis, raviolis, lasagnes…"],
   ["portion_pain_g", 50, "Pain (g) - calculé : tranches par élève × poids d'une tranche"],
   ["pain_tranches", 2, "Tranches de pain servies à chaque élève dès le départ"],
   ["portion_gateau_accompagnement_g", 40, "Petit gâteau servi avec une compote ou un fruit (g) : même dessert, consommation suivie à part"],
@@ -496,7 +497,7 @@ function handleSavePortionsJourABC(data) {
 // Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
 const PARAMETRES_MODIFIABLES = {
   portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
-  portion_fruit_g: [10, 500], portion_pain_g: [5, 300], pain_tranches: [1, 6], poids_tranche_pain_g: [5, 100], portion_gateau_accompagnement_g: [5, 150], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
+  portion_fruit_g: [10, 500], portion_pates_g: [50, 500], portion_pain_g: [5, 300], pain_tranches: [1, 6], poids_tranche_pain_g: [5, 100], portion_gateau_accompagnement_g: [5, 150], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
   poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_caissette_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
   poids_emballage_autre_g: [0, 50], poids_serviette_g: [0, 20], poids_epluchure_g: [0, 200], poids_os_g: [0, 200]
 };
@@ -659,10 +660,13 @@ function nettoyerTexte(t) {
   return String(t == null ? "" : t).replace(/[\[\]:|]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
 }
 
+function estPatesABC(nom) { return /(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(String(nom || "")); }
 function portionReference(composant, aliment, p) {
   const a = String(aliment || "").toLowerCase();
   if (/^sauce\b/i.test(a)) return p.portion_sauce_g || 20;
   if (composant === "pain") return p.portion_pain_g;
+  // Pâtes servies en plat ou en garniture : portion « Pâtes » (200 g par défaut).
+  if ((composant === "plat" || composant === "accompagnement") && estPatesABC(a)) return p.portion_pates_g || 200;
   if (composant === "entree") return p.portion_entree_g;
   if (composant === "plat") return p.portion_plat_g;
   if (composant === "accompagnement") return p.portion_garniture_g;
@@ -2161,7 +2165,9 @@ function repasReferenceABC(retenus, params) {
   const parFamille = {};
   desserts.forEach(function (i) { const f = familleDessertABC(i.aliment); parFamille[f] = Math.max(parFamille[f] || 0, Number(i.portion_ref_g) || 0); });
   const dessertG = Math.max(Number(params.portion_dessert_g) || 0, Object.keys(parFamille).reduce(function (t, f) { return t + parFamille[f]; }, 0));
-  const portions = { entree: params.portion_entree_g, plat: params.portion_plat_g, garniture: params.portion_garniture_g, dessert: dessertG, familles_dessert: Object.keys(parFamille), pain: params.portion_pain_g };
+  // Plat ou garniture plus lourd que la référence (pâtes 200 g…) : le repas de référence prend la portion réelle.
+  const maxPortion = function (comp, base) { return (retenus || []).filter(function (i) { return i.composant === comp; }).reduce(function (m, i) { return Math.max(m, Number(i.portion_ref_g) || 0); }, Number(base) || 0); };
+  const portions = { entree: params.portion_entree_g, plat: maxPortion("plat", params.portion_plat_g), garniture: maxPortion("accompagnement", params.portion_garniture_g), dessert: dessertG, familles_dessert: Object.keys(parFamille), pain: params.portion_pain_g };
   const ref = ["entree", "plat", "garniture", "dessert", "pain"].reduce(function (t, k) { return t + (Number(portions[k]) || 0); }, 0);
   const restes = (retenus || []).reduce(function (t, i) { return t + (Number(i.reste_g_ref) || 0); }, 0);
   return { ref_g: ref, portions: portions, restes_g: Math.round(restes), pct: ref > 0 ? Math.min(100, Math.round(100 * restes / ref)) : null };

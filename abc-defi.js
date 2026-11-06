@@ -3,7 +3,7 @@
 function defiPortionsABC() {
   const p = (typeof globalRawData !== "undefined" && globalRawData && globalRawData.parametres) || {};
   return { entree: p.portion_entree_g || 80, plat: p.portion_plat_g || 100, accompagnement: p.portion_garniture_g || 150,
-    dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50, sauce: p.portion_sauce_g || 20 };
+    dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50, sauce: p.portion_sauce_g || 20, pates: p.portion_pates_g || 200 };
 }
 function defiEstFruit(n) {
   n = n.toLowerCase();
@@ -23,7 +23,7 @@ function alimentsJeteJourABC(date) {
       let nom = m[1].trim(); const pct = +m[2] <= 5 ? 0 : +m[2]; let comp = m[3];
       if (/^aliment non identifi/i.test(nom) || /^sauce\b/i.test(nom) || !pct) continue;
       if (/^pain\b/i.test(nom)) { comp = "pain"; nom = "Pain"; }
-      const portion = comp === "dessert" && defiEstFruit(nom) ? por.fruit : (por[comp] || por.plat);
+      const portion = comp === "dessert" && defiEstFruit(nom) ? por.fruit : ((comp === "plat" || comp === "accompagnement") && /(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(nom) ? por.pates : (por[comp] || por.plat));
       const cle = nom.charAt(0).toUpperCase() + nom.slice(1).toLowerCase();
       const a = parAliment[cle] || (parAliment[cle] = { nom: nom.charAt(0).toUpperCase() + nom.slice(1).toLowerCase(), g: 0, plateaux: 0, entiers: 0 });
       a.g += portion * pct / 100; a.plateaux++; if (pct >= 90) a.entiers++;

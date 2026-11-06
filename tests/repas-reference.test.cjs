@@ -43,3 +43,15 @@ assert.equal(r.retenus.find(i => /Muffin/.test(i.aliment)).accompagnement, true)
 r = analyse([al('Muffin aux pépites de chocolat', 'dessert', 100)]);
 assert.equal(r.restes_g, 100);
 console.log('OK : deux desserts seulement pour un laitage + un autre dessert ; petit gâteau avec compote = même dessert, suivi à part.');
+
+// Pâtes : 200 g par défaut, en plat ou en garniture (pas en entrée).
+{
+  const fs2=require('fs');const src2=fs2.readFileSync(__dirname+'/../apps_script/Code.gs','utf8');
+  const f=new Function('estFruitFraisABC',src2.match(/function estPatesABC[\s\S]*?\n}\n/)[0]+src2.match(/function portionReference[\s\S]*?\n}\n/)[0]+'return portionReference;')(()=>false);
+  const p={portion_pates_g:200,portion_plat_g:100,portion_garniture_g:150,portion_entree_g:80,portion_pain_g:50};
+  require('assert').strictEqual(f('plat','Tortellinis fromage',p),200);
+  require('assert').strictEqual(f('accompagnement','Pâtes',p),200);
+  require('assert').strictEqual(f('accompagnement','Riz blanc',p),150);
+  require('assert').strictEqual(f('entree','Salade de pâtes',p),80);
+  console.log('pates ok');
+}

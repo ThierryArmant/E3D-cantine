@@ -10,7 +10,7 @@ const idDrive=url=>{const x=String(url||'');return (x.match(/\/file\/d\/([\w-]+)
 // Restes du REPAS DE RÉFÉRENCE (entrée + plat + garniture + dessert + pain, roue crantée) : 100 × grammes restants / grammes du repas.
 // Analyse récente : valeur enregistrée avec ses portions. Analyse ancienne : recalcul affiché comme tel (pas de modification des données).
 const SAUCE=/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement)\b/i;
-const portionsActuelles=()=>{const p=((typeof globalRawData!=='undefined'&&globalRawData)||{}).parametres||{};return {entree:p.portion_entree_g||80,plat:p.portion_plat_g||100,accompagnement:p.portion_garniture_g||150,dessert:p.portion_dessert_g||100,fruit:p.portion_fruit_g||150,pain:p.portion_pain_g||50}};
+const portionsActuelles=()=>{const p=((typeof globalRawData!=='undefined'&&globalRawData)||{}).parametres||{};return {entree:p.portion_entree_g||80,plat:p.portion_plat_g||100,accompagnement:p.portion_garniture_g||150,dessert:p.portion_dessert_g||100,fruit:p.portion_fruit_g||150,pain:p.portion_pain_g||50,pates:p.portion_pates_g||200}};
 const reste=s=>{
  let d=null;try{d=typeof s.detail==='string'&&s.detail?JSON.parse(s.detail):s.detail}catch(e){}
  const P=portionsActuelles();
@@ -20,7 +20,7 @@ const reste=s=>{
  if(!items.length)return null;
  items.forEach(x=>{if(/^pain\b/i.test(String(x.nom||'')))x.comp='pain'});
  // Deux desserts pris = deux portions de dessert dans le repas de référence.
- const portionItem=x=>/^pain\b/i.test(x.nom)?P.pain:(x.comp==='dessert'&&/(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|raisin|fruit)/i.test(x.nom)&&!/compote|yaourt|muffin|g[âa]teau|tarte/i.test(x.nom)?P.fruit:(P[x.comp]||P.plat));
+ const portionItem=x=>/^pain\b/i.test(x.nom)?P.pain:((x.comp==='plat'||x.comp==='accompagnement')&&/(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(x.nom||''))?P.pates:(x.comp==='dessert'&&/(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|raisin|fruit)/i.test(x.nom)&&!/compote|yaourt|muffin|g[âa]teau|tarte/i.test(x.nom)?P.fruit:(P[x.comp]||P.plat));
  // Deux desserts seulement pour un laitage + un autre dessert ; 2 yaourts, 2 fruits ou fruit + gâteau = 1.
  const famille=n=>/yaourt|yogourt|fromage|kiri|brie|camembert|emmental|tomme|comt[ée]|vache qui rit|petit[- ]suisse|ortolan/i.test(n)?'laitage':'autre';
  // Petit gâteau servi avec une compote ou un fruit : même dessert, ses restes comptent pour son vrai poids.
@@ -30,11 +30,13 @@ const reste=s=>{
  if(avecAutre)items.forEach(x=>{if(x.comp==='dessert'&&petit(String(x.nom||'')))x.accomp=true});
  const fam={};items.filter(x=>x.comp==='dessert'&&!x.accomp&&!SAUCE.test(String(x.nom||''))).forEach(x=>{const f=famille(String(x.nom||''));fam[f]=Math.max(fam[f]||0,portionItem(x))});
  const dessertG=Math.max(P.dessert,Object.values(fam).reduce((t,v)=>t+v,0));
- const ref=P.entree+P.plat+P.accompagnement+dessertG+P.pain;
+ const maxComp=(c,base)=>items.filter(x=>x.comp===c&&!SAUCE.test(String(x.nom||''))).reduce((m,x)=>Math.max(m,portionItem(x)),base);
+ const platG=maxComp('plat',P.plat),garnG=maxComp('accompagnement',P.accompagnement);
+ const ref=P.entree+platG+garnG+dessertG+P.pain;
  const utiles=items.filter(x=>!SAUCE.test(String(x.nom||'')) && x.pct>5);
  const g=utiles.reduce((t,x)=>t+(x.accomp?pg:portionItem(x))*x.pct/100,0);
  // 4 zones + pain : % restant de chaque zone servie (grammes restants / portion de la zone).
- const refZone={entree:P.entree,plat:P.plat,accompagnement:P.accompagnement,dessert:dessertG,pain:P.pain};
+ const refZone={entree:P.entree,plat:platG,accompagnement:garnG,dessert:dessertG,pain:P.pain};
  const zones={};Object.keys(refZone).forEach(z=>{
   const presents=items.filter(x=>x.comp===z&&!SAUCE.test(String(x.nom||'')));if(!presents.length)return;
   const gz=utiles.filter(x=>x.comp===z).reduce((t,x)=>t+(x.accomp?pg:portionItem(x))*x.pct/100,0);

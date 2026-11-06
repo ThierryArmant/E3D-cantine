@@ -1165,7 +1165,7 @@
             const p = (globalRawData && globalRawData.parametres) || {};
             return {
                 entree: p.portion_entree_g || 80, plat: p.portion_plat_g || 100, accompagnement: p.portion_garniture_g || 150,
-                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50, sauce: p.portion_sauce_g || 20
+                dessert: p.portion_dessert_g || 100, fruit: p.portion_fruit_g || 150, pain: p.portion_pain_g || 50, sauce: p.portion_sauce_g || 20, pates: p.portion_pates_g || 200
             };
         }
 
@@ -1180,6 +1180,7 @@
         function portionPour(item, portions) {
             if (/^sauce\b/i.test(item.nom)) return portions.sauce || 20;
             if (item.composant === "dessert" && estFruit(item.nom)) return portions.fruit;
+            if ((item.composant === "plat" || item.composant === "accompagnement") && /(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(item.nom || "")) return portions.pates || 200;
             return portions[item.composant] || portions.plat;
         }
 
@@ -2602,7 +2603,7 @@
         const PARAMS_CHAMPS = [
             ["portion_entree_g", "Entrée (g)", 80, "grammes", 10, 500], ["portion_plat_g", "Plat protidique (g)", 100, "grammes", 10, 500],
             ["portion_garniture_g", "Garniture (g)", 150, "grammes", 10, 500], ["portion_dessert_g", "Dessert ou laitage (g)", 100, "grammes", 10, 500],
-            ["portion_fruit_g", "Fruit frais (g)", 150, "grammes", 10, 500], ["pain_tranches", "Pain : tranches par élève", 2, "tranches", 1, 6], ["poids_tranche_pain_g", "Pain : poids d'une tranche (g)", 25, "grammes", 5, 100], ["portion_gateau_accompagnement_g", "Petit gâteau servi avec compote ou fruit (g)", 40, "grammes", 5, 150],
+            ["portion_fruit_g", "Fruit frais (g)", 150, "grammes", 10, 500], ["portion_pates_g", "Pâtes (g), en plat ou garniture", 200, "grammes", 50, 500], ["pain_tranches", "Pain : tranches par élève", 2, "tranches", 1, 6], ["poids_tranche_pain_g", "Pain : poids d'une tranche (g)", 25, "grammes", 5, 100], ["portion_gateau_accompagnement_g", "Petit gâteau servi avec compote ou fruit (g)", 40, "grammes", 5, 150],
             ["effectif_defaut", "Effectif attendu par défaut (couverts)", 450, "couverts", 1, 5000], ["prix_kg_eur", "Coût moyen de la denrée (€/kg)", 4.5, "€/kg", 0.1, 100]
         ];
         function ouvrirParametres() {
@@ -4544,9 +4545,9 @@
 <script src="abc-catalogue.js?v=20261104-menu-2"></script>
 <script src="abc-qrcode.js?v=1"></script>
 <script src="abc-photos.js?v=20261106-pain-salade-2"></script>
-<script src="abc-analyse-photos.js?v=20261104-zones-1"></script>
+<script src="abc-analyse-photos.js?v=20261106-pates-1"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
-<script src="abc-defi.js?v=20261104-1"></script>
+<script src="abc-defi.js?v=20261106-pates-1"></script>
 <script src="abc-bacs.js?v=20261104-1"></script>
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
 </body>
