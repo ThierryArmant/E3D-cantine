@@ -924,6 +924,20 @@ Réponds en JSON strict :
   // Surcoût de quelques centaines de jetons. Propriété RESOLUTION_IMAGE_SCAN = « defaut » pour revenir au réglage du modèle.
   const resolution = resolutionImageScanABC();
   if (resolution) payloadData.generationConfig.mediaResolution = resolution;
+  let jsonResp = null, jetons = null, texteReponse = "", modeleUtilise = modeleGeminiABC();
+  // Albert (IA de l'État, serveurs en France) si la propriété FOURNISSEUR_ANALYSE = albert, ou en test.
+  // En cas d'échec d'Albert (saturé, panne, réponse illisible), on bascule sur Gemini : aucun scan bloqué.
+  if (modeleAlbertABC()) {
+    try {
+      const a = appelerAlbertVisionABC(promptVision, cleanBase64);
+      JSON.parse(nettoyerJsonABC(a.texte));
+      texteReponse = a.texte; jetons = a.jetons; modeleUtilise = "albert:" + a.modele;
+    } catch (e) {
+      if (MODELE_FORCE_ABC && /^albert:/.test(MODELE_FORCE_ABC)) throw e; // en test, on veut voir l'erreur d'Albert
+      console.warn("Albert indisponible, repli sur Gemini : " + e);
+    }
+  }
+  if (!texteReponse) {
   let response;
   try {
     response = appelerGeminiParRequete(payloadData);
@@ -934,11 +948,13 @@ Réponds en JSON strict :
     delete payloadData.generationConfig.mediaResolution;
     response = appelerGeminiParRequete(payloadData);
   }
-  const jsonResp = JSON.parse(response.getContentText());
+  jsonResp = JSON.parse(response.getContentText());
   const usage = jsonResp.usageMetadata || {};
-  const jetons = { entree: usage.promptTokenCount || 0, reflexion: usage.thoughtsTokenCount || 0, sortie: usage.candidatesTokenCount || 0 };
+  jetons = { entree: usage.promptTokenCount || 0, reflexion: usage.thoughtsTokenCount || 0, sortie: usage.candidatesTokenCount || 0 };
   if (!jsonResp.candidates || !jsonResp.candidates[0].content) throw new Error("Réponse invalide de l'API Gemini pour le scan.");
-  const result = JSON.parse(jsonResp.candidates[0].content.parts[0].text.replace(/```json/gi, "").replace(/```/g, "").trim());
+  texteReponse = jsonResp.candidates[0].content.parts[0].text;
+  }
+  const result = JSON.parse(nettoyerJsonABC(texteReponse));
 
   // Plateau absent : on n'enregistre rien (évite de fausser les statistiques).
   // On garde une trace (type SCAN_ECHEC, hors statistiques) pour que ces photos ne disparaissent pas sans bruit.
@@ -998,7 +1014,7 @@ Réponds en JSON strict :
     ligne: [quand, "SCAN_IA_VISION", note,
       moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
       poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, residus: residus, bacs: tri.bacs, objets: tri.objets, jetons: jetons,
-        methode: METHODE_ANALYSE_ABC, modele: modeleGeminiABC(), repas_ref_g: repas.ref_g, portions_ref: repas.portions, restes_g: repas.restes_g, restes_pct_repas: repas.pct })],
+        methode: METHODE_ANALYSE_ABC, modele: modeleUtilise, repas_ref_g: repas.ref_g, portions_ref: repas.portions, restes_g: repas.restes_g, restes_pct_repas: repas.pct })],
     details: { aliments: retenus, ecartes: ecartes.length, bacs: tri.bacs }
   };
 }
@@ -2045,6 +2061,68 @@ function niveauReflexionScanABC() {
   // Par défaut : réglage du modèle. Essai du 03/11 : « low » ne baisse presque pas le coût de 3.5 Flash
   // (la photo et les consignes pèsent l'essentiel) et laisse 3 plateaux sur 39 sans détail.
   return ["minimal", "low", "medium", "high"].indexOf(v) >= 0 ? v : "";
+}
+
+// ==========================================================================
+// ALBERT (API de l'État, compatible OpenAI) pour la lecture des plateaux.
+// Propriétés du script : ALBERT_KEY (clé), FOURNISSEUR_ANALYSE = albert pour l'activer en service,
+// MODELE_ALBERT (par défaut mistral-small-3-2-24b-instruct-2506).
+// ==========================================================================
+const NOM_MODELE_ALBERT = "mistral-small-3-2-24b-instruct-2506";
+function modeleAlbertABC() {
+  if (MODELE_FORCE_ABC) return /^albert:/.test(MODELE_FORCE_ABC) ? MODELE_FORCE_ABC.slice(7) || NOM_MODELE_ALBERT : "";
+  let fournisseur = "", modele = "", cle = "";
+  try {
+    const props = PropertiesService.getScriptProperties();
+    fournisseur = String(props.getProperty("FOURNISSEUR_ANALYSE") || "").trim().toLowerCase();
+    modele = String(props.getProperty("MODELE_ALBERT") || "").trim();
+    cle = props.getProperty("ALBERT_KEY") || "";
+  } catch (e) {}
+  if (fournisseur !== "albert" || !cle) return "";
+  return /^[a-z0-9.\-]{3,80}$/i.test(modele) ? modele : NOM_MODELE_ALBERT;
+}
+function nettoyerJsonABC(t) {
+  t = String(t || "").replace(/```json/gi, "").replace(/```/g, "").trim();
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  return a >= 0 && b > a ? t.slice(a, b + 1) : t;
+}
+function appelerAlbertVisionABC(prompt, base64) {
+  const cle = PropertiesService.getScriptProperties().getProperty("ALBERT_KEY");
+  if (!cle) throw new Error("Clé Albert non configurée (propriété ALBERT_KEY).");
+  const modele = modeleAlbertABC() || NOM_MODELE_ALBERT;
+  const corps = {
+    model: modele, temperature: 0, max_tokens: 2000,
+    response_format: { type: "json_object" },
+    messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: "data:image/jpeg;base64," + base64 } }] }]
+  };
+  let delai = 2000;
+  for (let i = 0; i < 3; i++) {
+    const r = UrlFetchApp.fetch("https://albert.api.etalab.gouv.fr/v1/chat/completions", {
+      method: "post", contentType: "application/json", headers: { Authorization: "Bearer " + cle },
+      payload: JSON.stringify(corps), muteHttpExceptions: true
+    });
+    const code = r.getResponseCode();
+    if (code === 200) {
+      const j = JSON.parse(r.getContentText());
+      const texte = j.choices && j.choices[0] && j.choices[0].message ? j.choices[0].message.content : "";
+      if (!texte) throw new Error("Réponse vide d'Albert.");
+      const u = j.usage || {};
+      return { texte: texte, modele: modele, jetons: { entree: u.prompt_tokens || 0, reflexion: 0, sortie: u.completion_tokens || 0 } };
+    }
+    // Format JSON imposé refusé par le modèle : on réessaie sans (le prompt demande déjà du JSON).
+    if (code === 400 && corps.response_format && /response_format|json/i.test(r.getContentText())) { delete corps.response_format; i--; continue; }
+    if ((code === 429 || code >= 500) && i < 2) { Utilities.sleep(delai); delai *= 2; continue; }
+    throw new Error("Albert HTTP " + code + " : " + r.getContentText().slice(0, 300));
+  }
+  throw new Error("Albert indisponible après plusieurs tentatives.");
+}
+// ▶️ Test : les 17 plateaux témoins lus par Albert, résultats dans l'onglet Comparaison_Modeles (à comparer avec Flash-Lite).
+function comparerAlbertTemoinsABC() {
+  return comparerModeleABC("albert:" + NOM_MODELE_ALBERT, "", PLATEAUX_TEMOINS_ABC.map(function (x) { return x[0]; }), PLATEAUX_TEMOINS_ABC.map(function (x) { return x[1]; }));
+}
+// ▶️ Variante avec un autre modèle d'Albert (ex. gemma-4-31b-it).
+function comparerAlbertGemmaTemoinsABC() {
+  return comparerModeleABC("albert:gemma-4-31b-it", "", PLATEAUX_TEMOINS_ABC.map(function (x) { return x[0]; }), PLATEAUX_TEMOINS_ABC.map(function (x) { return x[1]; }));
 }
 
 // Modèle utilisé : propriété du script MODELE_GEMINI (ex. gemini-3.1-flash-lite) pour en changer sans toucher au code.
