@@ -734,7 +734,8 @@ const OBJETS_PLATEAU_ABC = { pot: ["poids_pot_g", "emballages"], opercule: ["poi
 const POIDS_OBJETS_DEFAUT_ABC = { poids_pot_g: 6, poids_opercule_g: 1, poids_film_g: 2, poids_caissette_g: 1, poids_brique_g: 10, poids_barquette_g: 8, poids_emballage_autre_g: 3, poids_serviette_g: 3, poids_epluchure_g: 25, poids_os_g: 15 };
 function estFruitFraisABC(nom) {
   const n = String(nom || "").toLowerCase();
-  if (/pommes? de terre|compote|yaourt|tarte|g[âa]teau|cr[èe]me|jus|sirop|confiture/.test(n)) return false;
+  // « Pommes noisettes », « pommes dauphines », frites… sont des pommes de terre, pas des fruits (09/11 : 16 kg classés en fruits).
+  if (/pommes? de terre|pommes? (noisettes?|dauphines?|duchesses?|rissol|sautees?|sautées?|vapeur|frites?|paillasson|grenailles?|au four)|noisettes|dauphines?|croquettes?|frites?|compote|yaourt|tarte|g[âa]teau|cr[èe]me|jus|sirop|confiture/.test(n)) return false;
   return /(^|[^a-zà-ÿ])(pomme|poire|banane|orange|cl[ée]mentine|mandarine|kiwi|p[êe]che|abricot|prune|raisin|melon|past[èe]que|fraise|pamplemousse|nectarine|fruit)/.test(n);
 }
 function trierDechetsPlateauABC(retenus, objetsBruts, params) {
@@ -887,7 +888,8 @@ RÈGLES
 - Ne décris pas deux fois la même portion physique sous des noms différents ; conserve les portions réellement distinctes.
 - Ne déduis pas le nom d’un aliment entièrement consommé de son emballage, d’os, de traces ou du menu : sans indice visuel distinctif, son identité reste inconnue.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
-- Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste. Les CROÛTES DE FROMAGE (camembert, brie, tomme…), la cire ou l'emballage du fromage sont un déchet INÉVITABLE : si seule la croûte reste, reste_pct = 0 (ne les compte pas comme du fromage jeté).
+- Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste. KIWI coupé en deux et mangé à la cuillère : les deux demi-peaux vidées (vertes à l'intérieur mais creuses) = 0 % ; ne compte que la chair verte encore en place. Peau de banane, d'orange ou de clémentine sans chair = 0 %.
+- POT, BARQUETTE, GOURDE OU EMBALLAGE (yaourt, compote, liégeois, fromage) : estime le CONTENU restant (vide, à moitié, plein) dans reste_pct ; le contenant lui-même ne compte jamais comme aliment. Les CROÛTES DE FROMAGE (camembert, brie, tomme…), la cire ou l'emballage du fromage sont un déchet INÉVITABLE : si seule la croûte reste, reste_pct = 0 (ne les compte pas comme du fromage jeté).
 - CONTENANT OU CONTENU : ne confonds jamais un emballage vide avec l'aliment qu'il contenait. Une caissette en papier plissé vue de dessus, au fond plat taché de gras ou de miettes, SANS gâteau bombé dedans, est une caissette VIDE : le gâteau a été mangé (reste 0 %). Un gâteau réellement présent a un dessus bombé, une épaisseur, une texture de mie et souvent des pépites ou des morceaux visibles. De même, un pot vide, un opercule, un film plastique froissé ou un papier aluminium déplié ne sont pas des aliments restants. En cas de doute entre caissette vide et gâteau entier, regarde le relief et l'ombre : sans relief, c'est une caissette vide. ATTENTION, piège fréquent : vu de dessus, le FOND d'une caissette vide est un disque beige ou rosé, lisse et uniforme, taché de gras, parfois avec quelques miettes : ce n'est PAS un muffin. Un vrai muffin restant montre un DESSUS BOMBÉ avec une croûte irrégulière et des PÉPITES de chocolat (points sombres) bien visibles ; s'il est entamé, on voit la mie claire et alvéolée. Un film plastique froissé avec quelques miettes est un emballage vide (0 %). Sans pépites ni dôme ni mie visibles, compte le muffin comme mangé (0 %). Un muffin jeté entier est RARE : ne l'annonce que si tu le vois clairement. Un pot de compote ou de yaourt NON OUVERT a son opercule plat, intact et scellé tout autour, avec l'impression bien lisible : il est jeté plein (reste 100 %, dans_emballage true). Si l'opercule est arraché, replié, déchiré ou enfoncé dans le pot, le pot a été ouvert : estime seulement le contenu visible, et 0 % s'il n'y a plus de compote visible.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
@@ -961,7 +963,8 @@ Réponds en JSON strict :
     const fiche = identifierCatalogueABC(nomMenu || alimentBrut, composant, catalogueScan);
     const aliment = nomMenu || (fiche ? fiche.libelle : alimentBrut);
     // Sauce ou condiment seul : attribut d'une préparation, jamais une portion jetée.
-    if (/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che)\b/i.test(aliment)) { residus.push(aliment); return; }
+    // Sauces et condiments (beurre en plaquette, cornichons…) : jamais une portion d'entrée ou de plat.
+    if (/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che|beurre|cornichons?|citron)\b/i.test(aliment)) { residus.push(aliment); return; }
     const portion = portionReference(composant, aliment, params);
     // Traces et miettes : négligeables (convention A.B.C.).
     const resteRetenu = reste <= SEUIL_RESIDU_PCT_ABC ? 0 : reste;

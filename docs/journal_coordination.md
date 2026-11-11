@@ -168,3 +168,18 @@ Tous les autres tests du dépôt passent.
 
 ### 6. À faire par l'établissement
 Gérard Philippe : dans Saisie des déchets, dates 02/11 et 03/11, garder la bonne pesée et supprimer les autres (elles restent archivées). Les valeurs justes sont à confirmer par Mme Briançon.
+
+---
+
+## 11 novembre 2026 — Écarts des 09 et 10/11 à Giono, contenu des pots
+
+Pesées (fruits avec les biodéchets) : 09/11 biodéchets 17 kg, pain 1,25, emballages 4,17 ; 10/11 biodéchets 12,31, pain 2,95, emballages 7,75.
+Estimation photo (627 et 628 plateaux) : 09/11 biodéchets + fruits 37,7 kg ; 10/11 23,6 kg. Pain et emballages cohérents.
+
+Causes trouvées dans les analyses du 09/11 :
+- « Pommes noisettes » rangées en **fruits** côté serveur (`estFruitFraisABC` reconnaissait « pomme ») : 16,6 kg. Corrigé (pommes noisettes, dauphines, frites, croquettes… exclues).
+- **Kiwi** coupé en deux et mangé à la cuillère : demi-peaux vides lues comme « 50 % » (7,2 kg le 09, 6,9 kg le 10). Règle ajoutée au prompt : peaux vidées = 0 %.
+- **Beurre** (plaquette) compté comme une entrée de 80 g : 2,1 kg. Beurre, cornichons, citron rangés avec les sauces (résidus), serveur et écran.
+- Pommes noisettes et pennes : estimation en vrac, portions de référence probablement trop fortes → saisir les portions réelles du jour (Précision scan / balance) ou le nombre de pièces (×N) au menu.
+
+Pots jetés pleins (yaourt, liégeois) : décision de Thierry, le contenu est du gaspillage alimentaire, le pot vide va aux emballages. Écran : le contenu des aliments « dans leur emballage » est désormais compté dans le gaspillage évitable (estimation photo ramenée aux convives, `contenuEmballagesKg`), sans être réparti sur les poubelles pesées ; la comparaison des poubelles reste physique (« Emballages, avec leur contenu »). Test ajouté.

@@ -9,7 +9,7 @@ const emoji=x=>({'pas aimé':'🔴','plus faim':'🟡','pas le temps':'🟠','to
 const idDrive=url=>{const x=String(url||'');return (x.match(/\/file\/d\/([\w-]+)/)||x.match(/[?&]id=([\w-]+)/)||[])[1]||''};
 // Restes du REPAS DE RÉFÉRENCE (entrée + plat + garniture + dessert + pain, roue crantée) : 100 × grammes restants / grammes du repas.
 // Analyse récente : valeur enregistrée avec ses portions. Analyse ancienne : recalcul affiché comme tel (pas de modification des données).
-const SAUCE=/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement)\b/i;
+const SAUCE=/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|beurre|cornichons?|citron)\b/i;
 const portionsActuelles=()=>{const p=((typeof globalRawData!=='undefined'&&globalRawData)||{}).parametres||{};return {entree:p.portion_entree_g||80,plat:p.portion_plat_g||100,accompagnement:p.portion_garniture_g||150,dessert:p.portion_dessert_g||100,fruit:p.portion_fruit_g||150,pain:p.portion_pain_g||50,pates:p.portion_pates_g||200}};
 const reste=s=>{
  let d=null;try{d=typeof s.detail==='string'&&s.detail?JSON.parse(s.detail):s.detail}catch(e){}

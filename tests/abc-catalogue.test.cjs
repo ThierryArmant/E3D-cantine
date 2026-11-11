@@ -89,3 +89,14 @@ assert.equal(JSON.stringify(front.abcSelection()),'['+'"poisson"'+']');
 front.document.getElementById=id=>id==='select-etablissement'?{value:'B'}:id==='input-menu-date'?{value:'2026-10-16'}:null;
 assert.equal(JSON.stringify(front.abcSelection()),'[]');
 console.log('Vérifications réussies : catalogue isolé, corrections datées réversibles, transfert de bac sans doublon, conservation des autres lignes, rechargement du menu, masses et syntaxe.');
+// Pots jetés pleins : le contenu compte comme gaspillage évitable (estimé), sans gonfler les poubelles pesées.
+{
+  delete c.globalRawData.portionsJour;
+  c.globalRawData.rawGaspillage.push({type:'SCAN_IA_VISION',dateRaw:'2026-10-16',commentaire:'[Yaourt nature : 100% restes | dessert | confiance haute]',emb:['Yaourt nature']});
+  const cal3=c.calculerCalibrage('2026-10-16','2026-10-16'), j=cal3.jours['2026-10-16'];
+  assert.ok(j.contenuEmballagesKg>0, 'contenu du pot estimé');
+  assert.ok(Math.abs(j.evitableKg+j.inevitableKg-8-j.contenuEmballagesKg)<1e-9, 'poubelles pesées inchangées + contenu du pot');
+  assert.ok(Math.abs(j.predictedKg-cal.jours['2026-10-16'].predictedKg*2/3)<1e-9, 'le pot ne gonfle pas l\'estimé des poubelles');
+  c.globalRawData.rawGaspillage.pop();
+  console.log('contenu des pots ok');
+}

@@ -1148,6 +1148,8 @@
                     correction: correction.motif
                 })];
                 if (bannis.has(cle) || bannis.has(cleObservationStat(it))) return [];
+                // Condiments servis à part (beurre en plaquette, cornichons, citron) : jamais une portion d'entrée ou de plat.
+                if (/^(beurre|cornichons?|citron)\b/.test(cle)) return [];
                 const generique = /^(entree|dessert|plat|plat principal|plat chaud|accompagnement|aliment|inconnu|non identifie)( non identifie)?$/.test(cle);
                 let reference = Object.keys(COEFFICIENTS_INEVITABLES).concat(Object.keys(COEFFICIENTS_CARBONE_ADEME)).find(n => cleAlimentStat(n) === cle);
                 let nom = libelles[cle] || (reference ? reference.charAt(0).toUpperCase() + reference.slice(1) : cle.charAt(0).toUpperCase() + cle.slice(1));
@@ -1516,15 +1518,18 @@
                     if (items.some(it => !it.composant)) res.scansComposantDevine = (res.scansComposantDevine || 0) + 1;
                     if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
                     jour.scansDetail++;
-                    // Aliments restés dans leur emballage : poubelle à emballages, hors des poubelles pesées alimentaire / fruits / pain.
+                    // Aliments restés dans leur pot / emballage (yaourt, compote, liégeois jetés pleins) : le pot part aux emballages,
+                    // mais son CONTENU est du gaspillage alimentaire. Il est estimé d'après la photo (« emb »), sans être réparti sur
+                    // les poubelles alimentaire / fruits / pain, puisque physiquement il n'y est pas.
                     const dansEmb = new Set((s.emb || []).map(cleAlimentStat));
                     detail.forEach(it => {
-                        if (dansEmb.size && (dansEmb.has(cleAlimentStat(it.nomBrut || it.nom)) || dansEmb.has(cleAlimentStat(it.nom)))) return;
+                        const emballe = dansEmb.size && (dansEmb.has(cleAlimentStat(it.nomBrut || it.nom)) || dansEmb.has(cleAlimentStat(it.nom)));
                         // Portion réelle saisie après coup pour ce jour (cuisinier), sinon portion de référence.
                         const portion = portionJourABC(d, it.nom) || portionPour(it, portions);
                         // Fruits jetés avec les biodéchets ce jour-là : ils sont comparés à la poubelle alimentaire.
-                        const bin = it.composant === "pain" || /^pain\b/i.test(it.nom) ? "pain" : (estFruit(it.nom) && !bins.fruitsDansBio ? "fruits" : "alim");
-                        const o = brut[it.nom] = brut[it.nom] || { nom: it.nom, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0 };
+                        const bin = emballe ? "emb" : (it.composant === "pain" || /^pain\b/i.test(it.nom) ? "pain" : (estFruit(it.nom) && !bins.fruitsDansBio ? "fruits" : "alim"));
+                        const cleBrut = bin === "emb" && brut[it.nom] && brut[it.nom].bin !== "emb" ? it.nom + " (dans son pot)" : (bin !== "emb" && brut[it.nom] && brut[it.nom].bin === "emb" ? it.nom + " (hors pot)" : it.nom);
+                        const o = brut[cleBrut] = brut[cleBrut] || { nom: cleBrut, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0 };
                         o.count++; o.resteG += portion * it.restePct / 100; o.portionG += portion;
                         // Estimation sans pesée : portion de référence × reste, inévitable déduit par la bibliothèque
                         const resteG1 = portion * it.restePct / 100, coef1 = coefInevitable(it.nom);
@@ -1539,7 +1544,7 @@
                 if (n > 0) {
                     res.scansDetail += n;
                     const liste = Object.keys(brut).map(k => brut[k]);
-                    const totaux = { alim: 0, fruits: 0, pain: 0 };
+                    const totaux = { alim: 0, fruits: 0, pain: 0, emb: 0 };
                     liste.forEach(o => { totaux[o.bin] += o.resteG; });
                     liste.forEach(o => {
                         let coef = coefInevitable(o.nom);
@@ -1555,7 +1560,9 @@
                             if (nbEtats > 0) coef = somme / nbEtats;
                         }
                         const servisKg = E * (o.count / n) * (o.portionG / o.count) / 1000;
-                        const totalKg = (totaux[o.bin] > 0 && bins[o.bin] > 0) ? bins[o.bin] * o.resteG / totaux[o.bin] : 0;
+                        // Contenu des pots jetés pleins : estimation photo ramenée aux convives (pas de pesée séparée possible).
+                        const totalKg = o.bin === "emb" ? o.resteG / n * E / 1000 : ((totaux[o.bin] > 0 && bins[o.bin] > 0) ? bins[o.bin] * o.resteG / totaux[o.bin] : 0);
+                        if (o.bin === "emb") { coef = 0; jour.contenuEmballagesKg = (jour.contenuEmballagesKg || 0) + totalKg; }
                         const inevKg = Math.min(totalKg, servisKg * (coef || 0));
                         const evitKg = totalKg - inevKg;
                         const etats = {};
@@ -1569,10 +1576,12 @@
                         });
                         jour.items[o.nom] = { totalKg: totalKg, evitKg: evitKg, inevKg: inevKg, carboneKg: carbKg, etats: etats, portionG: o.count ? o.portionG / o.count : 0, portionAjustee: !!portionJourABC(d, o.nom), vus: o.count, resteG: o.resteG };
                         jour.evitableKg += evitKg; jour.inevitableKg += inevKg; jour.carboneKg += carbKg;
-                        jour.predictedKg += o.resteG / n * E / 1000;
-                        jour.predictedBins[o.bin] += o.resteG / n * E / 1000;
+                        if (o.bin !== "emb") {
+                            jour.predictedKg += o.resteG / n * E / 1000;
+                            jour.predictedBins[o.bin] += o.resteG / n * E / 1000;
+                        }
                         const g = res.items[o.nom] = res.items[o.nom] || { totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0, etats: {}, estEvitKg: 0, estCarbKg: 0, pese: false };
-                        g.estEvitKg += o.estEvitKg; g.estCarbKg += o.estCarbKg; if (bins[o.bin] > 0) g.pese = true;
+                        g.estEvitKg += o.estEvitKg; g.estCarbKg += o.estCarbKg; if (bins[o.bin] > 0) g.pese = true; if (o.bin === "emb") g.contenuPot = true;
                         g.totalKg += totalKg; g.evitKg += evitKg; g.inevKg += inevKg; g.carboneKg += carbKg;
                         Object.keys(etats).forEach(nomEtat => {
                             const ge = g.etats[nomEtat] = g.etats[nomEtat] || { count: 0, totalKg: 0, evitKg: 0, inevKg: 0, carboneKg: 0 };
@@ -1585,7 +1594,7 @@
                     if (jour.utilisable) {
                         res.joursCalibres++;
                         res.attendusJoursScannes += E;
-                        res.predictedKg += jour.predictedKg; res.measuredKg += jour.evitableKg + jour.inevitableKg;
+                        res.predictedKg += jour.predictedKg; res.measuredKg += jour.evitableKg + jour.inevitableKg - (jour.contenuEmballagesKg || 0);
                     }
                 }
                 res.jours[d] = jour;
@@ -4595,7 +4604,7 @@
 <script src="abc-catalogue.js?v=20261104-menu-2"></script>
 <script src="abc-qrcode.js?v=1"></script>
 <script src="abc-photos.js?v=20261106-nom-cuisinier-2"></script>
-<script src="abc-analyse-photos.js?v=20261106-pates-1"></script>
+<script src="abc-analyse-photos.js?v=20261111-condiments-1"></script>
 <script src="abc-bilan.js?v=20261101-1"></script>
 <script src="abc-defi.js?v=20261106-pates-1"></script>
 <script src="abc-bacs.js?v=20261106-fruits-bio-1"></script>
