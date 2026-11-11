@@ -19,7 +19,7 @@ assert.equal(appels.length, 1);
 assert.equal(appels[0].thinkingConfig, undefined, "réglage du modèle par défaut");
 assert.equal(appels[0].mediaResolution, 'MEDIA_RESOLUTION_HIGH', 'photo lue en haute résolution');
 
-assert.deepEqual(JSON.parse(r.ligne[10]).jetons, { entree: 4000, reflexion: 300, sortie: 200 });
+assert.deepEqual(JSON.parse(r.ligne[10]).jetons, { entree: 4000, cache: 0, reflexion: 300, sortie: 200 });
 console.log('OK : réflexion courte, repli si refusée, jetons notés.');
 // Pain rangé par l'IA en « accompagnement » : remis en pain (50 g, bac pain).
 const rep2 = { candidates: [{ content: { parts: [{ text: JSON.stringify({ plateau_visible: true, resume_comportement: 'ok', aliments: [{ aliment: 'Pain', composant: 'accompagnement', reste_pct: 100, mange_pct: 0, confiance: 'haute' }], objets: [] }) }] } }] };
@@ -27,3 +27,11 @@ c.appelerGeminiParRequete = () => ({ getContentText: () => JSON.stringify(rep2) 
 const r2 = JSON.parse(c.analyserPlateauABC({}, 'AAAA', new Date('2026-11-03T12:00:00Z'), 'x', '').ligne[10]);
 assert.equal(r2.retenus[0].composant, 'pain'); assert.equal(r2.retenus[0].portion_ref_g, 50); assert.equal(r2.bacs.pain, 50); assert.equal(r2.bacs.biodechets, 0);
 console.log('OK : pain remis dans le bac pain.');
+// Cache : consignes du jour en premier, photo et choix de l'élève ensuite ; jetons en cache notés.
+{
+  const src2 = require('fs').readFileSync(__dirname + '/../apps_script/Code.gs', 'utf8');
+  const i = src2.indexOf('contents: [{ parts: [{ text: promptVision }, { inlineData:');
+  assert.ok(i > 0 && src2.indexOf('{ text: precisionEleve }', i) > i, 'partie variable après la photo');
+  assert.ok(!/PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « \$\{choixPlat\}/.test(src2), 'choix de l\'élève hors des consignes communes');
+  console.log('OK : consignes communes en tête (cache).');
+}

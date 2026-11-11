@@ -872,7 +872,6 @@ COMMENT ESTIMER reste_pct :
 - FORME INTACTE : pièces entières non touchées, tas de garniture non entamé, sauce lisse non étalée par la fourchette = l'aliment n'a pas été mangé (90 à 100 %). Ne réponds pas « en partie mangé » par défaut : une assiette à peine touchée est une assiette laissée.
 PAIN : chaque élève reçoit ${params.pain_tranches || 2} tranche(s) de pain au départ. Pour l'aliment « Pain », COMPTE les morceaux réellement visibles et ajoute "morceaux_pain": {"tranches": nombre de tranches entières ou presque, "demi": nombre de demi-tranches, "quignons": nombre de petits morceaux, croûtes ou quignons}. Les miettes ne comptent pas. Ne donne pas 50 % par habitude : un petit quignon n'est PAS une tranche. reste_pct = part des ${params.pain_tranches || 2} tranches laissée (indicatif, le serveur recalcule d'après les morceaux).
 
-PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « ${choixPlat} ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste.
 NOMS DU MENU DU JOUR (confirmés par l'équipe) : ${listeMenu || 'aucun'}. Quand un aliment correspond à l'un d'eux, écris EXACTEMENT ce nom, jamais un nom générique (« Gâteau », « Dessert », « Plat ») ni une variante.
 NOMS DU CATALOGUE (seulement si l'aliment n'est pas dans le menu du jour) : ${nomsCatalogue.join(', ')}.
 - UN PRODUIT = UN ALIMENT : les pépites, le glaçage, la garniture ou la croûte d'un gâteau font partie du gâteau ; ne les liste jamais comme un aliment séparé (pas de « Chocolat » à côté d'un muffin aux pépites de chocolat).
@@ -902,7 +901,7 @@ Réponds en JSON strict :
 {
   "plateau_visible": true,
   "nb_plateaux": 1,
-  "resume_comportement": "Phrase courte (ex. a trié les légumes mais mangé la viande).",
+  "resume_comportement": "10 mots au plus (ex. a trié les légumes, mangé la viande).",
   "aliments": [
     {"composant": "entree|plat|accompagnement|dessert|pain", "aliment": "Nom court", "forme": "forme servie : entier, demi, tranche, rondelles, râpé, haché, purée...", "preparation": "cuisson et sauce servies", "etat_reste": "aucun|intact|entamé|trié|émietté", "reste_pct": 0, "mange_pct": 100, "dans_emballage": false, "confiance": "haute|moyenne|faible"}
   ],
@@ -911,8 +910,11 @@ Réponds en JSON strict :
   ]
 }`;
 
+  const precisionEleve = "PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « " + choixPlat + " ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste. Réponds maintenant avec le JSON demandé.";
   const payloadData = {
-    contents: [{ parts: [{ text: promptVision }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }],
+    // Coût : les consignes (identiques pour tous les plateaux du jour) passent EN PREMIER pour que Google les garde en cache
+    // (facturées environ 10 fois moins cher) ; ce qui change d'un plateau à l'autre (photo, choix de l'élève) vient après.
+    contents: [{ parts: [{ text: promptVision }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }, { text: precisionEleve }] }],
     generationConfig: { responseMimeType: "application/json", temperature: 0 }
   };
   // Coût : par défaut le modèle « réfléchit » longuement (niveau high), et cette réflexion est facturée au prix fort.
@@ -929,7 +931,7 @@ Réponds en JSON strict :
   // En cas d'échec d'Albert (saturé, panne, réponse illisible), on bascule sur Gemini : aucun scan bloqué.
   if (modeleAlbertABC()) {
     try {
-      const a = appelerAlbertVisionABC(promptVision, cleanBase64);
+      const a = appelerAlbertVisionABC(promptVision + "\n" + precisionEleve, cleanBase64);
       JSON.parse(nettoyerJsonABC(a.texte));
       texteReponse = a.texte; jetons = a.jetons; modeleUtilise = "albert:" + a.modele;
     } catch (e) {
@@ -950,7 +952,7 @@ Réponds en JSON strict :
   }
   jsonResp = JSON.parse(response.getContentText());
   const usage = jsonResp.usageMetadata || {};
-  jetons = { entree: usage.promptTokenCount || 0, reflexion: usage.thoughtsTokenCount || 0, sortie: usage.candidatesTokenCount || 0 };
+  jetons = { entree: usage.promptTokenCount || 0, cache: usage.cachedContentTokenCount || 0, reflexion: usage.thoughtsTokenCount || 0, sortie: usage.candidatesTokenCount || 0 };
   if (!jsonResp.candidates || !jsonResp.candidates[0].content) throw new Error("Réponse invalide de l'API Gemini pour le scan.");
   texteReponse = jsonResp.candidates[0].content.parts[0].text;
   }
@@ -2125,6 +2127,20 @@ function comparerAlbertGemmaTemoinsABC() {
   return comparerModeleABC("albert:gemma-4-31b-it", "", PLATEAUX_TEMOINS_ABC.map(function (x) { return x[0]; }), PLATEAUX_TEMOINS_ABC.map(function (x) { return x[1]; }));
 }
 
+// ▶️ Bilan des jetons d'une journée (vérifier l'effet du cache) : bilanJetonsJourABC("2026-11-12")
+function bilanJetonsJourABC(date, ecole) {
+  ecole = ecole || "COLLEGE  J. GIONO"; date = date || Utilities.formatDate(new Date(), "Europe/Paris", "yyyy-MM-dd");
+  const sheets = getSheetsABC(ecole), v = sheets.gaspillage.getDataRange().getValues();
+  const t = { plateaux: 0, entree: 0, cache: 0, sortie: 0 };
+  v.slice(1).forEach(function (l) {
+    if (dateIso(l[0]) !== date || !/^\{/.test(String(l[10] || ""))) return;
+    try { const j = JSON.parse(l[10]).jetons || {}; t.plateaux++; t.entree += j.entree || 0; t.cache += j.cache || 0; t.sortie += j.sortie || 0; } catch (e) {}
+  });
+  const part = t.entree ? Math.round(100 * t.cache / t.entree) : 0;
+  Logger.log(ecole + " " + date + " : " + t.plateaux + " plateaux, jetons d'entrée " + t.entree + " dont " + t.cache + " en cache (" + part + " %), jetons de sortie " + t.sortie + ".");
+  return t;
+}
+
 // Modèle utilisé : propriété du script MODELE_GEMINI (ex. gemini-3.1-flash-lite) pour en changer sans toucher au code.
 let MODELE_FORCE_ABC = "";
 function modeleGeminiABC() {
@@ -2193,7 +2209,7 @@ function comparerModeleABC(modele, niveau, liste, attendus) {
         let det = {};
         try { det = JSON.parse(r.ligne[10] || "{}"); } catch (e) {}
         const j = det.jetons || {};
-        lignes.push(base.concat([r.ligne[2], j.entree || "", j.reflexion || "", j.sortie || "", "", det.restes_pct_repas === undefined ? "" : det.restes_pct_repas, attendus[k] || ""]));
+        lignes.push(base.concat([r.ligne[2], j.entree || "", (j.reflexion || "") + (j.cache ? " (cache " + j.cache + ")" : ""), j.sortie || "", "", det.restes_pct_repas === undefined ? "" : det.restes_pct_repas, attendus[k] || ""]));
       } catch (e) {
         lignes.push(base.concat(["", "", "", "", String(e).slice(0, 300), "", attendus[k] || ""]));
         if (/HTTP (400|404)/.test(String(e))) break; // modèle inconnu : inutile d'insister
