@@ -879,7 +879,7 @@ RÈGLES
 - Décris séparément la base, sa forme et sa préparation : aliment « Poisson », préparation « sauce curry ». Une sauce, un assaisonnement, du beurre ou des aromates font partie de l'aliment préparé : décris-les dans « preparation », ne les liste JAMAIS comme un aliment séparé (pas de ligne « Sauce tomate », « Mayonnaise »…). S'il ne reste qu'une couche de sauce étalée ou des traces, l'aliment a été mangé : liste-le à 0 % s'il est identifiable, sinon ne liste rien. Ne déduis jamais l'aliment mangé de la seule couleur d'une sauce.
 - RÉSIDUS NÉGLIGEABLES : traces, miettes, quelques grains épars, croûtes infimes = 0 % de restes. Une garniture de présentation servie DANS le même ramequin qu'un autre aliment (lit de salade sous un œuf, persil, rondelle de citron) fait partie de ce plat : ne la liste pas comme une entrée séparée.
 - Ne crée jamais un aliment à 0 % de restes d'après le seul menu ou l'avis « tout fini » ; l'absence d'un aliment ne prouve pas qu'il a été pris.
-- En cas d'ambiguïté poulet/poisson, utilise la précision de l'élève uniquement pour une identification compatible avec l'image ; sans preuve suffisante, écris « Aliment non identifié » avec une confiance faible.
+- En cas d'ambiguïté poulet/poisson, appuie-toi sur la RÉFÉRENCE VISUELLE DU SERVICE (photos des plats) ; sans preuve suffisante, écris « Aliment non identifié » avec une confiance faible.
 - Inventorie CHAQUE aliment visible séparément, même hors menu. Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu’un plat a été servi.
 - Pour chaque aliment, « forme » et « preparation » décrivent le plat TEL QU'IL A ÉTÉ SERVI au départ (identique pour tous les plateaux du jour, appuie-toi sur la référence visuelle du service et le menu) : par exemple « demi-avocat » et « sauce mayonnaise », même s'il n'en reste que des morceaux. L'aspect du RESTE (morceaux, miettes, traces, peau, purée écrasée par l'élève) ne va JAMAIS dans « forme » ou « preparation » : il va dans « etat_reste ». Distingue carottes râpées et cuites, par exemple.
 - Une sauce ou sa couleur ne suffisent jamais à identifier poisson, poulet ou une recette. Ne déduis pas « poisson au curry » d’une sauce jaune ni de sa présence au menu.
@@ -910,11 +910,11 @@ Réponds en JSON strict :
   ]
 }`;
 
-  const precisionEleve = "PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « " + choixPlat + " ». Cette indication aide à départager poulet/poisson mais ne prouve jamais qu'il en reste. Réponds maintenant avec le JSON demandé.";
   const payloadData = {
     // Coût : les consignes (identiques pour tous les plateaux du jour) passent EN PREMIER pour que Google les garde en cache
-    // (facturées environ 10 fois moins cher) ; ce qui change d'un plateau à l'autre (photo, choix de l'élève) vient après.
-    contents: [{ parts: [{ text: promptVision }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }, { text: precisionEleve }] }],
+    // (facturées environ 10 fois moins cher) ; seule la photo change d'un plateau à l'autre et vient après.
+    // Le choix « poulet / poisson » de l'élève n'est plus envoyé : les photos du service suffisent à reconnaître le plat.
+    contents: [{ parts: [{ text: promptVision }, { inlineData: { mimeType: "image/jpeg", data: cleanBase64 } }] }],
     generationConfig: { responseMimeType: "application/json", temperature: 0 }
   };
   // Coût : par défaut le modèle « réfléchit » longuement (niveau high), et cette réflexion est facturée au prix fort.
@@ -931,7 +931,7 @@ Réponds en JSON strict :
   // En cas d'échec d'Albert (saturé, panne, réponse illisible), on bascule sur Gemini : aucun scan bloqué.
   if (modeleAlbertABC()) {
     try {
-      const a = appelerAlbertVisionABC(promptVision + "\n" + precisionEleve, cleanBase64);
+      const a = appelerAlbertVisionABC(promptVision, cleanBase64);
       JSON.parse(nettoyerJsonABC(a.texte));
       texteReponse = a.texte; jetons = a.jetons; modeleUtilise = "albert:" + a.modele;
     } catch (e) {

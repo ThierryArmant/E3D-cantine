@@ -31,7 +31,7 @@ console.log('OK : pain remis dans le bac pain.');
 {
   const src2 = require('fs').readFileSync(__dirname + '/../apps_script/Code.gs', 'utf8');
   const i = src2.indexOf('contents: [{ parts: [{ text: promptVision }, { inlineData:');
-  assert.ok(i > 0 && src2.indexOf('{ text: precisionEleve }', i) > i, 'partie variable après la photo');
+  assert.ok(i > 0 && !/precisionEleve/.test(src2), 'photo seule après les consignes communes');
   assert.ok(!/PRÉCISION DE L'ÉLÈVE : il déclare avoir PRIS « \$\{choixPlat\}/.test(src2), 'choix de l\'élève hors des consignes communes');
   console.log('OK : consignes communes en tête (cache).');
 }
