@@ -16,6 +16,11 @@ const PARAMETRES_DEFAUT = [
   ["portion_garniture_g", 150, "Garniture (g) - référence collège : féculents cuits 150 à 180, légumes cuits 100 à 120"],
   ["portion_dessert_g", 100, "Dessert ou laitage (g) - référence collège : pâtisserie 80 à 100, compote 100 à 120, yaourt 125"],
   ["portion_fruit_g", 150, "Fruit frais (g) - référence collège : 150 à 180"],
+  ["portion_mais_comestible_g", 150, "Maïs : grains comestibles servis par élève (g), à mesurer en cuisine, hors rafle"],
+  ["poids_rafle_g", 0, "Rafle du tronçon servi (g), à renseigner après pesée ; 0 = poids inconnu"],
+  ["poids_noyau_g", 0, "Noyau (g), à renseigner après pesée ; 0 = poids inconnu"],
+  ["poids_coquille_g", 0, "Coquille (g), à renseigner après pesée ; 0 = poids inconnu"],
+  ["poids_croute_non_comestible_g", 0, "Cire ou croûte réellement non comestible (g), à renseigner ; 0 = poids inconnu"],
   ["portion_pates_g", 200, "Pâtes (g), en plat ou en garniture : pâtes, tortellinis, raviolis, lasagnes…"],
   ["portion_pain_g", 50, "Pain (g) - calculé : tranches par élève × poids d'une tranche"],
   ["pain_tranches", 2, "Tranches de pain servies à chaque élève dès le départ"],
@@ -499,6 +504,7 @@ function handleSavePortionsJourABC(data) {
 // Paramètres modifiables depuis le site (roue crantée) : liste blanche et bornes, rien d'autre ne peut être écrit.
 const PARAMETRES_MODIFIABLES = {
   portion_entree_g: [10, 500], portion_plat_g: [10, 500], portion_garniture_g: [10, 500], portion_dessert_g: [10, 500],
+  portion_mais_comestible_g: [1, 500], poids_rafle_g: [0, 300], poids_noyau_g: [0, 100], poids_coquille_g: [0, 100], poids_croute_non_comestible_g: [0, 100],
   portion_fruit_g: [10, 500], portion_pates_g: [50, 500], portion_pain_g: [5, 300], pain_tranches: [1, 6], poids_tranche_pain_g: [5, 100], portion_gateau_accompagnement_g: [5, 150], effectif_defaut: [1, 5000], prix_kg_eur: [0.1, 100],
   poids_pot_g: [0, 100], poids_opercule_g: [0, 20], poids_film_g: [0, 20], poids_caissette_g: [0, 20], poids_brique_g: [0, 100], poids_barquette_g: [0, 100],
   poids_emballage_autre_g: [0, 50], poids_serviette_g: [0, 20], poids_epluchure_g: [0, 200], poids_os_g: [0, 200]
@@ -671,6 +677,7 @@ function nettoyerTexte(t) {
 function estPatesABC(nom) { return /(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(String(nom || "")); }
 function portionReference(composant, aliment, p) {
   const a = String(aliment || "").toLowerCase();
+  if (/ma[ïi]s/i.test(a)) return p.portion_mais_comestible_g || p.portion_garniture_g;
   if (/^sauce\b/i.test(a)) return p.portion_sauce_g || 20;
   if (composant === "pain") return p.portion_pain_g;
   // Pâtes servies en plat ou en garniture : portion « Pâtes » (200 g par défaut).
@@ -730,8 +737,9 @@ function rapprocherNomMenuABC(nom, composant, menuNoms) {
 // Un aliment resté dans son propre emballage (pot, film) part avec lui au bac emballages, contenu compris.
 const OBJETS_PLATEAU_ABC = { pot: ["poids_pot_g", "emballages"], opercule: ["poids_opercule_g", "emballages"], film: ["poids_film_g", "emballages"], caissette: ["poids_caissette_g", "emballages"],
   brique: ["poids_brique_g", "emballages"], barquette: ["poids_barquette_g", "emballages"], autre_emballage: ["poids_emballage_autre_g", "emballages"],
+  rafle: ["poids_rafle_g", "biodechets"], noyau: ["poids_noyau_g", "fruits"], coquille: ["poids_coquille_g", "biodechets"], croute_non_comestible: ["poids_croute_non_comestible_g", "biodechets"],
   serviette: ["poids_serviette_g", "serviettes"], epluchure: ["poids_epluchure_g", "fruits"], os: ["poids_os_g", "biodechets"] };
-const POIDS_OBJETS_DEFAUT_ABC = { poids_pot_g: 6, poids_opercule_g: 1, poids_film_g: 2, poids_caissette_g: 1, poids_brique_g: 10, poids_barquette_g: 8, poids_emballage_autre_g: 3, poids_serviette_g: 3, poids_epluchure_g: 25, poids_os_g: 15 };
+const POIDS_OBJETS_DEFAUT_ABC = { poids_rafle_g: 0, poids_noyau_g: 0, poids_coquille_g: 0, poids_croute_non_comestible_g: 0, poids_pot_g: 6, poids_opercule_g: 1, poids_film_g: 2, poids_caissette_g: 1, poids_brique_g: 10, poids_barquette_g: 8, poids_emballage_autre_g: 3, poids_serviette_g: 3, poids_epluchure_g: 25, poids_os_g: 15 };
 function estFruitFraisABC(nom) {
   const n = String(nom || "").toLowerCase();
   // « Pommes noisettes », « pommes dauphines », frites… sont des pommes de terre, pas des fruits (09/11 : 16 kg classés en fruits).
@@ -740,8 +748,11 @@ function estFruitFraisABC(nom) {
 }
 function trierDechetsPlateauABC(retenus, objetsBruts, params) {
   const bacs = { biodechets: 0, fruits: 0, pain: 0, emballages: 0, serviettes: 0 }, objets = {};
+  const inevitables = { biodechets: 0, fruits: 0 }, poidsInconnus = [];
+  let evitableG = 0;
   (retenus || []).forEach(function (i) {
-    const g = i.reste_g_ref || 0;
+    const g = Math.max(0, Number(i.reste_g_ref) || 0);
+    evitableG += g;
     if (i.dans_emballage) bacs.emballages += g;
     else if (i.composant === "pain") bacs.pain += g;
     else if (estFruitFraisABC(i.aliment)) bacs.fruits += g;
@@ -752,11 +763,16 @@ function trierDechetsPlateauABC(retenus, objetsBruts, params) {
     const n = Math.max(0, Math.min(10, Math.round(Number(o && o.nombre) || 0)));
     if (!def || !n) return;
     objets[type] = (objets[type] || 0) + n;
-    const unite = params && params[def[0]] !== undefined ? params[def[0]] : POIDS_OBJETS_DEFAUT_ABC[def[0]];
+    const brut = params && params[def[0]] !== undefined ? params[def[0]] : POIDS_OBJETS_DEFAUT_ABC[def[0]];
+    const unite = Math.max(0, Number(brut) || 0);
     bacs[def[1]] += n * unite;
+    if (["rafle", "noyau", "coquille", "croute_non_comestible", "epluchure", "os"].indexOf(type) >= 0) {
+      inevitables[def[1]] += n * unite;
+      if (!unite) poidsInconnus.push(type);
+    }
   });
   Object.keys(bacs).forEach(function (k) { bacs[k] = Math.round(bacs[k]); });
-  return { bacs: bacs, objets: objets };
+  return { bacs: bacs, objets: objets, separation: { base: "comestible", evitable_g: Math.round(evitableG), inevitable_g: Math.round(inevitables.biodechets + inevitables.fruits), inevitables_bacs_g: inevitables, poids_inconnus: poidsInconnus } };
 }
 
 // Heure d'origine du scan (envoyée par la borne) si elle est plausible, sinon maintenant.
@@ -888,11 +904,18 @@ RÈGLES
 - Ne déduis pas le nom d’un aliment entièrement consommé de son emballage, d’os, de traces ou du menu : sans indice visuel distinctif, son identité reste inconnue.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste. KIWI coupé en deux et mangé à la cuillère : les deux demi-peaux vidées (vertes à l'intérieur mais creuses) = 0 % ; ne compte que la chair verte encore en place. Peau de banane, d'orange ou de clémentine sans chair = 0 %.
-- POT, BARQUETTE, GOURDE OU EMBALLAGE (yaourt, compote, liégeois, fromage) : estime le CONTENU restant (vide, à moitié, plein) dans reste_pct ; le contenant lui-même ne compte jamais comme aliment. Les CROÛTES DE FROMAGE (camembert, brie, tomme…), la cire ou l'emballage du fromage sont un déchet INÉVITABLE : si seule la croûte reste, reste_pct = 0 (ne les compte pas comme du fromage jeté).
+- POT, BARQUETTE, GOURDE OU EMBALLAGE (yaourt, compote, liégeois, fromage) : estime le CONTENU restant (vide, à moitié, plein) dans reste_pct ; le contenant lui-même ne compte jamais comme aliment. La cire et les emballages de fromage sont non alimentaires. Distingue les croûtes comestibles des croûtes confirmées non comestibles selon les règles ci-dessous.
 - CONTENANT OU CONTENU : ne confonds jamais un emballage vide avec l'aliment qu'il contenait. Une caissette en papier plissé vue de dessus, au fond plat taché de gras ou de miettes, SANS gâteau bombé dedans, est une caissette VIDE : le gâteau a été mangé (reste 0 %). Un gâteau réellement présent a un dessus bombé, une épaisseur, une texture de mie et souvent des pépites ou des morceaux visibles. De même, un pot vide, un opercule, un film plastique froissé ou un papier aluminium déplié ne sont pas des aliments restants. En cas de doute entre caissette vide et gâteau entier, regarde le relief et l'ombre : sans relief, c'est une caissette vide. ATTENTION, piège fréquent : vu de dessus, le FOND d'une caissette vide est un disque beige ou rosé, lisse et uniforme, taché de gras, parfois avec quelques miettes : ce n'est PAS un muffin. Un vrai muffin restant montre un DESSUS BOMBÉ avec une croûte irrégulière et des PÉPITES de chocolat (points sombres) bien visibles ; s'il est entamé, on voit la mie claire et alvéolée. Un film plastique froissé avec quelques miettes est un emballage vide (0 %). Sans pépites ni dôme ni mie visibles, compte le muffin comme mangé (0 %). Un muffin jeté entier est RARE : ne l'annonce que si tu le vois clairement. Un pot de compote ou de yaourt NON OUVERT a son opercule plat, intact et scellé tout autour, avec l'impression bien lisible : il est jeté plein (reste 100 %, dans_emballage true). Si l'opercule est arraché, replié, déchiré ou enfoncé dans le pot, le pot a été ouvert : estime seulement le contenu visible, et 0 % s'il n'y a plus de compote visible.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
 - N'utilise ni deux-points, ni crochets, ni barre verticale dans les champs texte.
+PART COMESTIBLE ET PART NON COMESTIBLE
+- Tous les reste_pct concernent exclusivement la PART COMESTIBLE de la portion servie. Os, rafles, noyaux et coquilles ne font jamais monter ce pourcentage. Indique part_non_comestible_seule true uniquement si aucun aliment comestible ne reste pour cette observation ; le logiciel imposera alors 0 %.
+- MAÏS EN ÉPI ou tronçon : examine les GRAINS encore fixés, jamais le volume du cœur. Rafle dépouillée, alvéoles vides = grains mangés, reste_pct 0. Épi avec grains intacts = reste des grains seulement. Une demi-surface encore garnie de grains vaut environ 50 % de grains restants. Compte chaque rafle UNE FOIS dans objets de type rafle, y compris si des grains y sont encore fixés. Le poids de référence du maïs est celui des grains servis, hors cœur.
+- Distingue chair et peau pour banane, agrumes, kiwi, melon, pastèque ; chair et noyau pour avocat, pêche, abricot et olives ; viande et os ; poisson et arêtes ; œuf et coquille ; mollusque et coquille. Un filet désarêté, un fruit épluché ou une purée n'ont pas de partie non comestible à inventer.
+- Pain et croûte de pain sont comestibles. Les croûtes de fromage comestibles restent de l'aliment ; seule la cire, un emballage ou une croûte confirmée non comestible est croute_non_comestible. En cas de doute, signale l'incertitude dans le résumé, sans inventer un déchet inévitable.
+- Les objets non comestibles sont comptés séparément avec leur type. Une rafle ne va ni dans epluchure ni dans autre_emballage. Noyau = noyau ; coquille = coquille. Ne compte jamais le même objet dans deux types.
+
 TRI DES DÉCHETS (pour estimer chaque poubelle)
 - Pour chaque aliment, "dans_emballage" vaut true si l'aliment est servi dans son propre emballage individuel (pot de compote, de yaourt ou de crème, muffin ou gâteau sous film, fromage en portion emballée, brique) ; false s'il est dans une assiette, un ramequin ou un bol de la cantine. Un produit jamais ouvert : dans_emballage true et reste_pct 100.
 - "objets" compte tout ce qui n'est pas de la nourriture et qui sera jeté : pots, opercules, films ou sachets, caissettes en papier vides, briques ou bouteilles, barquettes, serviettes en papier, épluchures ou trognons ou peaux de fruit, os ou arêtes. Compte chaque objet visible une fois, y compris les pots vides. N'invente aucun objet caché.
@@ -903,10 +926,10 @@ Réponds en JSON strict :
   "nb_plateaux": 1,
   "resume_comportement": "10 mots au plus (ex. a trié les légumes, mangé la viande).",
   "aliments": [
-    {"composant": "entree|plat|accompagnement|dessert|pain", "aliment": "Nom court", "forme": "forme servie : entier, demi, tranche, rondelles, râpé, haché, purée...", "preparation": "cuisson et sauce servies", "etat_reste": "aucun|intact|entamé|trié|émietté", "reste_pct": 0, "mange_pct": 100, "dans_emballage": false, "confiance": "haute|moyenne|faible"}
+    {"composant": "entree|plat|accompagnement|dessert|pain", "aliment": "Nom court", "forme": "forme servie : entier, demi, tranche, rondelles, râpé, haché, purée...", "preparation": "cuisson et sauce servies", "etat_reste": "aucun|intact|entamé|trié|émietté", "reste_pct": 0, "mange_pct": 100, "dans_emballage": false, "part_non_comestible_seule": false, "confiance": "haute|moyenne|faible"}
   ],
   "objets": [
-    {"type": "pot|opercule|film|caissette|brique|barquette|serviette|epluchure|os|autre_emballage", "nombre": 1}
+    {"type": "pot|opercule|film|caissette|brique|barquette|serviette|epluchure|os|rafle|noyau|coquille|croute_non_comestible|autre_emballage", "nombre": 1}
   ]
 }`;
 
@@ -968,6 +991,7 @@ Réponds en JSON strict :
   const retenus = [], ecartes = [], residus = [];
   (Array.isArray(result.aliments) ? result.aliments : []).forEach(function (a) {
     let reste = parseFloat(a.reste_pct), mange = parseFloat(a.mange_pct);
+    if (a.part_non_comestible_seule === true) { reste = 0; mange = 100; }
     let composant = String(a.composant || "").toLowerCase();
     // Le pain figure dans la rubrique « accompagnement » du menu : il reste du pain (portion 50 g, bac pain).
     if (/^pain\b/i.test(String(a.aliment || "").trim())) composant = "pain";
@@ -990,7 +1014,7 @@ Réponds en JSON strict :
       catalogue_id: fiche ? fiche.id : "", aliment_brut: alimentBrut, composant: composant, aliment: aliment, forme: nettoyerTexte(a.forme) || "?", preparation: nettoyerTexte(a.preparation) || "?",
       etat_reste: nettoyerTexte(a.etat_reste), reste_pct: Math.round(resteRetenu), portion_ref_g: portion,
       reste_g_ref: Math.round(portion * resteRetenu / 100), confiance: nettoyerTexte(a.confiance) || "moyenne",
-      dans_emballage: a.dans_emballage === true
+      dans_emballage: a.dans_emballage === true, base_comestible: true
     });
   });
 
@@ -1015,7 +1039,7 @@ Réponds en JSON strict :
   return {
     ligne: [quand, "SCAN_IA_VISION", note,
       moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, residus: residus, bacs: tri.bacs, objets: tri.objets, jetons: jetons,
+      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, residus: residus, bacs: tri.bacs, objets: tri.objets, separation: tri.separation, jetons: jetons,
         methode: METHODE_ANALYSE_ABC, modele: modeleUtilise, repas_ref_g: repas.ref_g, portions_ref: repas.portions, restes_g: repas.restes_g, restes_pct_repas: repas.pct })],
     details: { aliments: retenus, ecartes: ecartes.length, bacs: tri.bacs }
   };
@@ -2280,7 +2304,7 @@ function pctPainMorceauxABC(m, params) {
   const servies = Math.max(1, Number((params || {}).pain_tranches) || 2);
   return Math.min(100, Math.round(100 * tranches / servies));
 }
-const METHODE_ANALYSE_ABC = "repas-reference-1";
+const METHODE_ANALYSE_ABC = "repas-reference-2-comestible";
 const SEUIL_RESIDU_PCT_ABC = 5;
 
 // Desserts : chaque dessert pris par l'élève (vu sur le plateau, même mangé ou vide d'emballage) compte dans le repas
@@ -2318,3 +2342,4 @@ function marquerGateauAccompagnementABC(retenus, params) {
     i.accompagnement = true; i.portion_ref_g = g; i.reste_g_ref = Math.round(g * (Number(i.reste_pct) || 0) / 100);
   });
 }
+

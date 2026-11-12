@@ -929,6 +929,7 @@
         let currentModalOccurrences = [];
 
         const COEFFICIENTS_INEVITABLES = {
+            "déchets non comestibles observés": 1,
             "salade verte": 0.10, "laitue": 0.10, "mâche": 0.05, "batavia": 0.10, "concombre": 0.15,
             "tomate": 0.10, "tomates": 0.10, "carottes râpées": 0.05, "carotte": 0.10,
             "betterave": 0.10, "betteraves": 0.10, "céleri rémoulade": 0.05, "céleri": 0.15,
@@ -1513,11 +1514,27 @@
                                evitableKg: 0, inevitableKg: 0, carboneKg: 0, nonAlloue: { alim: 0, fruits: 0, pain: 0 }, predictedKg: 0, predictedBins: { alim: 0, fruits: 0, pain: 0 } };
                 const brut = {};
                 (scansParJour[d] || []).forEach(s => {
+                    let analyse = {};
+                    try { analyse = typeof s.detail === 'string' ? JSON.parse(s.detail) : (s.detail || {}); } catch (e) {}
+                    const baseComestible = analyse.separation && analyse.separation.base === 'comestible';
                     const items = itemsStatistiques(s.commentaire, s.dateRaw);
                     const detail = items.map(it => Object.assign({}, it, { composant: it.composant || devinerComposant(it.nom) }));
                     if (items.some(it => !it.composant)) res.scansComposantDevine = (res.scansComposantDevine || 0) + 1;
-                    if (detail.length === 0) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
+                    if (detail.length === 0 && !baseComestible) { if (items.length) res.scansLegacy++; else res.scansSansDetail++; return; }
                     jour.scansDetail++;
+                    if (baseComestible) {
+                        const masses = analyse.separation.inevitables_bacs_g || {};
+                        ['biodechets', 'fruits'].forEach(bac => {
+                            const masse = Math.max(0, Number(masses[bac]) || 0);
+                            if (!masse) return;
+                            const bin = bac === 'fruits' && !bins.fruitsDansBio ? 'fruits' : 'alim';
+                            const cle = 'Déchets non comestibles observés (' + bin + ')';
+                            const o = brut[cle] = brut[cle] || { nom: cle, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0, etats: {} };
+                            o.count++; o.resteG += masse; o.portionG += masse;
+                            o.etats.nature = o.etats.nature || { count: 0, resteG: 0 };
+                            o.etats.nature.count++; o.etats.nature.resteG += masse;
+                        });
+                    }
                     // Aliments restés dans leur pot / emballage (yaourt, compote, liégeois jetés pleins) : le pot part aux emballages,
                     // mais son CONTENU est du gaspillage alimentaire. Il est estimé d'après la photo (« emb »), sans être réparti sur
                     // les poubelles alimentaire / fruits / pain, puisque physiquement il n'y est pas.
@@ -1525,14 +1542,16 @@
                     detail.forEach(it => {
                         const emballe = dansEmb.size && (dansEmb.has(cleAlimentStat(it.nomBrut || it.nom)) || dansEmb.has(cleAlimentStat(it.nom)));
                         // Portion réelle saisie après coup pour ce jour (cuisinier), sinon portion de référence.
-                        const portion = portionJourABC(d, it.nom) || portionPour(it, portions);
+                        const enregistre = baseComestible && (analyse.retenus || []).find(x => cleAlimentStat(x.aliment) === cleAlimentStat(it.nomBrut || it.nom));
+                        const portion = portionJourABC(d, it.nom) || (enregistre && Number(enregistre.portion_ref_g)) || portionPour(it, portions);
                         // Fruits jetés avec les biodéchets ce jour-là : ils sont comparés à la poubelle alimentaire.
                         const bin = emballe ? "emb" : (it.composant === "pain" || /^pain\b/i.test(it.nom) ? "pain" : (estFruit(it.nom) && !bins.fruitsDansBio ? "fruits" : "alim"));
                         const cleBrut = bin === "emb" && brut[it.nom] && brut[it.nom].bin !== "emb" ? it.nom + " (dans son pot)" : (bin !== "emb" && brut[it.nom] && brut[it.nom].bin === "emb" ? it.nom + " (hors pot)" : it.nom);
-                        const o = brut[cleBrut] = brut[cleBrut] || { nom: cleBrut, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0 };
+                        const o = brut[cleBrut] = brut[cleBrut] || { nom: cleBrut, bin: bin, count: 0, resteG: 0, portionG: 0, estEvitKg: 0, estCarbKg: 0, portionComestibleG: 0 };
                         o.count++; o.resteG += portion * it.restePct / 100; o.portionG += portion;
+                        if (baseComestible) o.portionComestibleG += portion;
                         // Estimation sans pesée : portion de référence × reste, inévitable déduit par la bibliothèque
-                        const resteG1 = portion * it.restePct / 100, coef1 = coefInevitable(it.nom);
+                        const resteG1 = portion * it.restePct / 100, coef1 = baseComestible ? 0 : coefInevitable(it.nom);
                         const evit1 = (resteG1 - Math.min(resteG1, portion * (coef1 || 0))) / 1000;
                         o.estEvitKg += evit1; o.estCarbKg += evit1 * facteurCarboneEtat(it.nom, it.etat);
                         o.etats = o.etats || {};
@@ -1563,7 +1582,9 @@
                         // Contenu des pots jetés pleins : estimation photo ramenée aux convives (pas de pesée séparée possible).
                         const totalKg = o.bin === "emb" ? o.resteG / n * E / 1000 : ((totaux[o.bin] > 0 && bins[o.bin] > 0) ? bins[o.bin] * o.resteG / totaux[o.bin] : 0);
                         if (o.bin === "emb") { coef = 0; jour.contenuEmballagesKg = (jour.contenuEmballagesKg || 0) + totalKg; }
-                        const inevKg = Math.min(totalKg, servisKg * (coef || 0));
+                        // Les nouvelles observations portent déjà sur la chair ou les grains seuls.
+                        const partAncienne = o.portionG > 0 ? 1 - (o.portionComestibleG || 0) / o.portionG : 1;
+                        const inevKg = Math.min(totalKg, servisKg * (coef || 0) * partAncienne);
                         const evitKg = totalKg - inevKg;
                         const etats = {};
                         let carbKg = 0;
@@ -2158,7 +2179,7 @@
                 • Servi estimé = effectif attendu × part des plateaux scannés où l'aliment apparaît × portion. Effectif par défaut : ${effDef} (les effectifs saisis chaque jour dans le menu priment).<br>
                 • Les <strong>plateaux non scannés</strong> ne sont pas ignorés : leurs déchets sont dans les poubelles pesées, et l'indicateur « écart balance / scans » dit si l'échantillon scanné est représentatif.`)}
             ${bloc("#047857", "#f0fdf4", "3. Déchets inévitables : valeurs de travail de l'établissement",
-                `Pour chaque aliment : inévitable = min(poids jeté ; servi estimé × coefficient). Évitable = poids jeté − inévitable. La bibliothèque contient <strong>${nbCoef}</strong> entrées (os, peaux, trognons, croûtes…), recherchées par le nom le plus long reconnu dans l'aliment.<br>
+                `Anciennes analyses : inévitable = min(poids jeté ; servi estimé × coefficient). Nouvelles analyses sur partie comestible : les restes alimentaires sont évitables ; les rafles, os, peaux, noyaux et coquilles observés sont comptés séparément. Leur masse est une estimation selon les réglages cuisine. Un poids objet réglé à 0 reste inconnu et doit être renseigné avant une comparaison complète aux pesées. La bibliothèque contient <strong>${nbCoef}</strong> entrées (os, peaux, trognons, croûtes…), recherchées par le nom le plus long reconnu dans l'aliment.<br>
                 ⚠️ Ces coefficients sont des <strong>valeurs de travail</strong> propres à l'établissement, pas une table officielle ; leurs sources restent à documenter.<br>
                 ${sansCoef.length ? `Aliments vus sans coefficient (comptés 0 % inévitable, donc entièrement évitables) : <em>${sansCoef.join(", ")}</em>.` : "Tous les aliments scannés sur la période ont un coefficient."}`)}
             ${bloc("#0e7490", "#ecfeff", "4. Empreinte carbone : Agribalyse 3.2 (ADEME / INRAE)",
@@ -2626,6 +2647,7 @@
         const PARAMS_CHAMPS = [
             ["portion_entree_g", "Entrée (g)", 80, "grammes", 10, 500], ["portion_plat_g", "Plat protidique (g)", 100, "grammes", 10, 500],
             ["portion_garniture_g", "Garniture (g)", 150, "grammes", 10, 500], ["portion_dessert_g", "Dessert ou laitage (g)", 100, "grammes", 10, 500],
+            ["portion_mais_comestible_g", "Maïs : grains servis, hors rafle (g)", 150, "grammes", 1, 500], ["poids_rafle_g", "Rafle du tronçon (g), 0 = inconnu", 0, "grammes", 0, 300], ["poids_noyau_g", "Noyau (g), 0 = inconnu", 0, "grammes", 0, 100], ["poids_coquille_g", "Coquille (g), 0 = inconnu", 0, "grammes", 0, 100], ["poids_croute_non_comestible_g", "Cire ou croûte non comestible (g), 0 = inconnu", 0, "grammes", 0, 100],
             ["portion_fruit_g", "Fruit frais (g)", 150, "grammes", 10, 500], ["portion_pates_g", "Pâtes (g), en plat ou garniture", 200, "grammes", 50, 500], ["pain_tranches", "Pain : tranches par élève", 2, "tranches", 1, 6], ["poids_tranche_pain_g", "Pain : poids d'une tranche (g)", 25, "grammes", 5, 100], ["portion_gateau_accompagnement_g", "Petit gâteau servi avec compote ou fruit (g)", 40, "grammes", 5, 150],
             ["effectif_defaut", "Effectif attendu par défaut (couverts)", 450, "couverts", 1, 5000], ["prix_kg_eur", "Coût moyen de la denrée (€/kg)", 4.5, "€/kg", 0.1, 100]
         ];
@@ -4612,3 +4634,4 @@
 <script id="eco-navigation-guard">(()=>{const initial=new WeakMap(),pending=new Set();const scope='#form-moi,#view-cuisinier,#view-saisie-dechets';const eligible=e=>e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement;const value=e=>(e.type==='checkbox'||e.type==='radio')?String(e.checked):e.value;document.addEventListener('focusin',event=>{const e=event.target;if(eligible(e)&&e.closest(scope)&&!pending.has(e))initial.set(e,value(e));});for(const name of ['input','change'])document.addEventListener(name,event=>{const e=event.target;if(!event.isTrusted||!eligible(e)||!e.closest(scope)||e.id==='select-etablissement')return;if(!initial.has(e))initial.set(e,(e.type==='checkbox'||e.type==='radio')?String(!e.checked):e.defaultValue||'');if(initial.get(e)===value(e))pending.delete(e);else pending.add(e);});window.ecoMarkSaved=selector=>{for(const e of pending)if(e.matches(selector)||e.closest(selector)){pending.delete(e);initial.set(e,value(e));}};window.addEventListener('beforeunload',event=>{if(Array.from(pending).some(e=>e.isConnected)){event.preventDefault();event.returnValue='';}});document.querySelectorAll('#eco-navigation a[aria-current="page"]').forEach(a=>a.addEventListener('click',e=>e.preventDefault()));})();</script>
 </body>
 </html>
+

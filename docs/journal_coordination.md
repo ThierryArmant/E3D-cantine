@@ -183,3 +183,35 @@ Causes trouvées dans les analyses du 09/11 :
 - Pommes noisettes et pennes : estimation en vrac, portions de référence probablement trop fortes → saisir les portions réelles du jour (Précision scan / balance) ou le nombre de pièces (×N) au menu.
 
 Pots jetés pleins (yaourt, liégeois) : décision de Thierry, le contenu est du gaspillage alimentaire, le pot vide va aux emballages. Écran : le contenu des aliments « dans leur emballage » est désormais compté dans le gaspillage évitable (estimation photo ramenée aux convives, `contenuEmballagesKg`), sans être réparti sur les poubelles pesées ; la comparaison des poubelles reste physique (« Emballages, avec leur contenu »). Test ajouté.
+
+
+## 12 novembre 2026 — Maïs en épi et séparation évitable/inévitable
+
+Demande de Thierry après examen des scans du jour. Sur 182 plateaux où du maïs apparaît, les anciennes analyses attribuent 17 455 g de restes alimentaires au maïs. Ce total n'est pas une pesée. Une confusion grains/rafle est visible sur l'échantillon et empêche de valider ce total. Aucun remplacement automatique des résultats historiques.
+
+Correction serveur
+- Pourcentage restant sur la partie COMESTIBLE uniquement. Consignes explicites sur grains et rafle, chair et noyau, viande et os, poisson et arêtes, œuf et coquille, fruits et peaux.
+- Champ part_non_comestible_seule, qui impose 0 % alimentaire si le modèle signale seulement une partie non comestible. La reconnaissance visuelle reste à vérifier après déploiement.
+- Types objets rafle, noyau, coquille et croute_non_comestible. Chaque objet se compte une fois, même si un reste comestible y adhère.
+- Nouvelle séparation enregistrée avec les grammes évitables, inévitables estimés, les bacs correspondants et les objets de poids inconnu.
+- Correction de la règle qui assimilait toutes les croûtes de fromage à des déchets inévitables. La croûte du pain et les croûtes comestibles restent alimentaires.
+- Méthode repas-reference-2-comestible pour les nouvelles analyses. La sauvegarde des scans, l'anti-doublon et le modèle ne sont pas modifiés.
+
+Paramètres cuisine
+- portion_mais_comestible_g, poids des grains seuls par élève. Valeur initiale 150 g conservée de la référence de garniture existante pour compatibilité. Elle n'est pas une mesure d'un tronçon et doit être ajustée à la portion réelle.
+- poids_rafle_g, poids du cœur du tronçon servi. Valeur initiale 0 signifiant inconnu.
+- poids_noyau_g, poids_coquille_g, poids_croute_non_comestible_g. Même convention de poids inconnu.
+- Les poids des objets sont des estimations réglables, pas une masse obtenue par la photo. Les valeurs actuelles des peaux et os restent des repères existants à calibrer.
+
+Interface
+- Réglages ajoutés à la roue crantée.
+- Les nouvelles données sur partie comestible ne subissent plus une deuxième déduction du coefficient d'inévitable.
+- Les masses non comestibles observées et renseignées sont intégrées séparément à la répartition des pesées. Les anciennes analyses conservent leur traitement antérieur. Les masses inconnues limitent la comparaison aux balances.
+- Les portions stockées avec les nouvelles analyses sont réutilisées, sous réserve des corrections journalières explicites.
+
+Validation
+Six scénarios exécutés sur les fonctions réelles de tri et de portion du serveur. Rafle seule, grains + rafle, rafle de poids inconnu, produit alimentaire dans un pot et noyau + coquille, portion comestible spécifique au maïs. Syntaxe vérifiée pour le serveur et les scripts intégrés à index.html.
+Aucun appel IA payant ni réanalyse massive exécuté. La justesse de la reconnaissance grains/rafle n'a pas encore été mesurée avec le nouveau prompt.
+
+Déploiement
+Le commit met à jour le dépôt GitHub. Il faut reporter apps_script/Code.gs dans l'éditeur Apps Script et publier une nouvelle version du déploiement pour appliquer le serveur. Aucune connexion à l'éditeur Apps Script n'a été obtenue dans cette session. Après déploiement, régler les portions et tester quelques photos, puis réanalyser uniquement l'échantillon nécessaire avant de décider du traitement de la journée.
