@@ -1506,10 +1506,11 @@ function memoirePhotosABC(sheets){
 }
 function handleChercherPhotosMemoireABC(data){
   const sheets=getSheetsABC(data.ecole),q=normaliserRechercheABC(data.q),rubrique=String(data.rubrique||'');
-  if(q.length<3)return {success:true,photosVersion:1,menuPhotosVersion:2,resultats:[]};
-  const mots=q.split(' ');
+  // Sans mot-clé : les photos les plus récentes de la rubrique (parcourir le Drive des menus) ; sinon 3 lettres au moins.
+  if(q.length>0&&q.length<3)return {success:true,photosVersion:1,menuPhotosVersion:2,resultats:[]};
+  const mots=q?q.split(' '):[];
   const trouves=memoirePhotosABC(sheets).filter(p=>(!rubrique||p.rubrique===rubrique)&&p.date!==String(data.date||'')&&mots.every(m=>normaliserRechercheABC(p.noms.join(' ')).indexOf(m)>=0))
-    .sort((a,b)=>(b.confirmee-a.confirmee)||(a.date<b.date?1:-1)).slice(0,6);
+    .sort((a,b)=>q?((b.confirmee-a.confirmee)||(a.date<b.date?1:-1)):(a.date<b.date?1:-1)).slice(0,q?6:8);
   const resultats=trouves.map(p=>{let image='';try{const f=DriveApp.getFileById(p.driveId);const b=f.getThumbnail()||f.getBlob();image='data:'+b.getContentType()+';base64,'+Utilities.base64Encode(b.getBytes());}catch(e){}return {date:p.date,id:p.id,rubrique:p.rubrique,noms:p.noms,image:image};});
   return {success:true,photosVersion:1,menuPhotosVersion:2,resultats:resultats};
 }

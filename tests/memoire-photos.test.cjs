@@ -15,3 +15,4 @@ const n=rows.Photos_Service.length;assert.equal(rows.Photos_Service[n-1][3],'drv
 f.handleReprendrePhotoMemoireABC({ecole:'x',date:'2026-11-15',rubrique:'plat',source_date:'2026-11-05',source_id:'idA1234567'});
 assert.equal(rows.Photos_Service.length,n,'pas de doublon');
 console.log('memoire photos ok');
+assert.deepEqual(f.handleChercherPhotosMemoireABC({ecole:'x',q:'',rubrique:'plat',date:'2026-11-16'}).resultats.map(x=>x.date),['2026-11-05'],'sans mot-clé : dernières photos');
