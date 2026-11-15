@@ -344,9 +344,9 @@ function abcMemoirePhotos(g){
    liste.forEach(r=>{
     const c=abcEl('div');c.style.cssText='border:1px solid #cbd5e1;border-radius:8px;padding:6px;background:#f8fafc;font-size:12.5px;';
     if(r.image){const im=abcEl('img');im.src=r.image;im.alt='Photo du '+r.date;im.style.cssText='width:100%;max-height:120px;object-fit:cover;border-radius:6px;';c.append(im);}
-    c.append(abcEl('div','📅 '+r.date.split('-').reverse().join('/')),abcEl('div',r.noms.join(', ')));
+    c.append(abcEl('div','📅 '+r.date.split('-').reverse().join('/')+' · '+(ABC_PHOTO_GROUPES[r.rubrique]||r.rubrique)),abcEl('div',r.noms.join(', ')));
     const b=abcEl('button','⤵ Reprendre','btn');b.type='button';b.style.cssText='width:100%;min-height:40px;margin-top:4px;';
-    b.addEventListener('click',async()=>{b.disabled=true;b.textContent='⏳…';try{const ctx2=abcPhotoContexte(),d2=await abcAPIPhotoMenu('reusePhotoMemory',{...ctx2,rubrique:g,source_date:r.date,source_id:r.id});abcRecevoirMenuPhotos(d2,ctx2);abcAfficherPhotos();abcPhotoStatut('✓ Photo du '+r.date.split('-').reverse().join('/')+' reprise : '+r.noms.join(', ')+'. Vous pouvez encore la modifier.');b.textContent='✓ Reprise';bloc.open=false;champ.value='';res.replaceChildren();}catch(e){b.disabled=false;b.textContent='⤵ Reprendre';etat.textContent='⚠️ '+e.message;}});
+    b.addEventListener('click',async()=>{b.disabled=true;b.textContent='⏳…';try{const ctx2=abcPhotoContexte(),d2=await abcAPIPhotoMenu('reusePhotoMemory',{...ctx2,rubrique:r.rubrique||g,source_date:r.date,source_id:r.id});abcRecevoirMenuPhotos(d2,ctx2);abcAfficherPhotos();abcPhotoStatut('✓ Photo du '+r.date.split('-').reverse().join('/')+' reprise : '+r.noms.join(', ')+'. Vous pouvez encore la modifier.');b.textContent='✓ Reprise';bloc.open=false;champ.value='';res.replaceChildren();}catch(e){b.disabled=false;b.textContent='⤵ Reprendre';etat.textContent='⚠️ '+e.message;}});
     c.append(b);res.append(c);
    });
   }catch(e){if(n===numero)etat.textContent='⚠️ '+e.message;}
