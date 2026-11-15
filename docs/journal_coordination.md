@@ -215,3 +215,14 @@ Aucun appel IA payant ni réanalyse massive exécuté. La justesse de la reconna
 
 Déploiement
 Le commit met à jour le dépôt GitHub. Il faut reporter apps_script/Code.gs dans l'éditeur Apps Script et publier une nouvelle version du déploiement pour appliquer le serveur. Aucune connexion à l'éditeur Apps Script n'a été obtenue dans cette session. Après déploiement, régler les portions et tester quelques photos, puis réanalyser uniquement l'échantillon nécessaire avant de décider du traitement de la journée.
+
+## 15 novembre 2026 — Mémoire des photos de menus, croûtes de fromage
+
+Demande de Thierry : « si je saisis bourguignon, la photo arrive », pour l'entrée, le plat et le dessert.
+- Dans chaque rubrique du menu en photos, un champ « 🔎 Reprendre une photo déjà prise ». Dès 3 lettres, il cherche dans les photos des services passés de l'établissement, sans tenir compte des accents ni de œ. Les photos confirmées passent en premier, 6 au plus, avec miniature, date et aliments.
+- « Reprendre » ajoute la photo au service du jour avec les aliments déjà confirmés. Il n'y a pas de nouvelle reconnaissance payante. Le fichier Drive est partagé, jamais copié ni supprimé. Si la même photo est déjà dans le service du jour, rien n'est ajouté. Le cuisinier peut encore modifier les aliments.
+- Serveur : routes searchPhotoMemory et reusePhotoMemory. Test : tests/memoire-photos.test.cjs.
+- Case « Pain servi » : elle reste cochée quand aucun menu n'est encore enregistré pour la date.
+- Croûtes de fromage : la décision de Thierry est rétablie (déchet inévitable, reste 0 %, objet croute_non_comestible). La version du 12/11 les avait laissées comme aliment.
+- Le test repas-reference attend désormais la méthode repas-reference-2-comestible.
+- Constat : les scans du 13/11 portent bien repas-reference-2-comestible, donc la règle maïs/rafle du 12/11 est déployée. Les scans du maïs faits avant ce déploiement gardent l'ancienne lecture. Aucune réanalyse sans accord.

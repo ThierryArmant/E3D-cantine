@@ -319,6 +319,10 @@ function doPost(e) {
       responseOutput = handleApercusPhotosABC(data);
     } else if (action === "removeServicePhoto") {
       responseOutput = handleRetirerPhotoMenuABC(data);
+    } else if (action === "searchPhotoMemory") {
+      responseOutput = handleChercherPhotosMemoireABC(data);
+    } else if (action === "reusePhotoMemory") {
+      responseOutput = handleReprendrePhotoMemoireABC(data);
     } else if (action === "saveServicePhoto") {
       responseOutput = handlePhotoServiceABC(data);
     } else if (action === "analyseServicePhotos") {
@@ -904,7 +908,7 @@ RÈGLES
 - Ne déduis pas le nom d’un aliment entièrement consommé de son emballage, d’os, de traces ou du menu : sans indice visuel distinctif, son identité reste inconnue.
 - Pour chaque aliment, donne DEUX nombres cohérents : reste_pct (part qui reste de la portion servie, 0 à 100) et mange_pct (part mangée, 0 à 100). Leur somme doit faire 100.
 - Un contenant vide, une peau, une rafle, un noyau ou une croûte non comestible = 0 % de reste. KIWI coupé en deux et mangé à la cuillère : les deux demi-peaux vidées (vertes à l'intérieur mais creuses) = 0 % ; ne compte que la chair verte encore en place. Peau de banane, d'orange ou de clémentine sans chair = 0 %.
-- POT, BARQUETTE, GOURDE OU EMBALLAGE (yaourt, compote, liégeois, fromage) : estime le CONTENU restant (vide, à moitié, plein) dans reste_pct ; le contenant lui-même ne compte jamais comme aliment. La cire et les emballages de fromage sont non alimentaires. Distingue les croûtes comestibles des croûtes confirmées non comestibles selon les règles ci-dessous.
+- POT, BARQUETTE, GOURDE OU EMBALLAGE (yaourt, compote, liégeois, fromage) : estime le CONTENU restant (vide, à moitié, plein) dans reste_pct ; le contenant lui-même ne compte jamais comme aliment. Les CROÛTES DE FROMAGE (camembert, brie, tomme…), la cire et l'emballage du fromage sont un déchet INÉVITABLE : si seule la croûte reste, reste_pct = 0 et compte-la dans objets de type croute_non_comestible.
 - CONTENANT OU CONTENU : ne confonds jamais un emballage vide avec l'aliment qu'il contenait. Une caissette en papier plissé vue de dessus, au fond plat taché de gras ou de miettes, SANS gâteau bombé dedans, est une caissette VIDE : le gâteau a été mangé (reste 0 %). Un gâteau réellement présent a un dessus bombé, une épaisseur, une texture de mie et souvent des pépites ou des morceaux visibles. De même, un pot vide, un opercule, un film plastique froissé ou un papier aluminium déplié ne sont pas des aliments restants. En cas de doute entre caissette vide et gâteau entier, regarde le relief et l'ombre : sans relief, c'est une caissette vide. ATTENTION, piège fréquent : vu de dessus, le FOND d'une caissette vide est un disque beige ou rosé, lisse et uniforme, taché de gras, parfois avec quelques miettes : ce n'est PAS un muffin. Un vrai muffin restant montre un DESSUS BOMBÉ avec une croûte irrégulière et des PÉPITES de chocolat (points sombres) bien visibles ; s'il est entamé, on voit la mie claire et alvéolée. Un film plastique froissé avec quelques miettes est un emballage vide (0 %). Sans pépites ni dôme ni mie visibles, compte le muffin comme mangé (0 %). Un muffin jeté entier est RARE : ne l'annonce que si tu le vois clairement. Un pot de compote ou de yaourt NON OUVERT a son opercule plat, intact et scellé tout autour, avec l'impression bien lisible : il est jeté plein (reste 100 %, dans_emballage true). Si l'opercule est arraché, replié, déchiré ou enfoncé dans le pot, le pot a été ouvert : estime seulement le contenu visible, et 0 % s'il n'y a plus de compote visible.
 - Un aliment absent du plateau (non pris par l'élève) ne doit PAS être listé.
 - Si le plateau n'est pas visible (photo vide, plateau déjà débarrassé) : "plateau_visible": false. Si tu vois plusieurs plateaux, analyse celui du centre et indique "nb_plateaux".
@@ -913,7 +917,7 @@ PART COMESTIBLE ET PART NON COMESTIBLE
 - Tous les reste_pct concernent exclusivement la PART COMESTIBLE de la portion servie. Os, rafles, noyaux et coquilles ne font jamais monter ce pourcentage. Indique part_non_comestible_seule true uniquement si aucun aliment comestible ne reste pour cette observation ; le logiciel imposera alors 0 %.
 - MAÏS EN ÉPI ou tronçon : examine les GRAINS encore fixés, jamais le volume du cœur. Rafle dépouillée, alvéoles vides = grains mangés, reste_pct 0. Épi avec grains intacts = reste des grains seulement. Une demi-surface encore garnie de grains vaut environ 50 % de grains restants. Compte chaque rafle UNE FOIS dans objets de type rafle, y compris si des grains y sont encore fixés. Le poids de référence du maïs est celui des grains servis, hors cœur.
 - Distingue chair et peau pour banane, agrumes, kiwi, melon, pastèque ; chair et noyau pour avocat, pêche, abricot et olives ; viande et os ; poisson et arêtes ; œuf et coquille ; mollusque et coquille. Un filet désarêté, un fruit épluché ou une purée n'ont pas de partie non comestible à inventer.
-- Pain et croûte de pain sont comestibles. Les croûtes de fromage comestibles restent de l'aliment ; seule la cire, un emballage ou une croûte confirmée non comestible est croute_non_comestible. En cas de doute, signale l'incertitude dans le résumé, sans inventer un déchet inévitable.
+- Pain et croûte de pain sont comestibles (reste de pain). Une croûte de fromage seule n'est jamais du fromage jeté : croute_non_comestible, reste 0 %.
 - Les objets non comestibles sont comptés séparément avec leur type. Une rafle ne va ni dans epluchure ni dans autre_emballage. Noyau = noyau ; coquille = coquille. Ne compte jamais le même objet dans deux types.
 
 TRI DES DÉCHETS (pour estimer chaque poubelle)
@@ -1479,6 +1483,49 @@ function handleAnalyserMenuPhotosABC(data){
 }
 function handleCorrigerPhotoMenuABC(data){
  const sheets=getSheetsABC(data.ecole),date=datePhotosABC(data.date),p=photoServiceAutoriseeABC(sheets,date,data.photo_id),items=itemsPhotoABC(data.aliments,p.rubrique,lireCatalogueABC(sheets));const notes=String(data.notes||'').trim().slice(0,1500);feuilleIdentificationsPhotosABC(sheets);const lock=LockService.getScriptLock();lock.waitLock(30000);try{const actuel=identificationsPhotosABC(sheets,date)[p.id];if((actuel?actuel.revision:0)!==Number(data.revision||0))throw Error('Photo corrigée sur un autre appareil. Rechargez avant de confirmer.');feuilleIdentificationsPhotosABC(sheets).appendRow([date,p.id,JSON.stringify(actuel?actuel.brut:[]),JSON.stringify({aliments:items,notes:notes}),(actuel?actuel.revision:0)+1,true,new Date()]);}finally{lock.releaseLock();}return reponseMenuPhotosABC(sheets,date);
+}
+// ==========================================================================
+// MÉMOIRE DES PHOTOS DE MENUS : retrouver une photo d'un service passé (ex. « bourguignon ») et la reprendre
+// pour aujourd'hui, avec les aliments déjà confirmés, sans reprendre de photo. Le fichier Drive est partagé,
+// jamais copié ni supprimé ; « Supprimer » ne fait que désactiver la photo pour la date du jour.
+// ==========================================================================
+function normaliserRechercheABC(t){return String(t||'').toLowerCase().replace(/œ/g,'oe').replace(/æ/g,'ae').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function memoirePhotosABC(sheets){
+  const ph=sheets.menus.getParent().getSheetByName('Photos_Service'),idf=sheets.menus.getParent().getSheetByName('Identifications_Photos');
+  if(!ph||!idf)return [];
+  const ids={};idf.getDataRange().getValues().slice(1).forEach(r=>{const cle=dateIso(r[0])+'|'+r[1];try{const corr=JSON.parse(r[3]||'{}'),brut=JSON.parse(r[2]||'[]');ids[cle]={brut:brut,correction:corr,confirmee:r[5]===true||String(r[5])==='true'};}catch(e){}});
+  const vus={},out=[];
+  ph.getDataRange().getValues().slice(1).forEach(r=>{
+    const date=dateIso(r[0]),id=String(r[2]),drive=String(r[3]);if(!date||!drive||vus[drive])return;
+    const i=ids[date+'|'+id];if(!i)return;
+    const aliments=(i.correction&&i.correction.aliments&&i.correction.aliments.length?i.correction.aliments:i.brut)||[];
+    const noms=aliments.map(a=>String(a.nom||'')).filter(n=>n&&!/^aliment non identifi/i.test(n));if(!noms.length)return;
+    vus[drive]=true;out.push({date:date,id:id,rubrique:String(r[1]),driveId:drive,noms:noms,aliments:aliments,confirmee:i.confirmee,actif:r[4]!==false&&String(r[4])!=='false'});
+  });
+  return out;
+}
+function handleChercherPhotosMemoireABC(data){
+  const sheets=getSheetsABC(data.ecole),q=normaliserRechercheABC(data.q),rubrique=String(data.rubrique||'');
+  if(q.length<3)return {success:true,photosVersion:1,menuPhotosVersion:2,resultats:[]};
+  const mots=q.split(' ');
+  const trouves=memoirePhotosABC(sheets).filter(p=>(!rubrique||p.rubrique===rubrique)&&p.date!==String(data.date||'')&&mots.every(m=>normaliserRechercheABC(p.noms.join(' ')).indexOf(m)>=0))
+    .sort((a,b)=>(b.confirmee-a.confirmee)||(a.date<b.date?1:-1)).slice(0,6);
+  const resultats=trouves.map(p=>{let image='';try{const f=DriveApp.getFileById(p.driveId);const b=f.getThumbnail()||f.getBlob();image='data:'+b.getContentType()+';base64,'+Utilities.base64Encode(b.getBytes());}catch(e){}return {date:p.date,id:p.id,rubrique:p.rubrique,noms:p.noms,image:image};});
+  return {success:true,photosVersion:1,menuPhotosVersion:2,resultats:resultats};
+}
+function handleReprendrePhotoMemoireABC(data){
+  const sheets=getSheetsABC(data.ecole),date=datePhotosABC(data.date),source=datePhotosABC(data.source_date),rubrique=String(data.rubrique||'');
+  if(['entree','plat','dessert'].indexOf(rubrique)<0)throw Error('Rubrique photo invalide.');
+  const p=memoirePhotosABC(sheets).find(x=>x.date===source&&x.id===String(data.source_id));if(!p)throw Error('Photo introuvable dans la mémoire de cet établissement.');
+  const nouvelId=('m'+Utilities.formatDate(new Date(),'Europe/Paris','yyMMddHHmmss')+String(data.source_id)).replace(/[^a-zA-Z0-9_-]/g,'').slice(0,90);
+  const lock=LockService.getScriptLock();lock.waitLock(30000);
+  try{
+    if(photosJourABC(sheets,date).some(x=>x.driveId===p.driveId))return reponseMenuPhotosABC(sheets,date);
+    feuillePhotosABC(sheets).appendRow([date,rubrique,nouvelId,p.driveId,true,new Date()]);
+    // Aliments repris tels qu'ils avaient été confirmés : la photo est prête, le cuisinier peut encore les modifier.
+    feuilleIdentificationsPhotosABC(sheets).appendRow([date,nouvelId,JSON.stringify(p.aliments),JSON.stringify({aliments:p.aliments,notes:'Reprise du '+p.date}),1,true,new Date()]);
+  }finally{lock.releaseLock();}
+  return reponseMenuPhotosABC(sheets,date);
 }
 function signatureMenuPhotosABC(photos,identifications){return photos.map(p=>p.id+'@'+(identifications[p.id]?.revision||0)).sort().join('|');}
 function composerMenuPhotosABC(photos,identifications,pain,salade){
