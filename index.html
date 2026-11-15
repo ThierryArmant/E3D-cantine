@@ -887,6 +887,14 @@
                 <button type="button" onclick="document.getElementById('modal-parametres').style.display='none'" style="background:#ef4444; color:white; border:none; border-radius:4px; width:26px; height:26px; font-weight:bold; cursor:pointer;">✕</button>
             </div>
             <p style="font-size:11.5px; color:#64748b; margin:0 0 10px;">Ces valeurs servent aux calculs de poids, d'écarts et de pertes de <strong id="param-ecole">cet établissement</strong>. Par défaut : grammages officiels collège du plan alimentaire.</p>
+            <div style="margin:4px 0 12px; padding:10px 12px; border:1px solid #fcd34d; border-radius:8px; background:#fffbeb;">
+                <label style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:#1e293b; font-weight:800;">⚖️ Affiner les portions d'un jour
+                    <select id="param-jour-portions" onchange="majPortionsJourParam()" style="padding:4px 6px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px;"></select>
+                </label>
+                <p style="font-size:11px; color:#64748b; margin:4px 0 0;">Les aliments vus sur les plateaux ce jour-là, avec la portion utilisée. Exemple : blé pris en « petite faim » → 100 g. Ne change que ce jour-là.</p>
+                <div id="param-portions-jour"></div>
+            </div>
+            <div style="font-size:12px; font-weight:800; color:#1e293b; margin-bottom:2px;">Portions de référence (tous les jours)</div>
             <div id="param-champs"></div>
             <div style="margin-top:12px; padding-top:10px; border-top:1px solid #e2e8f0;">
                 <label style="display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12px; color:#1e293b; font-weight:700;">📸 Analyse des plateaux
@@ -2656,6 +2664,7 @@
             document.getElementById('param-ecole').innerText = ecole;
             document.getElementById('param-etat').innerText = "";
             remplirParametres(false);
+            remplirJoursPortionsParam();
             document.getElementById('modal-parametres').style.display = "flex";
         }
         function remplirParametres(officiel) {
@@ -3698,10 +3707,33 @@
                 const data = await r.json();
                 if (!data.success || data.portionsJourVersion !== 1) throw new Error(data.error || "Cette fonction nécessite le dernier GS et son redéploiement (Nouvelle version).");
                 if (globalRawData && globalRawData.ecole === ecole) { globalRawData.portionsJour = data.portionsJour || {}; }
-                renderPrecision();
+                try { renderPrecision(); } catch (e) {}
+                if (document.getElementById('modal-parametres').style.display === "flex") majPortionsJourParam();
                 const i = precisionLignes.findIndex(x => x.date === date);
                 if (i >= 0) precisionDetail(i);
             } catch (e) { etat.textContent = "⚠️ " + e.message; bouton.disabled = false; }
+        }
+        // Roue crantée : portions d'un jour précis, avec les aliments réellement vus ce jour-là (pesé ou non).
+        function joursPortionsParam() {
+            if (!globalRawData) return [];
+            let cal; try { cal = calculerCalibrage("2000-01-01", "2099-12-31"); } catch (e) { return []; }
+            return Object.keys(cal.jours).sort().reverse().map(d => cal.jours[d]).filter(j => j.scansDetail > 0 && j.items && Object.keys(j.items).length).slice(0, 30)
+                .map(j => ({ date: j.date, items: j.items, est: j.predictedKg, mes: j.bins.alim + j.bins.fruits + j.bins.pain, pese: !!j.utilisable, scans: j.scansDetail }));
+        }
+        function remplirJoursPortionsParam() {
+            const sel = document.getElementById('param-jour-portions'); if (!sel) return;
+            const avant = sel.value, jours = joursPortionsParam();
+            sel.innerHTML = jours.length ? jours.map(j => `<option value="${j.date}">${dateFR(j.date)}${j.pese ? ' · pesé' : ''}</option>`).join("") : '<option value="">Aucun jour scanné</option>';
+            if (avant && jours.some(j => j.date === avant)) sel.value = avant;
+            majPortionsJourParam();
+        }
+        function majPortionsJourParam() {
+            const zone = document.getElementById('param-portions-jour'), sel = document.getElementById('param-jour-portions'); if (!zone || !sel) return;
+            const l = joursPortionsParam().find(j => j.date === sel.value);
+            if (!l) { zone.innerHTML = ""; return; }
+            const bilan = l.pese ? `<div style="font-size:12px; margin-top:6px;">Ce jour-là : estimé <strong>${f2(l.est)} kg</strong> · pesé <strong>${f2(l.mes)} kg</strong> · écart <strong>${ecartTexte(l.est, l.mes)}</strong> (biodéchets + fruits + pain, ${l.scans} plateaux)</div>`
+                : `<div style="font-size:12px; margin-top:6px; color:#64748b;">Pas de pesée ce jour-là : les portions servent aux estimations en kg.</div>`;
+            zone.innerHTML = bilan + portionsJourEditeurHtml(l);
         }
         function precisionDetail(i) {
             const r = document.getElementById("precision-detail-" + i);
