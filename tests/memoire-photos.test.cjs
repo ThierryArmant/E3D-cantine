@@ -17,3 +17,5 @@ assert.equal(rows.Photos_Service.length,n,'pas de doublon');
 console.log('memoire photos ok');
 assert.deepEqual(f.handleChercherPhotosMemoireABC({ecole:'x',q:'',rubrique:'plat',date:'2026-11-16'}).resultats.map(x=>x.date),['2026-11-05'],'sans mot-clé : dernières photos');
 assert.equal(f.handleChercherPhotosMemoireABC({ecole:'x',q:'bourguignon',rubrique:'entree',date:'2026-11-16'}).resultats.length,1,'mot-clé : toutes rubriques');
+const page=f.handleChercherPhotosMemoireABC({ecole:'x',q:'',rubrique:'plat',date:'2026-11-16',depart:0,limite:12});
+assert.equal(page.total,1);
