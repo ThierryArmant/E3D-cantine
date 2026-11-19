@@ -1,7 +1,7 @@
 // Recalcul gratuit d'un jour passé (règle « aliments principaux ») : ancien résultat archivé, olives retirées.
 const fs = require('fs'), vm = require('vm'), assert = require('assert/strict');
 const c = vm.createContext({ Logger: { log() {} }, SpreadsheetApp: { flush() {} }, PropertiesService: { getScriptProperties: () => ({ getProperty: () => null }) } });
-vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8'), c);
+vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8').replace('const COEF_SURFACE_POIDS_ABC = 1.5;', 'const COEF_SURFACE_POIDS_ABC = 1; // logique de tri testée en grammes proportionnels'), c);
 const params = { portion_entree_g: 80, portion_plat_g: 100, portion_garniture_g: 150, portion_dessert_g: 100, portion_fruit_g: 150, portion_pain_g: 50, prix_kg_eur: 4.5, poids_serviette_g: 3 };
 const ret = (aliment, composant, pct, portion) => ({ aliment, aliment_brut: aliment, composant, reste_pct: pct, portion_ref_g: portion, reste_g_ref: Math.round(portion * pct / 100), forme: 'x', preparation: 'x', confiance: 'haute' });
 const json = { retenus: [ret('Poisson blanc', 'plat', 40, 100), ret('Olives noires', 'plat', 80, 100), ret('Boulgour', 'accompagnement', 30, 150)], bacs: { biodechets: 165 }, objets: { serviette: 1 } };

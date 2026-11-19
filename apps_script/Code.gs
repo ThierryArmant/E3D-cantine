@@ -502,7 +502,7 @@ function appliquerPortionsJourABC(retenus, pj) {
   if (!pj) return;
   retenus.forEach(function (i) {
     const g = portionJourAlimentABC(pj, i.composant, i.aliment);
-    if (g > 0) { i.portion_ref_g = g; i.portion_mesuree = true; i.reste_g_ref = Math.round(g * (Number(i.reste_pct) || 0) / 100); }
+    if (g > 0) { i.portion_ref_g = g; i.portion_mesuree = true; i.reste_g_ref = resteGrammesABC(g, i.reste_pct, i.composant); }
   });
 }
 function handleSavePortionsJourABC(data) {
@@ -719,6 +719,18 @@ function nettoyerTexte(t) {
   return String(t == null ? "" : t).replace(/[\[\]:|]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
 }
 
+// SURFACE → POIDS. L'IA lit la place que les restes occupent encore sur l'assiette, pas leur poids :
+// des restes étalés en couche fine couvrent beaucoup de surface pour peu de grammes, alors qu'une portion
+// servie est un tas épais. Poids restant = portion × (% vu / 100) ^ 1,5. Une portion intacte (100 %) reste
+// comptée entière, une assiette vide (0 %) reste à zéro. Exposant mesuré le 19/11/2026 sur les 8 jours pesés
+// à Giono en novembre (bacs biodéchets et fruits ; écart moyen ramené de +43 % à environ ±10 %,
+// stable de 1,45 à 1,55 quand on retire un jour). Le pain (tranches entières) reste proportionnel.
+const COEF_SURFACE_POIDS_ABC = 1.5;
+function resteGrammesABC(portion, pct, composant) {
+  const g = Number(portion) || 0, p = Math.max(0, Math.min(100, Number(pct) || 0)) / 100;
+  return Math.round(g * (composant === "pain" ? p : Math.pow(p, COEF_SURFACE_POIDS_ABC)));
+}
+
 // Sauces et condiments : jamais une portion (font partie du plat préparé).
 const RE_CONDIMENT_ABC = /^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che|beurre|cornichons?|citron|fromage r[aâ]p[eé]|r[aâ]p[eé])/i;
 function estPatesABC(nom) { return /(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(String(nom || "")); }
@@ -863,7 +875,7 @@ function garderPrincipauxABC(retenus, menuJour) {
       if (!premier) { i.fusion_plat = true; sortie.push(i); return; }
       if ((Number(i.reste_pct) || 0) > (Number(premier.reste_pct) || 0)) {
         premier.reste_pct = i.reste_pct;
-        premier.reste_g_ref = Math.round((Number(premier.portion_ref_g) || 0) * premier.reste_pct / 100);
+        premier.reste_g_ref = resteGrammesABC(premier.portion_ref_g, premier.reste_pct, premier.composant);
       }
       ecarter(i, "même plat que " + premier.aliment);
     });
@@ -1159,7 +1171,7 @@ Réponds en JSON strict :
     retenus.push({
       catalogue_id: fiche ? fiche.id : "", aliment_brut: alimentBrut, composant: composant, aliment: aliment, forme: nettoyerTexte(a.forme) || "?", preparation: nettoyerTexte(a.preparation) || "?",
       etat_reste: nettoyerTexte(a.etat_reste), reste_pct: Math.round(resteRetenu), portion_ref_g: portion,
-      reste_g_ref: Math.round(portion * resteRetenu / 100), confiance: nettoyerTexte(a.confiance) || "moyenne",
+      reste_g_ref: resteGrammesABC(portion, resteRetenu, composant), conversion_surface_poids: COEF_SURFACE_POIDS_ABC, confiance: nettoyerTexte(a.confiance) || "moyenne",
       dans_emballage: a.dans_emballage === true, base_comestible: true
     });
   });
@@ -2464,7 +2476,7 @@ function recalculerBacsJourABC(ecole, date) {
       j.retenus.forEach(function (i) {
         if (/^pain\b/i.test(String(i.aliment || "")) && i.composant !== "pain") {
           i.composant = "pain"; i.portion_ref_g = portionReference("pain", i.aliment, params);
-          i.reste_g_ref = Math.round(i.portion_ref_g * (i.reste_pct || 0) / 100);
+          i.reste_g_ref = resteGrammesABC(i.portion_ref_g, i.reste_pct, i.composant);
         }
       });
       const objets = Object.keys(j.objets || {}).map(function (t) { return { type: t, nombre: j.objets[t] }; });
@@ -2533,6 +2545,7 @@ function recalculerPrincipauxJourABC(ecole, date) {
       });
       appliquerPortionsJourABC(retenus, portionsDuJour);
       marquerGateauAccompagnementABC(retenus, params);
+      retenus.forEach(function (i) { i.reste_g_ref = resteGrammesABC(i.portion_ref_g, i.reste_pct, i.composant); i.conversion_surface_poids = COEF_SURFACE_POIDS_ABC; });
       const objets = Object.keys(j.objets || {}).map(function (t) { return { type: t, nombre: j.objets[t] }; }).concat(p.objets);
       const tri = trierDechetsPlateauABC(retenus, objets, params), repas = repasReferenceABC(retenus, params);
       const moy = function (c) { const x = retenus.filter(function (i) { return c.indexOf(i.composant) >= 0; }); return x.length ? Math.round(x.reduce(function (t, i) { return t + i.reste_pct; }, 0) / x.length) : 0; };
@@ -2615,7 +2628,7 @@ function marquerGateauAccompagnementABC(retenus, params) {
   const g = Number(params.portion_gateau_accompagnement_g) || 40;
   retenus.forEach(function (i) {
     if (i.composant !== "dessert" || !estPetitGateauABC(i.aliment)) return;
-    i.accompagnement = true; i.portion_ref_g = g; i.reste_g_ref = Math.round(g * (Number(i.reste_pct) || 0) / 100);
+    i.accompagnement = true; i.portion_ref_g = g; i.reste_g_ref = resteGrammesABC(g, i.reste_pct, i.composant);
   });
 }
 

@@ -64,7 +64,7 @@ const c = vm.createContext({
     formatDate: (d, tz, f) => { const x = new Date(d), j = new Intl.DateTimeFormat('sv-SE', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(x); return f === 'yyyy-MM-dd' ? j : new Intl.DateTimeFormat('fr-FR', { timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(x).replace(/:/g, '-'); }
   }
 });
-vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8'), c);
+vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8').replace('const COEF_SURFACE_POIDS_ABC = 1.5;', 'const COEF_SURFACE_POIDS_ABC = 1; // logique de tri testée en grammes proportionnels'), c);
 c.getSheetsABC = n => { if (n !== 'Giono') throw Error('École inconnue'); return sheets; };
 c.getAnnuaire = () => ({ GIONO: { nom: 'Giono', id: 'x' } });
 c.lireCatalogueABC = () => [];

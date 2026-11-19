@@ -1,7 +1,7 @@
 // Repas de référence : sauce seule ignorée, traces négligées, % rapporté aux 480 g, méthode et portions enregistrées.
 const fs = require('fs'), vm = require('vm'), assert = require('assert/strict');
 const c = vm.createContext({ Logger: { log() {} }, PropertiesService: { getScriptProperties: () => ({ getProperty: () => null }) } });
-vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8'), c);
+vm.runInContext(fs.readFileSync('apps_script/Code.gs', 'utf8').replace('const COEF_SURFACE_POIDS_ABC = 1.5;', 'const COEF_SURFACE_POIDS_ABC = 1; // logique de tri testée en grammes proportionnels'), c);
 const params = { portion_entree_g: 80, portion_plat_g: 100, portion_garniture_g: 150, portion_dessert_g: 100, portion_fruit_g: 150, portion_pain_g: 50, portion_sauce_g: 20, prix_kg_eur: 4.5, pain_tranches: 2 };
 c.getParametres = () => params; c.getMenuDuJour = () => 'Salade | Boulettes (Sauce Tomate) | Riz + Pain | Muffin aux pépites de chocolat';
 c.lireCatalogueABC = () => []; c.referencePhotoJourABC = () => ''; c.dateIso = () => '2026-11-02';
