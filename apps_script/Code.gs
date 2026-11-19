@@ -485,6 +485,26 @@ function lirePortionsJourABC(sheets) {
   });
   return res;
 }
+// Portion réellement servie ce jour-là pour un aliment (0 si non renseignée) : même nom, sinon même famille
+// (« Pâtes » vaut pour farfalles, pennes… ; « Pain » pour tout pain).
+function portionJourAlimentABC(pj, composant, aliment) {
+  if (!pj) return 0;
+  const cle = cleCatalogueABC(aliment), noms = Object.keys(pj);
+  for (let k = 0; k < noms.length; k++) if (cleCatalogueABC(noms[k]) === cle) return pj[noms[k]];
+  if ((composant === "plat" || composant === "accompagnement") && estPatesABC(aliment)) {
+    for (let k = 0; k < noms.length; k++) if (estPatesABC(noms[k]) && !/r[aâ]p[eé]/i.test(noms[k])) return pj[noms[k]];
+  }
+  if (composant === "pain") { for (let k = 0; k < noms.length; k++) if (/^pain\b/i.test(noms[k])) return pj[noms[k]]; }
+  return 0;
+}
+// Applique les portions mesurées du jour (onglet Portions_Jour) aux aliments d'un plateau.
+function appliquerPortionsJourABC(retenus, pj) {
+  if (!pj) return;
+  retenus.forEach(function (i) {
+    const g = portionJourAlimentABC(pj, i.composant, i.aliment);
+    if (g > 0) { i.portion_ref_g = g; i.portion_mesuree = true; i.reste_g_ref = Math.round(g * (Number(i.reste_pct) || 0) / 100); }
+  });
+}
 function handleSavePortionsJourABC(data) {
   const sheets = getSheetsABC(data.ecole || data.etablissement);
   const date = String(data.date || "");
@@ -1121,7 +1141,7 @@ Réponds en JSON strict :
     const aliment = nomMenu || (fiche ? fiche.libelle : alimentBrut);
     // Sauce ou condiment seul : attribut d'une préparation, jamais une portion jetée.
     // Sauces et condiments (beurre en plaquette, cornichons…) : jamais une portion d'entrée ou de plat.
-    if (/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che|beurre|cornichons?|citron)\b/i.test(aliment)) { residus.push(aliment); return; }
+    if (/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che|beurre|cornichons?|citron|fromage r[aâ]p[eé]|r[aâ]p[eé])/i.test(aliment)) { residus.push(aliment); return; }
     const portion = portionReference(composant, aliment, params);
     // Traces et miettes : négligeables (convention A.B.C.).
     const resteRetenu = reste <= SEUIL_RESIDU_PCT_ABC ? 0 : reste;
@@ -1135,6 +1155,8 @@ Réponds en JSON strict :
   // Aliments principaux du menu seulement ; accompagnements et ingrédients listés à part sortent du calcul.
   const principaux = garderPrincipauxABC(retenus, menuJour === "Non renseigné pour cette date" ? "" : menuJour);
   retenus.length = 0; principaux.retenus.forEach(function (i) { retenus.push(i); });
+  // Portions mesurées ce jour-là en cuisine (onglet Portions_Jour) : elles remplacent les portions de référence.
+  try { appliquerPortionsJourABC(retenus, lirePortionsJourABC(sheets)[dateIso(quand)]); } catch (e) {}
 
   function moyennePct(composants) {
     const l = retenus.filter(function (i) { return composants.indexOf(i.composant) !== -1; });
@@ -2478,6 +2500,7 @@ function recalculerPrincipauxJourABC(ecole, date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date || ""))) throw new Error("Date invalide (AAAA-MM-JJ).");
   const sheets = getSheetsABC(ecole), params = getParametres(sheets), menuJour = getMenuDuJour(sheets, date);
   if (!menuJour) return { date: date, plateaux: 0, raison: "menu du jour absent" };
+  const portionsDuJour = lirePortionsJourABC(sheets)[date];
   const res = avecVerrouABC(30000, function () {
     const derniere = sheets.gaspillage.getLastRow();
     if (derniere < 2) return { plateaux: 0, avant_g: 0, apres_g: 0 };
@@ -2493,7 +2516,11 @@ function recalculerPrincipauxJourABC(ecole, date) {
       if (!Array.isArray(j.retenus) || !j.bacs) return;
       archive.push([new Date(), date, String(l[11]), l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], String(l[10] || "").slice(0, 45000)]);
       const p = garderPrincipauxABC(j.retenus, menuJour);
-      const retenus = p.retenus;
+      const retenus = p.retenus.filter(function (i) {
+        if (/^(fromage r[aâ]p[eé]|r[aâ]p[eé])/i.test(String(i.aliment || ""))) { p.secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: "accompagnement (râpé)" }); return false; }
+        return true;
+      });
+      appliquerPortionsJourABC(retenus, portionsDuJour);
       marquerGateauAccompagnementABC(retenus, params);
       const objets = Object.keys(j.objets || {}).map(function (t) { return { type: t, nombre: j.objets[t] }; }).concat(p.objets);
       const tri = trierDechetsPlateauABC(retenus, objets, params), repas = repasReferenceABC(retenus, params);
@@ -2527,6 +2554,7 @@ function recalculerPrincipauxEtablissementABC(ecole, depuis) {
   sheets.gaspillage.getDataRange().getValues().slice(1).forEach(function (l) { const d = dateIso(l[0]); if (l[1] === "SCAN_IA_VISION" && d >= debut) jours[d] = true; });
   return Object.keys(jours).sort().map(function (d) { return recalculerPrincipauxJourABC(ecole, d); });
 }
+function recalculerGionoAujourdhuiABC() { return recalculerPrincipauxJourABC("COLLEGE  J. GIONO", dateIso(new Date())); }
 function recalculerPrincipauxGionoNovembreABC() { return recalculerPrincipauxEtablissementABC("COLLEGE  J. GIONO", "2026-11-01"); }
 // Tous les autres établissements du réseau (Giono déjà recalculé le 19/11), depuis le 1er novembre.
 function recalculerPrincipauxAutresEtablissementsABC() {

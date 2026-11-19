@@ -60,4 +60,12 @@ menu = '';
 r = analyse([al('Poisson blanc', 'plat', 40), al('Olives noires', 'plat', 80)]);
 assert.equal(r.poids, 120);
 
+// Portions mesurées en cuisine (Giono, 19/11) : assiette de pâtes 281 g (225 + sauce 50 + râpé 6), pain 10 g.
+menu = 'Salade verte | Sauce carbonara + Omelette + râpé sur les pates (Fromage râpé) | Pâtes + Pain | Pommes';
+c.lirePortionsJourABC = () => ({ '2026-11-16': { 'Pâtes': 281, 'Pain': 10 } });
+r = analyse([al('Farfalles', 'accompagnement', 40), al('Fromage râpé', 'plat', 100), al('râpé sur les pates', 'plat', 100), al('Sauce carbonara', 'plat', 50), al('Pain', 'pain', 50)]);
+assert.equal(r.poids, Math.round(281 * 0.4) + 5, 'pâtes 112 g + pain 5 g, râpé et sauce hors calcul');
+assert.equal(r.j.retenus.find(i => i.composant === 'pain').portion_ref_g, 10);
+delete c.lirePortionsJourABC;
+
 console.log('OK : aliments principaux seulement, accompagnements et ingrédients hors calcul, serviettes et emballages à part.');
