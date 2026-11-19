@@ -245,3 +245,8 @@ Serveur (apps_script/Code.gs)
 Tests : tests/aliments-principaux.test.cjs (plateaux réels du 16/11), tests/recalcul-principaux.test.cjs.
 
 Déploiement : reporter Code.gs dans l'éditeur Apps Script, exécuter recalculerPrincipauxGionoNovembreABC(), puis publier une nouvelle version du déploiement pour les nouveaux scans.
+
+Exécuté le 19/11 à 8 h 11 (éditeur Apps Script) : recalculerPrincipauxGionoNovembreABC, 4 187 plateaux. Restes estimés : 02/11 39,9 → 38,6 kg ; 06/11 58,0 → 57,4 ; 09/11 42,2 → 40,3 ; 10/11 43,1 → 42,6 ; 12/11 58,3 → 57,6 ; 13/11 63,4 → 60,0 ; 16/11 68,3 → 64,2. Les accompagnements ne pesaient que 1 à 6 %.
+Comparaison bac par bac : fruits (−9 %, +7 %) et pain (−3 % à +10 % certains jours) proches des balances ; l'écart vient surtout du bac alimentaire (+31 % le 13/11, +57 % le 16/11, ×2 à ×2,5 les 09 et 10/11). Emballages et serviettes ne sont presque jamais pesés (0 dans la saisie).
+
+Anne Frank (Valérie Briançon, Département) : le tableur de Mazan renommé « ODD E3D Self A FRANCK MORRIERE » contient 1 162 plateaux (16 et 17/11) et aucune pesée. Le tableau de bord se remettait à zéro sans pesée : corrigé dans index.html (chargement et choix de la période).

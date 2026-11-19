@@ -672,7 +672,7 @@ function actualiserComparaisonPesees(sheets) {
   feuille.getRange(1, 1, lignes.length, entete.length).setValues(lignes);
   feuille.setFrozenRows(1);
   feuille.getRange(1, 1, 1, entete.length).setFontWeight("bold");
-  if (lignes.length > 1) feuille.getRange(2, 3, lignes.length - 1, 3).setNumberFormat("0.000");
+  if (lignes.length > 1) { feuille.getRange(2, 3, lignes.length - 1, 3).setNumberFormat("0.000"); feuille.getRange(2, 6, lignes.length - 1, 1).setNumberFormat("0"); }
   return { success: true, jours: Object.keys(jours).length, lignes: lignes.length - 1 };
 }
 
