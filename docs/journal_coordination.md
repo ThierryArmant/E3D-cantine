@@ -226,3 +226,22 @@ Demande de Thierry : « si je saisis bourguignon, la photo arrive », pour l'ent
 - Croûtes de fromage : la décision de Thierry est rétablie (déchet inévitable, reste 0 %, objet croute_non_comestible). La version du 12/11 les avait laissées comme aliment.
 - Le test repas-reference attend désormais la méthode repas-reference-2-comestible.
 - Constat : les scans du 13/11 portent bien repas-reference-2-comestible, donc la règle maïs/rafle du 12/11 est déployée. Les scans du maïs faits avant ce déploiement gardent l'ancienne lecture. Aucune réanalyse sans accord.
+
+## 19 novembre 2026 — Aliments principaux seulement, comparaison bac par bac
+
+Constat sur les pesées de Giono : le scan donne plus que les balances tous les jours (de +4 % le 12/11 à × 2,8 le 10/11). Une cause vérifiée : les noms ENTRE PARENTHÈSES du menu (sauces, « Olives noires » le 16/11) étaient pris comme des plats ; un plateau comptait alors 80 g d'olives comme un plat entier. Des ingrédients listés à part (poivrons d'une poêlée, morceaux d'une salade composée) comptaient aussi chacun une portion.
+
+Décision de Thierry : seuls les aliments principaux du menu (photos du service, cases cochées) entrent dans le calcul ; les accompagnements en sortent. Les items ne contiennent que de la nourriture (biodéchets, fruits, pain) ; serviettes et emballages restent dans leurs bacs, jamais mêlés aux autres.
+
+Serveur (apps_script/Code.gs)
+- garderPrincipauxABC : par rubrique, garde les aliments du menu hors parenthèses. Un nom entre parenthèses est écarté quand un plat principal est sur le plateau. Un aliment hors menu à côté d'un plat principal de la même rubrique est écarté (ingrédient déjà compté). Sans aucun nom reconnu, les morceaux d'une rubrique forment un seul plat (plus fort reste). Desserts : un fruit ou un yaourt hors menu reste un dessert. Pain inchangé. Menu inconnu : rien n'est retiré.
+- Ce qui est écarté reste visible dans le JSON (« secondaires », avec la raison) pour la transparence.
+- Serviette, film, pot, barquette… listés comme aliments : convertis en objets de leur bac, jamais en biodéchets.
+- Consigne d'analyse : aliments principaux seulement, parenthèses = accompagnements, ingrédients non listés à part, confiance « haute » réservée aux cas nets.
+- Méthode : repas-reference-3-principaux.
+- Comparaison_Pesees_IA réécrite bac par bac : alimentaire, fruits (ou alimentaire + fruits quand les fruits sont jetés avec les biodéchets), pain, TOTAL NOURRITURE, puis emballages et serviettes à part. Même calcul que « Pesée estimée » : moyenne par plateau × couverts du jour.
+- Recalcul gratuit des jours passés, sans appel à l'IA : recalculerPrincipauxJourABC(ecole, date), recalculerPrincipauxGionoNovembreABC(), route POST recalculerPrincipauxJour. L'ancien résultat de chaque plateau est copié dans Historique_Analyses avant modification.
+
+Tests : tests/aliments-principaux.test.cjs (plateaux réels du 16/11), tests/recalcul-principaux.test.cjs.
+
+Déploiement : reporter Code.gs dans l'éditeur Apps Script, exécuter recalculerPrincipauxGionoNovembreABC(), puis publier une nouvelle version du déploiement pour les nouveaux scans.

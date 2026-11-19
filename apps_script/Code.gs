@@ -363,6 +363,9 @@ function doPost(e) {
       responseOutput = handleRelancerScansEnAttenteABC(data);
     } else if (action === "envoyerBilanCarbone") {
       responseOutput = handleEnvoyerBilanCarboneABC(data);
+    } else if (action === "recalculerPrincipauxJour") {
+      responseOutput = recalculerPrincipauxJourABC(data.ecole || data.etablissement, String(data.date || ""));
+      responseOutput.success = true;
     } else if (action === "reanalyserJour") {
       responseOutput = handleReanalyserJourABC(data);
     } else if (action === "recupererPhotosPlateaux") {
@@ -609,50 +612,68 @@ function handleLogBagWeights(data) {
   return { success: true, doublon: doublon };
 }
 
-// Comparaison expérimentale : les masses de référence de l’IA ne sont pas des pesées.
+// Comparaison balances / scans, BAC PAR BAC (19/11/2026) : nourriture d'un côté (alimentaire, fruits, pain),
+// emballages et serviettes à part, jamais additionnés à la nourriture. Même calcul que « Pesée estimée » de la saisie
+// des déchets : moyenne par plateau analysé × couverts du jour. Fruits jetés avec les biodéchets : comparés ensemble.
+function couvertsJourABC(sheets, params) {
+  const out = {};
+  sheets.menus.getDataRange().getValues().slice(1).forEach(function (l) {
+    const d = dateIso(l[0]); if (d && parseInt(l[4]) > 0) out[d] = parseInt(l[4]);
+  });
+  out.defaut = Number(params.effectif_defaut) || 0;
+  return out;
+}
 function actualiserComparaisonPesees(sheets) {
-  const ss = sheets.sacs.getParent();
+  const ss = sheets.sacs.getParent(), params = getParametres(sheets), couverts = couvertsJourABC(sheets, params);
   let feuille = ss.getSheetByName("Comparaison_Pesees_IA");
   if (!feuille) feuille = ss.insertSheet("Comparaison_Pesees_IA");
-  const entete = ["Date", "Catégorie", "Pesée réelle (kg)", "Estimation IA (kg)", "Écart signé (kg)", "Erreur absolue (%)", "Scans analysés", "Statut / limites"];
+  const entete = ["Date", "Bac", "Pesée balance (kg)", "Estimation scans (kg)", "Écart (kg)", "Écart (%)", "Plateaux analysés", "Couverts", "Remarque"];
   const jours = {};
   const sacs = sheets.sacs.getDataRange().getValues();
   for (let i = 1; i < sacs.length; i++) {
     const d = dateIso(sacs[i][0]); if (!d) continue;
-    if (!jours[d]) jours[d] = { reel: [0,0,0,0,0], virtuel: 0, scans: 0 };
-    for (let j = 0; j < 5; j++) jours[d].reel[j] += Number(sacs[i][j+1]) || 0;
+    if (!jours[d]) jours[d] = { reel: [0, 0, 0, 0, 0], fruitsBio: false, est: { biodechets: 0, fruits: 0, pain: 0, emballages: 0, serviettes: 0 }, n: 0, sansBacs: 0 };
+    for (let j = 0; j < 5; j++) jours[d].reel[j] += Number(String(sacs[i][j + 1]).replace(",", ".")) || 0;
+    if (/^oui$/i.test(String(sacs[i][6] || "").trim())) jours[d].fruitsBio = true;
   }
-  const scans = sheets.gaspillage.getDataRange().getValues();
-  const vus = {};
+  const scans = sheets.gaspillage.getDataRange().getValues(), vus = {};
   for (let i = 1; i < scans.length; i++) {
     if (scans[i][1] !== "SCAN_IA_VISION") continue;
-    const d = dateIso(scans[i][0]); if (!jours[d]) continue;
+    const d = dateIso(scans[i][0]), o = jours[d]; if (!o) continue;
     const id = String(scans[i][11] || "");
-    if (id && vus[d + "|" + id]) continue;
-    if (id) vus[d + "|" + id] = true;
-    jours[d].scans++;
-    jours[d].virtuel += (Number(scans[i][7]) || 0) / 1000;
+    if (id) { if (vus[d + "|" + id]) continue; vus[d + "|" + id] = true; }
+    const b = bacsDuDetailABC(scans[i][10]);
+    if (!b) { o.sansBacs++; continue; }
+    o.n++;
+    Object.keys(o.est).forEach(function (k) { o.est[k] += Number(b[k]) || 0; });
   }
-  const lignes = [entete], categories = ["Alimentaire", "Fruits", "Pain", "Emballages", "Serviettes"];
-  Object.keys(jours).sort().forEach(function(d) {
-    const o = jours[d];
-    for (let j = 0; j < 5; j++) {
-      lignes.push([d, categories[j], o.reel[j], "", "", "", o.scans,
-        j === 0 ? "Non comparable directement : l’IA additionne plusieurs catégories ; vérifier le périmètre et la couverture des scans." :
-        "Catégorie non estimable de façon fiable : ne pas assimiler une donnée absente à zéro."]);
+  const r3 = function (x) { return Math.round(x * 1000) / 1000; };
+  const lignes = [entete];
+  Object.keys(jours).sort().forEach(function (d) {
+    const o = jours[d], cv = couverts[d] || couverts.defaut || o.n, f = o.n ? cv / o.n / 1000 : 0;
+    const est = {}; Object.keys(o.est).forEach(function (k) { est[k] = o.est[k] * f; });
+    const rq = o.sansBacs ? o.sansBacs + " plateau(x) analysé(s) avant la répartition par bac, non comptés." : "";
+    const ligne = function (bac, reel, estime, remarque) {
+      const ok = reel > 0 && o.n > 0;
+      lignes.push([d, bac, r3(reel), o.n ? r3(estime) : "", ok ? r3(estime - reel) : "", ok ? Math.round(100 * (estime - reel) / reel) : "", o.n, cv, [remarque, rq].filter(String).join(" ") || (reel > 0 ? "" : "Non pesé ce jour-là.")]);
+    };
+    if (o.fruitsBio) {
+      ligne("Alimentaire + fruits", o.reel[0] + o.reel[1], est.biodechets + est.fruits, "Fruits jetés avec les biodéchets ce jour-là.");
+    } else {
+      ligne("Alimentaire (biodéchets)", o.reel[0], est.biodechets, "");
+      ligne("Fruits", o.reel[1], est.fruits, "");
     }
-    const total = o.reel.reduce(function(a,b) { return a+b; }, 0);
-    lignes.push([d, "TOTAL exploratoire (périmètres différents)", total,
-      Math.round(o.virtuel*1000)/1000, Math.round((o.virtuel-total)*1000)/1000,
-      total > 0 ? Math.round(Math.abs(o.virtuel-total)/total*10000)/100 : "", o.scans,
-      "INDICATEUR NON VALIDÉ : déchets des sacs et restes des plateaux ne couvrent pas nécessairement le même périmètre ; pas un taux d’erreur IA."]);
+    ligne("Pain", o.reel[2], est.pain, "");
+    ligne("TOTAL NOURRITURE (alimentaire + fruits + pain)", o.reel[0] + o.reel[1] + o.reel[2], est.biodechets + est.fruits + est.pain, "Emballages et serviettes non inclus.");
+    ligne("Emballages (à part)", o.reel[3], est.emballages, "");
+    ligne("Serviettes (à part)", o.reel[4], est.serviettes, "");
   });
   feuille.clearContents();
-  feuille.getRange(1,1,lignes.length,entete.length).setValues(lignes);
+  feuille.getRange(1, 1, lignes.length, entete.length).setValues(lignes);
   feuille.setFrozenRows(1);
-  feuille.getRange(1,1,1,entete.length).setFontWeight("bold");
-  if (lignes.length > 1) feuille.getRange(2,3,lignes.length-1,4).setNumberFormat("0.000");
-  return { success: true, jours: Object.keys(jours).length, lignes: lignes.length-1 };
+  feuille.getRange(1, 1, 1, entete.length).setFontWeight("bold");
+  if (lignes.length > 1) feuille.getRange(2, 3, lignes.length - 1, 3).setNumberFormat("0.000");
+  return { success: true, jours: Object.keys(jours).length, lignes: lignes.length - 1 };
 }
 
 // À exécuter une fois dans l’éditeur Apps Script pour créer/recalculer
@@ -735,6 +756,93 @@ function rapprocherNomMenuABC(nom, composant, menuNoms) {
     if (gateaux.length === 1) return gateaux[0];
   }
   return null;
+}
+
+// ==========================================================================
+// ALIMENTS PRINCIPAUX SEULEMENT (décision de Thierry, 19/11/2026)
+// Les aliments principaux sont ceux du menu (photos du service, cases cochées), hors parenthèses.
+// Les accompagnements entre parenthèses (sauces, olives, persillade…) et les ingrédients d'un plat listés à part
+// (olives dans la sauce du poisson, thon d'une salade composée…) sortent du calcul des grammes : ils font partie
+// du plat principal, déjà compté. Ils restent visibles dans le détail (« secondaires ») pour la transparence.
+// Les serviettes et emballages ne sont jamais des aliments : ils passent dans leurs propres bacs.
+// ==========================================================================
+const NON_ALIMENTS_ABC = [[/serviette|essuie|mouchoir|papier absorbant/, "serviette"], [/opercule|couvercle/, "opercule"],
+  [/caissette/, "caissette"], [/barquette|boite|boîte/, "barquette"], [/brique|bouteille|canette|gourde vide/, "brique"],
+  [/film|sachet/, "film"], [/emballage|plastique|aluminium|papier/, "autre_emballage"], [/^pots? vides?$|^pot$/, "pot"],
+  [/^(couverts?|fourchettes?|couteaux?|cuill[eè]res?|verres?|gobelets?|assiettes?|plateaux?|ramequins?|bols?)( vides?)?$/, null]];
+function nonAlimentABC(nom) {
+  const n = String(nom || "").toLowerCase().trim();
+  for (let k = 0; k < NON_ALIMENTS_ABC.length; k++) if (NON_ALIMENTS_ABC[k][0].test(n)) return { type: NON_ALIMENTS_ABC[k][1] };
+  return null;
+}
+// Noms entre parenthèses du menu (options et accompagnements), par rubrique.
+function optionsMenuJourABC(menu) {
+  const rubriques = ["entree", "plat", "accompagnement", "dessert"], out = { entree: [], plat: [], accompagnement: [], dessert: [] };
+  String(menu || "").split("|").slice(0, 4).forEach(function (groupe, i) {
+    (groupe.match(/\(([^)]*)\)/g) || []).map(function (o) { return o.slice(1, -1); }).join(",").split(/[,\/]/).forEach(function (n) {
+      const nom = nettoyerTexte(String(n).replace(/[\u{1F300}-\u{1FAFF}‍️]/gu, ""));
+      if (nom && out[rubriques[i]].indexOf(nom) < 0) out[rubriques[i]].push(nom);
+    });
+  });
+  return out;
+}
+function nomSecondaireABC(nom, options) {
+  const cle = cleCatalogueABC(nom), mots = motsNomABC(nom);
+  return Object.keys(options).some(function (r) {
+    return options[r].some(function (o) {
+      const co = cleCatalogueABC(o), mo = motsNomABC(o);
+      if (co === cle) return true;
+      return mo.length > 0 && mots.length > 0 && mo.every(function (m) { return mots.indexOf(m) >= 0; }) && mots.every(function (m) { return mo.indexOf(m) >= 0; });
+    });
+  });
+}
+// Garde les aliments principaux ; renvoie { retenus, secondaires, objets } (objets = serviettes / emballages listés à tort comme aliments).
+function garderPrincipauxABC(retenus, menuJour) {
+  const sansOptions = String(menuJour || "").replace(/\([^)]*\)/g, "");
+  const principaux = nomsMenuJourABC(sansOptions), options = optionsMenuJourABC(menuJour);
+  const menuConnu = ["entree", "plat", "accompagnement", "dessert"].some(function (r) { return principaux[r].length; });
+  const secondaires = [], objets = [], gardes = [];
+  (retenus || []).forEach(function (i) {
+    const na = nonAlimentABC(i.aliment) || nonAlimentABC(i.aliment_brut);
+    if (na) { if (na.type) objets.push({ type: na.type, nombre: 1 }); secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: "non alimentaire" }); return; }
+    gardes.push(i);
+  });
+  if (!menuConnu) return { retenus: gardes, secondaires: secondaires, objets: objets };
+  const estPrincipal = function (i) {
+    if (i.composant === "pain") return true;
+    const liste = principaux[i.composant] || [];
+    return liste.some(function (m) { return cleCatalogueABC(m) === cleCatalogueABC(i.aliment); }) || !!rapprocherNomMenuABC(i.aliment_brut || i.aliment, i.composant, principaux);
+  };
+  const ecarter = function (i, raison) { secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: raison }); };
+  const sortie = [];
+  ["entree", "plat", "accompagnement", "dessert", "pain"].forEach(function (comp) {
+    const groupe = gardes.filter(function (i) { return i.composant === comp; });
+    if (!groupe.length) return;
+    if (comp === "pain") { groupe.forEach(function (i) { sortie.push(i); }); return; }
+    const avecPrincipal = groupe.some(estPrincipal);
+    // Plateau tout entier : un plat principal présent dans une autre rubrique suffit à écarter une option (olives, sauce).
+    const principalAilleurs = gardes.some(function (i) { return i.composant !== "pain" && estPrincipal(i); });
+    groupe.forEach(function (i) {
+      if (estPrincipal(i)) { sortie.push(i); return; }
+      if (nomSecondaireABC(i.aliment_brut || i.aliment, options) || nomSecondaireABC(i.aliment, options)) {
+        if (avecPrincipal || principalAilleurs) { ecarter(i, "accompagnement du menu (entre parenthèses)"); return; }
+      }
+      // Desserts : un fruit ou un laitage hors menu reste un dessert à part entière.
+      if (comp === "dessert") { sortie.push(i); return; }
+      if (avecPrincipal) { ecarter(i, "ingrédient d'un plat principal déjà compté"); return; }
+      // Aucun aliment principal reconnu dans cette rubrique : les morceaux listés à part forment UN seul plat.
+      const premier = sortie.filter(function (s) { return s.composant === comp && s.fusion_plat; })[0];
+      if (!premier) { i.fusion_plat = true; sortie.push(i); return; }
+      if ((Number(i.reste_pct) || 0) > (Number(premier.reste_pct) || 0)) {
+        premier.reste_pct = i.reste_pct;
+        premier.reste_g_ref = Math.round((Number(premier.portion_ref_g) || 0) * premier.reste_pct / 100);
+      }
+      ecarter(i, "même plat que " + premier.aliment);
+    });
+  });
+  sortie.forEach(function (i) { delete i.fusion_plat; });
+  sortie.sort(function (a, b) { return gardes.indexOf(a) - gardes.indexOf(b); }); // ordre de lecture du plateau conservé
+  return { retenus: sortie, secondaires: secondaires, objets: objets };
 }
 
 // Poubelle de chaque reste, comme la saisie des déchets : biodéchets, fruits, pain, emballages, serviettes (grammes).
@@ -900,7 +1008,10 @@ RÈGLES
 - RÉSIDUS NÉGLIGEABLES : traces, miettes, quelques grains épars, croûtes infimes = 0 % de restes. Une garniture de présentation servie DANS le même ramequin qu'un autre aliment (lit de salade sous un œuf, persil, rondelle de citron) fait partie de ce plat : ne la liste pas comme une entrée séparée.
 - Ne crée jamais un aliment à 0 % de restes d'après le seul menu ou l'avis « tout fini » ; l'absence d'un aliment ne prouve pas qu'il a été pris.
 - En cas d'ambiguïté poulet/poisson, appuie-toi sur la RÉFÉRENCE VISUELLE DU SERVICE (photos des plats) ; sans preuve suffisante, écris « Aliment non identifié » avec une confiance faible.
-- Inventorie CHAQUE aliment visible séparément, même hors menu. Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu’un plat a été servi.
+- ALIMENTS PRINCIPAUX SEULEMENT : une ligne par plat servi, tel qu'il figure au menu (photos du service, cases cochées). Les noms ENTRE PARENTHÈSES du menu sont des accompagnements (sauces, olives, persillade, condiments) : ils font partie du plat, ne les liste JAMAIS comme un aliment. Les ingrédients d'un plat (olives ou champignons dans une sauce, thon ou maïs d'une salade composée, lardons, croûtons, fromage râpé, herbes) font partie de ce plat : estime le reste du PLAT ENTIER, ne les liste pas à part. Un aliment hors menu n'est listé que s'il s'agit clairement d'une portion distincte (un fruit, un yaourt).
+- Serviettes, pots, films, opercules, caissettes et barquettes ne sont JAMAIS des aliments : compte-les uniquement dans « objets ».
+- CONFIANCE : « haute » seulement si l'aliment est identifié sans doute ET que la quantité restante est nette (plateau vide, pièces comptées, portion intacte). Une quantité en vrac partiellement mangée estimée à l'œil = « moyenne » au plus. Doute sur l'aliment = « faible ». Ne mets pas « haute » par défaut.
+- Commence par les indices VISUELS (forme, texture, morceaux, panure), puis confronte au menu pour nommer une observation plausible. Le menu est une liste de possibilités, pas une preuve qu’un plat a été servi.
 - Pour chaque aliment, « forme » et « preparation » décrivent le plat TEL QU'IL A ÉTÉ SERVI au départ (identique pour tous les plateaux du jour, appuie-toi sur la référence visuelle du service et le menu) : par exemple « demi-avocat » et « sauce mayonnaise », même s'il n'en reste que des morceaux. L'aspect du RESTE (morceaux, miettes, traces, peau, purée écrasée par l'élève) ne va JAMAIS dans « forme » ou « preparation » : il va dans « etat_reste ». Distingue carottes râpées et cuites, par exemple.
 - Une sauce ou sa couleur ne suffisent jamais à identifier poisson, poulet ou une recette. Ne déduis pas « poisson au curry » d’une sauce jaune ni de sa présence au menu.
 - Si l’aliment est masqué ou non identifiable, utilise une désignation visuelle générique et une confiance « faible » ; n’invente pas d’espèce ou de recette.
@@ -1021,6 +1132,9 @@ Réponds en JSON strict :
       dans_emballage: a.dans_emballage === true, base_comestible: true
     });
   });
+  // Aliments principaux du menu seulement ; accompagnements et ingrédients listés à part sortent du calcul.
+  const principaux = garderPrincipauxABC(retenus, menuJour === "Non renseigné pour cette date" ? "" : menuJour);
+  retenus.length = 0; principaux.retenus.forEach(function (i) { retenus.push(i); });
 
   function moyennePct(composants) {
     const l = retenus.filter(function (i) { return composants.indexOf(i.composant) !== -1; });
@@ -1037,13 +1151,13 @@ Réponds en JSON strict :
   }
   if (ecartes.length) note += " | " + ecartes.length + " aliment(s) écarté(s) (incohérents)";
   marquerGateauAccompagnementABC(retenus, params);
-  const tri = trierDechetsPlateauABC(retenus, result.objets, params);
+  const tri = trierDechetsPlateauABC(retenus, (Array.isArray(result.objets) ? result.objets : []).concat(principaux.objets), params);
   const repas = repasReferenceABC(retenus, params);
 
   return {
     ligne: [quand, "SCAN_IA_VISION", note,
       moyennePct(["entree"]), moyennePct(["plat", "accompagnement"]), moyennePct(["dessert"]), moyennePct(["pain"]),
-      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, residus: residus, bacs: tri.bacs, objets: tri.objets, separation: tri.separation, jetons: jetons,
+      poidsG, parseFloat(perteEuro.toFixed(2)), avisEleve, JSON.stringify({ retenus: retenus, ecartes: ecartes.length, residus: residus, secondaires: principaux.secondaires, bacs: tri.bacs, objets: tri.objets, separation: tri.separation, jetons: jetons,
         methode: METHODE_ANALYSE_ABC, modele: modeleUtilise, repas_ref_g: repas.ref_g, portions_ref: repas.portions, restes_g: repas.restes_g, restes_pct_repas: repas.pct })],
     details: { aliments: retenus, ecartes: ecartes.length, bacs: tri.bacs }
   };
@@ -2353,7 +2467,69 @@ function pctPainMorceauxABC(m, params) {
   const servies = Math.max(1, Number((params || {}).pain_tranches) || 2);
   return Math.min(100, Math.round(100 * tranches / servies));
 }
-const METHODE_ANALYSE_ABC = "repas-reference-2-comestible";
+// ==========================================================================
+// RECALCUL GRATUIT (sans nouvel appel à l'IA) avec la règle « aliments principaux seulement » (19/11/2026).
+// Repart des pourcentages déjà lus sur chaque plateau : retire les accompagnements et ingrédients listés à part,
+// sort serviettes et emballages des aliments, recalcule grammes, bacs et repas de référence.
+// L'ancien résultat de chaque plateau est d'abord copié dans Historique_Analyses : rien n'est perdu.
+// ▶️ Depuis l'éditeur : recalculerPrincipauxGionoNovembreABC()  ou  recalculerPrincipauxJourABC("COLLEGE  J. GIONO", "2026-11-16")
+// ==========================================================================
+function recalculerPrincipauxJourABC(ecole, date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(date || ""))) throw new Error("Date invalide (AAAA-MM-JJ).");
+  const sheets = getSheetsABC(ecole), params = getParametres(sheets), menuJour = getMenuDuJour(sheets, date);
+  if (!menuJour) return { date: date, plateaux: 0, raison: "menu du jour absent" };
+  const res = avecVerrouABC(30000, function () {
+    const derniere = sheets.gaspillage.getLastRow();
+    if (derniere < 2) return { plateaux: 0, avant_g: 0, apres_g: 0 };
+    const plage = sheets.gaspillage.getRange(2, 1, derniere - 1, 12), v = plage.getValues();
+    const ss = sheets.menus.getParent();
+    let hist = ss.getSheetByName("Historique_Analyses");
+    if (!hist) { hist = ss.insertSheet("Historique_Analyses"); hist.appendRow(["Réanalysé le", "Date du scan", "ID scan", "Type", "Note", "Entrée %", "Plat %", "Dessert %", "Pain %", "Poids g", "Perte €", "Détail JSON"]); }
+    const archive = [], maj = [];
+    let avant = 0, apres = 0;
+    v.forEach(function (l, idx) {
+      if (l[1] !== "SCAN_IA_VISION" || dateIso(l[0]) !== date) return;
+      let j; try { j = JSON.parse(l[10] || "{}"); } catch (e) { return; }
+      if (!Array.isArray(j.retenus) || !j.bacs) return;
+      archive.push([new Date(), date, String(l[11]), l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], String(l[10] || "").slice(0, 45000)]);
+      const p = garderPrincipauxABC(j.retenus, menuJour);
+      const retenus = p.retenus;
+      marquerGateauAccompagnementABC(retenus, params);
+      const objets = Object.keys(j.objets || {}).map(function (t) { return { type: t, nombre: j.objets[t] }; }).concat(p.objets);
+      const tri = trierDechetsPlateauABC(retenus, objets, params), repas = repasReferenceABC(retenus, params);
+      const moy = function (c) { const x = retenus.filter(function (i) { return c.indexOf(i.composant) >= 0; }); return x.length ? Math.round(x.reduce(function (t, i) { return t + i.reste_pct; }, 0) / x.length) : 0; };
+      const poids = retenus.reduce(function (t, i) { return t + (Number(i.reste_g_ref) || 0); }, 0);
+      let note = String(l[2] || "").split(" | DÉTAIL INGRÉDIENTS")[0];
+      if (retenus.length) note += " | DÉTAIL INGRÉDIENTS : " + retenus.map(function (i) { return "[" + i.aliment + " - " + i.forme + " - " + i.preparation + " : " + i.reste_pct + "% restes | " + i.composant + " | confiance " + i.confiance + "]"; }).join(" ");
+      j.retenus = retenus; j.secondaires = (j.secondaires || []).concat(p.secondaires); j.bacs = tri.bacs; j.objets = tri.objets; j.separation = tri.separation;
+      j.repas_ref_g = repas.ref_g; j.portions_ref = repas.portions; j.restes_g = repas.restes_g; j.restes_pct_repas = repas.pct;
+      j.methode = METHODE_ANALYSE_ABC; j.recalcul_principaux = dateIso(new Date());
+      avant += Number(l[7]) || 0; apres += poids;
+      maj.push({ ligne: idx + 2, valeurs: [note, moy(["entree"]), moy(["plat", "accompagnement"]), moy(["dessert"]), moy(["pain"]), poids, parseFloat(((poids / 1000) * params.prix_kg_eur).toFixed(2)), l[9], JSON.stringify(j)] });
+    });
+    if (!maj.length) return { plateaux: 0, avant_g: 0, apres_g: 0 };
+    hist.getRange(hist.getLastRow() + 1, 1, archive.length, archive[0].length).setValues(archive);
+    const premiere = maj[0].ligne, fin = maj[maj.length - 1].ligne;
+    const bloc = sheets.gaspillage.getRange(premiere, 3, fin - premiere + 1, 9).getValues();
+    maj.forEach(function (m) { bloc[m.ligne - premiere] = m.valeurs; });
+    sheets.gaspillage.getRange(premiere, 3, bloc.length, 9).setValues(bloc);
+    SpreadsheetApp.flush();
+    return { plateaux: maj.length, avant_g: Math.round(avant), apres_g: Math.round(apres) };
+  });
+  actualiserComparaisonPesees(sheets);
+  res.date = date;
+  Logger.log(ecole + " " + date + " : " + res.plateaux + " plateaux recalculés, " + (res.avant_g / 1000).toFixed(1) + " kg → " + (res.apres_g / 1000).toFixed(1) + " kg.");
+  return res;
+}
+// Tous les jours de pesée d'un établissement à partir d'une date (par défaut : novembre 2026).
+function recalculerPrincipauxEtablissementABC(ecole, depuis) {
+  const sheets = getSheetsABC(ecole), debut = depuis || "2026-11-01", jours = {};
+  sheets.gaspillage.getDataRange().getValues().slice(1).forEach(function (l) { const d = dateIso(l[0]); if (l[1] === "SCAN_IA_VISION" && d >= debut) jours[d] = true; });
+  return Object.keys(jours).sort().map(function (d) { return recalculerPrincipauxJourABC(ecole, d); });
+}
+function recalculerPrincipauxGionoNovembreABC() { return recalculerPrincipauxEtablissementABC("COLLEGE  J. GIONO", "2026-11-01"); }
+
+const METHODE_ANALYSE_ABC = "repas-reference-3-principaux";
 const SEUIL_RESIDU_PCT_ABC = 5;
 
 // Desserts : chaque dessert pris par l'élève (vu sur le plateau, même mangé ou vide d'emballage) compte dans le repas

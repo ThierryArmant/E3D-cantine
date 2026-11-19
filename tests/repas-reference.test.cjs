@@ -13,7 +13,7 @@ const al = (aliment, composant, reste) => ({ aliment, composant, reste_pct: rest
 // Plateau n° 5 : sauce étalée seule + miettes → 0 %.
 let r = analyse([al('Sauce Tomate', 'plat', 60), al('Riz blanc', 'accompagnement', 3)]);
 assert.equal(r.restes_pct_repas, 0); assert.deepEqual(r.residus, ['Sauce Tomate']); assert.equal(r.repas_ref_g, 480);
-assert.equal(r.methode, 'repas-reference-2-comestible'); assert.equal(r.portions_ref.pain, 50);
+assert.equal(r.methode, 'repas-reference-3-principaux'); assert.equal(r.portions_ref.pain, 50);
 // Plateau n° 108 : une tranche sur deux (50 %) + muffin aux 3/4 → 25 + 75 = 100 g sur 480 g = 21 %.
 r = analyse([al('Pain', 'accompagnement', 50), al('Muffin aux pépites de chocolat', 'dessert', 75)]);
 assert.equal(r.restes_g, 100); assert.equal(r.restes_pct_repas, 21);
