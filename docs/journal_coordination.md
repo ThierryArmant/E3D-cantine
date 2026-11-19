@@ -250,3 +250,5 @@ Exécuté le 19/11 à 8 h 11 (éditeur Apps Script) : recalculerPrincipauxGionoN
 Comparaison bac par bac : fruits (−9 %, +7 %) et pain (−3 % à +10 % certains jours) proches des balances ; l'écart vient surtout du bac alimentaire (+31 % le 13/11, +57 % le 16/11, ×2 à ×2,5 les 09 et 10/11). Emballages et serviettes ne sont presque jamais pesés (0 dans la saisie).
 
 Anne Frank (Valérie Briançon, Département) : le tableur de Mazan renommé « ODD E3D Self A FRANCK MORRIERE » contient 1 162 plateaux (16 et 17/11) et aucune pesée. Le tableau de bord se remettait à zéro sans pesée : corrigé dans index.html (chargement et choix de la période).
+
+19/11, 8 h 20 : recalcul gratuit des autres établissements (recalculerPrincipauxAutresEtablissementsABC) : Gérard-Philipe 02, 03 et 05/11, Anne Frank 17/11 (peu ou pas de changement). Anne Frank 16/11 : aucun menu saisi. Sur décision de Thierry, le menu du 17/11 (qui regroupe les plats des deux jours) a été copié au 16/11 dans Historique_Menus, puis les 575 plateaux du 16/11 ont été remis en analyse depuis leurs photos (reanalyserJour, anciens résultats dans Historique_Analyses).
