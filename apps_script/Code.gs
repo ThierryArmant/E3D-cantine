@@ -2528,6 +2528,18 @@ function recalculerPrincipauxEtablissementABC(ecole, depuis) {
   return Object.keys(jours).sort().map(function (d) { return recalculerPrincipauxJourABC(ecole, d); });
 }
 function recalculerPrincipauxGionoNovembreABC() { return recalculerPrincipauxEtablissementABC("COLLEGE  J. GIONO", "2026-11-01"); }
+// Tous les autres établissements du réseau (Giono déjà recalculé le 19/11), depuis le 1er novembre.
+function recalculerPrincipauxAutresEtablissementsABC() {
+  const annuaire = getAnnuaire(), out = [];
+  Object.keys(annuaire).forEach(function (cle) {
+    const nom = annuaire[cle].nom;
+    if (normaliserNomEcole(nom) === normaliserNomEcole("COLLEGE J. GIONO")) return;
+    try { out.push({ etablissement: nom, jours: recalculerPrincipauxEtablissementABC(nom, "2026-11-01") }); }
+    catch (e) { out.push({ etablissement: nom, erreur: String(e) }); }
+  });
+  Logger.log(JSON.stringify(out));
+  return out;
+}
 
 const METHODE_ANALYSE_ABC = "repas-reference-3-principaux";
 const SEUIL_RESIDU_PCT_ABC = 5;
