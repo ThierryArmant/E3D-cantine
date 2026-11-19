@@ -71,6 +71,17 @@ r = analyse([al('Pâtes carbonara', 'plat', 60)]);
 assert.equal(r.poids, Math.round(281 * 0.6), 'les pâtes restent des pâtes');
 r = analyse([al('Pâtes carbonara', 'accompagnement', 40), al('Sauce carbonara', 'plat', 50)]);
 assert.equal(r.poids, Math.round(281 * 0.4));
+// Lignes enregistrées avant le correctif : le plat renommé « râpé sur les pates » reprend son nom lu (« Pâtes carbonara ») ;
+// le fromage râpé ne relève jamais le pourcentage d'un plat.
+{
+  const m = 'Salade verte | Pâtes carbonara + Omelette (Fromage râpé) | Ratatouille + Pain | Pommes';
+  const g = c.garderPrincipauxABC([
+    { aliment: 'Fromage râpé', aliment_brut: 'Fromage râpé', composant: 'plat', reste_pct: 50, portion_ref_g: 200, reste_g_ref: 100 },
+    { aliment: 'râpé sur les pates', aliment_brut: 'Pâtes carbonara', composant: 'plat', reste_pct: 60, portion_ref_g: 200, reste_g_ref: 120 }], m);
+  c.appliquerPortionsJourABC(g.retenus, { 'Pâtes': 330 });
+  assert.deepEqual(g.retenus.map(i => [i.aliment, i.reste_pct, i.reste_g_ref]), [['Pâtes carbonara', 60, 198]]);
+  assert.deepEqual(g.secondaires.map(i => i.aliment), ['Fromage râpé']);
+}
 delete c.lirePortionsJourABC;
 
 console.log('OK : aliments principaux seulement, accompagnements et ingrédients hors calcul, serviettes et emballages à part.');

@@ -827,6 +827,13 @@ function garderPrincipauxABC(retenus, menuJour) {
   (retenus || []).forEach(function (i) {
     const na = nonAlimentABC(i.aliment) || nonAlimentABC(i.aliment_brut);
     if (na) { if (na.type) objets.push({ type: na.type, nombre: 1 }); secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: "non alimentaire" }); return; }
+    // Sauce, râpé, condiment : jamais une portion, et jamais fusionné avec un plat (il en relèverait le pourcentage).
+    const brut = String(i.aliment_brut || i.aliment || "");
+    if (RE_CONDIMENT_ABC.test(brut)) {
+      secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: "sauce ou condiment" }); return;
+    }
+    // Plat renommé à tort d'après une sauce ou un râpé du menu (avant le 19/11) : il reprend le nom lu sur le plateau.
+    if (RE_CONDIMENT_ABC.test(String(i.aliment || ""))) i.aliment = brut;
     gardes.push(i);
   });
   if (!menuConnu) return { retenus: gardes, secondaires: secondaires, objets: objets };
@@ -846,9 +853,8 @@ function garderPrincipauxABC(retenus, menuJour) {
     const principalAilleurs = gardes.some(function (i) { return i.composant !== "pain" && estPrincipal(i); });
     groupe.forEach(function (i) {
       if (estPrincipal(i)) { sortie.push(i); return; }
-      if (nomSecondaireABC(i.aliment_brut || i.aliment, options) || nomSecondaireABC(i.aliment, options)) {
-        if (avecPrincipal || principalAilleurs) { ecarter(i, "accompagnement du menu (entre parenthèses)"); return; }
-      }
+      // Accompagnement entre parenthèses (fromage râpé, olives…) : toujours hors calcul.
+      if (nomSecondaireABC(i.aliment_brut || i.aliment, options) || nomSecondaireABC(i.aliment, options)) { ecarter(i, "accompagnement du menu (entre parenthèses)"); return; }
       // Desserts : un fruit ou un laitage hors menu reste un dessert à part entière.
       if (comp === "dessert") { sortie.push(i); return; }
       if (avecPrincipal) { ecarter(i, "ingrédient d'un plat principal déjà compté"); return; }
