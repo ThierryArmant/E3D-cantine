@@ -79,8 +79,8 @@ assert.equal(r.poids, Math.round(281 * 0.4));
     { aliment: 'Fromage râpé', aliment_brut: 'Fromage râpé', composant: 'plat', reste_pct: 50, portion_ref_g: 200, reste_g_ref: 100 },
     { aliment: 'râpé sur les pates', aliment_brut: 'Pâtes carbonara', composant: 'plat', reste_pct: 60, portion_ref_g: 200, reste_g_ref: 120 }], m);
   c.appliquerPortionsJourABC(g.retenus, { 'Pâtes': 330 });
-  assert.deepEqual(g.retenus.map(i => [i.aliment, i.reste_pct, i.reste_g_ref]), [['Pâtes carbonara', 60, 198]]);
-  assert.deepEqual(g.secondaires.map(i => i.aliment), ['Fromage râpé']);
+  assert.equal(JSON.stringify(g.retenus.map(i => [i.aliment, i.reste_pct, i.reste_g_ref])), JSON.stringify([['Pâtes carbonara', 60, 198]]));
+  assert.equal(JSON.stringify(g.secondaires.map(i => i.aliment)), JSON.stringify(['Fromage râpé']));
 }
 delete c.lirePortionsJourABC;
 
