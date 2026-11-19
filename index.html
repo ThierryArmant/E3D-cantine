@@ -3881,7 +3881,9 @@
                 if (typeof abcAccepterCatalogue === 'function') abcAccepterCatalogue(data, school);
                 menusHistorique = data.historiqueMenus || {};
                 renderControleFrequences();
-                if (!data || !data.sacsHistory || data.sacsHistory.labels.length === 0) { clearDashboardToZero(); return; }
+                // Scans sans aucune pesée saisie (début de campagne) : on affiche quand même les plateaux.
+                if (!data.sacsHistory) data.sacsHistory = { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [] };
+                if (data.sacsHistory.labels.length === 0 && !(data.rawGaspillage || []).length) { clearDashboardToZero(); return; }
                 globalRawData = data; for (const k in ETATS_SERVIS_CACHE) delete ETATS_SERVIS_CACHE[k];
                 if (typeof majComparaisonBacs === 'function') { try { majComparaisonBacs(); } catch (e) { console.error(e); } }
                 
