@@ -1463,7 +1463,8 @@
             document.querySelectorAll('.btn-period').forEach(b => b.classList.remove('active'));
             if (btnElem) btnElem.classList.add('active');
 
-            if (!globalRawData || !globalRawData.sacsHistory || globalRawData.sacsHistory.datesRaw.length === 0) return;
+            // Les plateaux scannés s'affichent même avant la première pesée (début de campagne).
+            if (!globalRawData || (!(globalRawData.sacsHistory || {}).datesRaw?.length && !(globalRawData.rawGaspillage || []).length)) return;
             
             const today = new Date();
             let startDate = "";
