@@ -719,6 +719,8 @@ function nettoyerTexte(t) {
   return String(t == null ? "" : t).replace(/[\[\]:|]/g, " ").replace(/\s+/g, " ").trim().slice(0, 60);
 }
 
+// Sauces et condiments : jamais une portion (font partie du plat préparé).
+const RE_CONDIMENT_ABC = /^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che|beurre|cornichons?|citron|fromage r[aâ]p[eé]|r[aâ]p[eé])/i;
 function estPatesABC(nom) { return /(^|[^a-zà-ÿ])(p[âa]tes|spaghettis?|coquillettes?|pennes?|macaronis?|tagliatelles?|tortellinis?|raviolis?|fusillis?|farfalles?|nouilles|lasagnes?|gnocchis?|torsades?)([^a-zà-ÿ]|$)/i.test(String(nom || "")); }
 function portionReference(composant, aliment, p) {
   const a = String(aliment || "").toLowerCase();
@@ -1136,12 +1138,15 @@ Réponds en JSON strict :
     if (incoherent || COMPOSANTS_VALIDES.indexOf(composant) === -1 || !nettoyerTexte(a.aliment)) { ecartes.push(a); return; }
     const alimentBrut = nettoyerTexte(a.aliment);
     // Le nom confirmé dans le menu du jour l'emporte sur le nom générique du catalogue.
-    const nomMenu = rapprocherNomMenuABC(alimentBrut, composant, menuNoms);
+    let nomMenu = rapprocherNomMenuABC(alimentBrut, composant, menuNoms);
+    // Un vrai plat ne prend jamais le nom d'une sauce ou d'un condiment du menu (« Pâtes carbonara » ≠ « Sauce carbonara »,
+    // ≠ « râpé sur les pâtes ») : sinon il serait écarté comme sauce ou râpé et ses restes disparaîtraient (bug du 19/11).
+    if (nomMenu && RE_CONDIMENT_ABC.test(nomMenu) && !RE_CONDIMENT_ABC.test(alimentBrut)) nomMenu = null;
     const fiche = identifierCatalogueABC(nomMenu || alimentBrut, composant, catalogueScan);
     const aliment = nomMenu || (fiche ? fiche.libelle : alimentBrut);
     // Sauce ou condiment seul : attribut d'une préparation, jamais une portion jetée.
     // Sauces et condiments (beurre en plaquette, cornichons…) : jamais une portion d'entrée ou de plat.
-    if (/^(sauce|mayonnaise|vinaigrette|ketchup|moutarde|huile|jus|assaisonnement|cr[eè]me fra[iî]che|beurre|cornichons?|citron|fromage r[aâ]p[eé]|r[aâ]p[eé])/i.test(aliment)) { residus.push(aliment); return; }
+    if (RE_CONDIMENT_ABC.test(aliment)) { residus.push(aliment); return; }
     const portion = portionReference(composant, aliment, params);
     // Traces et miettes : négligeables (convention A.B.C.).
     const resteRetenu = reste <= SEUIL_RESIDU_PCT_ABC ? 0 : reste;
@@ -2517,7 +2522,7 @@ function recalculerPrincipauxJourABC(ecole, date) {
       archive.push([new Date(), date, String(l[11]), l[1], l[2], l[3], l[4], l[5], l[6], l[7], l[8], String(l[10] || "").slice(0, 45000)]);
       const p = garderPrincipauxABC(j.retenus, menuJour);
       const retenus = p.retenus.filter(function (i) {
-        if (/^(fromage r[aâ]p[eé]|r[aâ]p[eé])/i.test(String(i.aliment || ""))) { p.secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: "accompagnement (râpé)" }); return false; }
+        if (/^(fromage r[aâ]p[eé]|r[aâ]p[eé])/i.test(String(i.aliment_brut || i.aliment || ""))) { p.secondaires.push({ aliment: i.aliment, composant: i.composant, reste_pct: i.reste_pct, raison: "accompagnement (râpé)" }); return false; }
         return true;
       });
       appliquerPortionsJourABC(retenus, portionsDuJour);

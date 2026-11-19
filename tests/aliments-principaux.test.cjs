@@ -66,6 +66,11 @@ c.lirePortionsJourABC = () => ({ '2026-11-16': { 'Pâtes': 281, 'Pain': 10 } });
 r = analyse([al('Farfalles', 'accompagnement', 40), al('Fromage râpé', 'plat', 100), al('râpé sur les pates', 'plat', 100), al('Sauce carbonara', 'plat', 50), al('Pain', 'pain', 50)]);
 assert.equal(r.poids, Math.round(281 * 0.4) + 5, 'pâtes 112 g + pain 5 g, râpé et sauce hors calcul');
 assert.equal(r.j.retenus.find(i => i.composant === 'pain').portion_ref_g, 10);
+// Bug du 19/11 : « Pâtes carbonara » ne doit être renommé ni « râpé sur les pates » ni « Sauce carbonara ».
+r = analyse([al('Pâtes carbonara', 'plat', 60)]);
+assert.equal(r.poids, Math.round(281 * 0.6), 'les pâtes restent des pâtes');
+r = analyse([al('Pâtes carbonara', 'accompagnement', 40), al('Sauce carbonara', 'plat', 50)]);
+assert.equal(r.poids, Math.round(281 * 0.4));
 delete c.lirePortionsJourABC;
 
 console.log('OK : aliments principaux seulement, accompagnements et ingrédients hors calcul, serviettes et emballages à part.');
