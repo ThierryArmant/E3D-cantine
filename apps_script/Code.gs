@@ -2619,3 +2619,49 @@ function marquerGateauAccompagnementABC(retenus, params) {
   });
 }
 
+
+// ==========================================================================
+// CALIBRATION « SURFACE → POIDS » : exporte, pour chaque jour pesé, les restes vus par l'IA
+// regroupés par aliment et par % (onglet Calibration_Restes). Lecture seule sur les scans.
+// ==========================================================================
+function exporterCalibrationABC(ecole) {
+  const sheets = getSheetsABC(ecole || "COLLEGE  J. GIONO"), params = getParametres(sheets), couverts = couvertsJourABC(sheets, params);
+  const jours = {};
+  sheets.sacs.getDataRange().getValues().slice(1).forEach(function (l) {
+    const d = dateIso(l[0]); if (!d) return;
+    const o = jours[d] = jours[d] || { reel: [0, 0, 0], fruitsBio: false, n: 0, objets: { biodechets: 0, fruits: 0, pain: 0 } };
+    for (let j = 0; j < 3; j++) o.reel[j] += Number(String(l[j + 1]).replace(",", ".")) || 0;
+    if (/^oui$/i.test(String(l[6] || "").trim())) o.fruitsBio = true;
+  });
+  const agg = {}, vus = {};
+  sheets.gaspillage.getDataRange().getValues().slice(1).forEach(function (l) {
+    if (l[1] !== "SCAN_IA_VISION") return;
+    const d = dateIso(l[0]), o = jours[d]; if (!o) return;
+    const id = String(l[11] || ""); if (id) { if (vus[d + "|" + id]) return; vus[d + "|" + id] = true; }
+    let j; try { j = JSON.parse(l[10] || "{}"); } catch (e) { return; }
+    if (!j.bacs || !Array.isArray(j.retenus)) return;
+    o.n++;
+    const parBac = { biodechets: 0, fruits: 0, pain: 0 };
+    j.retenus.forEach(function (i) {
+      if (i.dans_emballage) return;
+      const bac = i.composant === "pain" ? "pain" : estFruitFraisABC(i.aliment) ? "fruits" : "biodechets";
+      const g = Math.max(0, Number(i.reste_g_ref) || 0); parBac[bac] += g;
+      const k = [d, bac, String(i.aliment || "").toLowerCase().trim(), i.composant, Number(i.reste_pct) || 0].join("|");
+      const a = agg[k] = agg[k] || { n: 0, portion: 0, reste: 0 };
+      a.n++; a.portion += Number(i.portion_ref_g) || 0; a.reste += g;
+    });
+    ["biodechets", "fruits", "pain"].forEach(function (b) { o.objets[b] += Math.max(0, (Number(j.bacs[b]) || 0) - parBac[b]); });
+  });
+  const lignes = [["date", "bac", "aliment", "composant", "reste_pct", "n", "portion_g", "reste_g"]];
+  Object.keys(jours).sort().forEach(function (d) {
+    const o = jours[d]; if (!o.n) return;
+    lignes.push([d, "_JOUR", o.fruitsBio ? "fruits_dans_bio" : "", "", o.n, couverts[d] || couverts.defaut || o.n, o.reel.join(";"), [o.objets.biodechets, o.objets.fruits, o.objets.pain].join(";")]);
+  });
+  Object.keys(agg).sort().forEach(function (k) { const p = k.split("|"), a = agg[k]; lignes.push([p[0], p[1], p[2], p[3], Number(p[4]), a.n, a.portion, a.reste]); });
+  const ss = sheets.menus.getParent();
+  let f = ss.getSheetByName("Calibration_Restes"); if (!f) f = ss.insertSheet("Calibration_Restes");
+  f.clearContents(); f.getRange(1, 1, lignes.length, 8).setValues(lignes);
+  Logger.log("Calibration : " + (lignes.length - 1) + " lignes.");
+  return lignes.length - 1;
+}
+function exporterCalibrationGionoABC() { return exporterCalibrationABC("COLLEGE  J. GIONO"); }
