@@ -251,7 +251,7 @@
 
         <div class="content-area">
             <!-- PÔLE 1 : DASHBOARD -->
-            <section id="view-analyse-photos" class="view-section"><div class="abc-photo-panel"><h2>📸 Analyse photos</h2><p>Consultation des analyses existantes, sans appel Gemini.</p><div class="abc-photo-filters"><label>Date <input id="abc-photo-date" type="date"></label><label>Avis <select id="abc-photo-avis"><option value="">Tous</option><option>pas aimé</option><option>plus faim</option><option>pas le temps</option><option>tout fini</option></select></label><label>Restes du repas <select id="abc-photo-restes"><option value="">Tous</option><option value="0">Aucun</option><option value="1">1–29 %</option><option value="30">30–59 %</option><option value="60">60 % et plus</option></select></label><label>Statut <select id="abc-photo-statut"><option value="">Tous</option><option value="SCAN_IA_VISION">Analysés</option><option value="SCAN_EN_ATTENTE">En attente</option><option value="SCAN_ECHEC">Écartés</option></select></label><label>Recherche <input id="abc-photo-search" type="search" placeholder="Aliment, commentaire…"></label></div><div id="abc-photo-stats"></div><div id="abc-photo-flow"></div><div id="abc-photo-chart"></div><p id="abc-photo-info"></p><div id="abc-photo-grid"></div></div><dialog id="abc-photo-detail"><button type="button" id="abc-photo-close">Fermer ✕</button><div id="abc-photo-detail-content"></div></dialog></section><div id="view-dashboard" class="view-section active">
+            <section id="view-analyse-photos" class="view-section"><div class="abc-photo-panel"><h2>📸 Analyse photos</h2><p>Consultation des analyses existantes, sans appel Gemini.</p><div class="abc-photo-filters"><label>Date <input id="abc-photo-date" type="date"></label><label>Avis <select id="abc-photo-avis"><option value="">Tous</option><option>pas aimé</option><option value="plus faim">trop servi</option><option>pas le temps</option><option>tout fini</option></select></label><label>Restes du repas <select id="abc-photo-restes"><option value="">Tous</option><option value="0">Aucun</option><option value="1">1–29 %</option><option value="30">30–59 %</option><option value="60">60 % et plus</option></select></label><label>Statut <select id="abc-photo-statut"><option value="">Tous</option><option value="SCAN_IA_VISION">Analysés</option><option value="SCAN_EN_ATTENTE">En attente</option><option value="SCAN_ECHEC">Écartés</option></select></label><label>Recherche <input id="abc-photo-search" type="search" placeholder="Aliment, commentaire…"></label></div><div id="abc-photo-stats"></div><div id="abc-photo-flow"></div><div id="abc-photo-chart"></div><p id="abc-photo-info"></p><div id="abc-photo-grid"></div></div><dialog id="abc-photo-detail"><button type="button" id="abc-photo-close">Fermer ✕</button><div id="abc-photo-detail-content"></div></dialog></section><div id="view-dashboard" class="view-section active">
                 <div class="dashboard-wrapper">
                     <div id="dashboard-error-banner" style="display: none; background: #fee2e2; border-left: 4px solid #ef4444; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; margin-bottom: 10px;"></div>
 
@@ -437,9 +437,9 @@
                                 <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🟢</span>
                                 <span style="line-height:1.15;">Tout fini</span>
                             </button>
-                            <button type="button" id="push-btn-jaune" onclick="setPushAvis('jaune', this)" aria-label="Plus faim" style="flex: 1; background: linear-gradient(145deg, #facc15, #ca8a04); color: white; border: 3px solid #fef08a; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(202,138,4,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
+                            <button type="button" id="push-btn-jaune" onclick="setPushAvis('jaune', this)" aria-label="On m'a trop servi" style="flex: 1; background: linear-gradient(145deg, #facc15, #ca8a04); color: white; border: 3px solid #fef08a; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(202,138,4,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🟡</span>
-                                <span style="line-height:1.15;">Plus faim</span>
+                                <span style="line-height:1.15;">Trop servi</span>
                             </button>
                             <button type="button" id="push-btn-orange" onclick="setPushAvis('orange', this)" aria-label="Pas le temps" style="flex: 1; background: linear-gradient(145deg, #f59e0b, #b45309); color: white; border: 3px solid #fde047; border-radius: 16px; padding: 10px; font-size: 13.5px; font-weight: 900; cursor: pointer; box-shadow: 0 6px 15px rgba(217,119,6,0.4); transition: all 0.15s ease; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center;">
                                 <span aria-hidden="true" style="font-size:26px;line-height:1.2;">🟠</span>
@@ -2542,7 +2542,7 @@
         }
 
         function vueAvis(P) {
-            const ordre = [["tout fini", "🟢 « J'ai tout fini »", "#059669"], ["plus faim", "🟡 « J'ai plus faim »", "#ca8a04"], ["pas le temps", "🟠 « Pas eu le temps »", "#ea580c"], ["pas aimé", "🔴 « Je n'ai pas aimé »", "#dc2626"], ["non renseigné", "⚪ Pas d'avis", "#94a3b8"]];
+            const ordre = [["tout fini", "🟢 « J'ai tout fini »", "#059669"], ["plus faim", "🟡 « On m'a trop servi »", "#ca8a04"], ["pas le temps", "🟠 « Pas eu le temps »", "#ea580c"], ["pas aimé", "🔴 « Je n'ai pas aimé »", "#dc2626"], ["non renseigné", "⚪ Pas d'avis", "#94a3b8"]];
             const total = P.length;
             let h = titreC("Ce que les élèves déclarent, et ce que la borne mesure") + ordre.map(o => {
                 const l = P.filter(p => p.avis === o[0]);
@@ -2555,8 +2555,8 @@
             const bloc = (cle, titre, couleur) => { const t = top(cle); return t.length ? titreC(titre) + t.map(x => barreC(x.k, 100 * x.v / x.n, Math.round(100 * x.v / x.n) + " % des plateaux", x.n, couleur)).join("") : ""; };
             h += bloc("nonAime", "Aliments présents dans les plateaux « je n'ai pas aimé »", "#dc2626");
             h += bloc("temps", "Aliments présents dans les plateaux « pas eu le temps »", "#ea580c");
-            h += bloc("faim", "Aliments présents dans les plateaux « j'ai plus faim »", "#ca8a04");
-            return h + noteC("L'avis est donné par l'élève pour tout son plateau, pas pour un aliment : un aliment apparaît ici s'il figurait sur le plateau, il n'en est pas forcément la cause. « Plus faim » est de la satiété (portion ou repas trop copieux), pas un rejet du goût : à lire à part de « pas aimé ». Un écart entre l'avis déclaré et le reste mesuré est lui-même une information.");
+            h += bloc("faim", "Aliments présents dans les plateaux « on m'a trop servi »", "#ca8a04");
+            return h + noteC("L'avis est donné par l'élève pour tout son plateau, pas pour un aliment : un aliment apparaît ici s'il figurait sur le plateau, il n'en est pas forcément la cause. « Trop servi » (anciennement « plus faim ») veut dire portion trop grosse pour l'élève, pas un rejet du goût : à lire à part de « pas aimé ». Un écart entre l'avis déclaré et le reste mesuré est lui-même une information.");
         }
 
         // Services : séries de plateaux séparées par un vide d'au moins 30 minutes sans aucun scan (tous jours confondus)
@@ -2587,7 +2587,7 @@
                 h += `<div style="display:flex; align-items:center; gap:8px; margin:2px 0;"><div style="width:60px; font-size:11px; text-align:right; color:#1e293b;">${hhmm(c * 15)}</div><div style="flex:1; height:13px; background:#f1f5f9; border-radius:3px;"><div style="height:100%; width:${100 * l.length / maxN}%; background:${m === null ? "#cbd5e1" : couleurPalier(m)}; border-radius:3px;"></div></div><div style="width:150px; font-size:10.5px; color:#334155;">${l.length ? `<strong>${l.length}</strong> plateaux · ${Math.round(m)} % mangé` : "—"}</div></div>`;
             }
             h += titreC(services.length > 1 ? `${services.length} services repérés (vide d'au moins 30 min entre deux séries de scans)` : "Un seul service repéré");
-            h += `<table style="width:100%; border-collapse:collapse; font-size:11px;"><tr style="text-align:left; color:#64748b;"><th>Service</th><th>Plateaux</th><th>% mangé</th><th>Entrée</th><th>Plat</th><th>« Plus faim »</th><th>« Pas le temps »</th><th>« Pas aimé »</th></tr>` + services.map((sv, i) => {
+            h += `<table style="width:100%; border-collapse:collapse; font-size:11px;"><tr style="text-align:left; color:#64748b;"><th>Service</th><th>Plateaux</th><th>% mangé</th><th>Entrée</th><th>Plat</th><th>« Trop servi »</th><th>« Pas le temps »</th><th>« Pas aimé »</th></tr>` + services.map((sv, i) => {
                 const l = avecHeure.filter(p => p.min >= sv[0] && p.min <= sv[1]);
                 const comp = c => { const v = []; l.forEach(p => p.items.filter(it => it.comp === c).forEach(it => v.push(100 - it.restePct))); return v.length >= 3 ? Math.round(moy(v)) + " %" : "—"; };
                 const part = a => Math.round(100 * l.filter(p => p.avis === a).length / l.length) + " %";
@@ -3518,7 +3518,7 @@
 
             // 2. Récupération de l'avis
             if (type === 'vert') choixAvisCourant = "🟢 J'ai tout fini";
-            else if (type === 'jaune') choixAvisCourant = "🟡 J'ai plus faim";
+            else if (type === 'jaune') choixAvisCourant = "🟡 On m'a trop servi";
             else if (type === 'orange') choixAvisCourant = "🟠 Pas le temps";
             else if (type === 'rouge') choixAvisCourant = "🔴 J'ai pas aimé";
 
