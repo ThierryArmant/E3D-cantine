@@ -3838,6 +3838,21 @@
             catch(e) {console.warn('Copie locale indisponible', cle, e.message);return false;}
         }
 
+        // Galerie « Analyse photos » : suit le collège actif. Si elle est ouverte pendant un changement de collège ou un rechargement,
+        // on la redessine avec les scans du bon établissement, et on efface le filtre de date de l'ancien collège.
+        let galerieEcoleAffichee = null;
+        function abcRafraichirGalerieSiOuverte() {
+            try {
+                const ecole = document.getElementById('select-etablissement').value;
+                const vue = document.getElementById('view-analyse-photos');
+                if (galerieEcoleAffichee !== null && galerieEcoleAffichee !== ecole) {
+                    ['abc-photo-date', 'abc-photo-avis', 'abc-photo-restes', 'abc-photo-statut', 'abc-photo-search'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+                }
+                galerieEcoleAffichee = ecole;
+                if (vue && vue.classList.contains('active') && typeof abcPhotosRefresh === 'function') abcPhotosRefresh();
+            } catch (e) { console.warn('Galerie non rafraîchie', e); }
+        }
+
         function loadLiveData() {
             window.ABC_DERNIERE_ACTU = Date.now(); window.ABC_ACTU_EN_COURS = Date.now();
             const school = document.getElementById('select-etablissement').value;
@@ -3891,6 +3906,7 @@
                 if (!data.sacsHistory) data.sacsHistory = { labels: [], datesRaw: [], alimentaire: [], fruits: [], pain: [], emballages: [], serviettes: [] };
                 if (data.sacsHistory.labels.length === 0 && !(data.rawGaspillage || []).length) { clearDashboardToZero(); return; }
                 globalRawData = data; for (const k in ETATS_SERVIS_CACHE) delete ETATS_SERVIS_CACHE[k];
+                abcRafraichirGalerieSiOuverte();
                 if (typeof majComparaisonBacs === 'function') { try { majComparaisonBacs(); } catch (e) { console.error(e); } }
                 
                 let activeBtn = document.querySelector('.btn-period.active') || document.querySelectorAll('.btn-period')[0];
@@ -3943,6 +3959,7 @@
             if (menuBorne) menuBorne.innerText = 'Menu non chargé';
             precisionLignes = [];
             globalRawData = null;
+            abcRafraichirGalerieSiOuverte();
             derniereCalibration = null;
             globalItemsDetailedStats = {};
             croiseScans = [];

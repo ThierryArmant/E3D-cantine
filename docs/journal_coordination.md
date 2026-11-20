@@ -267,3 +267,20 @@ Correction : un aliment ne prend jamais le nom d'une sauce ou d'un condiment du 
 - Formule posée : poids restant = portion × (% vu / 100)^1,5 (pain proportionnel). Exposant ajusté sur les pesées (biodéchets + fruits), stable 1,45–1,55 en retirant un jour à la fois.
 - Résultat : 02/11 +6 %, 06/11 +3 %, 12/11 −20 %, 13/11 0 %, 16/11 +14 %, 19/11 −4 %. Les 09/11 (+55 %) et 10/11 (+112 %) restent hors norme : pesées à vérifier (12,3 kg pour 628 plateaux le 10/11).
 - Avis élève « Plus faim » renommé « Trop servi » (même catégorie).
+
+## 20 novembre 2026 — Relecture des remarques de GPT (entrée du 4 novembre)
+
+Relecture point par point des « À réaliser » laissés par GPT, contre le code actuel du dépôt (tests : les 16 fichiers de `tests/` passent, syntaxe de `Code.gs` et des scripts vérifiée).
+
+| Point de GPT | État |
+|---|---|
+| 1. Vérifier le serveur déployé | Non vérifiable depuis le dépôt. La galerie affiche « ID scan non transmis » si la copie collée dans Apps Script est ancienne : **Thierry doit confirmer que la dernière version de `apps_script/Code.gs` est déployée** (Déployer > Gérer les déploiements > version la plus récente). |
+| 2. Consignes visuelles film / caissette vide, traces de sauce | Livré le 04/11 (consignes du prompt). La reconnaissance reste à mesurer sur plateaux témoins. |
+| 3. Contrôle déterministe des résidus | Livré le 04/11 (liste `residus`, restes ≤ 5 % = 0) et renforcé le 19/11 (sauces, râpé, parenthèses jamais fusionnés à un plat). |
+| 4. Grammes restants et % du repas de référence, pain inclus | Livré le 04/11, remplacé par `repas-reference-3-principaux` puis par la conversion surface → poids du 19/11. |
+| 5. Version de méthode et portions conservées par analyse | Livré (`methode`, `modele`, `portions_ref`, `repas_ref_g`, `restes_g`). Aucun recalcul silencieux de l'historique ; anciens résultats archivés dans `Historique_Analyses`. |
+| 6. Galerie, filtres et statistiques sur la même définition | Libellés provisoires de GPT (« moyenne des aliments identifiés ») déjà remplacés par « part du repas de référence ». **Corrigé ce jour : la galerie suit le collège actif** (voir ci-dessous). |
+| 7. Tests sur les plateaux de référence | `tests/repas-reference.test.cjs` (plateau n° 5 → 0 %, n° 108 → 21 %, riz → 31 %). |
+| 8. Réanalyse contrôlée, pas de masse sans bilan | Respecté : recalculs gratuits sans IA, réanalyses ciblées par jour avec archivage. |
+
+Point que GPT disait « à vérifier en conditions réelles » : le rattachement de la galerie au collège actif et son rafraîchissement lors d'un changement de collège. Constat : les scans viennent bien de `globalRawData`, rechargé par établissement et refusé si la réponse est celle d'un autre collège, mais la galerie n'était redessinée qu'à l'ouverture de l'écran. Ouverte pendant un changement de collège, elle gardait les photos et les filtres de l'ancien (date, avis, statut, restes, recherche). Corrigé : `abcRafraichirGalerieSiOuverte()` redessine la galerie à chaque chargement des données et remet les filtres à zéro quand le collège change. Test navigateur avec deux collèges simulés (5 scans / 2 scans) : la galerie passe bien de 5 à 2 photos et le filtre de date est effacé.
